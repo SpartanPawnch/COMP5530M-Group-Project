@@ -154,9 +154,11 @@ int main() {
     //init graphics
     initGraphics();
 
-    AudioEngine engine;
+    //audio controls
+    AudioEngine audioEngine;
     AudioClip audioClip;
     const char* audioPath = NULL;
+    glm::vec3 audioPos(.0f);
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -170,7 +172,7 @@ int main() {
 
         ImVec2 mousePos = ImGui::GetMousePos();
 
-        // ImGui::ShowDemoWindow();
+        // --- Get Gui Input ---
         if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Active Clip: %s", audioPath);
             if (ImGui::Button("Load Audio File")) {
@@ -178,6 +180,8 @@ int main() {
                 if (path != NULL) {
                     SoLoud::result res = audioClip.load(path);
                     if (res == SoLoud::SO_NO_ERROR) {
+                        if (audioPath != NULL)
+                            delete audioPath;
                         audioPath = path;
                         logString += "Opened audio file ";
                         logString += path;
@@ -190,13 +194,20 @@ int main() {
                     }
                 }
             }
+
+            //adjust source position, listening position is center
+            if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+                audioEngine.setPosition(audioPos);
+            }
+
+            //play audio with 3d effects
             if (ImGui::Button("Play Audio File")) {
                 if (audioPath != NULL)
-                    engine.play(audioClip);
+                    audioEngine.play(audioClip);
             }
             ImGui::End();
         }
-        // --- Get Gui Input ---
+
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Active Directory: %s", activePath);
             if (ImGui::Button("Create Project")) {
