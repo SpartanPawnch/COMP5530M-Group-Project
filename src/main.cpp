@@ -22,6 +22,7 @@
 
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
 #include "drawing.h"
+#include "asset_import/audio.h"
 
 struct LogString {
 private:
@@ -153,6 +154,10 @@ int main() {
     //init graphics
     initGraphics();
 
+    AudioEngine engine;
+    AudioClip audioClip;
+    const char* audioPath = NULL;
+
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
         int width, height;
@@ -166,7 +171,31 @@ int main() {
         ImVec2 mousePos = ImGui::GetMousePos();
 
         // ImGui::ShowDemoWindow();
-
+        if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Active Clip: %s", audioPath);
+            if (ImGui::Button("Load Audio File")) {
+                const char* path = tinyfd_openFileDialog("Select File", NULL, 0, NULL, 0, false);
+                if (path != NULL) {
+                    SoLoud::result res = audioClip.load(path);
+                    if (res == SoLoud::SO_NO_ERROR) {
+                        audioPath = path;
+                        logString += "Opened audio file ";
+                        logString += path;
+                        logString += "\n";
+                    }
+                    else {
+                        logString += "Failed to load audio file ";
+                        logString += path;
+                        logString += "\n";
+                    }
+                }
+            }
+            if (ImGui::Button("Play Audio File")) {
+                if (audioPath != NULL)
+                    engine.play(audioClip);
+            }
+            ImGui::End();
+        }
         // --- Get Gui Input ---
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Active Directory: %s", activePath);
@@ -181,7 +210,7 @@ int main() {
                 }
             }
             if (ImGui::Button("Open Project")) {
-                const char* path = tinyfd_selectFolderDialog("Create a Project", NULL);
+                const char* path = tinyfd_selectFolderDialog("Open Project", NULL);
                 if (path != NULL) {
                     if (projectThread.joinable())
                         projectThread.join();
