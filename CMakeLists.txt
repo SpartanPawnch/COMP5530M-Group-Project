@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildSys CXX C)
 
+#setup SoLoud
+set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
+set(SOLOUD_BACKEND_WASAPI ON CACHE BOOL "" FORCE)
+add_subdirectory("external/soloud/contrib")
+
 #setup Imgui
 set(IMGUIDIR "external/imgui")
 include_directories(${IMGUIDIR} ${IMGUIDIR}/backends)
 aux_source_directory("${IMGUIDIR}/" IMGUICORE)
 set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/backends/imgui_impl_glfw.cpp")
-
-
 
 #setup executables
 add_executable(
