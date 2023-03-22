@@ -15,3 +15,9 @@ const TextureInfo& getTexture(int i);
 
 // Delete all currently loaded textures
 void clearTextures();
+struct TextureManager {
+    TextureManager() {}
+    ~TextureManager() {
+        clearTextures();
+    }
+};

@@ -152,10 +152,13 @@ int main() {
     LogString logString;
     std::thread projectThread;
 
-    int activeTexture = -1;
-
     //init graphics
     initGraphics();
+
+    //init textures
+    TextureManager texManager;
+    int activeTexture = -1;
+
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -255,8 +258,6 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    clearTextures();
 
     if (projectThread.joinable())
         projectThread.join();

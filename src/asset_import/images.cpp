@@ -64,7 +64,7 @@ const TextureInfo& getTexture(int i) {
 }
 
 void clearTextures() {
-    for (int i = 0;i < textures.size();i++)
+    for (unsigned int i = 0;i < textures.size();i++)
         glDeleteTextures(1, &textures[i].id);
     textures.clear();
 }
