@@ -23,6 +23,7 @@
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
 #include "drawing.h"
 #include "asset_import/audio.h"
+#include "asset_import/images.h"
 
 struct LogString {
 private:
@@ -151,6 +152,7 @@ int main() {
     const char* activePath = NULL;
     LogString logString;
     std::thread projectThread;
+
     //init graphics
     initGraphics();
 
@@ -159,6 +161,10 @@ int main() {
     int audioClip = -1;
     const char* audioPath = NULL;
     glm::vec3 audioPos(.0f);
+    //init textures
+    TextureManager texManager;
+    int activeTexture = -1;
+
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -259,6 +265,26 @@ int main() {
             ImGui::End();
         }
 
+        //texture debug
+        if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::Button("Load Texture")) {
+                const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
+                const char* path = tinyfd_openFileDialog("Load Texture", NULL,
+                    sizeof(filters) / sizeof(filters[0]), filters, NULL, 0);
+
+                if (path != NULL) {
+                    clearTextures();
+                    activeTexture = loadTexture(path);
+                }
+            }
+            if (activeTexture != -1) {
+                TextureInfo texInfo = getTexture(activeTexture);
+                ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+            }
+
+            ImGui::End();
+        }
+
         //--- Draw Results ---
         //adapt to resize
         glViewport(0, 0, width, height);
@@ -275,6 +301,7 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
     if (projectThread.joinable())
         projectThread.join();
 

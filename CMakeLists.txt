@@ -19,7 +19,7 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp"
 add_executable(
     ${PROJECT_NAME} src/main.cpp src/drawing.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-    src/asset_import/audio.cpp
+    src/asset_import/audio.cpp src/asset_import/images.cpp
 )
 
 #add glfw
