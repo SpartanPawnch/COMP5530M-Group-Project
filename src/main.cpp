@@ -22,6 +22,7 @@
 
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
 #include "drawing.h"
+#include "model_import/model.h"
 
 struct LogString {
 private:
@@ -153,6 +154,8 @@ int main() {
     //init graphics
     initGraphics();
 
+    Model model;
+
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
         int width, height;
@@ -204,7 +207,20 @@ int main() {
             }
             ImGui::End();
         }
-
+        if(ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Model Loading Demo");
+            if (ImGui::Button("Load Model")) {
+                const char* path = tinyfd_openFileDialog("Select Model File to Import", NULL, 0, NULL, NULL, 1);
+                //wait for current op to finish
+                if (path != NULL) {
+                    model.loadModel(path);
+                }
+            }
+            ImGui::Text("Model Meshes: %d", model.meshes.size());
+            ImGui::Text("Model Textures: %d", model.textures_loaded.size());
+            ImGui::Text("From: %s", model.directory.c_str());
+            ImGui::End();
+        }
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);

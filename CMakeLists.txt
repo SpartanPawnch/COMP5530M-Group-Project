@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildSys CXX C)
 
+#setup assimp
+add_subdirectory("external/assimp-5.2.5")
+
 #setup Imgui
 set(IMGUIDIR "external/imgui")
 include_directories(${IMGUIDIR} ${IMGUIDIR}/backends)
@@ -12,8 +15,7 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-)
+    ${PROJECT_NAME} src/main.cpp src/drawing.cpp  external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS} src/model_import/model.cpp src/model_import/mesh.cpp)
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -29,8 +31,8 @@ add_subdirectory("external/glew-2.1.0/build/cmake")
 add_subdirectory("external/glm")
 
 #setup linker
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include)
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include ${PROJECT_SOURCE_DIR}/external/assimp-5.2.5/include)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp)
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
