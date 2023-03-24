@@ -24,6 +24,7 @@
 #include "drawing.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
+#include "asset_import/folders.h"
 
 struct LogString {
 private:
@@ -156,15 +157,19 @@ int main() {
     //init graphics
     initGraphics();
 
+    //init textures
+    TextureManager texManager;
+    int activeTexture = -1;
+
     //audio controls
     audio::AudioEngine audioEngine;
     int audioClip = -1;
     const char* audioPath = NULL;
     glm::vec3 audioPos(.0f);
-    //init textures
-    TextureManager texManager;
-    int activeTexture = -1;
 
+    //asset folder controls
+    assetfolder::AssetDescriptor currFolder;
+    std::vector<assetfolder::AssetDescriptor> folderItems;
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -226,6 +231,7 @@ int main() {
                         projectThread.join();
                     projectThread = std::thread(createProj, path, std::ref(logString));
                     activePath = path;
+                    assetfolder::setActiveDirectory(path);
                 }
             }
             if (ImGui::Button("Open Project")) {
@@ -237,6 +243,7 @@ int main() {
                     logString += "Opened project at: ";
                     logString += activePath;
                     logString += "\n";
+                    assetfolder::setActiveDirectory(path);
                 }
             }
             if (ImGui::Button("Build and Run")) {
@@ -280,6 +287,19 @@ int main() {
             if (activeTexture != -1) {
                 TextureInfo texInfo = getTexture(activeTexture);
                 ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+            }
+
+            ImGui::End();
+        }
+
+        //folder debug
+        if (ImGui::Begin("Folder Browser", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            currFolder = assetfolder::getRootDir();
+            if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
+                assetfolder::listDir(currFolder, folderItems);
+                for (unsigned int i = 0;i < folderItems.size();i++) {
+                    ImGui::Text(folderItems[i].name.c_str());
+                }
             }
 
             ImGui::End();

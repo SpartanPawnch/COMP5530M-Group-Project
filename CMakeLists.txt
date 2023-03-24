@@ -20,6 +20,7 @@ add_executable(
     ${PROJECT_NAME} src/main.cpp src/drawing.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     src/asset_import/audio.cpp src/asset_import/images.cpp
+    src/asset_import/folders.cpp
 )
 
 #add glfw
@@ -37,7 +38,7 @@ add_subdirectory("external/glm")
 
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
-  ${PROJECT_SOURCE_DIR}/external/soloud/include
+  ${PROJECT_SOURCE_DIR}/external/soloud/include 
 )
 target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm soloud)
 add_custom_command(
