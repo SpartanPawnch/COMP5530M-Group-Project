@@ -49,7 +49,7 @@ public:
     }
 };
 
-void createProj(const char* path, LogString& logString) {
+void createProj(const std::string& path, LogString& logString) {
     char buf[1024];
     FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
     while (!feof(copyProc)) {
@@ -62,7 +62,7 @@ void createProj(const char* path, LogString& logString) {
     fclose(copyProc);
 }
 
-void buildRunProj(const char* activePath, const char* executablePath, LogString& logString) {
+void buildRunProj(const std::string& activePath, const char* executablePath, LogString& logString) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     //change to buildDir
@@ -235,7 +235,7 @@ int main() {
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    projectThread = std::thread(createProj, path.c_str(), std::ref(logString));
+                    projectThread = std::thread(createProj, path, std::ref(logString));
                     activePath = path;
                     assetfolder::setActiveDirectory(path);
                 }
@@ -258,7 +258,7 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    projectThread = std::thread(buildRunProj, activePath.c_str(),
+                    projectThread = std::thread(buildRunProj, activePath,
                         executablePath, std::ref(logString));
 
                 }
@@ -282,12 +282,12 @@ int main() {
         if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::Button("Load Texture")) {
                 const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
-                const char* path = tinyfd_openFileDialog("Load Texture", NULL,
+                std::string path = fdutil::openFile("Load Texture", NULL,
                     sizeof(filters) / sizeof(filters[0]), filters, NULL, 0);
 
-                if (path != NULL) {
+                if (!path.empty()) {
                     clearTextures();
-                    activeTexture = loadTexture(path);
+                    activeTexture = loadTexture(path.c_str());
                 }
             }
             if (activeTexture != -1) {
@@ -299,12 +299,14 @@ int main() {
         }
 
         //folder debug
-        if (ImGui::Begin("Folder Browser", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Once);
+        if (ImGui::Begin("Folder Browser", NULL, 0)) {
             currFolder = assetfolder::getRootDir();
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
                 assetfolder::listDir(currFolder, folderItems);
+                ImGui::Text("Items: %i", folderItems.size());
                 for (unsigned int i = 0;i < folderItems.size();i++) {
-                    ImGui::Text(folderItems[i].name.c_str());
+                    ImGui::Text("%s\n", folderItems[i].name.c_str());
                 }
             }
 

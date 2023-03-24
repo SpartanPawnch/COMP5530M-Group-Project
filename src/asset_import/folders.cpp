@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cassert>
 
-static const char* activeDirectory = NULL;
+static std::string activeDirectory;
 
 namespace assetfolder {
     //extract file name from path
@@ -66,12 +66,12 @@ namespace assetfolder {
         return AssetDescriptor::EFileType::MISC;
     }
 
-    void setActiveDirectory(const char* dir) {
+    void setActiveDirectory(std::string dir) {
         activeDirectory = dir;
     }
 
     AssetDescriptor getRootDir() {
-        if (activeDirectory == NULL)
+        if (activeDirectory.empty())
             return AssetDescriptor{
             std::string(""),
             std::string(""),

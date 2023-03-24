@@ -24,7 +24,7 @@ namespace assetfolder {
     };
 
     //set active directory for asset manager
-    void setActiveDirectory(const char* dir);
+    void setActiveDirectory(std::string dir);
 
     //get entry pointing to root assets folder
     AssetDescriptor getRootDir();
