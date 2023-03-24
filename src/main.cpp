@@ -20,9 +20,10 @@
 #include <thread>
 #include <mutex>
 
-#include "../external/tinyfiledialogs/tinyfiledialogs.h"
+#include "fdutil.h"
 #include "drawing.h"
 #include "asset_import/audio.h"
+
 
 struct LogString {
 private:
@@ -31,6 +32,11 @@ private:
 public:
     bool scrollToBot = false;
     inline void operator+=(const char* str) {
+        const std::lock_guard<std::mutex> lockg(mux);
+        buf += str;
+        scrollToBot = true;
+    }
+    inline void operator+=(std::string str) {
         const std::lock_guard<std::mutex> lockg(mux);
         buf += str;
         scrollToBot = true;
@@ -148,7 +154,7 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-    const char* activePath = NULL;
+    std::string activePath("");
     LogString logString;
     std::thread projectThread;
     //init graphics
@@ -157,7 +163,7 @@ int main() {
     //audio controls
     audio::AudioEngine audioEngine;
     int audioClip = -1;
-    const char* audioPath = NULL;
+    std::string audioPath("");
     glm::vec3 audioPos(.0f);
 
     while (!glfwWindowShouldClose(window)) {
@@ -174,15 +180,15 @@ int main() {
 
         // --- Get Gui Input ---
         if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Active Clip: %s", audioPath);
+            ImGui::Text("Active Clip: %s", audioPath.c_str());
             if (ImGui::Button("Load Audio File")) {
                 const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
                 const char* filterDesc = "Audio Files";
-                const char* path = tinyfd_openFileDialog("Select File", NULL,
+                std::string path = fdutil::openFile("Select File", NULL,
                     sizeof(filters) / sizeof(filters[0]), filters, filterDesc, false);
-                if (path != NULL) {
+                if (!path.empty()) {
                     audio::audioStopAll();
-                    audioClip = audio::audioLoad(path);
+                    audioClip = audio::audioLoad(path.c_str());
                     if (audioClip >= 0) {
                         audioPath = path;
                         logString += "Opened audio file ";
@@ -204,27 +210,27 @@ int main() {
 
             //play audio with 3d effects
             if (ImGui::Button("Play Audio File")) {
-                if (audioPath != NULL)
+                if (!audioPath.empty())
                     audio::audioPlay(audioClip);
             }
             ImGui::End();
         }
 
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Active Directory: %s", activePath);
+            ImGui::Text("Active Directory: %s", activePath.c_str());
             if (ImGui::Button("Create Project")) {
-                const char* path = tinyfd_selectFolderDialog("Create a Project", NULL);
+                std::string path = fdutil::selectFolder("Create a Project", NULL);
                 //wait for current op to finish
-                if (path != NULL) {
+                if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    projectThread = std::thread(createProj, path, std::ref(logString));
+                    projectThread = std::thread(createProj, path.c_str(), std::ref(logString));
                     activePath = path;
                 }
             }
             if (ImGui::Button("Open Project")) {
-                const char* path = tinyfd_selectFolderDialog("Open Project", NULL);
-                if (path != NULL) {
+                std::string path = fdutil::selectFolder("Open Project", NULL);
+                if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
                     activePath = path;
@@ -234,12 +240,12 @@ int main() {
                 }
             }
             if (ImGui::Button("Build and Run")) {
-                if (activePath != NULL) {
+                if (!activePath.empty()) {
                     //wait for current op to finish
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    projectThread = std::thread(buildRunProj, activePath,
+                    projectThread = std::thread(buildRunProj, activePath.c_str(),
                         executablePath, std::ref(logString));
 
                 }
