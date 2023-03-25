@@ -204,7 +204,7 @@ int main() {
                 const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
                 const char* filterDesc = "Audio Files";
                 std::string path = fdutil::openFile("Select File", NULL,
-                    sizeof(filters) / sizeof(filters[0]), filters, filterDesc, false);
+                    sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
                 if (!path.empty()) {
                     audio::audioStopAll();
                     audioClip = audio::audioLoad(path.c_str());
@@ -292,7 +292,7 @@ int main() {
             if (ImGui::Button("Load Texture")) {
                 const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
                 std::string path = fdutil::openFile("Load Texture", NULL,
-                    sizeof(filters) / sizeof(filters[0]), filters, NULL, 0);
+                    sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
                 if (!path.empty()) {
                     clearTextures();
@@ -316,10 +316,11 @@ int main() {
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
                 //import button
                 if (ImGui::Button("Import File")) {
-                    std::string path = fdutil::openFile("Import File", NULL,
-                        0, NULL, NULL, 0);
-                    if (!path.empty()) {
-                        assetfolder::addAsset(path, currFolder);
+                    std::vector<std::string> paths;
+                    fdutil::openFileMulti("Import File", NULL,
+                        0, NULL, NULL, paths);
+                    if (!paths.empty()) {
+                        assetfolder::addAssets(paths, currFolder);
                         queryFolder = true;
                     }
                 }
