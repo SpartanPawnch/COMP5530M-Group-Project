@@ -12,6 +12,9 @@
 #include <io.h>
 #include <sys/stat.h>
 
+//disable POSIX deprecation warning
+#pragma warning(disable:4996)
+
 static std::string activeDirectory;
 
 namespace assetfolder {
@@ -114,7 +117,7 @@ namespace assetfolder {
                 found = FindNextFileA(hFind, &findData)) {
                 if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
                     res.emplace_back(AssetDescriptor{
-                    std::string(dir.path + findData.cFileName),
+                    std::string(dir.path + "/" + findData.cFileName),
                     std::string(findData.cFileName),
                     findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
                         AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
@@ -194,7 +197,11 @@ namespace assetfolder {
     }
 
     void delAsset(const AssetDescriptor& asset) {
-        std::remove(asset.path.c_str());
+        int res = std::remove(asset.path.c_str());
+
+        //TODO log
+        if (res != 0)
+            printf("Failed to delete asset %s, got error %i\n", asset.path.c_str(), res);
     }
 
     void delAssets(const std::vector<AssetDescriptor>& assets) {

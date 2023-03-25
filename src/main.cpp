@@ -334,6 +334,11 @@ int main() {
                 for (unsigned int i = 0;i < folderItems.size();i++) {
                     ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
                         assetfolder::typeToString(folderItems[i].type));
+                    ImGui::SameLine();
+                    if (ImGui::Button("Delete")) {
+                        assetfolder::delAsset(folderItems[i]);
+                        queryFolder = true;
+                    }
                 }
             }
 
