@@ -132,6 +132,23 @@ namespace assetfolder {
 #endif
     }
 
+    AssetDescriptor outerDir(const AssetDescriptor& dir) {
+        int i = dir.path.length() - 1;
+        while (i > 0 && dir.path[i] != '/' && dir.path[i] != '\\')
+            i--;
+
+        //reached topmost folder
+        if (i == 0)
+            return dir;
+
+        std::string newPath = dir.path.substr(0, i);
+        return AssetDescriptor{
+            newPath,
+            getName(newPath.c_str()),
+            AssetDescriptor::EFileType::FOLDER
+        };
+    }
+
     static void addAssets_internal(const std::vector<AssetDescriptor>& assets, const AssetDescriptor& dir) {
         for (unsigned int i = 0;i < assets.size();i++) {
             addAsset(assets[i].path, dir);

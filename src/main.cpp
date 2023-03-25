@@ -246,6 +246,8 @@ int main() {
                     projectThread = std::thread(createProj, path, std::ref(logString));
                     activePath = path;
                     assetfolder::setActiveDirectory(path);
+                    currFolder = assetfolder::getRootDir();
+                    queryFolder = true;
                 }
             }
             if (ImGui::Button("Open Project")) {
@@ -258,6 +260,7 @@ int main() {
                     logString += activePath;
                     logString += "\n";
                     assetfolder::setActiveDirectory(path);
+                    currFolder = assetfolder::getRootDir();
                     queryFolder = true;
                 }
             }
@@ -308,9 +311,8 @@ int main() {
         }
 
         //folder debug
-        ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(800, 300), ImGuiCond_Once);
         if (ImGui::Begin("Folder Browser", NULL, 0)) {
-            currFolder = assetfolder::getRootDir();
             ImGui::Text("Current Folder: %s", currFolder.path.c_str());
 
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
@@ -332,6 +334,11 @@ int main() {
                         queryFolder = true;
                     }
                 }
+                ImGui::SameLine();
+                if (ImGui::Button("..")) {
+                    currFolder = assetfolder::outerDir(currFolder);
+                    queryFolder = true;
+                }
 
                 //draw file list
                 if (queryFolder) {
@@ -341,14 +348,25 @@ int main() {
                 }
                 ImGui::Text("Items: %i", folderItems.size());
                 std::string deleteLabel("Delete ##");
+                std::string browseLabel("Browse ##");
                 for (unsigned int i = 0;i < folderItems.size();i++) {
                     ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
                         assetfolder::typeToString(folderItems[i].type));
+
+                    ImGui::SameLine();
+                    if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
+                        if (ImGui::Button((browseLabel + std::to_string(i)).c_str())) {
+                            currFolder = folderItems[i];
+                            queryFolder = true;
+                        }
+                    }
+
                     ImGui::SameLine();
                     if (ImGui::Button((deleteLabel + std::to_string(i)).c_str())) {
                         assetfolder::delAsset(folderItems[i]);
                         queryFolder = true;
                     }
+
                 }
             }
 

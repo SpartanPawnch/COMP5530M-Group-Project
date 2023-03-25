@@ -32,6 +32,9 @@ namespace assetfolder {
     //list items in directory given. dir.type must be EFileType::FOLDER
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res);
 
+    //go to outer directory
+    AssetDescriptor outerDir(const AssetDescriptor& dir);
+
     //copy asset in path to folder specified
     void addAsset(const std::string& path, const AssetDescriptor& dir);
     void addAssets(const std::vector<std::string>& paths, const AssetDescriptor& dir);
