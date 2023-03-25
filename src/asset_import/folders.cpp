@@ -130,6 +130,16 @@ namespace assetfolder {
 #else
         //TODO - Linux Version?
 #endif
+
+        //bubble sort for folders first
+        for (int i = res.size() - 1;i > 0;i--) {
+            for (int j = 0;j < i;j++) {
+                if (res[j].type != AssetDescriptor::EFileType::FOLDER &&
+                    res[j + 1].type == AssetDescriptor::EFileType::FOLDER)
+                    std::swap(res[j], res[j + 1]);
+            }
+        }
+
     }
 
     AssetDescriptor outerDir(const AssetDescriptor& dir) {

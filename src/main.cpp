@@ -312,7 +312,7 @@ int main() {
 
         //folder debug
         ImGui::SetNextWindowSize(ImVec2(800, 300), ImGuiCond_Once);
-        if (ImGui::Begin("Folder Browser", NULL, 0)) {
+        if (ImGui::Begin("Asset Browser", NULL, 0)) {
             ImGui::Text("Current Folder: %s", currFolder.path.c_str());
 
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
@@ -326,6 +326,7 @@ int main() {
                         queryFolder = true;
                     }
                 }
+
                 ImGui::SameLine();
                 if (ImGui::Button("Import Folder")) {
                     std::string path = fdutil::selectFolder("Import Folder", NULL);
@@ -334,6 +335,7 @@ int main() {
                         queryFolder = true;
                     }
                 }
+
                 ImGui::SameLine();
                 if (ImGui::Button("..")) {
                     currFolder = assetfolder::outerDir(currFolder);
