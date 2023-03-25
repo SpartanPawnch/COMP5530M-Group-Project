@@ -176,8 +176,16 @@ int main() {
     //asset folder controls
     assetfolder::AssetDescriptor currFolder;
     std::vector<assetfolder::AssetDescriptor> folderItems;
+    const float QUERY_INTERVAL = 5.0f;
+    float lastQueryTime = float(glfwGetTime());
+    float currTime = float(glfwGetTime());
+    bool queryFolder = true;
 
     while (!glfwWindowShouldClose(window)) {
+        currTime = float(glfwGetTime());
+        if (!queryFolder && (currTime > lastQueryTime + QUERY_INTERVAL)) {
+            queryFolder = true;
+        }
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -250,6 +258,7 @@ int main() {
                     logString += activePath;
                     logString += "\n";
                     assetfolder::setActiveDirectory(path);
+                    queryFolder = true;
                 }
             }
             if (ImGui::Button("Build and Run")) {
@@ -302,11 +311,29 @@ int main() {
         ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Once);
         if (ImGui::Begin("Folder Browser", NULL, 0)) {
             currFolder = assetfolder::getRootDir();
+            ImGui::Text("Current Folder: %s", currFolder.path.c_str());
+
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                assetfolder::listDir(currFolder, folderItems);
+                //import button
+                if (ImGui::Button("Import File")) {
+                    std::string path = fdutil::openFile("Import File", NULL,
+                        0, NULL, NULL, 0);
+                    if (!path.empty()) {
+                        assetfolder::addAsset(path, currFolder);
+                        queryFolder = true;
+                    }
+                }
+
+                //draw file list
+                if (queryFolder) {
+                    assetfolder::listDir(currFolder, folderItems);
+                    queryFolder = false;
+                    lastQueryTime = currTime;
+                }
                 ImGui::Text("Items: %i", folderItems.size());
                 for (unsigned int i = 0;i < folderItems.size();i++) {
-                    ImGui::Text("%s\n", folderItems[i].name.c_str());
+                    ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
+                        assetfolder::typeToString(folderItems[i].type));
                 }
             }
 

@@ -1,11 +1,16 @@
 #include "folders.h"
 #ifdef _WIN32
-#include<Windows.h>
+#include<windows.h>
+#include<direct.h>
 #else
 //TODO Linux version?
 #endif
 #include <cstring>
 #include <cassert>
+#include <cstdio>
+#include <fcntl.h>
+#include <io.h>
+#include <sys/stat.h>
 
 static std::string activeDirectory;
 
@@ -95,22 +100,26 @@ namespace assetfolder {
         hFind = FindFirstFileA((dir.path + "/*").c_str(), &findData);
         if (hFind != 0) {
             //add first result
-            res.emplace_back(AssetDescriptor{
-                std::string(dir.path + findData.cFileName),
-                std::string(findData.cFileName),
-                findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
-                    AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
-                });
+            if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
+                res.emplace_back(AssetDescriptor{
+                    std::string(dir.path + findData.cFileName),
+                    std::string(findData.cFileName),
+                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
+                        AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
+                    });
+            }
 
             //add other results
             for (bool found = FindNextFileA(hFind, &findData);found;
                 found = FindNextFileA(hFind, &findData)) {
-                res.emplace_back(AssetDescriptor{
-                std::string(dir.path + findData.cFileName),
-                std::string(findData.cFileName),
-                findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
-                    AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
-                    });
+                if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
+                    res.emplace_back(AssetDescriptor{
+                    std::string(dir.path + findData.cFileName),
+                    std::string(findData.cFileName),
+                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
+                        AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
+                        });
+                }
             }
         }
 #else
@@ -118,11 +127,89 @@ namespace assetfolder {
 #endif
     }
 
-    void addAsset(const char* path, const AssetDescriptor& dir) {
+    static void addAssets_internal(const std::vector<AssetDescriptor>& assets, const AssetDescriptor& dir) {
+        for (unsigned int i = 0;i < assets.size();i++) {
+            addAsset(assets[i].path, dir);
+        }
+    }
+
+    void addAsset(const std::string& path, const AssetDescriptor& dir) {
         assert(dir.type == AssetDescriptor::EFileType::FOLDER);
+
+        std::string name = getName(path.c_str());
+        std::string newPath = dir.path + "/" + name;
+        size_t bytesRead;
+
+        //check if file is directory
+        struct stat s;
+        if (stat(path.c_str(), &s) != 0)
+            return;
+
+        if (s.st_mode & S_IFDIR) {
+            //directory
+
+            //create folder in destination
+            _mkdir(newPath.c_str());
+            AssetDescriptor dirDesc = {
+                path,
+                name,
+                AssetDescriptor::EFileType::FOLDER
+            };
+
+            //get source contents
+            std::vector<AssetDescriptor> contents;
+            listDir(dirDesc, contents);
+
+            //copy source contents
+            dirDesc.path = newPath;
+            addAssets_internal(contents, dirDesc);
+        }
+        else if (s.st_mode & S_IFREG) {
+            //file - copy using POSIX descriptors
+            char buf[BUFSIZ];
+            int src = _open(path.c_str(), O_RDONLY, 0);
+            if (src == NULL) {
+                printf("Failed to open file %s for reading\n", path.c_str());
+                return;
+            }
+
+            int dst = _open(newPath.c_str(), O_WRONLY | O_CREAT, 0644);
+            if (dst == NULL) {
+                printf("Failed to open file %s for writing\n", newPath.c_str());
+                return;
+            }
+
+            while ((bytesRead = _read(src, buf, BUFSIZ)) > 0)
+                _write(dst, buf, BUFSIZ);
+
+            _close(src);
+            _close(dst);
+        }
+    }
+
+    void addAssets(const std::vector<std::string>& paths, const AssetDescriptor& dir) {
+        for (unsigned int i = 0;i < paths.size();i++) {
+            addAsset(paths[i], dir);
+        }
     }
 
     void delAsset(const AssetDescriptor& asset) {
+        std::remove(asset.path.c_str());
+    }
 
+    void delAssets(const std::vector<AssetDescriptor>& assets) {
+        for (unsigned int i = 0;i < assets.size();i++)
+            delAsset(assets[i]);
+    }
+    const char* typeToString(const AssetDescriptor::EFileType& type) {
+        const char* literals[] = {
+            "FOLDER",
+            "MODEL",
+            "TEXTURE",
+            "AUDIO",
+            "MISC",
+            "INVALID"
+        };
+        return literals[int(type)];
     }
 }

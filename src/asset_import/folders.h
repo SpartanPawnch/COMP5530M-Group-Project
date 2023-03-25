@@ -33,8 +33,13 @@ namespace assetfolder {
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res);
 
     //copy asset in path to folder specified
-    void addAsset(const char* path, const AssetDescriptor& folder);
+    void addAsset(const std::string& path, const AssetDescriptor& dir);
+    void addAssets(const std::vector<std::string>& paths, const AssetDescriptor& dir);
 
     //delete asset
     void delAsset(const AssetDescriptor& asset);
+    void delAssets(const std::vector<AssetDescriptor>& assets);
+
+    //get type as string
+    const char* typeToString(const AssetDescriptor::EFileType&);
 }
