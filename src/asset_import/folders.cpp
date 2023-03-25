@@ -172,13 +172,13 @@ namespace assetfolder {
         else if (s.st_mode & S_IFREG) {
             //file - copy using POSIX descriptors
             char buf[BUFSIZ];
-            int src = _open(path.c_str(), O_RDONLY, 0);
+            int src = _open(path.c_str(), O_RDONLY | O_BINARY, 0);
             if (src == NULL) {
                 printf("Failed to open file %s for reading\n", path.c_str());
                 return;
             }
 
-            int dst = _open(newPath.c_str(), O_WRONLY | O_CREAT, 0644);
+            int dst = _open(newPath.c_str(), O_WRONLY | O_CREAT | O_BINARY, _S_IWRITE | _S_IREAD);
             if (dst == NULL) {
                 printf("Failed to open file %s for writing\n", newPath.c_str());
                 return;

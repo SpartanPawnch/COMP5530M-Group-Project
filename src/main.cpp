@@ -324,6 +324,14 @@ int main() {
                         queryFolder = true;
                     }
                 }
+                ImGui::SameLine();
+                if (ImGui::Button("Import Folder")) {
+                    std::string path = fdutil::selectFolder("Import Folder", NULL);
+                    if (!path.empty()) {
+                        assetfolder::addAsset(path, currFolder);
+                        queryFolder = true;
+                    }
+                }
 
                 //draw file list
                 if (queryFolder) {
@@ -332,11 +340,12 @@ int main() {
                     lastQueryTime = currTime;
                 }
                 ImGui::Text("Items: %i", folderItems.size());
+                std::string deleteLabel("Delete ##");
                 for (unsigned int i = 0;i < folderItems.size();i++) {
                     ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
                         assetfolder::typeToString(folderItems[i].type));
                     ImGui::SameLine();
-                    if (ImGui::Button("Delete")) {
+                    if (ImGui::Button((deleteLabel + std::to_string(i)).c_str())) {
                         assetfolder::delAsset(folderItems[i]);
                         queryFolder = true;
                     }
