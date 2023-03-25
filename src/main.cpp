@@ -203,9 +203,9 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
-        if (!queryFolder && (currTime > lastQueryTime + QUERY_INTERVAL)) {
-            queryFolder = true;
-        }
+        // if (!queryFolder && (currTime > lastQueryTime + QUERY_INTERVAL)) {
+        //     queryFolder = true;
+        // }
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -344,7 +344,6 @@ int main() {
                 if (queryFolder) {
                     assetfolder::listDir(currFolder, folderItems);
                     queryFolder = false;
-                    lastQueryTime = currTime;
                     itemIsSelected.resize(folderItems.size(), false);
                 }
 
@@ -390,6 +389,12 @@ int main() {
                 if (ImGui::Button("..")) {
                     currFolder = assetfolder::outerDir(currFolder);
                     setVec(itemIsSelected, false);
+                    queryFolder = true;
+                }
+
+                //refresh button
+                ImGui::SameLine();
+                if (ImGui::Button("Refresh")) {
                     queryFolder = true;
                 }
 
