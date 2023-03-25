@@ -115,14 +115,16 @@ namespace assetfolder {
             //add other results
             for (bool found = FindNextFileA(hFind, &findData);found;
                 found = FindNextFileA(hFind, &findData)) {
-                if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
-                    res.emplace_back(AssetDescriptor{
-                    std::string(dir.path + "/" + findData.cFileName),
-                    std::string(findData.cFileName),
-                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
-                        AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
-                        });
-                }
+                //skip "." and ".."
+                if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0)
+                    continue;
+
+                res.emplace_back(AssetDescriptor{
+                std::string(dir.path + "/" + findData.cFileName),
+                std::string(findData.cFileName),
+                findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
+                    AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
+                    });
             }
         }
 #else
@@ -197,8 +199,18 @@ namespace assetfolder {
     }
 
     void delAsset(const AssetDescriptor& asset) {
-        int res = std::remove(asset.path.c_str());
+        //remove directory
+        if (asset.type == AssetDescriptor::EFileType::FOLDER) {
+            std::vector<AssetDescriptor> contents;
+            listDir(asset, contents);
+            delAssets(contents);
+            _rmdir(asset.path.c_str());
+            return;
+        }
 
+
+        //remove single file
+        int res = std::remove(asset.path.c_str());
         //TODO log
         if (res != 0)
             printf("Failed to delete asset %s, got error %i\n", asset.path.c_str(), res);
