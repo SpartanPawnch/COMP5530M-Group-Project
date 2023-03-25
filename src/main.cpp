@@ -352,6 +352,7 @@ int main() {
                 std::string deleteLabel("Delete ##");
                 std::string browseLabel("Browse ##");
                 for (unsigned int i = 0;i < folderItems.size();i++) {
+                    ImGui::BeginGroup();
                     ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
                         assetfolder::typeToString(folderItems[i].type));
 
@@ -368,6 +369,7 @@ int main() {
                         assetfolder::delAsset(folderItems[i]);
                         queryFolder = true;
                     }
+                    ImGui::EndGroup();
 
                 }
             }
