@@ -27,6 +27,14 @@
 #include "asset_import/folders.h"
 
 
+// --- GUI constants, possibly replace with settings file ---
+namespace guicfg {
+    const ImVec2 assetMgrPadding(10.0f, 25.0f);
+    const ImVec2 assetMgrIconSize(60.0f, 60.0f);
+    const ImVec2 assetMgrItemSize(80.0f, 80.0f);
+};
+
+//TODO proper log library
 struct LogString {
 private:
     std::string buf;
@@ -108,6 +116,14 @@ void buildRunProj(const std::string& activePath, const char* executablePath, Log
     _chdir(executablePath);
 }
 
+//utility function - set all elements to specific value
+template<typename T>
+void setVec(std::vector<T>& vec, T val) {
+    for (unsigned int i = 0;i < vec.size();i++) {
+        vec[i] = val;
+    }
+}
+
 int main() {
     //switch to correct working directory - platform specific
 #ifdef _WIN32
@@ -173,13 +189,17 @@ int main() {
     std::string audioPath("");
     glm::vec3 audioPos(.0f);
 
-    //asset folder controls
+    //asset manager controls
     assetfolder::AssetDescriptor currFolder;
     std::vector<assetfolder::AssetDescriptor> folderItems;
     const float QUERY_INTERVAL = 5.0f;
     float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
     bool queryFolder = true;
+
+    //asset manager visuals
+    int fileTexture = loadTexture("assets/fileico.png");
+    int folderTexture = loadTexture("assets/folderico.png");
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -198,43 +218,43 @@ int main() {
         ImVec2 mousePos = ImGui::GetMousePos();
 
         // --- Get Gui Input ---
-        if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Active Clip: %s", audioPath.c_str());
-            if (ImGui::Button("Load Audio File")) {
-                const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
-                const char* filterDesc = "Audio Files";
-                std::string path = fdutil::openFile("Select File", NULL,
-                    sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
-                if (!path.empty()) {
-                    audio::audioStopAll();
-                    audioClip = audio::audioLoad(path.c_str());
-                    if (audioClip >= 0) {
-                        audioPath = path;
-                        logString += "Opened audio file ";
-                        logString += path;
-                        logString += "\n";
-                    }
-                    else {
-                        logString += "Failed to load audio file ";
-                        logString += path;
-                        logString += "\n";
-                    }
-                }
-            }
+        // if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        //     ImGui::Text("Active Clip: %s", audioPath.c_str());
+        //     if (ImGui::Button("Load Audio File")) {
+        //         const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
+        //         const char* filterDesc = "Audio Files";
+        //         std::string path = fdutil::openFile("Select File", NULL,
+        //             sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
+        //         if (!path.empty()) {
+        //             audio::audioStopAll();
+        //             audioClip = audio::audioLoad(path.c_str());
+        //             if (audioClip >= 0) {
+        //                 audioPath = path;
+        //                 logString += "Opened audio file ";
+        //                 logString += path;
+        //                 logString += "\n";
+        //             }
+        //             else {
+        //                 logString += "Failed to load audio file ";
+        //                 logString += path;
+        //                 logString += "\n";
+        //             }
+        //         }
+        //     }
 
-            //adjust source position, listening position is center
-            if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
-                audio::audioSetPosition(audioPos);
-            }
+        //     //adjust source position, listening position is center
+        //     if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+        //         audio::audioSetPosition(audioPos);
+        //     }
 
-            //play audio with 3d effects
-            if (ImGui::Button("Play Audio File")) {
-                if (!audioPath.empty())
-                    audio::audioPlay(audioClip);
-            }
-            ImGui::End();
-        }
-
+        //     //play audio with 3d effects
+        //     if (ImGui::Button("Play Audio File")) {
+        //         if (!audioPath.empty())
+        //             audio::audioPlay(audioClip);
+        //     }
+        //     ImGui::End();
+        // }
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Active Directory: %s", activePath.c_str());
             if (ImGui::Button("Create Project")) {
@@ -291,24 +311,24 @@ int main() {
         }
 
         //texture debug
-        if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            if (ImGui::Button("Load Texture")) {
-                const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
-                std::string path = fdutil::openFile("Load Texture", NULL,
-                    sizeof(filters) / sizeof(filters[0]), filters, NULL);
+        // if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        //     if (ImGui::Button("Load Texture")) {
+        //         const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
+        //         std::string path = fdutil::openFile("Load Texture", NULL,
+        //             sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
-                if (!path.empty()) {
-                    clearTextures();
-                    activeTexture = loadTexture(path.c_str());
-                }
-            }
-            if (activeTexture != -1) {
-                TextureInfo texInfo = getTexture(activeTexture);
-                ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
-            }
+        //         if (!path.empty()) {
+        //             clearTextures();
+        //             activeTexture = loadTexture(path.c_str());
+        //         }
+        //     }
+        //     if (activeTexture != -1) {
+        //         TextureInfo texInfo = getTexture(activeTexture);
+        //         ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+        //     }
 
-            ImGui::End();
-        }
+        //     ImGui::End();
+        // }
 
         //folder debug
         ImGui::SetNextWindowSize(ImVec2(800, 300), ImGuiCond_Once);
@@ -316,7 +336,19 @@ int main() {
             ImGui::Text("Current Folder: %s", currFolder.path.c_str());
 
             if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                //import button
+                static std::vector<bool> itemIsSelected;
+                int itemsPerLine = int(ImGui::GetWindowWidth() / (guicfg::assetMgrItemSize.x +
+                    guicfg::assetMgrPadding.x));
+
+                //refresh folder if needed
+                if (queryFolder) {
+                    assetfolder::listDir(currFolder, folderItems);
+                    queryFolder = false;
+                    lastQueryTime = currTime;
+                    itemIsSelected.resize(folderItems.size(), false);
+                }
+
+                //import buttons
                 if (ImGui::Button("Import File")) {
                     std::vector<std::string> paths;
                     fdutil::openFileMulti("Import File", NULL,
@@ -336,41 +368,100 @@ int main() {
                     }
                 }
 
+                //delete button
                 ImGui::SameLine();
-                if (ImGui::Button("..")) {
-                    currFolder = assetfolder::outerDir(currFolder);
+                if (ImGui::Button("Delete") || glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
+                    for (unsigned int i = 0;i < itemIsSelected.size();i++) {
+                        if (itemIsSelected[i])
+                            assetfolder::delAsset(folderItems[i]);
+                    }
+                    setVec(itemIsSelected, false);
                     queryFolder = true;
                 }
 
-                //draw file list
-                if (queryFolder) {
-                    assetfolder::listDir(currFolder, folderItems);
-                    queryFolder = false;
-                    lastQueryTime = currTime;
+                //outer dir shorcut
+                ImGui::SameLine();
+                if (ImGui::Button("Root")) {
+                    currFolder = assetfolder::getRootDir();
+                    setVec(itemIsSelected, false);
+                    queryFolder = true;
                 }
-                ImGui::Text("Items: %i", folderItems.size());
-                std::string deleteLabel("Delete ##");
-                std::string browseLabel("Browse ##");
-                for (unsigned int i = 0;i < folderItems.size();i++) {
-                    ImGui::BeginGroup();
-                    ImGui::Text("%s %s\n", folderItems[i].name.c_str(),
-                        assetfolder::typeToString(folderItems[i].type));
+                ImGui::SameLine();
+                if (ImGui::Button("..")) {
+                    currFolder = assetfolder::outerDir(currFolder);
+                    setVec(itemIsSelected, false);
+                    queryFolder = true;
+                }
 
-                    ImGui::SameLine();
+                //draw files in folder
+                ImVec2 winPos = ImGui::GetWindowPos();
+                float initialItemPad = ImGui::GetCursorPosX();
+                for (unsigned int i = 0;i < folderItems.size();i++) {
+                    ImGui::PushID(i);
+                    ImVec2 initialPos = ImGui::GetCursorPos();
+                    ImGui::BeginGroup();
+                    //icon
                     if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                        if (ImGui::Button((browseLabel + std::to_string(i)).c_str())) {
-                            currFolder = folderItems[i];
-                            queryFolder = true;
+                        TextureInfo texInfo = getTexture(folderTexture);
+                        ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    }
+                    else {
+                        TextureInfo texInfo = getTexture(fileTexture);
+                        ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    }
+
+                    //filename
+                    ImGui::PushClipRect(ImVec2(winPos.x + initialPos.x, winPos.y + initialPos.y),
+                        ImVec2(winPos.x + initialPos.x + guicfg::assetMgrItemSize.x,
+                            winPos.y + initialPos.y + guicfg::assetMgrItemSize.y), false);
+                    ImGui::Text("%s", folderItems[i].name.c_str());
+                    ImGui::PopClipRect();
+
+                    //selectable
+                    ImGui::SetCursorPos(initialPos);
+                    if (ImGui::Selectable("##fileselector", itemIsSelected[i], 0, guicfg::assetMgrItemSize)) {
+                        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+                            glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL)) {
+                            itemIsSelected[i] = true;
+                        }
+                        else {
+                            setVec(itemIsSelected, false);
+                            itemIsSelected[i] = true;
                         }
                     }
 
-                    ImGui::SameLine();
-                    if (ImGui::Button((deleteLabel + std::to_string(i)).c_str())) {
-                        assetfolder::delAsset(folderItems[i]);
-                        queryFolder = true;
-                    }
                     ImGui::EndGroup();
 
+                    if (ImGui::IsItemHovered()) {
+                        //check for folder switch
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) &&
+                            folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
+                            currFolder = folderItems[i];
+                            setVec(itemIsSelected, false);
+                            queryFolder = true;
+                        }
+
+                        //draw tooltip - full path
+                        ImGui::SetTooltip(folderItems[i].path.c_str());
+                    }
+
+                    if (i < folderItems.size() - 1) {
+                        //wrap to next line if needed
+                        bool wrap = i % itemsPerLine == itemsPerLine - 1;
+                        ImVec2 nextPos = ImVec2(
+                            wrap ? initialItemPad : (initialPos.x +
+                                guicfg::assetMgrItemSize.x + guicfg::assetMgrPadding.x),
+                            initialPos.y + (guicfg::assetMgrIconSize.y + guicfg::assetMgrPadding.y) *
+                            wrap
+                        );
+                        ImGui::SetCursorPos(
+                            nextPos);
+                    }
+
+                    ImGui::PopID();
+                }
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
+                    setVec(itemIsSelected, false);
                 }
             }
 
