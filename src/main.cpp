@@ -21,6 +21,7 @@
 #include <mutex>
 
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
+#include "../render-engine/RenderManager.h"
 #include "drawing.h"
 
 struct LogString {
@@ -99,6 +100,9 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
     _chdir(executablePath);
 }
 
+//set renderEngine instance to nullptr initially
+RenderEngine* RenderEngine::instance = nullptr;
+
 int main() {
     //switch to correct working directory - platform specific
 #ifdef _WIN32
@@ -137,7 +141,7 @@ int main() {
     }
 
     //swap buffers to avoid the window not responding
-    glClearColor(.7f, .7f, .7f, 1.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -152,6 +156,13 @@ int main() {
     std::thread projectThread;
     //init graphics
     initGraphics();
+    //setup components
+    //Render Engine
+    RenderEngine* renderManager = RenderEngine::getInstance();
+    renderManager = RenderEngine::getInstance();
+    renderManager = RenderEngine::getInstance();
+    renderManager = RenderEngine::getInstance();
+    
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -225,7 +236,7 @@ int main() {
         ImGui::Render();
 
         //draw background
-        glClearColor(.7f, .7f, .7f, 1.0f);
+        glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

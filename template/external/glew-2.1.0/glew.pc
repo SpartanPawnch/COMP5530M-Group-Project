@@ -1,6 +1,6 @@
-prefix=C:/Program Files (x86)/BuildSys
+prefix=C:/Program Files (x86)/BuildTest
 exec_prefix=${prefix}
-libdir=C:/Program Files (x86)/BuildSys/lib
+libdir=C:/Program Files (x86)/BuildTest/lib
 includedir=${prefix}/include
 
 Name: glew
