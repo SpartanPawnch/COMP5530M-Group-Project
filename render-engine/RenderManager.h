@@ -3,33 +3,35 @@
 #include <iostream>
 #include <fstream>
 
-class RenderEngine
+#include <GLFW/glfw3.h>
+
+class RenderManager
 {
 private:
 	
 	//pointer to single instance of RenderEngine
-	static RenderEngine* instance;
+	static RenderManager* instance;
 	bool initialized = false;
 
 	//test output writing for RenderEngine
 	//std::ofstream testOutput;
 
 	//default constructor does nothing
-	RenderEngine() {}
+	RenderManager() {}
 
 	// no copy constructor or copy operator
-	RenderEngine(const RenderEngine&) = delete;
-	RenderEngine& operator=(const RenderEngine&) = delete;
+	RenderManager(const RenderManager&) = delete;
+	RenderManager& operator=(const RenderManager&) = delete;
 
 	//default destructor does nothing
-	~RenderEngine() {}
+	~RenderManager() {}
 
 public:
 
 	//needs to be static to be invoked without object of class
-	static RenderEngine* getInstance();
+	static RenderManager* getInstance();
 
-	void startUp();
+	void startUp(GLFWwindow* aWindow);
 
 	void shutDown();
 

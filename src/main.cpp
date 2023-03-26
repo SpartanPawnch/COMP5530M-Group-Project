@@ -101,7 +101,7 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
 }
 
 //set renderEngine instance to nullptr initially
-RenderEngine* RenderEngine::instance = nullptr;
+RenderManager* RenderManager::instance = nullptr;
 
 int main() {
     //switch to correct working directory - platform specific
@@ -158,10 +158,9 @@ int main() {
     initGraphics();
     //setup components
     //Render Engine
-    RenderEngine* renderManager = RenderEngine::getInstance();
-    renderManager = RenderEngine::getInstance();
-    renderManager = RenderEngine::getInstance();
-    renderManager = RenderEngine::getInstance();
+    RenderManager* renderManager = RenderManager::getInstance();
+
+    renderManager->startUp(window);
     
 
     while (!glfwWindowShouldClose(window)) {

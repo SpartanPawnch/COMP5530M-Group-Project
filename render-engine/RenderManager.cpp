@@ -1,10 +1,10 @@
 #include "RenderManager.h"
 
-RenderEngine* RenderEngine::getInstance()
+RenderManager* RenderManager::getInstance()
 {
 	if (instance == nullptr)
 	{
-		instance = new RenderEngine();
+		instance = new RenderManager();
 		std::cout << "Render Instance created now." << std::endl;
 				
 	}
@@ -14,4 +14,12 @@ RenderEngine* RenderEngine::getInstance()
 		
 	}
 	return instance;
+}
+
+void RenderManager::startUp(GLFWwindow* aWindow)
+{
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glfwSwapBuffers(aWindow);
+	glfwPollEvents();
 }
