@@ -22,6 +22,7 @@
 
 #include "fdutil.h"
 #include "drawing.h"
+#include "levels.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
@@ -139,7 +140,7 @@ int main() {
     //remove executable name
     for (pathLen--;pathLen >= 0 && executablePath[pathLen] != '/';pathLen--) {
         executablePath[pathLen] = '\0';
-    }
+}
 #endif
 
     _chdir(executablePath);
