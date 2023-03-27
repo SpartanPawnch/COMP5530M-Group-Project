@@ -20,41 +20,25 @@
 #include <thread>
 #include <mutex>
 
-#include "../external/tinyfiledialogs/tinyfiledialogs.h"
+#include "fdutil.h"
 #include "drawing.h"
+#include "logging.h"
+#include "asset_import/audio.h"
 #include "asset_import/images.h"
 
-struct LogString {
-private:
-    std::string buf;
-    std::mutex mux;
-public:
-    bool scrollToBot = false;
-    inline void operator+=(const char* str) {
-        const std::lock_guard<std::mutex> lockg(mux);
-        buf += str;
-        scrollToBot = true;
-    }
-    inline const char* c_str() {
-        const std::lock_guard<std::mutex> lockg(mux);
-        return buf.c_str();
-    }
-};
 
-void createProj(const char* path, LogString& logString) {
+void createProj(const char* path) {
     char buf[1024];
     FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
     while (!feof(copyProc)) {
         fgets(buf, sizeof(char) * 1024, copyProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Created project at ";
-    logString += path;
-    logString += "\n";
+    logging::logInfo("Created project at {}\n", path);
     fclose(copyProc);
 }
 
-void buildRunProj(const char* activePath, const char* executablePath, LogString& logString) {
+void buildRunProj(const char* activePath, const char* executablePath) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     //change to buildDir
@@ -67,9 +51,9 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
     char buf[1024];
     while (!feof(cmakeProc)) {
         fgets(buf, sizeof(char) * 1024, cmakeProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Building Done!\n";
+    logging::logInfo("Building Done!\n");
 
     //build cleanup
     fclose(cmakeProc);
@@ -148,17 +132,25 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-    const char* activePath = NULL;
-    LogString logString;
+    std::string activePath;
+
     std::thread projectThread;
+
+    //init logging
+    logging::LogManager logMgr;
 
     //init graphics
     initGraphics();
 
+    //audio controls
+    audio::AudioEngine audioEngine;
+    int audioClip = -1;
+    std::string audioPath("");
+    glm::vec3 audioPos(.0f);
+
     //init textures
     TextureManager texManager;
     int activeTexture = -1;
-
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -173,37 +165,65 @@ int main() {
         ImVec2 mousePos = ImGui::GetMousePos();
 
         // --- Get Gui Input ---
+        if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Active Clip: %s", audioPath.c_str());
+            if (ImGui::Button("Load Audio File")) {
+                const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
+                const char* filterDesc = "Audio Files";
+                std::string path = fdutil::openFile("Select File", NULL,
+                    sizeof(filters) / sizeof(filters[0]), filters, filterDesc, false);
+                if (!path.empty()) {
+                    audio::audioStopAll();
+                    audioClip = audio::audioLoad(path.c_str());
+                    if (audioClip >= 0) {
+                        audioPath = path;
+                        logging::logInfo("Opened audio file at: {}\n", path.c_str());
+                    }
+                }
+            }
+
+            //adjust source position, listening position is center
+            if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+                audio::audioSetPosition(audioPos);
+            }
+
+            //play audio with 3d effects
+            if (ImGui::Button("Play Audio File")) {
+                if (!audioPath.empty())
+                    audio::audioPlay(audioClip);
+            }
+            ImGui::End();
+        }
+
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Active Directory: %s", activePath);
+            ImGui::Text("Active Directory: %s", activePath.c_str());
             if (ImGui::Button("Create Project")) {
-                const char* path = tinyfd_selectFolderDialog("Create a Project", NULL);
+                std::string path = fdutil::selectFolder("Create a Project", NULL);
                 //wait for current op to finish
-                if (path != NULL) {
-                    if (projectThread.joinable())
-                        projectThread.join();
-                    projectThread = std::thread(createProj, path, std::ref(logString));
-                    activePath = path;
-                }
-            }
-            if (ImGui::Button("Open Project")) {
-                const char* path = tinyfd_selectFolderDialog("Create a Project", NULL);
-                if (path != NULL) {
-                    if (projectThread.joinable())
-                        projectThread.join();
-                    activePath = path;
-                    logString += "Opened project at: ";
-                    logString += activePath;
-                    logString += "\n";
-                }
-            }
-            if (ImGui::Button("Build and Run")) {
-                if (activePath != NULL) {
-                    //wait for current op to finish
+                if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    projectThread = std::thread(buildRunProj, activePath,
-                        executablePath, std::ref(logString));
+                    projectThread = std::thread(createProj, path.c_str());
+
+                }
+            }
+            if (ImGui::Button("Open Project")) {
+                std::string path = fdutil::selectFolder("Open Project", NULL);
+                if (!path.empty()) {
+                    if (projectThread.joinable())
+                        projectThread.join();
+                    activePath = path;
+                    logging::logInfo("Opened project at: {}\n", activePath.c_str());
+                }
+            }
+            if (ImGui::Button("Build and Run")) {
+                if (!activePath.empty()) {
+                    //wait for current op to finish
+                    if (projectThread.joinable())
+                        projectThread.join();
+                    projectThread = std::thread(buildRunProj, activePath.c_str(),
+                        executablePath);
 
                 }
             }
@@ -213,10 +233,10 @@ int main() {
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);
-            ImGui::TextUnformatted(logString.c_str());
+            ImGui::TextUnformatted(logging::getLogString());
             ImGui::PopTextWrapPos();
-            if (logString.scrollToBot) {
-                logString.scrollToBot = false;
+            if (logging::scrollToBot) {
+                logging::scrollToBot = false;
                 ImGui::SetScrollHereY(1.0f);
             }
             ImGui::End();
@@ -226,12 +246,12 @@ int main() {
         if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::Button("Load Texture")) {
                 const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
-                const char* path = tinyfd_openFileDialog("Load Texture", NULL,
+                std::string path = fdutil::openFile("Load Texture", NULL,
                     sizeof(filters) / sizeof(filters[0]), filters, NULL, 0);
 
-                if (path != NULL) {
+                if (!path.empty()) {
                     clearTextures();
-                    activeTexture = loadTexture(path);
+                    activeTexture = loadTexture(path.c_str());
                 }
             }
             if (activeTexture != -1) {
