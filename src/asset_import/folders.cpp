@@ -12,6 +12,8 @@
 #include <io.h>
 #include <sys/stat.h>
 
+#include "../logging.h"
+
 //disable POSIX deprecation warning
 #pragma warning(disable:4996)
 
@@ -201,13 +203,13 @@ namespace assetfolder {
             char buf[BUFSIZ];
             int src = _open(path.c_str(), O_RDONLY | O_BINARY, 0);
             if (src == NULL) {
-                printf("Failed to open file %s for reading\n", path.c_str());
+                logging::logErr("Failed to open file {} for reading\n", path.c_str());
                 return;
             }
 
             int dst = _open(newPath.c_str(), O_WRONLY | O_CREAT | O_BINARY, _S_IWRITE | _S_IREAD);
             if (dst == NULL) {
-                printf("Failed to open file %s for writing\n", newPath.c_str());
+                logging::logErr("Failed to open file {} for writing\n", newPath.c_str());
                 return;
             }
 
@@ -240,7 +242,7 @@ namespace assetfolder {
         int res = std::remove(asset.path.c_str());
         //TODO log
         if (res != 0)
-            printf("Failed to delete asset %s, got error %i\n", asset.path.c_str(), res);
+            logging::logErr("Failed to delete asset {}, got error {}\n", asset.path.c_str(), res);
     }
 
     void delAssets(const std::vector<AssetDescriptor>& assets) {
