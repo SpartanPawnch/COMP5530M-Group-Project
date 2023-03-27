@@ -22,45 +22,22 @@
 
 #include "fdutil.h"
 #include "drawing.h"
-#include "asset_import/audio.h"
+#include "logging.h"
 
-
-struct LogString {
-private:
-    std::string buf;
-    std::mutex mux;
-public:
-    bool scrollToBot = false;
-    inline void operator+=(const char* str) {
-        const std::lock_guard<std::mutex> lockg(mux);
-        buf += str;
-        scrollToBot = true;
-    }
-    inline void operator+=(std::string str) {
-        const std::lock_guard<std::mutex> lockg(mux);
-        buf += str;
-        scrollToBot = true;
-    }
-    inline const char* c_str() {
-        const std::lock_guard<std::mutex> lockg(mux);
-        return buf.c_str();
-    }
-};
-
-void createProj(const char* path, LogString& logString) {
+void createProj(const char* path) {
     char buf[1024];
     FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
     while (!feof(copyProc)) {
         fgets(buf, sizeof(char) * 1024, copyProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Created project at ";
-    logString += path;
-    logString += "\n";
+    logging::logInfo("Created project at ");
+    logging::logInfo(path);
+    logging::logInfo("\n");
     fclose(copyProc);
 }
 
-void buildRunProj(const char* activePath, const char* executablePath, LogString& logString) {
+void buildRunProj(const char* activePath, const char* executablePath) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     //change to buildDir
@@ -73,9 +50,9 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
     char buf[1024];
     while (!feof(cmakeProc)) {
         fgets(buf, sizeof(char) * 1024, cmakeProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Building Done!\n";
+    logging::logInfo("Building Done!\n");
 
     //build cleanup
     fclose(cmakeProc);
@@ -154,9 +131,18 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-    std::string activePath("");
+    <<<<<< < HEAD
+        std::string activePath("");
     LogString logString;
-    std::thread projectThread;
+    ====== =
+        const char* activePath = NULL;
+
+    >>>>>> > 9 - dedicated - logging - solution
+        std::thread projectThread;
+
+    //init logging
+    logging::LogManager logMgr;
+
     //init graphics
     initGraphics();
 
@@ -224,8 +210,12 @@ int main() {
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    projectThread = std::thread(createProj, path.c_str(), std::ref(logString));
-                    activePath = path;
+                    <<<<<< < HEAD
+                        projectThread = std::thread(createProj, path.c_str(), std::ref(logString));
+                    ====== =
+                        projectThread = std::thread(createProj, path);
+                    >>>>>> > 9 - dedicated - logging - solution
+                        activePath = path;
                 }
             }
             if (ImGui::Button("Open Project")) {
@@ -234,9 +224,9 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
                     activePath = path;
-                    logString += "Opened project at: ";
-                    logString += activePath;
-                    logString += "\n";
+                    logging::logInfo("Opened project at: ");
+                    logging::logInfo(activePath);
+                    logging::logInfo("\n");
                 }
             }
             if (ImGui::Button("Build and Run")) {
@@ -245,8 +235,13 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    projectThread = std::thread(buildRunProj, activePath.c_str(),
-                        executablePath, std::ref(logString));
+                    <<<<<< < HEAD
+                        projectThread = std::thread(buildRunProj, activePath.c_str(),
+                            executablePath, std::ref(logString));
+                    ====== =
+                        projectThread = std::thread(buildRunProj, activePath,
+                            executablePath);
+                    >>>>>> > 9 - dedicated - logging - solution
 
                 }
             }
@@ -256,10 +251,10 @@ int main() {
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);
-            ImGui::TextUnformatted(logString.c_str());
+            ImGui::TextUnformatted(logging::getLogString());
             ImGui::PopTextWrapPos();
-            if (logString.scrollToBot) {
-                logString.scrollToBot = false;
+            if (logging::scrollToBot) {
+                logging::scrollToBot = false;
                 ImGui::SetScrollHereY(1.0f);
             }
             ImGui::End();
