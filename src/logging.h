@@ -9,16 +9,16 @@ namespace logging {
     extern bool scrollToBot;
 
     // log fatal error and quit
-    void logFatal(const char* msg);
+    void logFatal(const char* fmt, ...);
 
     // log error and continue execution
-    void logErr(const char* msg);
+    void logErr(const char* fmt, ...);
 
     // log warning
-    void logWarn(const char* msg);
+    void logWarn(const char* fmt, ...);
 
     // log info
-    void logInfo(const char* msg);
+    void logInfo(const char* fmt, ...);
 
     const char* getLogString();
 
