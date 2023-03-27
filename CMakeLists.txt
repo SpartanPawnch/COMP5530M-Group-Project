@@ -21,6 +21,7 @@ add_executable(
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
+    src/logging.cpp
 )
 
 #add glfw
@@ -36,11 +37,14 @@ add_subdirectory("external/glew-2.1.0/build/cmake")
 #add glm
 add_subdirectory("external/glm")
 
+#add spdlog
+add_subdirectory("external/spdlog")
+
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
   ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
 )
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm soloud)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm soloud spdlog)
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory 

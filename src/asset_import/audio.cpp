@@ -4,6 +4,7 @@
 #include<vector>
 #include<memory>
 
+#include "../logging.h"
 
 namespace audio {
     static SoLoud::Soloud* pSoloud;
@@ -32,6 +33,9 @@ namespace audio {
         if (res == SoLoud::SO_NO_ERROR) {
             return (loadedClips.size() - 1);
         }
+        else {
+            logging::logErr("Failed to load audio file {}\n", path);
+        };
 
         loadedClips.pop_back();
 

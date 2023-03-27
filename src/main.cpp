@@ -22,6 +22,7 @@
 
 #include "fdutil.h"
 #include "drawing.h"
+#include "logging.h"
 #include "levels.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
@@ -35,43 +36,18 @@ namespace guicfg {
     const ImVec2 assetMgrItemSize(80.0f, 80.0f);
 };
 
-//TODO proper log library
-struct LogString {
-private:
-    std::string buf;
-    std::mutex mux;
-public:
-    bool scrollToBot = false;
-    inline void operator+=(const char* str) {
-        const std::lock_guard<std::mutex> lockg(mux);
-        buf += str;
-        scrollToBot = true;
-    }
-    inline void operator+=(std::string str) {
-        const std::lock_guard<std::mutex> lockg(mux);
-        buf += str;
-        scrollToBot = true;
-    }
-    inline const char* c_str() {
-        const std::lock_guard<std::mutex> lockg(mux);
-        return buf.c_str();
-    }
-};
-
-void createProj(const std::string& path, LogString& logString) {
+void createProj(const std::string& path) {
     char buf[1024];
     FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
     while (!feof(copyProc)) {
         fgets(buf, sizeof(char) * 1024, copyProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Created project at ";
-    logString += path;
-    logString += "\n";
+    logging::logInfo("Created project at {}\n", path);
     fclose(copyProc);
 }
 
-void buildRunProj(const std::string& activePath, const char* executablePath, LogString& logString) {
+void buildRunProj(const std::string& activePath, const char* executablePath) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     //change to buildDir
@@ -84,9 +60,9 @@ void buildRunProj(const std::string& activePath, const char* executablePath, Log
     char buf[1024];
     while (!feof(cmakeProc)) {
         fgets(buf, sizeof(char) * 1024, cmakeProc);
-        logString += buf;
+        logging::logInfo(buf);
     }
-    logString += "Building Done!\n";
+    logging::logInfo("Building Done!\n");
 
     //build cleanup
     fclose(cmakeProc);
@@ -140,7 +116,7 @@ int main() {
     //remove executable name
     for (pathLen--;pathLen >= 0 && executablePath[pathLen] != '/';pathLen--) {
         executablePath[pathLen] = '\0';
-}
+    }
 #endif
 
     _chdir(executablePath);
@@ -173,9 +149,12 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-    std::string activePath("");
-    LogString logString;
+    std::string activePath;
+
     std::thread projectThread;
+
+    //init logging
+    logging::LogManager logMgr;
 
     //init graphics
     initGraphics();
@@ -264,7 +243,7 @@ int main() {
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    projectThread = std::thread(createProj, path, std::ref(logString));
+                    projectThread = std::thread(createProj, path);
                     activePath = path;
                     assetfolder::setActiveDirectory(path);
                     currFolder = assetfolder::getRootDir();
@@ -277,9 +256,7 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
                     activePath = path;
-                    logString += "Opened project at: ";
-                    logString += activePath;
-                    logString += "\n";
+                    logging::logInfo("Opened project at: {}\n", activePath.c_str());
                     assetfolder::setActiveDirectory(path);
                     currFolder = assetfolder::getRootDir();
                     queryFolder = true;
@@ -292,7 +269,7 @@ int main() {
                         projectThread.join();
 
                     projectThread = std::thread(buildRunProj, activePath,
-                        executablePath, std::ref(logString));
+                        executablePath);
 
                 }
             }
@@ -302,10 +279,10 @@ int main() {
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);
-            ImGui::TextUnformatted(logString.c_str());
+            ImGui::TextUnformatted(logging::getLogString());
             ImGui::PopTextWrapPos();
-            if (logString.scrollToBot) {
-                logString.scrollToBot = false;
+            if (logging::scrollToBot) {
+                logging::scrollToBot = false;
                 ImGui::SetScrollHereY(1.0f);
             }
             ImGui::End();
