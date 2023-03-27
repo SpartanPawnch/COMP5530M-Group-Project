@@ -1,4 +1,8 @@
 #pragma once
+#include <memory>
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/ostream_sink.h"
 
 namespace logging {
     struct LogManager {
@@ -6,19 +10,39 @@ namespace logging {
         ~LogManager();
     };
 
-    extern bool scrollToBot;
-
     // log fatal error and quit
-    void logFatal(const char* fmt, ...);
+    template<typename... Args>
+    void logFatal(const char* fmt, const Args&... args) {
+        extern std::unique_ptr<spdlog::logger> logger;
+        logger->critical(fmt, args...);
+        scrollToBot = true;
+    }
 
     // log error and continue execution
-    void logErr(const char* fmt, ...);
+    template<typename... Args>
+    void logErr(const char* fmt, const Args&... args) {
+        extern std::unique_ptr<spdlog::logger> logger;
+        logger->error(fmt, args...);
+        scrollToBot = true;
+    }
 
     // log warning
-    void logWarn(const char* fmt, ...);
+    template<typename... Args>
+    void logWarn(const char* fmt, const Args&... args) {
+        extern std::unique_ptr<spdlog::logger> logger;
+        logger->warn(fmt, args...);
+        scrollToBot = true;
+    }
 
     // log info
-    void logInfo(const char* fmt, ...);
+    template<typename... Args>
+    void logInfo(const char* fmt, const Args&... args) {
+        extern std::unique_ptr<spdlog::logger> logger;
+        logger->info(fmt, args...);
+        scrollToBot = true;
+    }
+
+    extern bool scrollToBot;
 
     const char* getLogString();
 
