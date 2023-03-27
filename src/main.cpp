@@ -250,6 +250,7 @@ int main() {
                     sizeof(filters) / sizeof(filters[0]), filters, NULL, 0);
 
                 if (!path.empty()) {
+                    logging::logInfo("Loaded texture {}\n", path);
                     clearTextures();
                     activeTexture = loadTexture(path.c_str());
                 }

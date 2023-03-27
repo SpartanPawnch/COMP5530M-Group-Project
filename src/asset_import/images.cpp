@@ -7,6 +7,7 @@
 #include<vector>
 #include<cstdio>
 
+#include "../logging.h"
 
 static std::vector<TextureInfo> textures;
 
@@ -17,7 +18,7 @@ int loadTexture(const char* filename) {
 
     //TODO proper log function
     if (data == NULL) {
-        printf("Failed to load texture %s\n", filename);
+        logging::logErr("Failed to load texture {}\n", filename);
         return -1;
     }
 
@@ -56,6 +57,7 @@ int loadTexture(const char* filename) {
 
 
     //something went wrong - return failure
+    logging::logErr("Failed to load texture {}\n", filename);
     return -1;
 }
 
