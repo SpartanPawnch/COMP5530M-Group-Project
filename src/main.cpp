@@ -23,6 +23,8 @@
 #include "fdutil.h"
 #include "drawing.h"
 #include "logging.h"
+#include "asset_import/audio.h"
+
 
 void createProj(const char* path) {
     char buf[1024];
@@ -131,14 +133,9 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-    <<<<<< < HEAD
-        std::string activePath("");
-    LogString logString;
-    ====== =
-        const char* activePath = NULL;
+    std::string activePath;
 
-    >>>>>> > 9 - dedicated - logging - solution
-        std::thread projectThread;
+    std::thread projectThread;
 
     //init logging
     logging::LogManager logMgr;
@@ -177,14 +174,10 @@ int main() {
                     audioClip = audio::audioLoad(path.c_str());
                     if (audioClip >= 0) {
                         audioPath = path;
-                        logString += "Opened audio file ";
-                        logString += path;
-                        logString += "\n";
+                        logging::logInfo(("Opened audio file " + path + "\n").c_str());
                     }
                     else {
-                        logString += "Failed to load audio file ";
-                        logString += path;
-                        logString += "\n";
+                        logging::logErr(("Failed to load audio file " + path + "\n").c_str());
                     }
                 }
             }
@@ -210,12 +203,9 @@ int main() {
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    <<<<<< < HEAD
-                        projectThread = std::thread(createProj, path.c_str(), std::ref(logString));
-                    ====== =
-                        projectThread = std::thread(createProj, path);
-                    >>>>>> > 9 - dedicated - logging - solution
-                        activePath = path;
+
+                    projectThread = std::thread(createProj, path.c_str());
+
                 }
             }
             if (ImGui::Button("Open Project")) {
@@ -224,9 +214,7 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
                     activePath = path;
-                    logging::logInfo("Opened project at: ");
-                    logging::logInfo(activePath);
-                    logging::logInfo("\n");
+                    logging::logInfo(("Opened project at: " + activePath + "\n").c_str());
                 }
             }
             if (ImGui::Button("Build and Run")) {
@@ -234,14 +222,8 @@ int main() {
                     //wait for current op to finish
                     if (projectThread.joinable())
                         projectThread.join();
-
-                    <<<<<< < HEAD
-                        projectThread = std::thread(buildRunProj, activePath.c_str(),
-                            executablePath, std::ref(logString));
-                    ====== =
-                        projectThread = std::thread(buildRunProj, activePath,
-                            executablePath);
-                    >>>>>> > 9 - dedicated - logging - solution
+                    projectThread = std::thread(buildRunProj, activePath.c_str(),
+                        executablePath);
 
                 }
             }

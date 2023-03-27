@@ -4,6 +4,7 @@
 #include<vector>
 #include<memory>
 
+#include "../logging.h"
 
 namespace audio {
     static SoLoud::Soloud* pSoloud;
@@ -32,6 +33,8 @@ namespace audio {
         if (res == SoLoud::SO_NO_ERROR) {
             return (loadedClips.size() - 1);
         }
+        else {
+        };
 
         loadedClips.pop_back();
 
