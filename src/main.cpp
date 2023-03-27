@@ -31,9 +31,7 @@ void createProj(const char* path) {
         fgets(buf, sizeof(char) * 1024, copyProc);
         logging::logInfo(buf);
     }
-    logging::logInfo("Created project at ");
-    logging::logInfo(path);
-    logging::logInfo("\n");
+    logging::logInfo("Created project at {}\n", path);
     fclose(copyProc);
 }
 

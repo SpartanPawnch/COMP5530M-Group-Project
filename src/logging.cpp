@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <cstdarg>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/ostream_sink.h"
@@ -24,23 +25,35 @@ namespace logging {
     }
 
     // log fatal error and quit
-    void logFatal(const char* msg) {
-        logger->critical("{}", msg);
+    void logFatal(const char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        logger->critical(fmt, args);
+        va_end(args);
     }
 
     // log error and continue execution
-    void logErr(const char* msg) {
-        logger->error("{}", msg);
+    void logErr(const char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        logger->error(fmt, args);
+        va_end(args);
     }
 
     // log warning
-    void logWarn(const char* msg) {
-        logger->warn("{}", msg);
+    void logWarn(const char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        logger->warn(fmt, args);
+        va_end(args);
     }
 
     // log info
-    void logInfo(const char* msg) {
-        logger->info("{}", msg);
+    void logInfo(const char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        logger->info(fmt, args);
+        va_end(args);
     }
 
     const char* getLogString() {
