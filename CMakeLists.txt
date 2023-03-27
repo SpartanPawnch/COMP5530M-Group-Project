@@ -12,7 +12,8 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
+    ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c
+     ${IMGUICORE} ${IMGUIBACKENDS} src/logging.cpp
 )
 
 #add glfw
@@ -28,9 +29,12 @@ add_subdirectory("external/glew-2.1.0/build/cmake")
 #add glm
 add_subdirectory("external/glm")
 
+#add spdlog
+add_subdirectory("external/spdlog")
+
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include)
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm spdlog)
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
