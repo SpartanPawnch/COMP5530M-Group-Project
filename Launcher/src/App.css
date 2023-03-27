@@ -1,0 +1,229 @@
+*{
+  box-sizing: border-box;
+}
+body{
+  font-family: "Sora", sans-serif;
+  overflow: hidden;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.loading{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5;
+}
+.loading-spinner{
+  width: 60px;
+  height: 60px;
+  border: 10px solid #d1d1d1;
+  border-top: 10px solid #3498db;
+  border-radius: 50%;
+  animation: spin 2s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+.loading-text{
+  font-size: 20px;
+  font-weight: 400;
+  animation: loading 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.set-config-screen{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5;
+}
+
+.set-config-screen-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.set-config-screen-text{
+  font-size: 20px;
+  font-weight: 400;
+  margin-bottom: 15px;
+}
+
+/* every child minus the last margin bottom 5px */
+.set-config-screen-content > *:not(:last-child){
+  margin-bottom: 15px;
+}
+
+.set-config-screen-input > *:first-child{
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  padding:10px;
+  font-size: 20px;
+}
+
+.set-config-screen-input > *:last-child{
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  height: 100%;
+  font-size: 20px;
+  cursor:pointer;
+}
+
+.set-config-screen-button{
+  width: 100%;
+}
+
+.set-config-screen-button > button{
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.projects-screen{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5;
+  padding:15px;
+}
+
+.new-project-button{
+  width: 100%;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.new-project-button > button{
+  border-radius: 15px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.projects-list{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.project-item{
+  width: 100%;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgb(194, 194, 194);
+}
+
+.project-info{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.project-name{
+
+}
+.project-path{
+  font-size: 15px;
+}
+
+.new-project-modal{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+.new-project-modal-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  width: 500px;
+  background-color: #f5f5f5;
+  border-radius: 15px;
+  padding: 15px;
+}
+.new-project-modal-text{
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+.new-project-modal-input{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.new-project-modal-input > input{
+  border-radius: 15px;
+  padding:10px;
+  font-size: 20px;
+}
+.new-project-modal-button > button{
+  padding: 10px;
+  font-size: 15px;
+  margin: 10px;
+}
+
+
+@media (prefers-color-scheme: dark) {
+  
+}
