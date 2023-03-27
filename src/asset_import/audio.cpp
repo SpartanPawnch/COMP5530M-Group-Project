@@ -34,6 +34,7 @@ namespace audio {
             return (loadedClips.size() - 1);
         }
         else {
+            logging::logErr("Failed to load audio file {}\n", path);
         };
 
         loadedClips.pop_back();

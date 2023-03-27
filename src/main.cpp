@@ -172,10 +172,7 @@ int main() {
                     audioClip = audio::audioLoad(path.c_str());
                     if (audioClip >= 0) {
                         audioPath = path;
-                        logging::logInfo(("Opened audio file " + path + "\n").c_str());
-                    }
-                    else {
-                        logging::logErr(("Failed to load audio file " + path + "\n").c_str());
+                        logging::logInfo("Opened audio file at: {}\n", path.c_str());
                     }
                 }
             }
@@ -212,7 +209,7 @@ int main() {
                     if (projectThread.joinable())
                         projectThread.join();
                     activePath = path;
-                    logging::logInfo(("Opened project at: " + activePath + "\n").c_str());
+                    logging::logInfo("Opened project at: {}\n", activePath.c_str());
                 }
             }
             if (ImGui::Button("Build and Run")) {
