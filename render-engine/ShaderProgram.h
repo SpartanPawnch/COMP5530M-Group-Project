@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -22,10 +24,15 @@ private:
 	GLuint shaderProgram;
 	GLuint vertexShader;
 	GLuint fragmentShader;
+	GLuint computeShader;
+	GLuint tescShader;
+	GLuint teseShader;
+	GLuint geometryShader;
 
 	const char* readShaderCode(const char* shaderPath);
 
 public:
+
 	ShaderProgram(const char* vertexPath,
 		const char* fragmentPath,
 		const char* geometryPath = nullptr,

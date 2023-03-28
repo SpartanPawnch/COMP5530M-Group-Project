@@ -24,6 +24,7 @@
 #include "../render-engine/RenderManager.h"
 #include "drawing.h"
 
+
 struct LogString {
 private:
     std::string buf;
@@ -235,7 +236,7 @@ int main() {
         ImGui::Render();
 
         //draw background
-        glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

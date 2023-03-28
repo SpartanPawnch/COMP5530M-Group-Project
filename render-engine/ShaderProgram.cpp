@@ -33,46 +33,44 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 	const char* tessEvalPath)
 {
 	//Load and compile vertex shader
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	this->vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const char* vertexShaderCode = readShaderCode(vertexPath);
-	glShaderSource(vertexShader, 1, &vertexShaderCode, NULL);
-	glCompileShader(vertexShader);
+	glShaderSource(this->vertexShader, 1, &vertexShaderCode, NULL);
+	glCompileShader(this->vertexShader);
 
 	//Load and compile fragment shader
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	this->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	const char* fragmentShaderCode = readShaderCode(fragmentPath);
-	glShaderSource(fragmentShader, 1, &fragmentShaderCode, NULL);
-	glCompileShader(fragmentShader);
+	glShaderSource(this->fragmentShader, 1, &fragmentShaderCode, NULL);
+	glCompileShader(this->fragmentShader);
 
 	//Optional shaders
-	GLuint tesselationControlShader = 0;
-	GLuint tesselationEvalShader = 0;
-	GLuint geometryShader = 0;
-	GLuint computeShader = 0;
+	this->tescShader = 0;
+	this->teseShader = 0;
+	this->geometryShader = 0;
+	this->computeShader = 0;
 
 	//if tesselation shaders are used
 	if (tessControlPath && tessEvalPath)
 	{
-		tesselationControlShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+		this->tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
 		const char* tescCode = readShaderCode(tessControlPath);
-		glShaderSource(tesselationControlShader, 1, &tescCode, NULL);
-		glCompileShader(tesselationControlShader);
+		glShaderSource(this->tescShader, 1, &tescCode, NULL);
+		glCompileShader(this->tescShader);
 
-		tesselationEvalShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+		this->teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
 		const char* teseCode = readShaderCode(tessEvalPath);
-		glShaderSource(tesselationEvalShader, 1, &teseCode, NULL);
-		glCompileShader(tesselationEvalShader);
+		glShaderSource(this->teseShader, 1, &teseCode, NULL);
+		glCompileShader(this->teseShader);
 	}
 
 	if (geometryPath)
 	{
-		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+		this->geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		const char* geoCode = readShaderCode(geometryPath);
 		glShaderSource(geometryShader, 1, &geoCode, NULL);
 		glCompileShader(geometryShader);
 	}
-
-
 
 	//Link shaders
 	shaderProgram = glCreateProgram();
@@ -81,8 +79,8 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 	
 	if (tessControlPath && tessEvalPath)
 	{
-		glAttachShader(shaderProgram, tesselationControlShader);
-		glAttachShader(shaderProgram, tesselationEvalShader);
+		glAttachShader(shaderProgram, tescShader);
+		glAttachShader(shaderProgram, teseShader);
 	}
 
 	if (geometryPath)
@@ -96,16 +94,17 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	if (tesselationControlShader != 0 && tesselationEvalShader != 0)
+	if (tescShader != 0 && teseShader != 0)
 	{
-		glDeleteShader(tesselationControlShader);
-		glDeleteShader(tesselationEvalShader);
+		glDeleteShader(tescShader);
+		glDeleteShader(teseShader);
 	}
 
 	if (geometryShader != 0)
 	{
 		glDeleteShader(geometryShader);
 	}
+
 }
 
 ShaderProgram::~ShaderProgram()

@@ -1,3 +1,4 @@
+
 #include "RenderManager.h"
 
 RenderManager* RenderManager::getInstance()
@@ -22,4 +23,11 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glfwSwapBuffers(aWindow);
 	glfwPollEvents();
+
+	this->programs.clear();
+}
+
+void RenderManager::addProgram(ShaderProgram aProgram)
+{
+	this->programs.push_back(aProgram);
 }

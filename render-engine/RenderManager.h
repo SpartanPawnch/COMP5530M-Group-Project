@@ -2,8 +2,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+
+#include "ShaderProgram.h"
 
 #include <GLFW/glfw3.h>
+
+
 
 class RenderManager
 {
@@ -12,6 +17,9 @@ private:
 	//pointer to single instance of RenderEngine
 	static RenderManager* instance;
 	bool initialized = false;
+
+	//members
+	std::vector<ShaderProgram> programs;
 
 	//test output writing for RenderEngine
 	//std::ofstream testOutput;
@@ -32,6 +40,8 @@ public:
 	static RenderManager* getInstance();
 
 	void startUp(GLFWwindow* aWindow);
+
+	void addProgram(ShaderProgram aProgram);
 
 	void shutDown();
 
