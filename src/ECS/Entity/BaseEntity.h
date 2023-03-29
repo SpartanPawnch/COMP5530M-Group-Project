@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Component/BaseComponent.h"
+#include "../Component/BaseComponent.h"
 
 //Requires Change!!
 class BaseEntity{

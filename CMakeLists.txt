@@ -12,7 +12,7 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
+    ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS} src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp src/ECS/Component/TransformComponent.cpp src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp  src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp src/ECS/System/InterfaceSystem.cpp
 )
 
 #add glfw

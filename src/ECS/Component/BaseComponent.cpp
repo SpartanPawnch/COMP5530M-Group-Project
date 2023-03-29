@@ -9,3 +9,15 @@ BaseComponent::~BaseComponent()
 {
     stop();
 }
+
+void BaseComponent::start()
+{
+}
+
+void BaseComponent::update(float dt)
+{
+}
+
+void BaseComponent::stop()
+{
+}

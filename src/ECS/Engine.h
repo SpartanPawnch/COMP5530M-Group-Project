@@ -10,6 +10,7 @@
 #include "Component/BaseComponent.h"
 
 #include "System/BaseSystem.h"
+#include "System/InterfaceSystem.h"
 
 class Engine{
 public:
@@ -22,6 +23,6 @@ public:
 
     int shouldClose;
     int currentScene;
-    std::vector<Scene> scenes;
-    std::vector<BaseSystem> systems;
+    std::vector<Scene*> scenes;
+    std::vector<BaseSystem*> systems;
 };

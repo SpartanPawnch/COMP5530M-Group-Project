@@ -6,9 +6,9 @@ class BaseComponent{
 public:
     BaseComponent();
     ~BaseComponent();
-    virtual void start();
-    virtual void update(float dt);
-    virtual void stop();
+    void start();
+    void update(float dt);
+    void stop();
 
     int uuid;
 };

@@ -26,17 +26,16 @@ void Engine::start()
     //render system
     //physics system
     //audio system
+    systems.push_back(new InterfaceSystem());
 
     //TEMPORARY:create scene
-    Scene scene;
-    scene.start();
+    Scene* scene = new Scene();
     //Temporary: create entity
     ModelEntity entity;
     entity.start();
-    scene.addEntity(entity);
+    scene->addEntity(entity);
     CameraEntity camera;
-    camera.start();
-    scene.addEntity(camera);
+    scene->addEntity(camera);
     scenes.push_back(scene);
     
     openScene(currentScene);
@@ -49,18 +48,22 @@ void Engine::update()
     //TEMPOARY: set fake time
     float dt = 0.016f;
     //update systems
-    for (int i = 0; i < systems.size()-1; i++)
+    for (int i = 0; i < systems.size(); i++)
     {
-        systems[i].update(dt);
+        systems[i]->update(dt);
     }
     //update scene
-    scenes[currentScene].update(dt);
+    scenes[currentScene]->update(dt);
     //render scene, last system was not updated before the scene because it should be the render system that will be used to render the scene last
-    systems[systems.size() - 1].update(dt);
+    //systems[systems.size() - 1].update(dt);
 }
 
 void Engine::stop()
 {
+}
+
+void Engine::openScene(int scene) {
+
 }
 
 

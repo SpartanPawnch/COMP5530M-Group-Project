@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "Entity/BaseEntity.h"
-#include "Component/BaseComponent.h"
+#include "BaseEntity.h"
+#include "../Component/BaseComponent.h"
 
 class SkeletalMeshEntity : public BaseEntity{
 public:

@@ -2,14 +2,14 @@
 
 #include <vector>
 
-#include "Entity/BaseEntity.h"
-#include "Component/BaseComponent.h"
+#include "../Entity/BaseEntity.h"
+#include "../Component/BaseComponent.h"
 
 class BaseSystem{
 public:
     BaseSystem();
     ~BaseSystem();
-    void start();
-    void update(float dt);
-    void stop();
+    virtual void start();
+    virtual void update(float dt);
+    virtual void stop();
 };

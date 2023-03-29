@@ -1,5 +1,7 @@
 #include "BaseSystem.h"
 
+#include <iostream>
+
 BaseSystem::BaseSystem()
 {
     start();

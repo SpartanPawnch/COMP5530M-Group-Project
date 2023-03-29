@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 
 
-#include "Component/BaseComponent.h"
+#include "BaseComponent.h"
 
 class TransformComponent : public BaseComponent{
 public:
