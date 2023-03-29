@@ -128,51 +128,42 @@ GUIManager::GUIManager() {
     folderTexture = loadTexture("assets/folderico.png");
 }
 
-void prepUI(GLFWwindow* window, const char* executablePath, float dt,
-    int viewportWidth, int viewportHeight) {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+inline void drawAudioDemo() {
+    if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Active Clip: %s", audioPath.c_str());
+        if (ImGui::Button("Load Audio File")) {
+            const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
+            const char* filterDesc = "Audio Files";
+            std::string path = fdutil::openFile("Select File", NULL,
+                sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
+            if (!path.empty()) {
+                audio::audioStopAll();
+                audioClip = audio::audioLoad(path.c_str());
+                if (audioClip >= 0) {
+                    audioPath = path;
+                    logging::logInfo("Opened audio file {}\n", path);
+                }
+                else {
+                    logging::logErr("Failed to load audio file ", path);
+                }
+            }
+        }
 
-    ImVec2 mousePos = ImGui::GetMousePos();
+        //adjust source position, listening position is center
+        if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+            audio::audioSetPosition(audioPos);
+        }
 
-    // --- Get Gui Input ---
-    // if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-    //     ImGui::Text("Active Clip: %s", audioPath.c_str());
-    //     if (ImGui::Button("Load Audio File")) {
-    //         const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
-    //         const char* filterDesc = "Audio Files";
-    //         std::string path = fdutil::openFile("Select File", NULL,
-    //             sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
-    //         if (!path.empty()) {
-    //             audio::audioStopAll();
-    //             audioClip = audio::audioLoad(path.c_str());
-    //             if (audioClip >= 0) {
-    //                 audioPath = path;
-    //                 logString += "Opened audio file ";
-    //                 logString += path;
-    //                 logString += "\n";
-    //             }
-    //             else {
-    //                 logString += "Failed to load audio file ";
-    //                 logString += path;
-    //                 logString += "\n";
-    //             }
-    //         }
-    //     }
+        //play audio with 3d effects
+        if (ImGui::Button("Play Audio File")) {
+            if (!audioPath.empty())
+                audio::audioPlay(audioClip);
+        }
+        ImGui::End();
+    }
+}
 
-    //     //adjust source position, listening position is center
-    //     if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
-    //         audio::audioSetPosition(audioPos);
-    //     }
-
-    //     //play audio with 3d effects
-    //     if (ImGui::Button("Play Audio File")) {
-    //         if (!audioPath.empty())
-    //             audio::audioPlay(audioClip);
-    //     }
-    //     ImGui::End();
-    // }
+inline void drawProjectWindow(const char* executablePath) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
     if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Active Directory: %s", activePath.c_str());
@@ -214,6 +205,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
         }
         ImGui::End();
     }
+}
+
+inline void drawModelDemo() {
     if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Model Loading Demo");
         if (ImGui::Button("Load Model")) {
@@ -228,6 +222,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
         ImGui::Text("From: %s", model.directory.c_str());
         ImGui::End();
     }
+}
+
+inline void drawLog() {
     ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
     if (ImGui::Begin("Log", NULL, NULL)) {
         ImGui::PushTextWrapPos(560);
@@ -239,27 +236,31 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
         }
         ImGui::End();
     }
+}
 
-    //texture debug
-    // if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-    //     if (ImGui::Button("Load Texture")) {
-    //         const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
-    //         std::string path = fdutil::openFile("Load Texture", NULL,
-    //             sizeof(filters) / sizeof(filters[0]), filters, NULL);
+inline void drawTextureDebug() {
+    // texture debug
+    if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::Button("Load Texture")) {
+            const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
+            std::string path = fdutil::openFile("Load Texture", NULL,
+                sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
-    //         if (!path.empty()) {
-    //             clearTextures();
-    //             activeTexture = loadTexture(path.c_str());
-    //         }
-    //     }
-    //     if (activeTexture != -1) {
-    //         TextureInfo texInfo = getTexture(activeTexture);
-    //         ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
-    //     }
+            if (!path.empty()) {
+                clearTextures();
+                activeTexture = loadTexture(path.c_str());
+            }
+        }
+        if (activeTexture != -1) {
+            TextureInfo texInfo = getTexture(activeTexture);
+            ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+        }
 
-    //     ImGui::End();
-    // }
+        ImGui::End();
+    }
+}
 
+inline void drawAssetBrowser(GLFWwindow* window) {
     //folder debug
     ImGui::SetNextWindowSize(ImVec2(800, 300), ImGuiCond_Once);
     if (ImGui::Begin("Asset Browser", NULL, 0)) {
@@ -402,6 +403,20 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
         ImGui::End();
     }
+}
+
+void prepUI(GLFWwindow* window, const char* executablePath, float dt,
+    int viewportWidth, int viewportHeight) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+
+    // --- Get Gui Input ---
+    drawProjectWindow(executablePath);
+    drawLog();
+    drawAssetBrowser(window);
 }
 
 void drawUI() {
