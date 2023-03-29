@@ -8,6 +8,9 @@ set(SOLOUD_BACKEND_WASAPI ON CACHE BOOL "" FORCE)
 add_subdirectory("external/soloud/contrib")
 
 #setup assimp
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 add_subdirectory("external/assimp-5.2.5")
 
 #setup Imgui
@@ -25,7 +28,7 @@ add_executable(
     src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
-    src/logging.cpp
+    src/logging.cpp src/gui.cpp
 )
 
 #add glfw
