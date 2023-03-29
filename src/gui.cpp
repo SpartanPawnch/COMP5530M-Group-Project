@@ -29,6 +29,8 @@
 #include "asset_import/folders.h"
 #include "model_import/model.h"
 
+using namespace ImGui;
+
 // --- GUI constants, possibly replace with settings file ---
 namespace guicfg {
     const ImVec2 assetMgrPadding(10.0f, 25.0f);
@@ -405,18 +407,121 @@ inline void drawAssetBrowser(GLFWwindow* window) {
     }
 }
 
+void DrawSplitter(int split_vertically, float thickness, float* size0, float* size1, float min_size0, float min_size1)
+{
+    ImVec2 backup_pos = ImGui::GetCursorPos();
+    if (split_vertically)
+        ImGui::SetCursorPosY(backup_pos.y + *size0);
+    else
+        ImGui::SetCursorPosX(backup_pos.x + *size0);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7,0.7,0.7,1));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0,0,0,0));          // We don't draw while active/pressed because as we move the panes the splitter button will be 1 frame late
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f,0.6f,0.6f,0.10f));
+    ImGui::Button("##Splitter", ImVec2(!split_vertically ? thickness : -1.0f, split_vertically ? thickness : -1.0f));
+    ImGui::PopStyleColor(3);
+
+    ImGui::SetItemAllowOverlap(); // This is to allow having other buttons OVER our splitter. 
+
+    if (ImGui::IsItemActive())
+    {
+        float mouse_delta = split_vertically ? ImGui::GetIO().MouseDelta.y : ImGui::GetIO().MouseDelta.x;
+
+        // Minimum pane size
+        if (mouse_delta < min_size0 - *size0)
+            mouse_delta = min_size0 - *size0;
+        if (mouse_delta > *size1 - min_size1)
+            mouse_delta = *size1 - min_size1;
+
+        // Apply resize
+        *size0 += mouse_delta;
+        *size1 -= mouse_delta;
+    }
+    ImGui::SetCursorPos(backup_pos);
+}
+ImVec2 childsize = ImVec2(960,2160);
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
+    ImVec2 windowSize = ImVec2(viewportWidth,viewportHeight);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImVec2 mousePos = ImGui::GetMousePos();
 
+
+    ImGui::SetNextWindowPos(ImVec2(0,0));
+    SetNextWindowSize(windowSize);
     // --- Get Gui Input ---
-    drawProjectWindow(executablePath);
-    drawLog();
-    drawAssetBrowser(window);
+    if(ImGui::Begin("Window",nullptr,ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize))
+    {
+        ImVec2 childsize0 = ImVec2(windowSize.x/4,windowSize.y);
+        ImVec2 childsize1 = ImVec2(windowSize.x/2,windowSize.y);
+        ImVec2 childsize2 = ImVec2(windowSize.x/4,windowSize.y);
+        DrawSplitter(0,5.f,&childsize.x,&childsize.y,20.f,20.f);
+
+        BeginChild("##Object",childsize);
+        Text("0");
+        EndChild();
+        
+        SameLine();
+
+
+        SameLine();
+        BeginChild("##Scene");
+        Text("1");
+        EndChild();
+
+        SameLine();
+        BeginChild("##Properties");
+        Text("2");
+        EndChild();
+
+
+        // if(BeginTable("##main",3,ImGuiTableFlags_Resizable|ImGuiTableFlags_Borders|ImGuiTableFlags_SizingStretchProp))
+        // {
+        //     TableSetupColumn("##Scene Object",0,width/4);
+        //     TableSetupColumn("##Scene",0,width/2);
+        //     TableSetupColumn("##Proporties",0,width/4);
+
+            
+        //     TableNextColumn();
+        //     if(BeginChild("##",ImVec2(width/4,height*.6f),false))
+        //     {
+        //         Text("Scene Object");
+        //         EndChild();
+        //     }
+
+        //     TableNextColumn();
+            
+        //     Text("Scene");
+
+        //     TableNextColumn();
+            
+        //     Text("Proporties");
+
+        //     EndTable();
+        // }
+
+        windowSize = GetWindowSize();
+        End();
+    }
+    
+    // ImGui::SetNextWindowPos(ImVec2(windowSize.x,0));
+    // if(ImGui::Begin("Window Scene Object",nullptr,ImGuiWindowFlags_NoResize))
+    // {
+    //     SetWindowSize(ImVec2(GetWindowSize().x,windowSize.y));
+    //     windowSize.x += GetWindowSize().x;
+    //     End();
+    // }
+
+    // ImGui::SetNextWindowPos(ImVec2(windowSize.x,0));
+    // if(ImGui::Begin("Window Proporties",nullptr))
+    // {
+    //     SetWindowSize(ImVec2(GetWindowSize().x,windowSize.y));
+    //     windowSize.x += GetWindowSize().x;
+    //     End();
+    // }
 }
 
 void drawUI() {
