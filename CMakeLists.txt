@@ -7,6 +7,9 @@ set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
 set(SOLOUD_BACKEND_WASAPI ON CACHE BOOL "" FORCE)
 add_subdirectory("external/soloud/contrib")
 
+#setup assimp
+add_subdirectory("external/assimp-5.2.5")
+
 #setup Imgui
 set(IMGUIDIR "external/imgui")
 include_directories(${IMGUIDIR} ${IMGUIDIR}/backends)
@@ -21,6 +24,7 @@ add_executable(
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
+    src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp
 )
 
@@ -44,7 +48,7 @@ add_subdirectory("external/spdlog")
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
   ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
 )
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm soloud spdlog)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog)
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory 

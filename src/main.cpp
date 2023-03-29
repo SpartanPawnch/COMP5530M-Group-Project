@@ -27,6 +27,7 @@
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "model_import/model.h"
 
 
 // --- GUI constants, possibly replace with settings file ---
@@ -180,6 +181,7 @@ int main() {
     //asset manager visuals
     int fileTexture = loadTexture("assets/fileico.png");
     int folderTexture = loadTexture("assets/folderico.png");
+    Model model;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -275,7 +277,20 @@ int main() {
             }
             ImGui::End();
         }
-
+        if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Model Loading Demo");
+            if (ImGui::Button("Load Model")) {
+                std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL, NULL);
+                //wait for current op to finish
+                if (!path.empty()) {
+                    model.loadModel(path);
+                }
+            }
+            ImGui::Text("Model Meshes: %d", model.meshes.size());
+            ImGui::Text("Model Textures: %d", model.textures_loaded.size());
+            ImGui::Text("From: %s", model.directory.c_str());
+            ImGui::End();
+        }
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);
