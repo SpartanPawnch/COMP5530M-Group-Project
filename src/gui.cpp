@@ -13,6 +13,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
+#include <imgui_internal.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
@@ -36,6 +37,7 @@ namespace guicfg {
     const ImVec2 assetMgrPadding(10.0f, 25.0f);
     const ImVec2 assetMgrIconSize(60.0f, 60.0f);
     const ImVec2 assetMgrItemSize(80.0f, 80.0f);
+    const float splitterThickness = 7.f;
 };
 
 void createProj(const std::string& path) {
@@ -407,24 +409,22 @@ inline void drawAssetBrowser(GLFWwindow* window) {
     }
 }
 
-void DrawSplitter(int split_vertically, float thickness, float* size0, float* size1, float min_size0, float min_size1)
-{
-    ImVec2 backup_pos = ImGui::GetCursorPos();
-    if (split_vertically)
-        ImGui::SetCursorPosY(backup_pos.y + *size0);
-    else
-        ImGui::SetCursorPosX(backup_pos.x + *size0);
-
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7,0.7,0.7,1));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0,0,0,0));          // We don't draw while active/pressed because as we move the panes the splitter button will be 1 frame late
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f,0.6f,0.6f,0.10f));
-    ImGui::Button("##Splitter", ImVec2(!split_vertically ? thickness : -1.0f, split_vertically ? thickness : -1.0f));
+void DrawSplitter(int split_vertically, float thickness, float* size0,
+    float* size1, float min_size0, float min_size1, float longAxis = -1.f) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(.0f, .0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, .0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, .5f);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.3f, 0.3f, .1f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.10f));
+    ImGui::Button("##Splitter", split_vertically ? ImVec2(longAxis, thickness) :
+        ImVec2(thickness, longAxis));
     ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(3);
 
     ImGui::SetItemAllowOverlap(); // This is to allow having other buttons OVER our splitter. 
 
-    if (ImGui::IsItemActive())
-    {
+    if (ImGui::IsItemActive()) {
         float mouse_delta = split_vertically ? ImGui::GetIO().MouseDelta.y : ImGui::GetIO().MouseDelta.x;
 
         // Minimum pane size
@@ -437,91 +437,76 @@ void DrawSplitter(int split_vertically, float thickness, float* size0, float* si
         *size0 += mouse_delta;
         *size1 -= mouse_delta;
     }
-    ImGui::SetCursorPos(backup_pos);
+
+
 }
-ImVec2 childsize = ImVec2(960,2160);
+
+//relative widget sizes
+//TODO dynamic layout
+static float widthFractions[] = { .25f,.5f,.25f };
+static float heightFractions[] = { .6f,.4f };
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
-    ImVec2 windowSize = ImVec2(viewportWidth,viewportHeight);
+    ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImVec2 mousePos = ImGui::GetMousePos();
 
-
-    ImGui::SetNextWindowPos(ImVec2(0,0));
-    SetNextWindowSize(windowSize);
     // --- Get Gui Input ---
-    if(ImGui::Begin("Window",nullptr,ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize))
-    {
-        ImVec2 childsize0 = ImVec2(windowSize.x/4,windowSize.y);
-        ImVec2 childsize1 = ImVec2(windowSize.x/2,windowSize.y);
-        ImVec2 childsize2 = ImVec2(windowSize.x/4,windowSize.y);
-        DrawSplitter(0,5.f,&childsize.x,&childsize.y,20.f,20.f);
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    SetNextWindowSize(windowSize);
+    if (ImGui::Begin("Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar)) {
 
-        BeginChild("##Object",childsize);
+        //record modifications for this frame
+        float editedWidths[] = { widthFractions[0] * windowSize.x, widthFractions[1] * windowSize.x,
+            widthFractions[2] * windowSize.x };
+        float editedHeights[] = { heightFractions[0] * windowSize.y,heightFractions[1] * windowSize.y };
+
+        BeginChild("##Object", ImVec2(widthFractions[0] * windowSize.x,
+            heightFractions[0] * windowSize.y));
         Text("0");
         EndChild();
-        
-        SameLine();
-
 
         SameLine();
-        BeginChild("##Scene");
+        ImGui::PushID(0);
+        DrawSplitter(0, guicfg::splitterThickness, &editedWidths[0], &editedWidths[1], 20.f, 20.f, editedHeights[0]);
+        ImGui::PopID();
+
+        SameLine();
+        BeginChild("##Scene", ImVec2(widthFractions[1] * windowSize.x,
+            heightFractions[0] * windowSize.y));
         Text("1");
         EndChild();
 
         SameLine();
-        BeginChild("##Properties");
+        ImGui::PushID(1);
+        DrawSplitter(0, guicfg::splitterThickness, &editedWidths[1], &editedWidths[2], 20.f, 20.f, editedHeights[0]);
+        ImGui::PopID();
+
+        SameLine();
+        BeginChild("##Properties", ImVec2(widthFractions[2] * windowSize.x,
+            heightFractions[0] * windowSize.y));
         Text("2");
         EndChild();
 
+        DrawSplitter(1, guicfg::splitterThickness, &editedHeights[0], &editedHeights[1], 20.f, 20.f);
 
-        // if(BeginTable("##main",3,ImGuiTableFlags_Resizable|ImGuiTableFlags_Borders|ImGuiTableFlags_SizingStretchProp))
-        // {
-        //     TableSetupColumn("##Scene Object",0,width/4);
-        //     TableSetupColumn("##Scene",0,width/2);
-        //     TableSetupColumn("##Proporties",0,width/4);
+        BeginChild("##FileBrowser", ImVec2(windowSize.x, heightFractions[1] * windowSize.y));
+        Text("3");
+        EndChild();
 
-            
-        //     TableNextColumn();
-        //     if(BeginChild("##",ImVec2(width/4,height*.6f),false))
-        //     {
-        //         Text("Scene Object");
-        //         EndChild();
-        //     }
+        //update relative sizes for next frame
+        widthFractions[0] = editedWidths[0] / windowSize.x;
+        widthFractions[1] = editedWidths[1] / windowSize.x;
+        heightFractions[0] = editedHeights[0] / windowSize.y;
+        heightFractions[1] = editedHeights[1] / windowSize.y;
 
-        //     TableNextColumn();
-            
-        //     Text("Scene");
-
-        //     TableNextColumn();
-            
-        //     Text("Proporties");
-
-        //     EndTable();
-        // }
-
-        windowSize = GetWindowSize();
         End();
     }
-    
-    // ImGui::SetNextWindowPos(ImVec2(windowSize.x,0));
-    // if(ImGui::Begin("Window Scene Object",nullptr,ImGuiWindowFlags_NoResize))
-    // {
-    //     SetWindowSize(ImVec2(GetWindowSize().x,windowSize.y));
-    //     windowSize.x += GetWindowSize().x;
-    //     End();
-    // }
-
-    // ImGui::SetNextWindowPos(ImVec2(windowSize.x,0));
-    // if(ImGui::Begin("Window Proporties",nullptr))
-    // {
-    //     SetWindowSize(ImVec2(GetWindowSize().x,windowSize.y));
-    //     windowSize.x += GetWindowSize().x;
-    //     End();
-    // }
 }
 
 void drawUI() {
