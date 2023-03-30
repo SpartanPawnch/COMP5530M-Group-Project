@@ -2,6 +2,8 @@
 
 CameraEntity::CameraEntity()
 {
+    uuid = 200;
+    name = "Camera Entity";
     start();
 }
 
@@ -16,13 +18,14 @@ void CameraEntity::start()
     //example:
     //transform component
     //camera component
+    components.push_back(new TransformComponent());
 }
 
 void CameraEntity::update(float dt)
 {
     for (int i = 0; i < components.size(); i++)
     {
-        components[i].update(dt);
+        components[i]->update(dt);
     }
 }
 

@@ -9,10 +9,7 @@ class SkeletalMeshEntity : public BaseEntity{
 public:
     SkeletalMeshEntity();
     ~SkeletalMeshEntity();
-    void start();
-    void update(float dt);
-    void stop();
-
-    int uuid;
-    std::vector<BaseComponent> components;
+    virtual void start() override;
+    virtual void update(float dt) override;
+    virtual void stop() override;
 };

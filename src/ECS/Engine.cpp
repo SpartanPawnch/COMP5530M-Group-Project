@@ -18,6 +18,10 @@ Engine::~Engine()
 
 void Engine::start()
 {
+    //TEMPORARY:create scene
+    Scene* scene = new Scene();
+
+
     //create systems
     //example:
     //time system
@@ -26,13 +30,11 @@ void Engine::start()
     //render system
     //physics system
     //audio system
-    systems.push_back(new InterfaceSystem());
+    systems.push_back(new InterfaceSystem(scene));
 
-    //TEMPORARY:create scene
-    Scene* scene = new Scene();
+    
     //Temporary: create entity
     ModelEntity entity;
-    entity.start();
     scene->addEntity(entity);
     CameraEntity camera;
     scene->addEntity(camera);

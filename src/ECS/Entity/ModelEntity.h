@@ -9,10 +9,7 @@ class ModelEntity : public BaseEntity{
 public:
     ModelEntity();
     ~ModelEntity();
-    void start();
-    void update(float dt);
-    void stop();
-
-    int uuid;
-    std::vector<BaseComponent> components;
+    virtual void start() override;
+    virtual void update(float dt) override;
+    virtual void stop() override;
 };

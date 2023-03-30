@@ -14,7 +14,8 @@ public:
     void stop();
     void addEntity(BaseEntity entity);
     void removeEntity(int uuid);
+    void selectEntity(BaseEntity* entity);
 
-    int selectedEntity;
+    BaseEntity* selectedEntity;
     std::vector<BaseEntity> entities;
 };

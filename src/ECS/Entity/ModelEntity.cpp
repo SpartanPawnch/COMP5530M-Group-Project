@@ -2,6 +2,8 @@
 
 ModelEntity::ModelEntity()
 {
+    uuid = 100;
+    name = "Model Entity";
     start();
 }
 
@@ -22,7 +24,7 @@ void ModelEntity::update(float dt)
 {
     for (int i = 0; i < components.size(); i++)
     {
-        components[i].update(dt);
+        components[i]->update(dt);
     }
 }
 

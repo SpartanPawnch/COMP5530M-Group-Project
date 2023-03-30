@@ -1,7 +1,8 @@
 #include "InterfaceSystem.h"
 
-InterfaceSystem::InterfaceSystem()
+InterfaceSystem::InterfaceSystem(Scene* sc)
 {
+    scene = sc;
     start();
 }
 
@@ -53,8 +54,48 @@ void InterfaceSystem::update(float dt)
     ImVec2 mousePos = ImGui::GetMousePos();
 
     // --- Get Gui Input ---
-    if (ImGui::Begin("DEMO", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Example Demo Interface System");
+    if (ImGui::Begin("Entities", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        for (int i = 0; i < scene->entities.size(); i++)
+        {
+            if (ImGui::TreeNodeEx(scene->entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen, scene->entities.at(i).name.c_str())) {
+                if (ImGui::IsItemClicked()) {
+                    if (scene->selectedEntity != &scene->entities.at(i)) {
+                        scene->selectedEntity = &scene->entities.at(i);
+                    }
+                }
+                //TODO:display children if open
+                ImGui::TreePop();
+            }
+        }
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Add Entity")) {
+                scene->addEntity(BaseEntity());
+            }
+            if (ImGui::MenuItem("Add Camera Entity")) {
+                scene->addEntity(CameraEntity());
+            }
+            if (ImGui::MenuItem("Add Model Entity")) {
+                scene->addEntity(ModelEntity());
+            }
+            if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
+                scene->addEntity(SkeletalMeshEntity());
+            }
+            ImGui::EndPopup();
+        }
+        ImGui::End();
+    }
+
+    if (ImGui::Begin("Components", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (scene->selectedEntity == nullptr) {
+            ImGui::Text("Select an Entity to show it's components");
+        } else {
+            for (int i = 0; i < scene->selectedEntity->components.size(); i++)
+            {
+                if (ImGui::TreeNodeEx(scene->selectedEntity->components.at(i)->name.c_str())) {
+                    ImGui::TreePop();
+                }
+            }
+        }
         ImGui::End();
     }
 

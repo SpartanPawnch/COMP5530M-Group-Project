@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "../Component/BaseComponent.h"
 
@@ -9,13 +10,13 @@ class BaseEntity{
 public:
     BaseEntity();
     ~BaseEntity();
-    void start();
-    void update(float dt);
-    void stop();
-    void addComponent(BaseComponent component);
+    virtual void start();
+    virtual void update(float dt);
+    virtual void stop();
     void removeComponent(int uuid);
 
     //look for the best uuid generator
     int uuid;
-    std::vector<BaseComponent> components;
+    std::string name;
+    std::vector<BaseComponent*> components;
 };

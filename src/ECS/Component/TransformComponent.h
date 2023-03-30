@@ -10,9 +10,9 @@ class TransformComponent : public BaseComponent{
 public:
     TransformComponent();
     ~TransformComponent();
-    void start();
-    void update(float dt);
-    void stop();
+    virtual void start() override;
+    virtual void update(float dt) override;
+    virtual void stop() override;
 
     int uuid;
     glm::vec3 position;

@@ -12,16 +12,25 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "BaseSystem.h"
+
 #include "../Entity/BaseEntity.h"
+#include "../Entity/CameraEntity.h"
+#include "../Entity/ModelEntity.h"
+#include "../Entity/SkeletalMeshEntity.h"
+
+
 #include "../Component/BaseComponent.h"
+
+#include "../Scene/Scene.h"
 
 class InterfaceSystem : public BaseSystem {
 public:
-    InterfaceSystem();
+    InterfaceSystem(Scene* sc);
     ~InterfaceSystem();
     void start() override;
     void update(float dt) override;
     void stop() override;
 
     GLFWwindow* window;
+    Scene* scene;
 };

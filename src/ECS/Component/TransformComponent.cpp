@@ -2,6 +2,8 @@
 
 TransformComponent::TransformComponent()
 {
+    uuid = 999;
+    name = "Transform Component";
     start();
 }
 

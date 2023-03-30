@@ -4,15 +4,13 @@
 
 #include "BaseEntity.h"
 #include "../Component/BaseComponent.h"
+#include "../Component/TransformComponent.h"
 
 class CameraEntity : public BaseEntity{
 public:
     CameraEntity();
     ~CameraEntity();
-    void start();
-    void update(float dt);
-    void stop();
-
-    int uuid;
-    std::vector<BaseComponent> components;
+    virtual void start() override;
+    virtual void update(float dt) override;
+    virtual void stop() override;
 };

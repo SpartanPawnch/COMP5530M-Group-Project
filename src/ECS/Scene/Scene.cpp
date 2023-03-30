@@ -2,6 +2,7 @@
 
 Scene::Scene()
 {
+    selectedEntity = nullptr;
     start();
 }
 
@@ -43,6 +44,10 @@ void Scene::removeEntity(int uuid)
             entities.erase(entities.begin() + i);
         }
     }
+}
+
+void Scene::selectEntity(BaseEntity* entity) {
+    selectedEntity = entity;
 }
 
 

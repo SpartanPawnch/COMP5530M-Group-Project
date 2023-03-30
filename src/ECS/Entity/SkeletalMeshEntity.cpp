@@ -2,6 +2,8 @@
 
 SkeletalMeshEntity::SkeletalMeshEntity()
 {
+    uuid = 500;
+    name = "Skeletal Mesh Entity";
     start();
 }
 
@@ -22,7 +24,7 @@ void SkeletalMeshEntity::update(float dt)
 {
     for (int i = 0; i < components.size(); i++)
     {
-        components[i].update(dt);
+        components[i]->update(dt);
     }
 }
 
