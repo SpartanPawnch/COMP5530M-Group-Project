@@ -29,6 +29,12 @@ add_executable(
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp src/gui.cpp
+    src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
+    src/ECS/Component/TransformComponent.cpp
+    src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
+    src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
+    src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp 
+    src/ECS/System/InterfaceSystem.cpp
 )
 
 #add glfw
