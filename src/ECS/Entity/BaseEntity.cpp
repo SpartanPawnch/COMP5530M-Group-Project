@@ -38,3 +38,7 @@ void BaseEntity::removeComponent(int uuid)
         }
     }
 }
+
+void BaseEntity::addChild(BaseEntity entity) {
+    children.push_back(entity);
+}

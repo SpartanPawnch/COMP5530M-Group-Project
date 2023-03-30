@@ -30,6 +30,7 @@ public:
     void start() override;
     void update(float dt) override;
     void stop() override;
+    void drawEntity(BaseEntity* entity);
 
     GLFWwindow* window;
     Scene* scene;

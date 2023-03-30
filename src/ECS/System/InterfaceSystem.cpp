@@ -55,19 +55,16 @@ void InterfaceSystem::update(float dt)
 
     // --- Get Gui Input ---
     if (ImGui::Begin("Entities", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::Button("Add Entity")) {
+            ImGui::OpenPopup("AddEntity");
+        }
+
         for (int i = 0; i < scene->entities.size(); i++)
         {
-            if (ImGui::TreeNodeEx(scene->entities.at(i).name.c_str(), ImGuiTreeNodeFlags_Leaf, scene->entities.at(i).name.c_str())) {
-                if (ImGui::IsItemClicked()) {
-                    if (scene->selectedEntity != &scene->entities.at(i)) {
-                        scene->selectedEntity = &scene->entities.at(i);
-                    }
-                }
-                //TODO:display children if open
-                ImGui::TreePop();
-            }
+            drawEntity(&scene->entities.at(i));
         }
-        if (ImGui::BeginPopupContextItem()) {
+
+        if (ImGui::BeginPopup("AddEntity")) {
             if (ImGui::MenuItem("Add Entity")) {
                 scene->addEntity(BaseEntity());
             }
@@ -82,8 +79,10 @@ void InterfaceSystem::update(float dt)
             }
             ImGui::EndPopup();
         }
+
         ImGui::End();
     }
+
 
     if (ImGui::Begin("Components", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (scene->selectedEntity == nullptr) {
@@ -112,6 +111,39 @@ void InterfaceSystem::update(float dt)
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+}
+
+void InterfaceSystem::drawEntity(BaseEntity* entity) {
+    auto flag = ImGuiTreeNodeFlags_Leaf;
+    if (entity->children.size() > 0) {
+        flag = ImGuiTreeNodeFlags_DefaultOpen;
+    }
+    if (ImGui::TreeNodeEx(entity->name.c_str(), flag, entity->name.c_str())) {
+        if (ImGui::IsItemClicked()) {
+            if (scene->selectedEntity != entity) {
+                scene->selectedEntity = entity;
+            }
+        }
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Add Child Entity")) {
+                entity->addChild(BaseEntity());
+            }
+            if (ImGui::MenuItem("Add Child Camera Entity")) {
+                entity->addChild(CameraEntity());
+            }
+            if (ImGui::MenuItem("Add Child Model Entity")) {
+                entity->addChild(ModelEntity());
+            }
+            if (ImGui::MenuItem("Add Child Skeletal Mesh Entity")) {
+                entity->addChild(SkeletalMeshEntity());
+            }
+            ImGui::EndPopup();
+        }
+        for (int i = 0; i < entity->children.size(); i++) {
+            drawEntity(&entity->children.at(i));
+        }
+        ImGui::TreePop();
+    }
 }
 
 void InterfaceSystem::stop()
