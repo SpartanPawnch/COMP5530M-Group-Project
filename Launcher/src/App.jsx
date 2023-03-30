@@ -1,44 +1,44 @@
 import { useState, useEffect } from "react";
 import { BaseDirectory, readDir, createDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
 import { invoke } from "@tauri-apps/api/tauri";
+import { Command } from '@tauri-apps/api/shell';
 import "./App.css";
 
 function App() {
   //look for config.json in the app's directory
+    let beencalled = false;
   const [config, setConfig] = useState(null);
   const [projectsDir, setProjectsDir] = useState(null);
   const [projects, setProjects] = useState([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
   
-  const getConfig = async () => {
-    await readTextFile("config.json",{
-      dir: BaseDirectory.App
-    }).then((data) => {
-      setConfig(JSON.parse(data));
-      setProjectsDir(JSON.parse(data).projectsDir);
-      readProjects(JSON.parse(data).projectsDir);
-    }).catch((err) => {
-      console.log(err);
-      createConfig();
-    });
-  };
+    const getConfig = async () => {
+        await readTextFile("config.json",{
+          dir: BaseDirectory.App
+        }).then((data) => {
+            setConfig(JSON.parse(data));
+            setProjectsDir(JSON.parse(data).projectsDir);
+            readProjects(JSON.parse(data).projectsDir);
+        }).catch((err) => {
+          console.log(err);
+          createConfig();
+        });
+    };
 
   const createConfig = async () => {
     writeTextFile("config.json",JSON.stringify({projectsDir: ""}),{
       dir: BaseDirectory.App
     }).then(() => {
-      getConfig();
     }).catch((err) => {
       console.log(err);
     });
   };
 
-  const setCofig = async (projectsDir) => {
+  const writeConfig = async (projectsDir) => {
     writeTextFile("config.json",JSON.stringify({projectsDir: projectsDir}),{
       dir: BaseDirectory.App
     }).then(() => {
-      getConfig();
     }).catch((err) => {
       console.log(err);
     });
@@ -55,25 +55,29 @@ function App() {
     });
   };
 
-  const readProjects = async (projectsDir) => {
-    setProjectsLoaded(false);
-    setProjects([]);
-    await readDir(projectsDir).then((data) => {
-      console.log(data);
-      data.forEach(async (project) => {
-        await readTextFile(project.path+"\\project.json").then((data) => {
-          let projectData = JSON.parse(data);
-          projectData.path = project.path;
-          setProjects((projects) => [...projects, projectData]);
-          setProjectsLoaded(true);
+    const readProjects = async (projectsDir) => {
+        await readDir(projectsDir).then((data) => {
+            console.log(data);
+            const projectsToLoad = data.length;
+            let projectsLoadedCount = 0;
+              data.forEach(async (project) => {
+                  await readTextFile(project.path + "\\project.json").then((data) => {
+                      let projectData = JSON.parse(data);
+                      projectData.path = project.path;
+                      setProjects((projects) => [...projects, projectData]);
+                  }).catch((err) => {
+                      console.log(err);
+                  }).then(() => {
+                      projectsLoadedCount++;
+                      if (projectsLoadedCount == projectsToLoad) {
+                          setProjectsLoaded(true);
+                      }
+                  });
+              });
         }).catch((err) => {
           console.log(err);
-        });
-      });
-    }).catch((err) => {
-      console.log(err);
-    });
-  };
+        })
+    };
 
   const createNewProject = async (projectName) => {
     await createDir(projectsDir+"\\"+projectName).then(async () => {
@@ -88,11 +92,28 @@ function App() {
     }).catch((err) => {
       console.log(err);
     });
-  };
+ };
 
-  useEffect(() => {
-    getConfig();
-  }, []);
+    const openEngine = async (projectPath) => {
+        const enginePath = "C:\\Users\\jjpgn\\Desktop\\groupproject\\Project\\COMP5530M-Group-Project\\out\\build\\x64-debug\\BuildSys.exe";
+        const command = new Command(enginePath,projectPath);
+        command.on('close', data => {
+            console.log(`command finished with code ${data.code} and signal ${data.signal}`)
+        });
+        command.on('error', error => console.error(`command error: "${error}"`));
+        command.stdout.on('data', line => console.log(`command stdout: "${line}"`));
+        command.stderr.on('data', line => console.log(`command stderr: "${line}"`));
+
+        const child = await command.spawn();
+        console.log('pid:', child.pid);
+    }
+
+    useEffect(() => {
+        if (!beencalled) {
+            getConfig();
+            beencalled = true;
+        }
+    }, []);
 
   return (
     <div className="container">
@@ -114,7 +135,7 @@ function App() {
               <input type="text" id="projects-folder-input" /><button onClick={() => openFolderDialog()}>Browse</button>
             </div>
             <div className="set-config-screen-button">
-              <button onClick={() => setCofig(document.getElementById("projects-folder-input").value)}>Save</button>
+             <button onClick={() => writeConfig(document.getElementById("projects-folder-input").value)}>Save</button>
             </div>
           </div>
         </div>
@@ -143,8 +164,8 @@ function App() {
             <button onClick={() => setNewProjectModalOpen(true)}>New Project</button>
           </div>
           <div className="projects-list">
-            {projects.map((project) => (
-              <div className="project-item">
+            {projects.map((project, key) => (
+                <div key={key} className="project-item" onClick={() => openEngine(project.path) }>
                 <div className="project-info">
                   <div className="project-name">{project.projectName}</div>
                   <div className="project-path">{project.path}</div>

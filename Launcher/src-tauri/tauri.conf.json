@@ -14,8 +14,9 @@
     "allowlist": {
       "all": false,
       "shell": {
-        "all": false,
-        "open": true
+        "all": true,
+        "open": true,
+        "execute": true
       },
       "fs": {
         "all": true,
