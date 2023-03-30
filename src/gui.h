@@ -5,7 +5,7 @@
 #include<GLFW/glfw3.h>
 
 struct GUIManager {
-    GUIManager();
+    GUIManager(GLFWwindow* window);
     ~GUIManager();
 };
 

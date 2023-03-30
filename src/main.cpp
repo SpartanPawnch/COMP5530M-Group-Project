@@ -11,9 +11,6 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_glfw.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
@@ -73,15 +70,6 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    //Init ImGui
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
-
-    //enable docking
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
     //init logging
     logging::LogManager logMgr;
 
@@ -97,7 +85,7 @@ int main() {
     //audio controls
     audio::AudioEngine audioEngine;
 
-    GUIManager guiInstance;
+    GUIManager guiInstance(window);
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());

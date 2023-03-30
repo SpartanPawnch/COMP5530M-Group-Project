@@ -129,7 +129,19 @@ static Model model;
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
 
-GUIManager::GUIManager() {
+//TODO Load/Save style to disk
+static ImGuiStyle guiStyle;
+
+GUIManager::GUIManager(GLFWwindow* window) {
+    //Init ImGui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
+
+    //enable docking
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     fileTexture = loadTexture("assets/fileico.png");
     folderTexture = loadTexture("assets/folderico.png");
 
@@ -145,6 +157,7 @@ GUIManager::GUIManager() {
 GUIManager::~GUIManager() {
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
+
     if (projectThread.joinable())
         projectThread.join();
 }
@@ -184,48 +197,65 @@ inline void drawAudioDemo() {
     ImGui::End();
 }
 
-inline void drawProjectWindow(const char* executablePath) {
+inline float drawMainMenu(const char* executablePath) {
     //TODO (Jub) - switch to main menu options
-    if (ImGui::Begin("Project", NULL)) {
-        ImGui::Text("Active Directory: %s", activePath.c_str());
-        if (ImGui::Button("Create Project")) {
-            std::string path = fdutil::selectFolder("Create a Project", NULL);
-            //wait for current op to finish
-            if (!path.empty()) {
-                if (projectThread.joinable())
-                    projectThread.join();
-                projectThread = std::thread(createProj, path);
-                activePath = path;
-                assetfolder::setActiveDirectory(path);
-                currFolder = assetfolder::getRootDir();
-                queryFolder = true;
-            }
-        }
-        if (ImGui::Button("Open Project")) {
-            std::string path = fdutil::selectFolder("Open Project", NULL);
-            if (!path.empty()) {
-                if (projectThread.joinable())
-                    projectThread.join();
-                activePath = path;
-                logging::logInfo("Opened project at: {}\n", activePath.c_str());
-                assetfolder::setActiveDirectory(path);
-                currFolder = assetfolder::getRootDir();
-                queryFolder = true;
-            }
-        }
-        if (ImGui::Button("Build and Run")) {
-            if (!activePath.empty()) {
+    float barHeight = .0f;
+    if (ImGui::BeginMainMenuBar()) {
+        // ImGui::Text("Active Directory: %s", activePath.c_str());
+
+        //file menu
+        if (ImGui::BeginMenu("File##mainmenu")) {
+            if (ImGui::MenuItem("Create Project")) {
+                std::string path = fdutil::selectFolder("Create a Project", NULL);
                 //wait for current op to finish
-                if (projectThread.joinable())
-                    projectThread.join();
-
-                projectThread = std::thread(buildRunProj, activePath,
-                    executablePath);
-
+                if (!path.empty()) {
+                    if (projectThread.joinable())
+                        projectThread.join();
+                    projectThread = std::thread(createProj, path);
+                    activePath = path;
+                    assetfolder::setActiveDirectory(path);
+                    currFolder = assetfolder::getRootDir();
+                    queryFolder = true;
+                }
             }
+            if (ImGui::MenuItem("Open Project")) {
+                std::string path = fdutil::selectFolder("Open Project", NULL);
+                if (!path.empty()) {
+                    if (projectThread.joinable())
+                        projectThread.join();
+                    activePath = path;
+                    logging::logInfo("Opened project at: {}\n", activePath.c_str());
+                    assetfolder::setActiveDirectory(path);
+                    currFolder = assetfolder::getRootDir();
+                    queryFolder = true;
+                }
+            }
+            ImGui::EndMenu();
         }
+
+        //build menu
+        if (ImGui::BeginMenu("Build##mainmenu")) {
+            if (ImGui::MenuItem("Build and Run")) {
+                if (!activePath.empty()) {
+                    //wait for current op to finish
+                    if (projectThread.joinable())
+                        projectThread.join();
+
+                    projectThread = std::thread(buildRunProj, activePath,
+                        executablePath);
+
+                }
+            }
+            ImGui::EndMenu();
+        }
+
+        //get height
+        barHeight = ImGui::GetWindowSize().y;
+
+        ImGui::EndMainMenuBar();
     }
-    ImGui::End();
+
+    return barHeight;
 }
 
 inline void drawModelDemo() {
@@ -426,7 +456,7 @@ inline void drawAssetBrowser(GLFWwindow* window) {
 int viewportTexWidth = 0;
 int viewportTexHeight = 0;
 
-void drawViewport() {
+inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
@@ -449,6 +479,28 @@ void drawViewport() {
     ImGui::End();
 }
 
+
+inline void drawStyleEditor() {
+    if (ImGui::Begin("Style Editor"))
+        ImGui::ShowStyleEditor(&guiStyle);
+    ImGui::End();
+
+}
+
+inline void drawProperties() {
+    if (ImGui::Begin("Properties")) {
+
+    }
+    ImGui::End();
+}
+
+inline void drawEntities() {
+    if (ImGui::Begin("Entities")) {
+
+    }
+    ImGui::End();
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -458,13 +510,19 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     ImVec2 mousePos = ImGui::GetMousePos();
 
+    //adjust fullscreen windows size to account for menubar
+    float mainMenuHeight = drawMainMenu(executablePath);
+    windowSize.y -= mainMenuHeight;
+
     static ImGuiID dockCenter = 0;
     static ImGuiID dockLeft;
     static ImGuiID dockRight;
-    static ImGuiID dockBot;
+    static ImGuiID dockBotRight;
+    static ImGuiID dockBotLeft;
 
+    //TODO save and load dock state
     //create layout if not present already
-    ImGui::SetNextWindowPos(ImVec2(.0f, .0f));
+    ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
     ImGui::SetNextWindowSize(windowSize);
     if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
@@ -479,9 +537,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
             ImGui::DockBuilderSetNodeSize(dockCenter, windowSize);
             ImGui::DockBuilderSetNodePos(dockCenter, ImGui::GetMainViewport()->Pos);
 
-            //TODO dynamic layout
             //split vertically
-            dockBot = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
+            dockBotRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
+            dockBotLeft = ImGui::DockBuilderSplitNode(dockBotRight, ImGuiDir_Left, .5f, NULL, &dockBotRight);
 
             //split horizontally twice
             dockLeft = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Left, .25f, NULL, &dockCenter);
@@ -491,19 +549,22 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
             dockSpaceInit = true;
         }
     }
+
     ImGui::End();
 
-    //TODO fix crash on docking multiple windows in same node
     //TODO undocked windows in front
-
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
-    drawProjectWindow(executablePath);
-    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawLog();
-    ImGui::SetNextWindowDockID(dockBot, ImGuiCond_Once);
+    drawEntities();
+    ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser(window);
+    ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
+    drawLog();
     ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
     drawViewport();
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawStyleEditor();
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawProperties();
 
     //prepare gui for rendering
     ImGui::Render();
