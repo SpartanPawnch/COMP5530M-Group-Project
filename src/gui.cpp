@@ -182,8 +182,8 @@ inline void drawAudioDemo() {
             if (!audioPath.empty())
                 audio::audioPlay(audioClip);
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 inline void drawProjectWindow(const char* executablePath) {
@@ -226,8 +226,8 @@ inline void drawProjectWindow(const char* executablePath) {
 
             }
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 inline void drawModelDemo() {
@@ -243,8 +243,8 @@ inline void drawModelDemo() {
         ImGui::Text("Model Meshes: %d", model.meshes.size());
         ImGui::Text("Model Textures: %d", model.textures_loaded.size());
         ImGui::Text("From: %s", model.directory.c_str());
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 inline void drawLog() {
@@ -256,8 +256,8 @@ inline void drawLog() {
             logging::scrollToBot = false;
             ImGui::SetScrollHereY(1.0f);
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 inline void drawTextureDebug() {
@@ -278,8 +278,8 @@ inline void drawTextureDebug() {
             ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
         }
 
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 inline void drawAssetBrowser(GLFWwindow* window) {
@@ -422,8 +422,8 @@ inline void drawAssetBrowser(GLFWwindow* window) {
             }
         }
 
-        ImGui::End();
     }
+    ImGui::End();
 }
 int viewportTexWidth = 0;
 int viewportTexHeight = 0;
@@ -446,9 +446,9 @@ void drawViewport() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         ImGui::Image((void*)viewportTex, windowSize);
-        ImGui::PopStyleVar(2);
-        ImGui::End();
     }
+    ImGui::PopStyleVar(2);
+    ImGui::End();
 }
 
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
@@ -492,8 +492,8 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
             ImGui::DockBuilderFinish(dockId);
             dockSpaceInit = true;
         }
-        ImGui::End();
     }
+    ImGui::End();
 
     //TODO fix crash on docking multiple windows in same node
     //TODO undocked windows in front
@@ -513,4 +513,12 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
 void drawUI() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
+    }
 }
