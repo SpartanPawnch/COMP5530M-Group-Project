@@ -38,6 +38,7 @@ namespace guicfg {
     const ImVec2 assetMgrIconSize(60.0f, 60.0f);
     const ImVec2 assetMgrItemSize(80.0f, 80.0f);
     const float splitterThickness = 7.f;
+    const ImGuiID dockspaceID = 1;
 };
 
 void createProj(const std::string& path) {
@@ -168,8 +169,8 @@ inline void drawAudioDemo() {
 }
 
 inline void drawProjectWindow(const char* executablePath) {
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
-    if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+    //TODO (Jub) - switch to main menu options
+    if (ImGui::Begin("Project", NULL)) {
         ImGui::Text("Active Directory: %s", activePath.c_str());
         if (ImGui::Button("Create Project")) {
             std::string path = fdutil::selectFolder("Create a Project", NULL);
@@ -229,9 +230,8 @@ inline void drawModelDemo() {
 }
 
 inline void drawLog() {
-    ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
     if (ImGui::Begin("Log", NULL, NULL)) {
-        ImGui::PushTextWrapPos(560);
+        ImGui::PushTextWrapPos(ImGui::GetWindowSize().x - 40.0f);
         ImGui::TextUnformatted(logging::getLogString());
         ImGui::PopTextWrapPos();
         if (logging::scrollToBot) {
@@ -266,13 +266,12 @@ inline void drawTextureDebug() {
 
 inline void drawAssetBrowser(GLFWwindow* window) {
     //folder debug
-    ImGui::SetNextWindowSize(ImVec2(800, 300), ImGuiCond_Once);
-    if (ImGui::Begin("Asset Browser", NULL, 0)) {
+    if (ImGui::Begin("Asset Browser", NULL)) {
         ImGui::Text("Current Folder: %s", currFolder.path.c_str());
 
         if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
             static std::vector<bool> itemIsSelected;
-            int itemsPerLine = int(ImGui::GetWindowWidth() / (guicfg::assetMgrItemSize.x +
+            int itemsPerLine = int(ImGui::GetWindowSize().x / (guicfg::assetMgrItemSize.x +
                 guicfg::assetMgrPadding.x));
 
             //refresh folder if needed
@@ -409,43 +408,6 @@ inline void drawAssetBrowser(GLFWwindow* window) {
     }
 }
 
-void DrawSplitter(int split_vertically, float thickness, float* size0,
-    float* size1, float min_size0, float min_size1, float longAxis = -1.f) {
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(.0f, .0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, .0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, .5f);
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.3f, 0.3f, .1f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.10f));
-    ImGui::Button("##Splitter", split_vertically ? ImVec2(longAxis, thickness) :
-        ImVec2(thickness, longAxis));
-    ImGui::PopStyleColor(3);
-    ImGui::PopStyleVar(3);
-
-    ImGui::SetItemAllowOverlap(); // This is to allow having other buttons OVER our splitter. 
-
-    if (ImGui::IsItemActive()) {
-        float mouse_delta = split_vertically ? ImGui::GetIO().MouseDelta.y : ImGui::GetIO().MouseDelta.x;
-
-        // Minimum pane size
-        if (mouse_delta < min_size0 - *size0)
-            mouse_delta = min_size0 - *size0;
-        if (mouse_delta > *size1 - min_size1)
-            mouse_delta = *size1 - min_size1;
-
-        // Apply resize
-        *size0 += mouse_delta;
-        *size1 -= mouse_delta;
-    }
-
-
-}
-
-//relative widget sizes
-//TODO dynamic layout
-static float widthFractions[] = { .25f,.5f,.25f };
-static float heightFractions[] = { .6f,.4f };
-
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -455,58 +417,47 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     ImVec2 mousePos = ImGui::GetMousePos();
 
-    // --- Get Gui Input ---
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    SetNextWindowSize(windowSize);
-    if (ImGui::Begin("Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar)) {
+    static ImGuiID dockCenter = 0;
+    static ImGuiID dockLeft;
+    static ImGuiID dockRight;
+    static ImGuiID dockBot;
 
-        //record modifications for this frame
-        float editedWidths[] = { widthFractions[0] * windowSize.x, widthFractions[1] * windowSize.x,
-            widthFractions[2] * windowSize.x };
-        float editedHeights[] = { heightFractions[0] * windowSize.y,heightFractions[1] * windowSize.y };
+    //create layout if not present already
+    ImGui::SetNextWindowPos(ImVec2(.0f, .0f));
+    ImGui::SetNextWindowSize(windowSize);
+    if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
 
-        BeginChild("##Object", ImVec2(widthFractions[0] * windowSize.x,
-            heightFractions[0] * windowSize.y));
-        Text("0");
-        EndChild();
+        ImGuiID dockId = ImGui::GetID("DockspaceDefault");
+        ImGui::DockSpace(dockId);
+        static bool dockSpaceInit = false;
+        if (!dockSpaceInit) {
+            //create initial empty node
+            ImGui::DockBuilderRemoveNode(dockId);
+            dockCenter = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockCenter, windowSize);
+            ImGui::DockBuilderSetNodePos(dockCenter, ImGui::GetMainViewport()->Pos);
 
-        SameLine();
-        ImGui::PushID(0);
-        DrawSplitter(0, guicfg::splitterThickness, &editedWidths[0], &editedWidths[1], 20.f, 20.f, editedHeights[0]);
-        ImGui::PopID();
+            //TODO dynamic layout
+            //split vertically
+            dockBot = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
 
-        SameLine();
-        BeginChild("##Scene", ImVec2(widthFractions[1] * windowSize.x,
-            heightFractions[0] * windowSize.y));
-        Text("1");
-        EndChild();
+            //split horizontally twice
+            dockLeft = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Left, .25f, NULL, &dockCenter);
+            dockRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Right, .25f, NULL, &dockCenter);
 
-        SameLine();
-        ImGui::PushID(1);
-        DrawSplitter(0, guicfg::splitterThickness, &editedWidths[1], &editedWidths[2], 20.f, 20.f, editedHeights[0]);
-        ImGui::PopID();
-
-        SameLine();
-        BeginChild("##Properties", ImVec2(widthFractions[2] * windowSize.x,
-            heightFractions[0] * windowSize.y));
-        Text("2");
-        EndChild();
-
-        DrawSplitter(1, guicfg::splitterThickness, &editedHeights[0], &editedHeights[1], 20.f, 20.f);
-
-        BeginChild("##FileBrowser", ImVec2(windowSize.x, heightFractions[1] * windowSize.y));
-        Text("3");
-        EndChild();
-
-        //update relative sizes for next frame
-        widthFractions[0] = editedWidths[0] / windowSize.x;
-        widthFractions[1] = editedWidths[1] / windowSize.x;
-        heightFractions[0] = editedHeights[0] / windowSize.y;
-        heightFractions[1] = editedHeights[1] / windowSize.y;
-
-        End();
+            ImGui::DockBuilderFinish(dockId);
+            dockSpaceInit = true;
+        }
+        ImGui::End();
     }
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawProjectWindow(executablePath);
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawLog();
+    ImGui::SetNextWindowDockID(dockBot, ImGuiCond_Once);
+    drawAssetBrowser(window);
 }
 
 void drawUI() {
