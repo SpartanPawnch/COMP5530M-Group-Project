@@ -8,6 +8,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <glm/ext.hpp>
 
 
 class RenderManager
@@ -36,12 +37,19 @@ private:
 
 public:
 
+	//matrices
+	glm::mat4 modelMatrix;
+	glm::mat4 projectionMatrix;
+	glm::mat4 viewMatrix;
+
 	//needs to be static to be invoked without object of class
 	static RenderManager* getInstance();
 
 	void startUp(GLFWwindow* aWindow);
 
 	void addProgram(ShaderProgram aProgram);
+
+	void updateMatrices(int* width, int* height);
 
 	void shutDown();
 

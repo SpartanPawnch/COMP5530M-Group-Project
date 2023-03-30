@@ -40,5 +40,7 @@ public:
 		const char* tessControlPath = nullptr,
 		const char* tessEvalPath = nullptr);
 
+	GLuint getProgram();
+
 	~ShaderProgram();
 };

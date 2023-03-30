@@ -14,6 +14,7 @@ const char* ShaderProgram::readShaderCode(const char* shaderPath)
 		shaderStream << shaderFile.rdbuf();
 		shaderFile.close();
 		shaderCode = shaderStream.str();
+		
 	}
 	catch (std::ifstream::failure e)
 	{
@@ -21,8 +22,8 @@ const char* ShaderProgram::readShaderCode(const char* shaderPath)
 			shaderPath
 			<<" ::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
 	}
-
-	return shaderCode.c_str();
+	std::cout << shaderCode.c_str() << std::endl;
+	return shaderCode.c_str();;
 }
 
 ShaderProgram::ShaderProgram(const char* vertexPath,
@@ -35,6 +36,7 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 	//Load and compile vertex shader
 	this->vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const char* vertexShaderCode = readShaderCode(vertexPath);
+	std::cout << vertexShaderCode << std::endl;
 	glShaderSource(this->vertexShader, 1, &vertexShaderCode, NULL);
 	glCompileShader(this->vertexShader);
 
@@ -105,9 +107,24 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 		glDeleteShader(geometryShader);
 	}
 
+	// check shader program for errors
+	GLint success;
+	GLchar infoLog[512];
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+	}
+
 }
 
 ShaderProgram::~ShaderProgram()
 {
 	glDeleteProgram(this->shaderProgram);
+}
+
+GLuint ShaderProgram::getProgram()
+{
+	return this->shaderProgram;
 }

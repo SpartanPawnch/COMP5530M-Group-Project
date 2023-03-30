@@ -24,6 +24,38 @@
 #include "../render-engine/RenderManager.h"
 #include "drawing.h"
 
+// Define the cube's vertices positions and colors separately
+GLfloat cubePositions[] = {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f
+};
+
+GLfloat cubeColors[] = {
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f
+};
+
+// Define the cube's vertex indices
+GLuint cubeIndices[] = {
+    0, 1, 2, 2, 3, 0,    // Front face
+    1, 5, 6, 6, 2, 1,    // Right face
+    4, 0, 3, 3, 7, 4,    // Left face
+    5, 4, 7, 7, 6, 5,    // Back face
+    3, 2, 6, 6, 7, 3,    // Top face
+    4, 5, 1, 1, 0, 4     // Bottom face
+};
 
 struct LogString {
 private:
@@ -124,7 +156,6 @@ int main() {
 
     _chdir(executablePath);
 
-
     //init glfw and setup window
     GLFWwindow* window;
     glfwInit();
@@ -162,12 +193,20 @@ int main() {
     RenderManager* renderManager = RenderManager::getInstance();
 
     renderManager->startUp(window);
-    
+
+    //init shader
+    /*const char* vertexPath = "../../../assets/shaders/colours.vert";
+    const char* fragPath = "../../../assets/shaders/colours.frag";
+    ShaderProgram* program = new ShaderProgram(vertexPath, fragPath);
+    renderManager->addProgram(*program);*/
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
+        
+        //update matrices
+        renderManager->updateMatrices(&width, &height);
 
         //prepare gui
         ImGui_ImplOpenGL3_NewFrame();
@@ -240,6 +279,23 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        //RENDERING
+        //glUseProgram(program->getProgram());
+
+        ////handle for uniforms
+        //GLuint ModelID = glGetUniformLocation(program->getProgram(), "model");
+        //GLuint ViewID = glGetUniformLocation(program->getProgram(), "view");
+        //GLuint ProjectionID = glGetUniformLocation(program->getProgram(), "projection");
+
+        //glUniformMatrix4fv(ModelID, 1, GL_FALSE, &renderManager->modelMatrix[0][0]);
+        //glUniformMatrix4fv(ViewID, 1, GL_FALSE, &renderManager->viewMatrix[0][0]);
+        //glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &renderManager->projectionMatrix[0][0]);
+
+        //// Render the cube
+        //glBindVertexArray(VAO);
+        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
