@@ -107,9 +107,9 @@ void setVec(std::vector<T>& vec, T val) {
 }
 
 
-std::string activePath;
+static std::string activePath;
 
-std::thread projectThread;
+static std::thread projectThread;
 
 static int activeTexture = -1;
 
@@ -126,11 +126,29 @@ static bool queryFolder = true;
 static int fileTexture;
 static int folderTexture;
 
-Model model;
+static Model model;
+
+GLuint viewportFramebuffer;
+static GLuint viewportTex;
 
 GUIManager::GUIManager() {
     fileTexture = loadTexture("assets/fileico.png");
     folderTexture = loadTexture("assets/folderico.png");
+
+    //create viewport framebuffer
+    glGenFramebuffers(1, &viewportFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+
+    glGenTextures(1, &viewportTex);
+    glBindTexture(GL_TEXTURE_2D, viewportTex);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, viewportTex, 0);
+}
+GUIManager::~GUIManager() {
+    glDeleteFramebuffers(1, &viewportFramebuffer);
+    glDeleteTextures(1, &viewportTex);
+    if (projectThread.joinable())
+        projectThread.join();
 }
 
 inline void drawAudioDemo() {
@@ -407,6 +425,31 @@ inline void drawAssetBrowser(GLFWwindow* window) {
         ImGui::End();
     }
 }
+int viewportTexWidth = 0;
+int viewportTexHeight = 0;
+
+void drawViewport() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
+    if (ImGui::Begin("Viewport")) {
+        //adjust for titlebar
+        ImVec2 windowSize = ImGui::GetWindowSize();
+        windowSize.y -= ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
+
+        viewportTexWidth = int(windowSize.x);
+        viewportTexHeight = int(windowSize.y);
+
+        //adjust to window resize
+        glBindTexture(GL_TEXTURE_2D, viewportTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth,
+            viewportTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        ImGui::Image((void*)viewportTex, windowSize);
+        ImGui::PopStyleVar(2);
+        ImGui::End();
+    }
+}
 
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
@@ -452,12 +495,20 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
         ImGui::End();
     }
 
+    //TODO fix crash on docking multiple windows in same node
+    //TODO undocked windows in front
+
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawProjectWindow(executablePath);
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawLog();
     ImGui::SetNextWindowDockID(dockBot, ImGuiCond_Once);
     drawAssetBrowser(window);
+    ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
+    drawViewport();
+
+    //prepare gui for rendering
+    ImGui::Render();
 }
 
 void drawUI() {

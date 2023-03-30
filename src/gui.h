@@ -6,11 +6,12 @@
 
 struct GUIManager {
     GUIManager();
+    ~GUIManager();
 };
 
-extern std::string activePath;
-
-extern std::thread projectThread;
+extern GLuint viewportFramebuffer;
+extern int viewportTexWidth;
+extern int viewportTexHeight;
 
 //define UI structure
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,

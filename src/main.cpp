@@ -109,24 +109,27 @@ int main() {
         prepUI(window, executablePath, currTime, width, height);
 
         //--- Draw Results ---
-        //adapt to resize
-        glViewport(0, 0, width, height);
+        //draw scene to texture
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        //prepare gui for rendering
-        ImGui::Render();
+        GLuint attachment = GL_COLOR_ATTACHMENT0;
+        glDrawBuffers(1, &attachment);
 
         //draw background
         glClearColor(.7f, .7f, .7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glFlush();
+
+        //draw UI to full window
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
         drawUI();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    if (projectThread.joinable())
-        projectThread.join();
 
     return 0;
 }
