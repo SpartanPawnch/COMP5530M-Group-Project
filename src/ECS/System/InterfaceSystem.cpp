@@ -57,7 +57,7 @@ void InterfaceSystem::update(float dt)
     if (ImGui::Begin("Entities", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         for (int i = 0; i < scene->entities.size(); i++)
         {
-            if (ImGui::TreeNodeEx(scene->entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen, scene->entities.at(i).name.c_str())) {
+            if (ImGui::TreeNodeEx(scene->entities.at(i).name.c_str(), ImGuiTreeNodeFlags_Leaf, scene->entities.at(i).name.c_str())) {
                 if (ImGui::IsItemClicked()) {
                     if (scene->selectedEntity != &scene->entities.at(i)) {
                         scene->selectedEntity = &scene->entities.at(i);
@@ -91,9 +91,7 @@ void InterfaceSystem::update(float dt)
         } else {
             for (int i = 0; i < scene->selectedEntity->components.size(); i++)
             {
-                if (ImGui::TreeNodeEx(scene->selectedEntity->components.at(i)->name.c_str())) {
-                    ImGui::TreePop();
-                }
+                scene->selectedEntity->components.at(i)->drawInterface();
             }
         }
         ImGui::End();

@@ -13,6 +13,7 @@ public:
     virtual void start() override;
     virtual void update(float dt) override;
     virtual void stop() override;
+    virtual void drawInterface() override;
 
     int uuid;
     glm::vec3 position;

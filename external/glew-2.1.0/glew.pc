@@ -1,6 +1,6 @@
-prefix=C:/Users/jjpgn/Desktop/group project/Project/COMP5530M-Group-Project/out/install/x64-release
+prefix=C:/Users/jjpgn/Desktop/group project/Project/COMP5530M-Group-Project/out/install/x64-debug
 exec_prefix=${prefix}
-libdir=C:/Users/jjpgn/Desktop/group project/Project/COMP5530M-Group-Project/out/install/x64-release/lib
+libdir=C:/Users/jjpgn/Desktop/group project/Project/COMP5530M-Group-Project/out/install/x64-debug/lib
 includedir=${prefix}/include
 
 Name: glew

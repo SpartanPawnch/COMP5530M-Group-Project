@@ -21,3 +21,7 @@ void BaseComponent::update(float dt)
 void BaseComponent::stop()
 {
 }
+
+void BaseComponent::drawInterface() {
+    ImGui::Text("Default Component has no parameters");
+}

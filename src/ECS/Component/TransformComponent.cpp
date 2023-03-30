@@ -26,3 +26,10 @@ void TransformComponent::update(float dt)
 void TransformComponent::stop()
 {
 }
+
+void TransformComponent::drawInterface() {
+    ImGui::Text("Transform Parameters");
+    ImGui::DragFloat3("Position", &position.x, .1);
+    ImGui::DragFloat4("Rotation", &rotation.x, .1);
+    ImGui::DragFloat3("Scale", &scale.x, .1);
+}
