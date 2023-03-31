@@ -108,6 +108,14 @@ int main() {
         glClearColor(.7f, .7f, .7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //placeholder triangle to show viewport is working
+        //TODO replace ASAP
+        glBegin(GL_TRIANGLES);
+        glVertex2f(-.5f, .5f);
+        glVertex2f(.5f, .5f);
+        glVertex2f(.0f, -.5f);
+        glEnd();
+
         glFlush();
 
         //draw UI to full window

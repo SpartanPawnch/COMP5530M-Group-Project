@@ -32,14 +32,14 @@ void Engine::start()
     //audio system
     systems.push_back(new InterfaceSystem(scene));
 
-    
+
     //Temporary: create entity
     ModelEntity entity;
     scene->addEntity(entity);
     CameraEntity camera;
     scene->addEntity(camera);
     scenes.push_back(scene);
-    
+
     openScene(currentScene);
 }
 
@@ -50,7 +50,7 @@ void Engine::update()
     //TEMPOARY: set fake time
     float dt = 0.016f;
     //update systems
-    for (int i = 0; i < systems.size(); i++)
+    for (unsigned int i = 0; i < systems.size(); i++)
     {
         systems[i]->update(dt);
     }

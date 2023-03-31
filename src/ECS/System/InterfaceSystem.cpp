@@ -55,8 +55,7 @@ void InterfaceSystem::update(float dt)
 
     // --- Get Gui Input ---
     if (ImGui::Begin("Entities", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        for (int i = 0; i < scene->entities.size(); i++)
-        {
+        for (unsigned int i = 0; i < scene->entities.size(); i++) {
             if (ImGui::TreeNodeEx(scene->entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen, scene->entities.at(i).name.c_str())) {
                 if (ImGui::IsItemClicked()) {
                     if (scene->selectedEntity != &scene->entities.at(i)) {
@@ -88,8 +87,9 @@ void InterfaceSystem::update(float dt)
     if (ImGui::Begin("Components", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (scene->selectedEntity == nullptr) {
             ImGui::Text("Select an Entity to show it's components");
-        } else {
-            for (int i = 0; i < scene->selectedEntity->components.size(); i++)
+        }
+        else {
+            for (unsigned int i = 0; i < scene->selectedEntity->components.size(); i++)
             {
                 if (ImGui::TreeNodeEx(scene->selectedEntity->components.at(i)->name.c_str())) {
                     ImGui::TreePop();

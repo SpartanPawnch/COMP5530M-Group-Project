@@ -22,7 +22,7 @@ void SkeletalMeshEntity::start()
 
 void SkeletalMeshEntity::update(float dt)
 {
-    for (int i = 0; i < components.size(); i++)
+    for (unsigned int i = 0; i < components.size(); i++)
     {
         components[i]->update(dt);
     }

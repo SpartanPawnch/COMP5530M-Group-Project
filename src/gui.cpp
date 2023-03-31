@@ -27,6 +27,10 @@
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
 #include "model_import/model.h"
+#include "ECS/Entity/CameraEntity.h"
+#include "ECS/Entity/ModelEntity.h"
+#include "ECS/Entity/SkeletalMeshEntity.h"
+#include "ECS/Scene/Scene.h"
 
 using namespace ImGui;
 
@@ -126,6 +130,8 @@ static int folderTexture;
 
 static Model model;
 
+static Scene scene;
+
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
 
@@ -153,13 +159,15 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, viewportTex);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, viewportTex, 0);
+
 }
 GUIManager::~GUIManager() {
+    if (projectThread.joinable())
+        projectThread.join();
+
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
 
-    if (projectThread.joinable())
-        projectThread.join();
 }
 
 inline void drawAudioDemo() {
@@ -487,16 +495,67 @@ inline void drawStyleEditor() {
 
 }
 
-inline void drawProperties() {
-    if (ImGui::Begin("Properties")) {
-
-    }
-    ImGui::End();
-}
-
 inline void drawEntities() {
     if (ImGui::Begin("Entities")) {
+        for (unsigned int i = 0; i < scene.entities.size(); i++) {
+            if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
+                ImGuiTreeNodeFlags_DefaultOpen, scene.entities[i].name.c_str())) {
+                if (ImGui::IsItemClicked()) {
+                    if (scene.selectedEntity != &scene.entities[i]) {
+                        scene.selectedEntity = &scene.entities[i];
+                    }
+                }
+                //TODO:display children if open
+                ImGui::TreePop();
+            }
+        }
 
+
+        //draw invisible button to allow mouse click for full window
+        //TODO - adjust when entity children are implemented
+        ImGui::SetCursorPos(ImVec2(.0f, .0f));
+        ImVec2 buttonSize = ImGui::GetWindowSize();
+        float borderSize = ImGui::GetStyle().WindowBorderSize;
+        ImVec2 padding = ImGui::GetStyle().WindowPadding;
+        buttonSize.x -= borderSize + 2 * padding.x;
+        buttonSize.y -= borderSize + 2 * padding.y;
+        ImGui::InvisibleButton("##entitiesinvisblebutton",
+            buttonSize);
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Add Entity")) {
+                scene.addEntity(BaseEntity());
+            }
+            if (ImGui::MenuItem("Add Camera Entity")) {
+                scene.addEntity(CameraEntity());
+            }
+            if (ImGui::MenuItem("Add Model Entity")) {
+                scene.addEntity(ModelEntity());
+            }
+            if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
+                scene.addEntity(SkeletalMeshEntity());
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    ImGui::End();
+
+}
+
+inline void drawProperties() {
+    if (ImGui::Begin("Properties")) {
+        //TODO properties for other item types
+        if (scene.selectedEntity == nullptr) {
+            ImGui::Text("Select an Entity to show it's components");
+        }
+        else {
+            for (unsigned int i = 0; i < scene.selectedEntity->components.size(); i++) {
+                if (ImGui::TreeNodeEx(scene.selectedEntity->components[i]->name.c_str())) {
+                    ImGui::TreePop();
+                }
+            }
+        }
     }
     ImGui::End();
 }
@@ -555,14 +614,19 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     //TODO undocked windows in front
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
+
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser(window);
+
     ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
     drawLog();
+
     ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
     drawViewport();
+
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawStyleEditor();
+
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
 

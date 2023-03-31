@@ -13,12 +13,12 @@ Scene::~Scene()
 
 void Scene::start()
 {
-    
+
 }
 
 void Scene::update(float dt)
 {
-    for (int i = 0; i < entities.size(); i++)
+    for (unsigned int i = 0; i < entities.size(); i++)
     {
         entities[i].update(dt);
     }
@@ -37,7 +37,7 @@ void Scene::addEntity(BaseEntity entity)
 
 void Scene::removeEntity(int uuid)
 {
-    for (int i = 0; i < entities.size(); i++)
+    for (unsigned int i = 0; i < entities.size(); i++)
     {
         if (entities[i].uuid == uuid)
         {
