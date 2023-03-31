@@ -343,9 +343,11 @@ int main() {
 
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
+        
 
         //handle inputs
         handleInput(window);
+        previous_time = current_time;
 
         //update matrices
         renderManager->updateMatrices(&width, &height);
