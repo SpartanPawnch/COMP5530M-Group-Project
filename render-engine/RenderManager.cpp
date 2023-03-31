@@ -28,6 +28,13 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 
 	this->programs.clear();
 	this->deltaTime = 0.0f;
+	this->xPos = 0.0f;
+	this->yPos = 0.0f;
+	this->xPosLast = 0.0f;
+	this->yPosLast = 0.0f;
+	this->firstRClick = true;
+	this->xOffset = 0.0f;
+	this->yOffset = 0.0f;
 
 	//Initialise the camera
 	this->camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f, 0.f, 0.f));

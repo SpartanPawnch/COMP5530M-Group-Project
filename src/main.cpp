@@ -178,21 +178,36 @@ void handleKeyboardInput(GLFWwindow* window)
 
 void handleMouseInput(GLFWwindow* window)
 {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS
-    && renderManager->camera->focusState == false)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        // Strafe the camera right
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        renderManager->camera->focusState = true;
+        
+        //now we can change the orientation of the camera
+        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
 
+     
+        if (renderManager->firstRClick == true)
+        {
+            renderManager->xPosLast = renderManager->xPos;
+            renderManager->yPosLast = renderManager->yPos;
+            renderManager->firstRClick = false;
+        }
+
+        //offset
+        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
+        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
+
+        std::cout << "X: " << renderManager->xOffset << "      Y:" << renderManager->yOffset << std::endl;
+
+        //send data to camera
+        renderManager->camera->updateInput(renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+
+ 
     }
-    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS
-    && renderManager->camera->focusState == true)
-    {
-        // Strafe the camera right
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        renderManager->camera->focusState = false;
-    }
+    
 }
 //set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;

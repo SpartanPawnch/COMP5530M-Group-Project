@@ -40,6 +40,9 @@ public:
 	Camera* camera;
 
 	double deltaTime;
+	double xPos, yPos, xPosLast, yPosLast;
+	double xOffset, yOffset;
+	bool firstRClick;
 
 	//matrices
 	glm::mat4 modelMatrix;
