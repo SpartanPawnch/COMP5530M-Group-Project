@@ -112,8 +112,11 @@ int main() {
         //TODO replace ASAP
         glBegin(GL_TRIANGLES);
         glVertex2f(-.5f, .5f);
+        glColor3f(1.f, 1.f, .0f);
         glVertex2f(.5f, .5f);
+        glColor3f(.0f, 1.f, 1.f);
         glVertex2f(.0f, -.5f);
+        glColor3f(1.f, .0f, 1.f);
         glEnd();
 
         glFlush();

@@ -41,6 +41,12 @@ namespace guicfg {
     const ImVec2 assetMgrItemSize(80.0f, 80.0f);
     const float splitterThickness = 7.f;
     const ImGuiID dockspaceID = 1;
+
+    const char* titleFontPath = "fonts/Phudu-Medium.ttf";
+    const char* regularFontPath = "fonts/Armata-Regular.ttf";
+
+    ImFont* titleFont = nullptr;
+    ImFont* regularFont = nullptr;
 };
 
 void createProj(const std::string& path) {
@@ -146,8 +152,33 @@ GUIManager::GUIManager(GLFWwindow* window) {
     ImGui_ImplOpenGL3_Init();
 
     //enable docking
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+    //load fonts
+    ImFont* defaultFont = io.Fonts->AddFontDefault();
+    guicfg::titleFont = io.Fonts->AddFontFromFileTTF(guicfg::titleFontPath, 16.f);
+    guicfg::regularFont = io.Fonts->AddFontFromFileTTF(guicfg::regularFontPath, 15.f);
+    io.Fonts->Build();
+
+    //fallback to default if loading fails
+    guicfg::titleFont = guicfg::titleFont ? guicfg::titleFont : defaultFont;
+    guicfg::regularFont = guicfg::regularFont ? guicfg::regularFont : defaultFont;
+
+    io.FontDefault = guicfg::titleFont;
+
+    //set UI colors
+    ImVec4* colors = ImGui::GetStyle().Colors;
+    colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.23f, 0.26f, 0.94f);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.21f, 0.24f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.11f, 0.58f, 0.62f, 1.00f);
+    colors[ImGuiCol_Tab] = ImVec4(0.13f, 0.38f, 0.42f, 0.86f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.23f, 0.82f, 0.84f, 0.80f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.23f, 0.82f, 0.84f, 1.00f);
+    colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.38f, 0.42f, 0.86f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.12f, 0.71f, 0.73f, 1.00f);
+
+    //load ui elements
     fileTexture = loadTexture("assets/fileico.png");
     folderTexture = loadTexture("assets/folderico.png");
 
@@ -159,6 +190,8 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, viewportTex);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, viewportTex, 0);
+
+
 
 }
 GUIManager::~GUIManager() {
@@ -172,6 +205,7 @@ GUIManager::~GUIManager() {
 
 inline void drawAudioDemo() {
     if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("Active Clip: %s", audioPath.c_str());
         if (ImGui::Button("Load Audio File")) {
             const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
@@ -201,18 +235,19 @@ inline void drawAudioDemo() {
             if (!audioPath.empty())
                 audio::audioPlay(audioClip);
         }
+        ImGui::PopFont();
     }
     ImGui::End();
 }
 
 inline float drawMainMenu(const char* executablePath) {
-    //TODO (Jub) - switch to main menu options
     float barHeight = .0f;
     if (ImGui::BeginMainMenuBar()) {
         // ImGui::Text("Active Directory: %s", activePath.c_str());
 
         //file menu
         if (ImGui::BeginMenu("File##mainmenu")) {
+            ImGui::PushFont(guicfg::regularFont);
             if (ImGui::MenuItem("Create Project")) {
                 std::string path = fdutil::selectFolder("Create a Project", NULL);
                 //wait for current op to finish
@@ -238,11 +273,13 @@ inline float drawMainMenu(const char* executablePath) {
                     queryFolder = true;
                 }
             }
+            ImGui::PopFont();
             ImGui::EndMenu();
         }
 
         //build menu
         if (ImGui::BeginMenu("Build##mainmenu")) {
+            ImGui::PushFont(guicfg::regularFont);
             if (ImGui::MenuItem("Build and Run")) {
                 if (!activePath.empty()) {
                     //wait for current op to finish
@@ -254,6 +291,7 @@ inline float drawMainMenu(const char* executablePath) {
 
                 }
             }
+            ImGui::PopFont();
             ImGui::EndMenu();
         }
 
@@ -268,6 +306,7 @@ inline float drawMainMenu(const char* executablePath) {
 
 inline void drawModelDemo() {
     if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("Model Loading Demo");
         if (ImGui::Button("Load Model")) {
             std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL, NULL);
@@ -279,12 +318,14 @@ inline void drawModelDemo() {
         ImGui::Text("Model Meshes: %d", model.meshes.size());
         ImGui::Text("Model Textures: %d", model.textures_loaded.size());
         ImGui::Text("From: %s", model.directory.c_str());
+        ImGui::PopFont();
     }
     ImGui::End();
 }
 
 inline void drawLog() {
     if (ImGui::Begin("Log", NULL, NULL)) {
+        ImGui::PushFont(guicfg::regularFont);
         ImGui::PushTextWrapPos(ImGui::GetWindowSize().x - 40.0f);
         ImGui::TextUnformatted(logging::getLogString());
         ImGui::PopTextWrapPos();
@@ -292,6 +333,7 @@ inline void drawLog() {
             logging::scrollToBot = false;
             ImGui::SetScrollHereY(1.0f);
         }
+        ImGui::PopFont();
     }
     ImGui::End();
 }
@@ -299,6 +341,7 @@ inline void drawLog() {
 inline void drawTextureDebug() {
     // texture debug
     if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::PushFont(guicfg::regularFont);
         if (ImGui::Button("Load Texture")) {
             const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
             std::string path = fdutil::openFile("Load Texture", NULL,
@@ -313,7 +356,7 @@ inline void drawTextureDebug() {
             TextureInfo texInfo = getTexture(activeTexture);
             ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
         }
-
+        ImGui::PopFont();
     }
     ImGui::End();
 }
@@ -321,6 +364,7 @@ inline void drawTextureDebug() {
 inline void drawAssetBrowser(GLFWwindow* window) {
     //folder debug
     if (ImGui::Begin("Asset Browser", NULL)) {
+        ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("Current Folder: %s", currFolder.path.c_str());
 
         if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
@@ -457,7 +501,7 @@ inline void drawAssetBrowser(GLFWwindow* window) {
                 setVec(itemIsSelected, false);
             }
         }
-
+        ImGui::PopFont();
     }
     ImGui::End();
 }
@@ -489,14 +533,18 @@ inline void drawViewport() {
 
 
 inline void drawStyleEditor() {
-    if (ImGui::Begin("Style Editor"))
+    if (ImGui::Begin("Style Editor")) {
+        ImGui::PushFont(guicfg::regularFont);
         ImGui::ShowStyleEditor(&guiStyle);
+        ImGui::PopFont();
+    }
     ImGui::End();
 
 }
 
 inline void drawEntities() {
     if (ImGui::Begin("Entities")) {
+        ImGui::PushFont(guicfg::regularFont);
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
             if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
                 ImGuiTreeNodeFlags_DefaultOpen, scene.entities[i].name.c_str())) {
@@ -537,6 +585,7 @@ inline void drawEntities() {
             }
             ImGui::EndPopup();
         }
+        ImGui::PopFont();
     }
 
     ImGui::End();
@@ -552,6 +601,7 @@ void drawComponentProps(TransformComponent& component) {
 
 inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
+        ImGui::PushFont(guicfg::regularFont);
         //TODO properties for other item types
         if (scene.selectedEntity == nullptr) {
             ImGui::Text("Select an Entity to show it's components");
@@ -569,6 +619,7 @@ inline void drawProperties() {
                 }
             }
         }
+        ImGui::PopFont();
     }
     ImGui::End();
 }
