@@ -31,6 +31,7 @@ public:
     void update(float dt) override;
     void stop() override;
     void drawEntity(BaseEntity* entity);
+    void setupImGuiStyle();
 
     GLFWwindow* window;
     Scene* scene;
