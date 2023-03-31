@@ -59,6 +59,8 @@ GLuint cubeIndices[] = {
     4, 5, 1, 1, 0, 4     // Bottom face
 };
 
+RenderManager* renderManager;
+
 struct LogString {
 private:
     std::string buf;
@@ -135,6 +137,44 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
     _chdir(executablePath);
 }
 
+void handleInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        // Move the camera forward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        // Move the camera backward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        // Strafe the camera left
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    {
+        // Strafe the camera right
+        renderManager->camera->resetPosition();
+    }
+}
 //set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 
@@ -191,7 +231,7 @@ int main() {
   
     //setup components
     //Render Engine
-    RenderManager* renderManager = RenderManager::getInstance();
+    renderManager = RenderManager::getInstance();
 
     renderManager->startUp(window);
 
@@ -293,10 +333,19 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    //glfwSetKeyCallback(window, handleInput);
+    double previous_time = glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
+
+        double current_time = glfwGetTime();
+        renderManager->deltaTime = current_time - previous_time;
+
+        //handle inputs
+        handleInput(window);
 
         //update matrices
         renderManager->updateMatrices(&width, &height);

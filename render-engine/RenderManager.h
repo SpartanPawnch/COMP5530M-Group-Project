@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ShaderProgram.h"
+#include "Camera.h"
 
 #include <GLFW/glfw3.h>
 
@@ -36,6 +37,9 @@ public:
 
 	//members
 	std::vector<ShaderProgram> programs;
+	Camera* camera;
+
+	double deltaTime;
 
 	//matrices
 	glm::mat4 modelMatrix;

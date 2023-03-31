@@ -11,7 +11,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-enum direction { FORWARD = 0, BACKWARD, LEFT, RIGHT };
+enum direction { FORWARD = 0, BACKWARD, LEFT, RIGHT, ASCEND, DESCEND };
 
 class Camera
 {

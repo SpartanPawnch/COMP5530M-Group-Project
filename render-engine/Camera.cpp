@@ -15,7 +15,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction)
 {
     this->viewMatrix = glm::mat4(1.f);
 
-    this->movementSpeed = 0.5f;
+    this->movementSpeed = 0.001f;
     this->sensitivity = 0.01f;
 
     this->worldUp = glm::vec3(0.f, 1.f, 0.f);
@@ -66,6 +66,11 @@ void Camera::updateKeyboardInput(const float& deltaTime, const int direction)
     case RIGHT:
         this->position += this->right * this->movementSpeed * deltaTime;
         break;
+    case ASCEND:
+        this->position += glm::vec3(0.0f, 1.0f, 0.0f) * this->movementSpeed * deltaTime;
+        break;
+    case DESCEND:
+        this->position -= glm::vec3(0.0f, 1.0f, 0.0f) * this->movementSpeed * deltaTime;
     default:
         break;
 
