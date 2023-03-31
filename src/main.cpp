@@ -137,7 +137,7 @@ void buildRunProj(const char* activePath, const char* executablePath, LogString&
     _chdir(executablePath);
 }
 
-void handleInput(GLFWwindow* window)
+void handleKeyboardInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
@@ -164,7 +164,7 @@ void handleInput(GLFWwindow* window)
         // Strafe the camera right
         renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
     {
         // Strafe the camera right
         renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
@@ -173,6 +173,25 @@ void handleInput(GLFWwindow* window)
     {
         // Strafe the camera right
         renderManager->camera->resetPosition();
+    }
+}
+
+void handleMouseInput(GLFWwindow* window)
+{
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS
+    && renderManager->camera->focusState == false)
+    {
+        // Strafe the camera right
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        renderManager->camera->focusState = true;
+
+    }
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS
+    && renderManager->camera->focusState == true)
+    {
+        // Strafe the camera right
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        renderManager->camera->focusState = false;
     }
 }
 //set renderEngine instance to nullptr initially
@@ -333,7 +352,6 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    //glfwSetKeyCallback(window, handleInput);
     double previous_time = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
@@ -344,9 +362,9 @@ int main() {
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
         
-
         //handle inputs
-        handleInput(window);
+        handleKeyboardInput(window);
+        handleMouseInput(window);
         previous_time = current_time;
 
         //update matrices

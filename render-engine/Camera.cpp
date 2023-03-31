@@ -23,6 +23,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction)
     this->initialPosition = position;
     this->right = glm::vec3(0.f);
     this->up = glm::vec3(0.f, 1.f, 0.f);
+    this->focusState = false;
 
     this->pitch = 0.f;
     this->yaw = -90.f;

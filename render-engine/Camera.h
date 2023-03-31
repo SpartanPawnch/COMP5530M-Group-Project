@@ -37,6 +37,9 @@ private:
     void updateCameraProperties();
 
 public:
+
+    bool focusState;
+
     Camera(glm::vec3 position, glm::vec3 direction);
 
     ~Camera() {}
