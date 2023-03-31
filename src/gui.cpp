@@ -511,16 +511,16 @@ inline void drawEntities() {
         }
 
 
-        //draw invisible button to allow mouse click for full window
-        //TODO - adjust when entity children are implemented
+        //draw invisible button to allow context menu for full window
+        //TODO - adjust size and pos when entity children are implemented
         ImGui::SetCursorPos(ImVec2(.0f, .0f));
         ImVec2 buttonSize = ImGui::GetWindowSize();
         float borderSize = ImGui::GetStyle().WindowBorderSize;
         ImVec2 padding = ImGui::GetStyle().WindowPadding;
         buttonSize.x -= borderSize + 2 * padding.x;
         buttonSize.y -= borderSize + 2 * padding.y;
-        ImGui::InvisibleButton("##entitiesinvisblebutton",
-            buttonSize);
+
+        ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize);
 
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Add Entity")) {
@@ -543,6 +543,13 @@ inline void drawEntities() {
 
 }
 
+
+void drawComponentProps(TransformComponent& component) {
+    ImGui::InputFloat3("Position", &component.position[0]);
+    ImGui::InputFloat4("Rotation", &component.rotation[0]);
+    ImGui::InputFloat3("Scale", &component.scale[0]);
+}
+
 inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
         //TODO properties for other item types
@@ -552,6 +559,12 @@ inline void drawProperties() {
         else {
             for (unsigned int i = 0; i < scene.selectedEntity->components.size(); i++) {
                 if (ImGui::TreeNodeEx(scene.selectedEntity->components[i]->name.c_str())) {
+                    //already running into polymorphism caveats
+                    if (TransformComponent* transform = dynamic_cast<TransformComponent*>
+                        (scene.selectedEntity->components[i])) {
+                        drawComponentProps(*transform);
+                    }
+
                     ImGui::TreePop();
                 }
             }
