@@ -1,6 +1,7 @@
 #include "ShaderProgram.h";
 
-const char* ShaderProgram::readShaderCode(const char* shaderPath)
+//adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
+bool ShaderProgram::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
 	std::string shaderCode;
 	std::ifstream shaderFile;
@@ -23,7 +24,29 @@ const char* ShaderProgram::readShaderCode(const char* shaderPath)
 			<<" ::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
 	}
 	std::cout << shaderCode.c_str() << std::endl;
-	return shaderCode.c_str();;
+	
+	char const* sCode = shaderCode.c_str();
+	glShaderSource(id, 1, &sCode, NULL);
+	glCompileShader(id);
+
+	GLint res = GL_FALSE;
+	int infoLogLength;
+
+	//check Shader
+	glGetShaderiv(id, GL_COMPILE_STATUS, &res);
+	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0)
+	{
+		std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
+		glGetShaderInfoLog(id, infoLogLength, NULL, &vertexShaderErrorMessage[0]);
+		std::cout << &vertexShaderErrorMessage[0] << std::endl;
+	}
+
+	std::cout << "Compilation of Shader: " << shaderPath << " " <<
+		(res == GL_TRUE ? "Success" : "Failed!") << std::endl;
+
+	return res == 1;
+	
 }
 
 ShaderProgram::ShaderProgram(const char* vertexPath,
@@ -35,16 +58,11 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 {
 	//Load and compile vertex shader
 	this->vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	const char* vertexShaderCode = readShaderCode(vertexPath);
-	std::cout << vertexShaderCode << std::endl;
-	glShaderSource(this->vertexShader, 1, &vertexShaderCode, NULL);
-	glCompileShader(this->vertexShader);
+	readAndCompileShader(vertexPath, this->vertexShader);
 
 	//Load and compile fragment shader
 	this->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	const char* fragmentShaderCode = readShaderCode(fragmentPath);
-	glShaderSource(this->fragmentShader, 1, &fragmentShaderCode, NULL);
-	glCompileShader(this->fragmentShader);
+	readAndCompileShader(fragmentPath, this->fragmentShader);
 
 	//Optional shaders
 	this->tescShader = 0;
@@ -56,28 +74,22 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 	if (tessControlPath && tessEvalPath)
 	{
 		this->tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
-		const char* tescCode = readShaderCode(tessControlPath);
-		glShaderSource(this->tescShader, 1, &tescCode, NULL);
-		glCompileShader(this->tescShader);
+		readAndCompileShader(tessControlPath, this->tescShader);
 
 		this->teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
-		const char* teseCode = readShaderCode(tessEvalPath);
-		glShaderSource(this->teseShader, 1, &teseCode, NULL);
-		glCompileShader(this->teseShader);
+		readAndCompileShader(tessEvalPath, this->teseShader);
 	}
 
 	if (geometryPath)
 	{
 		this->geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-		const char* geoCode = readShaderCode(geometryPath);
-		glShaderSource(geometryShader, 1, &geoCode, NULL);
-		glCompileShader(geometryShader);
+		readAndCompileShader(geometryPath, this->geometryShader);
 	}
 
 	//Link shaders
 	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
+	glAttachShader(shaderProgram, this->vertexShader);
+	glAttachShader(shaderProgram, this->fragmentShader);
 	
 	if (tessControlPath && tessEvalPath)
 	{

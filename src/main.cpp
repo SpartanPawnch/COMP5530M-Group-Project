@@ -36,6 +36,7 @@ GLfloat cubePositions[] = {
     -0.5f,  0.5f,  0.5f
 };
 
+
 GLfloat cubeColors[] = {
     1.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f,
@@ -46,6 +47,7 @@ GLfloat cubeColors[] = {
     0.0f, 0.0f, 1.0f,
     1.0f, 1.0f, 1.0f
 };
+
 
 // Define the cube's vertex indices
 GLuint cubeIndices[] = {
@@ -142,14 +144,14 @@ int main() {
     char executablePath[MAX_PATH];
     int pathLen = GetModuleFileName(NULL, executablePath, MAX_PATH);
     //remove executable name
-    for (pathLen--;pathLen >= 0 && executablePath[pathLen] != '\\';pathLen--) {
+    for (pathLen--; pathLen >= 0 && executablePath[pathLen] != '\\'; pathLen--) {
         executablePath[pathLen] = '\0';
     }
 #else
     char executablePath[PATH_MAX];
     int pathLen = readlink("/proc/self/exe", executablePath, PATH_MAX);
     //remove executable name
-    for (pathLen--;pathLen >= 0 && executablePath[pathLen] != '/';pathLen--) {
+    for (pathLen--; pathLen >= 0 && executablePath[pathLen] != '/'; pathLen--) {
         executablePath[pathLen] = '\0';
     }
 #endif
@@ -186,8 +188,7 @@ int main() {
     const char* activePath = NULL;
     LogString logString;
     std::thread projectThread;
-    //init graphics
-    initGraphics();
+  
     //setup components
     //Render Engine
     RenderManager* renderManager = RenderManager::getInstance();
@@ -195,16 +196,108 @@ int main() {
     renderManager->startUp(window);
 
     //init shader
-    /*const char* vertexPath = "../../../assets/shaders/colours.vert";
+    const char* vertexPath = "../../../assets/shaders/colours.vert";
     const char* fragPath = "../../../assets/shaders/colours.frag";
     ShaderProgram* program = new ShaderProgram(vertexPath, fragPath);
-    renderManager->addProgram(*program);*/
+    renderManager->addProgram(*program);
+
+    const char* vert = R"(
+        #version 330 core
+
+        layout (location = 0) in vec3 pos;
+        layout (location = 1) in vec3 col;
+
+        out vec3 vsCol;
+
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+
+        void main()
+        {
+            gl_Position = projection * view * model * vec4(pos, 1.0);
+            vsCol = col;
+}
+    )";
+
+    //create shader
+    int success;
+    char glErrInfo[512];
+
+    GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertShader, 1, &vert, NULL);
+    glCompileShader(vertShader);
+    glGetShaderiv(vertShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertShader, 512, NULL, glErrInfo);
+        printf("Vertex Shader Error:%s", glErrInfo);
+    }
+
+    const char* frag = R"(
+        #version 330 core
+
+        in vec3 vsCol;
+
+        out vec4 fsColour;
+
+        void main()
+        {
+            fsColour = vec4(vsCol, 0.0f);
+        }
+    )";
+
+    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragShader, 1, &frag, NULL);
+    glCompileShader(fragShader);
+    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragShader, 512, NULL, glErrInfo);
+        printf("Fragment Shader Error:%s", glErrInfo);
+    }
+
+    static GLuint shader = glCreateProgram();
+    glAttachShader(shader, vertShader);
+    glAttachShader(shader, fragShader);
+    glLinkProgram(shader);
+
+    glDeleteShader(vertShader);
+    glDeleteShader(fragShader);
+
+    //vertex array object (VAO)
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    //create vertex buffer object(VBO)
+    GLuint posVBO;
+    glGenBuffers(1, &posVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, posVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubePositions), cubePositions, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(0);
+
+    GLuint colVBO;
+    glGenBuffers(1, &colVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, colVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeColors), cubeColors, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+
+    //create an element buffer object for the indices
+    GLuint EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-        
+
         //update matrices
         renderManager->updateMatrices(&width, &height);
 
@@ -214,8 +307,6 @@ int main() {
         ImGui::NewFrame();
 
         ImVec2 mousePos = ImGui::GetMousePos();
-
-        // ImGui::ShowDemoWindow();
 
         // --- Get Gui Input ---
         if (ImGui::Begin("Project", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -275,27 +366,27 @@ int main() {
         ImGui::Render();
 
         //draw background
-        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         //RENDERING
-        //glUseProgram(program->getProgram());
+        glUseProgram(renderManager->programs[0].getProgram());
 
         ////handle for uniforms
-        //GLuint ModelID = glGetUniformLocation(program->getProgram(), "model");
-        //GLuint ViewID = glGetUniformLocation(program->getProgram(), "view");
-        //GLuint ProjectionID = glGetUniformLocation(program->getProgram(), "projection");
+        GLuint ModelID = glGetUniformLocation(renderManager->programs[0].getProgram(), "model");
+        GLuint ViewID = glGetUniformLocation(renderManager->programs[0].getProgram(), "view");
+        GLuint ProjectionID = glGetUniformLocation(renderManager->programs[0].getProgram(), "projection");
 
-        //glUniformMatrix4fv(ModelID, 1, GL_FALSE, &renderManager->modelMatrix[0][0]);
-        //glUniformMatrix4fv(ViewID, 1, GL_FALSE, &renderManager->viewMatrix[0][0]);
-        //glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &renderManager->projectionMatrix[0][0]);
+        glUniformMatrix4fv(ModelID, 1, GL_FALSE, &renderManager->modelMatrix[0][0]);
+        glUniformMatrix4fv(ViewID, 1, GL_FALSE, &renderManager->viewMatrix[0][0]);
+        glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &renderManager->projectionMatrix[0][0]);
 
         //// Render the cube
-        //glBindVertexArray(VAO);
-        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();

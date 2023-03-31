@@ -19,9 +19,6 @@ private:
 	static RenderManager* instance;
 	bool initialized = false;
 
-	//members
-	std::vector<ShaderProgram> programs;
-
 	//test output writing for RenderEngine
 	//std::ofstream testOutput;
 
@@ -36,6 +33,9 @@ private:
 	~RenderManager() {}
 
 public:
+
+	//members
+	std::vector<ShaderProgram> programs;
 
 	//matrices
 	glm::mat4 modelMatrix;

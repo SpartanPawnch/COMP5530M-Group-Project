@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include <GL/glew.h>
 
@@ -29,7 +30,7 @@ private:
 	GLuint teseShader;
 	GLuint geometryShader;
 
-	const char* readShaderCode(const char* shaderPath);
+	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
 
 public:
 
