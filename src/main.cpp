@@ -180,17 +180,29 @@ void handleMouseInput(GLFWwindow* window)
 {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        
-        //now we can change the orientation of the camera
-        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
+        if (renderManager->camera->focusState == false)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderManager->camera->focusState = true;
+        }
+        else
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderManager->camera->focusState = false;
+        }
 
-     
         if (renderManager->firstRClick == true)
         {
             renderManager->xPosLast = renderManager->xPos;
             renderManager->yPosLast = renderManager->yPos;
             renderManager->firstRClick = false;
         }
+    }
+    
+    if (renderManager->camera->focusState == true)
+    {
+        //now we can change the orientation of the camera
+        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
 
         //offset
         renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
@@ -204,10 +216,7 @@ void handleMouseInput(GLFWwindow* window)
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
-
- 
     }
-    
 }
 //set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
@@ -427,9 +436,9 @@ int main() {
 
                 }
             }
-            ImGui::End();
+            
         }
-
+        ImGui::End();
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Always);
         if (ImGui::Begin("Log", NULL, NULL)) {
             ImGui::PushTextWrapPos(560);
