@@ -7,53 +7,56 @@ import "./App.css";
 function App() {
   //look for config.json in the app's directory
     let beencalled = false;
-  const [config, setConfig] = useState(null);
-  const [projectsDir, setProjectsDir] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [projectsLoaded, setProjectsLoaded] = useState(false);
-  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
+    const [config, setConfig] = useState(null);
+    const [projectsDir, setProjectsDir] = useState(null);
+
+    const [projects, setProjects] = useState([]);
+    const [projectsLoaded, setProjectsLoaded] = useState(false);
+    const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
   
     const getConfig = async () => {
         await readTextFile("config.json",{
-          dir: BaseDirectory.App
+            dir: BaseDirectory.App
         }).then((data) => {
             setConfig(JSON.parse(data));
             setProjectsDir(JSON.parse(data).projectsDir);
             readProjects(JSON.parse(data).projectsDir);
         }).catch((err) => {
-          console.log(err);
-          createConfig();
+            console.log(err);
+            createConfig();
         });
     };
 
-  const createConfig = async () => {
-    writeTextFile("config.json",JSON.stringify({projectsDir: ""}),{
-      dir: BaseDirectory.App
-    }).then(() => {
-    }).catch((err) => {
-      console.log(err);
-    });
-  };
+    const createConfig = async () => {
+        writeTextFile("config.json",JSON.stringify({projectsDir: ""}),{
+            dir: BaseDirectory.App
+        }).then(() => {
+            getConfig();
+        }).catch((err) => {
+            console.log(err);
+        });
+    };
 
-  const writeConfig = async (projectsDir) => {
-    writeTextFile("config.json",JSON.stringify({projectsDir: projectsDir}),{
-      dir: BaseDirectory.App
-    }).then(() => {
-    }).catch((err) => {
-      console.log(err);
-    });
-  };
+    const writeConfig = async (projectsDir) => {
+        writeTextFile("config.json",JSON.stringify({projectsDir: projectsDir}),{
+            dir: BaseDirectory.App
+        }).then(() => {
+            getConfig();
+        }).catch((err) => {
+            console.log(err);
+        });
+    };
 
-  const openFolderDialog = async () => {
-    await window.__TAURI__.dialog.open({
-      directory: true,
-      multiple: false
-    }).then((path) => {
-      document.getElementById("projects-folder-input").value = path;
-    }).catch((err) => {
-      console.log(err);
-    });
-  };
+    const openFolderDialog = async () => {
+        await window.__TAURI__.dialog.open({
+            directory: true,
+            multiple: false
+        }).then((path) => {
+            document.getElementById("projects-folder-input").value = path;
+        }).catch((err) => {
+            console.log(err);
+        });
+    };
 
     const readProjects = async (projectsDir) => {
         await readDir(projectsDir).then((data) => {
@@ -64,35 +67,43 @@ function App() {
                   await readTextFile(project.path + "\\project.json").then((data) => {
                       let projectData = JSON.parse(data);
                       projectData.path = project.path;
-                      setProjects((projects) => [...projects, projectData]);
-                  }).catch((err) => {
-                      console.log(err);
-                  }).then(() => {
+
                       projectsLoadedCount++;
                       if (projectsLoadedCount == projectsToLoad) {
                           setProjectsLoaded(true);
                       }
-                  });
+                      let alreadyLoaded = false;
+                      projects.forEach((proj) =>{
+                          if (projectData.projectName == proj.projectName) {
+                              alreadyLoaded = true;
+                          }
+                      })
+                      if (!alreadyLoaded) {
+                          setProjects((projects) => [...projects, projectData]);
+                      }
+                  }).catch((err) => {
+                      console.log(err);
+                  })
               });
         }).catch((err) => {
           console.log(err);
         })
     };
 
-  const createNewProject = async (projectName) => {
-    await createDir(projectsDir+"\\"+projectName).then(async () => {
-      await writeTextFile(projectsDir+"\\"+projectName+"\\project.json",JSON.stringify({
-        projectName: projectName,
-        lastEdit: new Date().toLocaleString().split(",")[0],
-      })).then(() => {
-        readProjects(projectsDir);
-      }).catch((err) => {
-        console.log(err);
-      });
-    }).catch((err) => {
-      console.log(err);
-    });
- };
+    const createNewProject = async (projectName) => {
+        await createDir(projectsDir+"\\"+projectName).then(async () => {
+            await writeTextFile(projectsDir+"\\"+projectName+"\\project.json",JSON.stringify({
+            projectName: projectName,
+            lastEdit: new Date().toLocaleString().split(",")[0],
+            })).then(() => {
+                readProjects(projectsDir);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }).catch((err) => {
+            console.log(err);
+        });
+    };
 
     const openEngine = async (projectPath) => {
         //const enginePath = "C:\\Users\\jjpgn\\Desktop\\groupproject\\Project\\COMP5530M-Group-Project\\out\\build\\x64-debug\\BuildSys.exe";
