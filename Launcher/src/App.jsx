@@ -95,8 +95,8 @@ function App() {
  };
 
     const openEngine = async (projectPath) => {
-        const enginePath = "C:\\Users\\jjpgn\\Desktop\\groupproject\\Project\\COMP5530M-Group-Project\\out\\build\\x64-debug\\BuildSys.exe";
-        const command = new Command(enginePath,projectPath);
+        //const enginePath = "C:\\Users\\jjpgn\\Desktop\\groupproject\\Project\\COMP5530M-Group-Project\\out\\build\\x64-debug\\BuildSys.exe";
+        const command = new Command("engine",[projectPath]);
         command.on('close', data => {
             console.log(`command finished with code ${data.code} and signal ${data.signal}`)
         });

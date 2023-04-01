@@ -13,11 +13,20 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "shell": {
-        "all": true,
-        "open": true,
-        "execute": true
-      },
+        "shell": {
+            "all": true,
+            "open": true,
+            "execute": true,
+            "scope": [
+                {
+                    "name": "engine",
+                    "cmd": "C:\\Users\\jjpgn\\Desktop\\groupproject\\Project\\COMP5530M-Group-Project\\out\\build\\x64-debug\\BuildSys.exe",
+                    "args": [
+                        { "validator": "\\S+" }
+                    ]
+                }
+            ]
+        },
       "fs": {
         "all": true,
         "scope": ["$APP/*","$HOME/**"]
