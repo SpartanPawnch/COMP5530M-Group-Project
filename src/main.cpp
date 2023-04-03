@@ -161,19 +161,30 @@ void handleKeyboardInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        // Strafe the camera right
+        // Ascend camera
         renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
     }
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
     {
-        // Strafe the camera right
+        // Descend camera
         renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
     {
-        // Strafe the camera right
+        // Reset camera position
         renderManager->camera->resetPosition();
     }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        //increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        //increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+ 
 }
 
 void handleMouseInput(GLFWwindow* window)

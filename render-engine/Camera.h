@@ -11,7 +11,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-enum direction { FORWARD = 0, BACKWARD, LEFT, RIGHT, ASCEND, DESCEND };
+enum direction { FORWARD = 0, BACKWARD, LEFT, RIGHT, ASCEND, DESCEND, FAST, SLOW};
 
 class Camera
 {
@@ -21,6 +21,10 @@ private:
     glm::mat4 viewMatrix;
 
     GLfloat movementSpeed;
+    GLfloat defaultSpeed;
+    GLfloat lowSpeed;
+    GLfloat highSpeed;
+
     GLfloat sensitivity;
 
     glm::vec3 worldUp;
