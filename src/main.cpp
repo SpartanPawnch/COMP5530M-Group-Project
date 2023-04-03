@@ -219,15 +219,15 @@ void handleMouseInput(GLFWwindow* window)
         renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
         renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
 
-        std::cout << "X: " << renderManager->xOffset << "      Y:" << renderManager->yOffset << std::endl;
-
         //send data to camera
-        renderManager->camera->updateInput(renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+        renderManager->camera->updateInput(renderManager->deltaTime,
+            -1, renderManager->xOffset, renderManager->yOffset);
 
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
+    
 }
 //set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
