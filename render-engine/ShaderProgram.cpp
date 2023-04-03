@@ -133,7 +133,7 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 
 ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(this->shaderProgram);
+	
 }
 
 GLuint ShaderProgram::getProgram()

@@ -295,68 +295,6 @@ int main() {
     ShaderProgram* program = new ShaderProgram(vertexPath, fragPath);
     renderManager->addProgram(*program);
 
-    const char* vert = R"(
-        #version 330 core
-
-        layout (location = 0) in vec3 pos;
-        layout (location = 1) in vec3 col;
-
-        out vec3 vsCol;
-
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main()
-        {
-            gl_Position = projection * view * model * vec4(pos, 1.0);
-            vsCol = col;
-}
-    )";
-
-    //create shader
-    int success;
-    char glErrInfo[512];
-
-    GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertShader, 1, &vert, NULL);
-    glCompileShader(vertShader);
-    glGetShaderiv(vertShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertShader, 512, NULL, glErrInfo);
-        printf("Vertex Shader Error:%s", glErrInfo);
-    }
-
-    const char* frag = R"(
-        #version 330 core
-
-        in vec3 vsCol;
-
-        out vec4 fsColour;
-
-        void main()
-        {
-            fsColour = vec4(vsCol, 0.0f);
-        }
-    )";
-
-    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragShader, 1, &frag, NULL);
-    glCompileShader(fragShader);
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragShader, 512, NULL, glErrInfo);
-        printf("Fragment Shader Error:%s", glErrInfo);
-    }
-
-    static GLuint shader = glCreateProgram();
-    glAttachShader(shader, vertShader);
-    glAttachShader(shader, fragShader);
-    glLinkProgram(shader);
-
-    glDeleteShader(vertShader);
-    glDeleteShader(fragShader);
-
     //vertex array object (VAO)
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
