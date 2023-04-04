@@ -255,22 +255,35 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
                 }
             }
             if (ImGui::MenuItem("Open Project")) {
-                std::string path = fdutil::selectFolder("Open Project", NULL);
+                const char* filter = "project.json";
+                std::string path = fdutil::openFile("Open Project", nullptr, 1,
+                    &filter, "Project File (project.json)");
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
-                    activePath = path;
-                    logging::logInfo("Opened project at: {}\n", activePath.c_str());
-                    assetfolder::setActiveDirectory(path);
-                    currFolder = assetfolder::getRootDir();
-                    queryFolder = true;
+
+                    std::string level = loadProjectFile(path.c_str());
+                    if (!level.empty()) {
+                        //get folder path
+                        //TODO separate function?
+                        int i = path.length() - 1;
+                        while (i > 0 && path[i] != '/' && path[i] != '\\')
+                            i--;
+
+                        activePath = path.substr(0, i);
+                        assetfolder::setActiveDirectory(activePath);
+                        currFolder = assetfolder::getRootDir();
+                        queryFolder = true;
+                        loadLevel((activePath + "/" + level).c_str(), scene);
+                        glfwSetWindowTitle(window, (assetfolder::getName(level.c_str()) +
+                            " - ONO Engine").c_str());
+                    }
                 }
             }
             if (ImGui::MenuItem("Save Project")) {
-
-            }
-            if (ImGui::MenuItem("Save Project As")) {
-
+                if (!activePath.empty()) {
+                    saveProjectFile((activePath + "/project.json").c_str());
+                }
             }
             if (ImGui::MenuItem("Open Level")) {
                 const char* filter = "*.json";
@@ -283,7 +296,7 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
                 }
             }
             if (ImGui::MenuItem("Save Level")) {
-                saveCurrent();
+                saveCurrentLevel();
             }
             if (ImGui::MenuItem("Save Level As")) {
 

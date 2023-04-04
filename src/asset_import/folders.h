@@ -48,4 +48,7 @@ namespace assetfolder {
 
     //get name from path
     std::string getName(const char* path);
+
+    //get relative path based on current path
+    std::string getRelativePath(const char* path);
 }

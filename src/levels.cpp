@@ -15,6 +15,7 @@
 #include "util.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
+#include "asset_import/folders.h"
 #include "ECS/Scene/Scene.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
@@ -23,7 +24,8 @@
 #include "ECS/Component/TransformComponent.h"
 
 
-static std::string currentPath;
+static std::string currentLevelPath;
+static std::string defaultLevelPath;
 static Scene* currentScene;
 
 //load level from manifest in path
@@ -31,7 +33,7 @@ void loadLevel(const char* path, Scene& scene) {
     //load document
     std::ifstream file(path);
     if (!file.is_open()) {
-        logging::logErr("Failed to open file {}\n", path);
+        logging::logErr("Failed to open file {} for reading\n", path);
         return;
     }
 
@@ -158,7 +160,7 @@ void loadLevel(const char* path, Scene& scene) {
     }
 
     //set level to current if everything is succesful
-    currentPath = std::string(path);
+    currentLevelPath = assetfolder::getRelativePath(path);
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
 }
@@ -278,7 +280,6 @@ void saveLevel(const char* path, const Scene& scene) {
 
     //save and close document
     char writeBuf[BUFSIZ];
-    using namespace rapidjson;
     rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
     rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
     d.Accept(writer);
@@ -288,7 +289,65 @@ void saveLevel(const char* path, const Scene& scene) {
 }
 
 //save last loaded level
-void saveCurrent() {
-    if (!currentPath.empty())
-        saveLevel(currentPath.c_str(), *currentScene);
+void saveCurrentLevel() {
+    if (!currentLevelPath.empty())
+        saveLevel(currentLevelPath.c_str(), *currentScene);
+}
+
+//load default project from project file
+std::string loadProjectFile(const char* path) {
+    //try to open file
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        logging::logErr("Failed to open file {} for reading\n", path);
+        return std::string("");
+    }
+
+    //dump file contents to string
+    file.seekg(0, file.end);
+    size_t bufSize = size_t(file.tellg());
+    file.seekg(0, file.beg);
+    std::vector<char> buf(bufSize + 1);
+    setVec(buf, '\0');
+    file.read(buf.data(), bufSize);
+    file.close();
+
+    //parse document
+    rapidjson::Document doc;
+    doc.Parse(buf.data());
+    if (doc.HasParseError()) {
+        logging::logErr("JSON parse error: {}\n", doc.GetParseError());
+        return std::string("");
+    }
+
+    assert(doc.HasMember("base_level"));
+    logging::logInfo("Opened project file at: {}\n", path);
+
+    defaultLevelPath = std::string(doc["base_level"].GetString());
+    return defaultLevelPath;
+}
+
+//save project file to manifest
+void saveProjectFile(const char* path) {
+    if (defaultLevelPath.empty())
+        return;
+
+    FILE* file = fopen(path, "wb");
+    if (file == NULL) {
+        logging::logErr("Failed to open file {} for writing\n", path);
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("base_level", rapidjson::Value(defaultLevelPath.c_str(),
+        doc.GetAllocator()), doc.GetAllocator());
+
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+    doc.Accept(writer);
+    fclose(file);
+
+    logging::logInfo("Saved project file at {}\n", path);
 }

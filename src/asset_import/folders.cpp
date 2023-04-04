@@ -260,4 +260,9 @@ namespace assetfolder {
         };
         return literals[int(type)];
     }
+
+    std::string getRelativePath(const char* path) {
+        assert(strlen(path) >= activeDirectory.length() + 1);
+        return std::string(path + activeDirectory.length() + 1);
+    }
 }
