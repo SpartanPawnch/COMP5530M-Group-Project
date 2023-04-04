@@ -80,7 +80,7 @@ namespace assetfolder {
         activeDirectory = dir;
     }
 
-    AssetDescriptor getRootDir() {
+    AssetDescriptor getAssetsRootDir() {
         if (activeDirectory.empty())
             return AssetDescriptor{
             std::string(""),
@@ -91,6 +91,21 @@ namespace assetfolder {
         return AssetDescriptor{
             std::string(activeDirectory) + "/assets",
             std::string("assets"),
+            AssetDescriptor::EFileType::FOLDER
+        };
+    }
+
+    AssetDescriptor getLevelsRootDir() {
+        if (activeDirectory.empty())
+            return AssetDescriptor{
+            std::string(""),
+            std::string(""),
+            AssetDescriptor::EFileType::INVALID
+        };
+
+        return AssetDescriptor{
+            std::string(activeDirectory) + "/levels",
+            std::string("levels"),
             AssetDescriptor::EFileType::FOLDER
         };
     }

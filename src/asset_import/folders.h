@@ -27,7 +27,10 @@ namespace assetfolder {
     void setActiveDirectory(std::string dir);
 
     //get entry pointing to root assets folder
-    AssetDescriptor getRootDir();
+    AssetDescriptor getAssetsRootDir();
+
+    //get entry pointing to levels folder
+    AssetDescriptor getLevelsRootDir();
 
     //list items in directory given. dir.type must be EFileType::FOLDER
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res);

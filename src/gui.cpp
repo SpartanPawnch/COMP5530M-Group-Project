@@ -107,7 +107,7 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     _chdir(executablePath);
 }
 
-
+static GLFWwindow* baseWindow;
 static std::string activePath;
 
 static std::thread projectThread;
@@ -119,10 +119,12 @@ static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
 
 //asset manager controls
-static assetfolder::AssetDescriptor currFolder = { "","",assetfolder::AssetDescriptor::EFileType::INVALID };
+static assetfolder::AssetDescriptor currAssetFolder = { "","",
+    assetfolder::AssetDescriptor::EFileType::INVALID };
 static std::vector<assetfolder::AssetDescriptor> folderItems;
 static const float QUERY_INTERVAL = 5.0f;
-static bool queryFolder = true;
+static bool queryAssetsFolder = true;
+static bool queryLevelsFolder = true;
 
 static int fileTexture;
 static int folderTexture;
@@ -185,7 +187,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
         GL_TEXTURE_2D, viewportTex, 0);
 
 
-
+    baseWindow = window;
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -233,7 +235,7 @@ inline void drawAudioDemo() {
     ImGui::End();
 }
 
-inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
+inline float drawMainMenu(const char* executablePath) {
     float barHeight = .0f;
     if (ImGui::BeginMainMenuBar()) {
         // ImGui::Text("Active Directory: %s", activePath.c_str());
@@ -250,8 +252,9 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
                     projectThread = std::thread(createProj, path);
                     activePath = path;
                     assetfolder::setActiveDirectory(path);
-                    currFolder = assetfolder::getRootDir();
-                    queryFolder = true;
+                    currAssetFolder = assetfolder::getAssetsRootDir();
+                    queryAssetsFolder = true;
+                    queryLevelsFolder = true;
                 }
             }
             if (ImGui::MenuItem("Open Project")) {
@@ -262,7 +265,10 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
                     if (projectThread.joinable())
                         projectThread.join();
 
+                    //try to load project
                     std::string level = loadProjectFile(path.c_str());
+
+                    //try to open level
                     if (!level.empty()) {
                         //get folder path
                         //TODO separate function?
@@ -272,10 +278,16 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
 
                         activePath = path.substr(0, i);
                         assetfolder::setActiveDirectory(activePath);
-                        currFolder = assetfolder::getRootDir();
-                        queryFolder = true;
+                        currAssetFolder = assetfolder::getAssetsRootDir();
+
+                        //reset queries
+                        queryAssetsFolder = true;
+                        queryLevelsFolder = true;
+
                         loadLevel((activePath + "/" + level).c_str(), scene);
-                        glfwSetWindowTitle(window, (assetfolder::getName(level.c_str()) +
+
+                        //set appropriate window title
+                        glfwSetWindowTitle(baseWindow, (assetfolder::getName(level.c_str()) +
                             " - ONO Engine").c_str());
                     }
                 }
@@ -291,7 +303,7 @@ inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
                     (activePath + "/levels/").c_str(), 1, &filter, "Level Files (.json)");
                 if (!path.empty()) {
                     loadLevel(path.c_str(), scene);
-                    glfwSetWindowTitle(window, (assetfolder::getName(path.c_str()) +
+                    glfwSetWindowTitle(baseWindow, (assetfolder::getName(path.c_str()) +
                         " - ONO Engine").c_str());
                 }
             }
@@ -389,21 +401,21 @@ inline void drawTextureDebug() {
     ImGui::End();
 }
 
-inline void drawAssetBrowser(GLFWwindow* window) {
+inline void drawAssetBrowser() {
     //folder debug
     if (ImGui::Begin("Asset Browser", NULL)) {
         ImGui::PushFont(guicfg::regularFont);
-        ImGui::Text("Current Folder: %s", currFolder.path.c_str());
+        ImGui::Text("Current Folder: %s", currAssetFolder.path.c_str());
 
-        if (currFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
+        if (currAssetFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
             static std::vector<bool> itemIsSelected;
             int itemsPerLine = int(ImGui::GetWindowSize().x / (guicfg::assetMgrItemSize.x +
                 guicfg::assetMgrPadding.x));
 
             //refresh folder if needed
-            if (queryFolder) {
-                assetfolder::listDir(currFolder, folderItems);
-                queryFolder = false;
+            if (queryAssetsFolder) {
+                assetfolder::listDir(currAssetFolder, folderItems);
+                queryAssetsFolder = false;
                 itemIsSelected.resize(folderItems.size(), false);
             }
 
@@ -413,8 +425,8 @@ inline void drawAssetBrowser(GLFWwindow* window) {
                 fdutil::openFileMulti("Import File", NULL,
                     0, NULL, NULL, paths);
                 if (!paths.empty()) {
-                    assetfolder::addAssets(paths, currFolder);
-                    queryFolder = true;
+                    assetfolder::addAssets(paths, currAssetFolder);
+                    queryAssetsFolder = true;
                 }
             }
 
@@ -422,40 +434,40 @@ inline void drawAssetBrowser(GLFWwindow* window) {
             if (ImGui::Button("Import Folder")) {
                 std::string path = fdutil::selectFolder("Import Folder", NULL);
                 if (!path.empty()) {
-                    assetfolder::addAsset(path, currFolder);
-                    queryFolder = true;
+                    assetfolder::addAsset(path, currAssetFolder);
+                    queryAssetsFolder = true;
                 }
             }
 
             //delete button
             ImGui::SameLine();
-            if (ImGui::Button("Delete") || glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
+            if (ImGui::Button("Delete") || glfwGetKey(baseWindow, GLFW_KEY_DELETE) == GLFW_PRESS) {
                 for (unsigned int i = 0;i < itemIsSelected.size();i++) {
                     if (itemIsSelected[i])
                         assetfolder::delAsset(folderItems[i]);
                 }
                 setVec(itemIsSelected, false);
-                queryFolder = true;
+                queryAssetsFolder = true;
             }
 
             //outer dir shorcut
             ImGui::SameLine();
             if (ImGui::Button("Root")) {
-                currFolder = assetfolder::getRootDir();
+                currAssetFolder = assetfolder::getAssetsRootDir();
                 setVec(itemIsSelected, false);
-                queryFolder = true;
+                queryAssetsFolder = true;
             }
             ImGui::SameLine();
             if (ImGui::Button("..")) {
-                currFolder = assetfolder::outerDir(currFolder);
+                currAssetFolder = assetfolder::outerDir(currAssetFolder);
                 setVec(itemIsSelected, false);
-                queryFolder = true;
+                queryAssetsFolder = true;
             }
 
             //refresh button
             ImGui::SameLine();
             if (ImGui::Button("Refresh")) {
-                queryFolder = true;
+                queryAssetsFolder = true;
             }
 
             //draw files in folder
@@ -485,8 +497,8 @@ inline void drawAssetBrowser(GLFWwindow* window) {
                 //selectable
                 ImGui::SetCursorPos(initialPos);
                 if (ImGui::Selectable("##fileselector", itemIsSelected[i], 0, guicfg::assetMgrItemSize)) {
-                    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
-                        glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL)) {
+                    if (glfwGetKey(baseWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+                        glfwGetKey(baseWindow, GLFW_KEY_RIGHT_CONTROL)) {
                         itemIsSelected[i] = true;
                     }
                     else {
@@ -501,9 +513,9 @@ inline void drawAssetBrowser(GLFWwindow* window) {
                     //check for folder switch
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) &&
                         folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                        currFolder = folderItems[i];
+                        currAssetFolder = folderItems[i];
                         setVec(itemIsSelected, false);
-                        queryFolder = true;
+                        queryAssetsFolder = true;
                     }
 
                     //draw tooltip - full path
@@ -652,6 +664,80 @@ inline void drawProperties() {
     ImGui::End();
 }
 
+inline void drawLevels() {
+    static assetfolder::AssetDescriptor currLevelDir = { "","",
+        assetfolder::AssetDescriptor::EFileType::INVALID };
+    static std::vector<assetfolder::AssetDescriptor> levelDescriptors;
+    static int selectedLevel = -1;
+
+    if (ImGui::Begin("Levels")) {
+        ImGui::PushFont(guicfg::regularFont);
+        //refresh levels if needed
+        if (queryLevelsFolder) {
+            currLevelDir = assetfolder::getLevelsRootDir();
+            if (currLevelDir.type == assetfolder::AssetDescriptor::EFileType::FOLDER)
+                assetfolder::listDir(currLevelDir, levelDescriptors);
+            else
+                levelDescriptors.clear();
+
+            queryLevelsFolder = false;
+            selectedLevel = -1;
+        }
+
+        //prepare ui sizes
+        ImVec2 buttonSize = ImGui::GetWindowSize();
+        float borderSize = ImGui::GetStyle().WindowBorderSize;
+        ImVec2 padding = ImGui::GetStyle().WindowPadding;
+        buttonSize.x -= borderSize + 2 * padding.x;
+
+        //draw levels
+        for (unsigned int i = 0;i < levelDescriptors.size();i++) {
+            ImGui::PushID(i);
+            ImVec2 initialPos = ImGui::GetCursorPos();
+            BeginGroup();
+            //text
+            ImGui::Text(levelDescriptors[i].name.c_str());
+            ImGui::SetCursorPos(initialPos);
+
+            //selectable over text
+            bool selected = (i == selectedLevel);
+            if (ImGui::Selectable("##levelselectable", &selected, 0,
+                ImVec2(buttonSize.x, ImGui::GetItemRectSize().y))) {
+                selectedLevel = i;
+            }
+
+            //popup
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem("New Level")) {
+                    queryLevelsFolder = true;
+                }
+                if (ImGui::MenuItem("Load Level")) {
+                    loadLevel(levelDescriptors[i].path.c_str(), scene);
+                    glfwSetWindowTitle(baseWindow, (levelDescriptors[i].name +
+                        " - ONO Engine").c_str());
+                }
+                if (ImGui::MenuItem("Set as Default")) {}
+                ImGui::EndPopup();
+            }
+            EndGroup();
+            ImGui::PopID();
+        }
+
+        //draw invisible button for clicking rest of empty widget space
+        buttonSize.y -= borderSize + padding.y + ImGui::GetCursorPosY();
+        if (ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize)) {
+            selectedLevel = -1;
+        }
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("New Level")) {}
+            ImGui::EndPopup();
+        }
+
+        ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -662,7 +748,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     ImVec2 mousePos = ImGui::GetMousePos();
 
     //adjust fullscreen windows size to account for menubar
-    float mainMenuHeight = drawMainMenu(window, executablePath);
+    float mainMenuHeight = drawMainMenu(executablePath);
     windowSize.y -= mainMenuHeight;
 
     static ImGuiID dockCenter = 0;
@@ -705,10 +791,13 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     //TODO undocked windows in front
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawLevels();
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
-    drawAssetBrowser(window);
+    drawAssetBrowser();
 
     ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
     drawLog();
