@@ -23,6 +23,7 @@
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
+#include "util.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
@@ -104,14 +105,6 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
 
     //restore path
     _chdir(executablePath);
-}
-
-//utility function - set all elements to specific value
-template<typename T>
-void setVec(std::vector<T>& vec, T val) {
-    for (unsigned int i = 0;i < vec.size();i++) {
-        vec[i] = val;
-    }
 }
 
 
@@ -240,7 +233,7 @@ inline void drawAudioDemo() {
     ImGui::End();
 }
 
-inline float drawMainMenu(const char* executablePath) {
+inline float drawMainMenu(GLFWwindow* window, const char* executablePath) {
     float barHeight = .0f;
     if (ImGui::BeginMainMenuBar()) {
         // ImGui::Text("Active Directory: %s", activePath.c_str());
@@ -272,6 +265,28 @@ inline float drawMainMenu(const char* executablePath) {
                     currFolder = assetfolder::getRootDir();
                     queryFolder = true;
                 }
+            }
+            if (ImGui::MenuItem("Save Project")) {
+
+            }
+            if (ImGui::MenuItem("Save Project As")) {
+
+            }
+            if (ImGui::MenuItem("Open Level")) {
+                const char* filter = "*.json";
+                std::string path = fdutil::openFile("Open Level", activePath.empty() ? nullptr :
+                    (activePath + "/levels/").c_str(), 1, &filter, "Level Files (.json)");
+                if (!path.empty()) {
+                    loadLevel(path.c_str(), scene);
+                    glfwSetWindowTitle(window, (assetfolder::getName(path.c_str()) +
+                        " - ONO Engine").c_str());
+                }
+            }
+            if (ImGui::MenuItem("Save Level")) {
+                saveCurrent();
+            }
+            if (ImGui::MenuItem("Save Level As")) {
+
             }
             ImGui::PopFont();
             ImGui::EndMenu();
@@ -634,7 +649,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     ImVec2 mousePos = ImGui::GetMousePos();
 
     //adjust fullscreen windows size to account for menubar
-    float mainMenuHeight = drawMainMenu(executablePath);
+    float mainMenuHeight = drawMainMenu(window, executablePath);
     windowSize.y -= mainMenuHeight;
 
     static ImGuiID dockCenter = 0;

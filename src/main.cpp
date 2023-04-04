@@ -54,7 +54,7 @@ int main() {
     glfwWindowHint(GLFW_MAXIMIZED, 1);
     glfwWindowHint(GLFW_SAMPLES, 4);
     //create window
-    window = glfwCreateWindow(1600, 900, "Build System Test", NULL, NULL);
+    window = glfwCreateWindow(1600, 900, "ONO Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     //setup OpenGL

@@ -23,4 +23,6 @@ namespace audio {
 
     //stop all clips
     void audioStopAll();
+
+    void audioClearAll();
 }

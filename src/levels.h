@@ -1,10 +1,11 @@
 #pragma once
+#include "ECS/Scene/Scene.h"
 
 //load level from manifest in path
-void loadLevel(const char* path);
+void loadLevel(const char* path, Scene& scene);
 
 //save level to manifest in path
-void saveLevel(const char* path);
+void saveLevel(const char* path, const Scene& scene);
 
 //save last loaded level
 void saveCurrent();

@@ -45,4 +45,7 @@ namespace assetfolder {
 
     //get type as string
     const char* typeToString(const AssetDescriptor::EFileType&);
+
+    //get name from path
+    std::string getName(const char* path);
 }

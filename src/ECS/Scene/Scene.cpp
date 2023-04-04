@@ -28,7 +28,7 @@ void Scene::stop()
 {
 }
 
-void Scene::addEntity(BaseEntity entity)
+void Scene::addEntity(const BaseEntity& entity)
 {
     //generate uuid
     //add uuid to entity

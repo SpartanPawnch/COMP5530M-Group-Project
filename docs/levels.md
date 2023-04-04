@@ -5,28 +5,28 @@ Level files are json files with the following structure:
 {
     //assets
     "audio":[
-        {"id":"<id0>","path":"<path0>"},
-        {"id":"<id1>","path":"<path1>"},
+        {"uuid":"<id0>","path":"<path0>"},
+        {"uuid":"<id1>","path":"<path1>"},
         ...
         ],
     "models":[
-        {"id":"<id0>","path":"<path0>"},
+        {"uuid":"<id0>","path":"<path0>"},
         {"id":"<id1>","path":"<path1>"},
         ...
         ],
     "textures":[
-        {"id":"<id0>","path":"<path0>"},
-        {"id":"<id1>","path":"<path1>"},
+        {"uuid":"<id0>","path":"<path0>"},
+        {"uuid":"<id1>","path":"<path1>"},
         ...
         ],
     "scripts":[
-        {"id":"<id0>","path":"<path0>"},
-        {"id":"<id1>","path":"<path1>"},
+        {"uuid":"<id0>","path":"<path0>"},
+        {"uuid":"<id1>","path":"<path1>"},
         ...
         ],
     "misc":[
-        {"id":"<id0>","path":"<path0>"},
-        {"id":"<id1>","path":"<path1>"},
+        {"uuid":"<id0>","path":"<path0>"},
+        {"uuid":"<id1>","path":"<path1>"},
         ...
         ],
 
@@ -37,10 +37,18 @@ Level files are json files with the following structure:
         {
             "name":"<name0>",
             "id":"<id0>",
-            //TODO - innate object properties
+            //TODO - innate entity subclass properties?
             "components":[
                 {
-                //TODO component structure
+                    "type":"<subclass>",
+                    //shared properties
+                    "uuid":"<uuid>",
+                    "name":"<name>",
+                    //subclasses specifics:
+                    //TransformComponent
+                    "position":[],//vec3
+                    "rotation":[],//vec4
+                    "scale":[],
                 }
             ]
         },

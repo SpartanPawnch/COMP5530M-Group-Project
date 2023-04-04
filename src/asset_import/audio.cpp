@@ -19,10 +19,14 @@ namespace audio {
         pSoloud->init();
     }
 
-    AudioEngine::~AudioEngine() {
-        //TODO - custom allocator
+    void audioClearAll() {
         audioStopAll();
         loadedClips.clear();
+    }
+
+    AudioEngine::~AudioEngine() {
+        //TODO - custom allocator
+        audioClearAll();
         pSoloud->deinit();
         delete pSoloud;
     }

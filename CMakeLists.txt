@@ -58,13 +58,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external
   ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
 )
 target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog)
+
+#copy dirs after build
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_CURRENT_SOURCE_DIR}/template
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>/template)
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/template
+)
 
-#copy assets after build
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory 

@@ -21,7 +21,7 @@ static std::string activeDirectory;
 
 namespace assetfolder {
     //extract file name from path
-    static std::string getName(const char* path) {
+    std::string getName(const char* path) {
         int i = strlen(path) - 1;
         while (i > 0 && path[i] != '/' && path[i] != '\\')
             i--;

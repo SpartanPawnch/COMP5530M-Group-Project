@@ -67,6 +67,7 @@ void initGraphics() {
     glDeleteShader(fragShader);
 
     //GL settings
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_ALPHA_TEST);
+    glEnable(GL_MULTISAMPLE);
 }
