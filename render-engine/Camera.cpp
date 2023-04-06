@@ -101,3 +101,12 @@ void Camera::updateInput(const float& deltaTime, const int direction, const doub
     this->updateKeyboardInput(deltaTime, direction);
     this->updateMouseInput(deltaTime, offsetX, offsetY);
 }
+
+void Camera::updateMatrices(int* width, int* height)
+{
+    //Initialize matrices
+    this->modelMatrix = glm::mat4(1.0f);
+    //this->viewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    this->viewMatrix = camera->getViewMatrix();
+    this->projectionMatrix = glm::perspective(glm::radians(45.0f), (float)*width / (float)*height, 0.01f, 100.0f);
+}

@@ -24,6 +24,7 @@
 #include "../render-engine/RenderManager.h"
 #include "drawing.h"
 
+
 // Define the cube's vertices positions and colors separately
 GLfloat cubePositions[] = {
     -0.5f, -0.5f, -0.5f,

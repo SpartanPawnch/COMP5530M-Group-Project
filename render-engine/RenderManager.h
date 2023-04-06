@@ -6,6 +6,8 @@
 
 #include "ShaderProgram.h"
 #include "Camera.h"
+#include "RenderPipeline.h"
+
 
 #include <GLFW/glfw3.h>
 
@@ -20,8 +22,10 @@ private:
 	static RenderManager* instance;
 	bool initialized = false;
 
-	//test output writing for RenderEngine
-	//std::ofstream testOutput;
+	//Available Render Pipelines
+	std::vector <RenderPipeline> pipelines; //Pipeline refers to a shader program
+	std::vector <Camera> cameras;
+	std::vector <GLFWwindow*> windows;
 
 	//default constructor does nothing
 	RenderManager() {}
@@ -33,31 +37,40 @@ private:
 	//default destructor does nothing
 	~RenderManager() {}
 
+
 public:
 
 	//members
-	std::vector<ShaderProgram> programs;
-	Camera* camera;
+	//std::vector<ShaderProgram> programs; // moved to render pipelines
+	//Camera* camera;
 
 	double deltaTime;
 	double xPos, yPos, xPosLast, yPosLast;
 	double xOffset, yOffset;
 	bool firstRClick;
 
-	//matrices
-	glm::mat4 modelMatrix;
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
+	//matrices // moved to Camera
+	//glm::mat4 modelMatrix;
+	//glm::mat4 projectionMatrix;
+	//glm::mat4 viewMatrix;
 
 	//needs to be static to be invoked without object of class
 	static RenderManager* getInstance();
 
 	void startUp(GLFWwindow* aWindow);
 
-	void addProgram(ShaderProgram aProgram);
+	//void addProgram(ShaderProgram aProgram);
 
-	void updateMatrices(int* width, int* height);
 
 	void shutDown();
+
+	//When camera is added to scene, initialize and add it to the class vector
+	void AddCamera();
+
+	void AddPipeline();
+
+	// To create the Pipeline-Entity Map
+	void AddToPipeline();
+
 
 };
