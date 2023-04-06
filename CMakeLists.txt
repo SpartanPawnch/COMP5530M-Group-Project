@@ -19,6 +19,7 @@ include_directories(${IMGUIDIR} ${IMGUIDIR}/backends)
 aux_source_directory("${IMGUIDIR}/" IMGUICORE)
 set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" 
   "${IMGUIDIR}/backends/imgui_impl_glfw.cpp"
+  "${IMGUIDIR}/misc/cpp/imgui_stdlib.cpp"
 )
 
 #setup executables

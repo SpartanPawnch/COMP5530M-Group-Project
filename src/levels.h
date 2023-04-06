@@ -19,6 +19,15 @@ std::string loadProjectFile(const char* path);
 //save project file to manifest
 void saveProjectFile(const char* path);
 
+//check if level name is default for project
+bool isDefaultLevel(const std::string& name);
+
+//set default project to level in path
+void setDefaultLevel(const std::string& path);
+
+//check if level is currently active
+bool isCurrentLevel(const std::string& name);
+
 //manager struct for automatic cleanup - mostly handled by asset modules
 struct LevelManager {
     bool autoSaveOnQuit = true;

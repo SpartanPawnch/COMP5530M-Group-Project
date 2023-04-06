@@ -12,6 +12,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_internal.h>
+#include <misc/cpp/imgui_stdlib.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
@@ -297,21 +298,8 @@ inline float drawMainMenu(const char* executablePath) {
                     saveProjectFile((activePath + "/project.json").c_str());
                 }
             }
-            if (ImGui::MenuItem("Open Level")) {
-                const char* filter = "*.json";
-                std::string path = fdutil::openFile("Open Level", activePath.empty() ? nullptr :
-                    (activePath + "/levels/").c_str(), 1, &filter, "Level Files (.json)");
-                if (!path.empty()) {
-                    loadLevel(path.c_str(), scene);
-                    glfwSetWindowTitle(baseWindow, (assetfolder::getName(path.c_str()) +
-                        " - ONO Engine").c_str());
-                }
-            }
             if (ImGui::MenuItem("Save Level")) {
                 saveCurrentLevel();
-            }
-            if (ImGui::MenuItem("Save Level As")) {
-
             }
             ImGui::PopFont();
             ImGui::EndMenu();
@@ -697,6 +685,17 @@ inline void drawLevels() {
             BeginGroup();
             //text
             ImGui::Text(levelDescriptors[i].name.c_str());
+
+            if (isCurrentLevel(levelDescriptors[i].name)) {
+                ImGui::SameLine();
+                ImGui::Text("Current");
+            }
+
+            if (isDefaultLevel(levelDescriptors[i].name)) {
+                ImGui::SameLine();
+                ImGui::Text("Default");
+            }
+
             ImGui::SetCursorPos(initialPos);
 
             //selectable over text
@@ -708,30 +707,49 @@ inline void drawLevels() {
 
             //popup
             if (ImGui::BeginPopupContextItem()) {
-                if (ImGui::MenuItem("New Level")) {
-                    queryLevelsFolder = true;
-                }
                 if (ImGui::MenuItem("Load Level")) {
+                    //load level and change window title
                     loadLevel(levelDescriptors[i].path.c_str(), scene);
                     glfwSetWindowTitle(baseWindow, (levelDescriptors[i].name +
                         " - ONO Engine").c_str());
                 }
-                if (ImGui::MenuItem("Set as Default")) {}
+                if (ImGui::MenuItem("Set as Default")) {
+                    setDefaultLevel(levelDescriptors[i].path);
+                    saveProjectFile((activePath + "/project.json").c_str());
+                }
                 ImGui::EndPopup();
             }
             EndGroup();
             ImGui::PopID();
         }
 
-        //draw invisible button for clicking rest of empty widget space
-        buttonSize.y -= borderSize + padding.y + ImGui::GetCursorPosY();
-        if (ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize)) {
-            selectedLevel = -1;
-        }
-        if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::MenuItem("New Level")) {}
+        if (ImGui::BeginPopup("##newlvlpopup")) {
+            std::string buf;
+            if (ImGui::InputText("Name ##newlvl", &buf, ImGuiInputTextFlags_EnterReturnsTrue |
+                ImGuiInputTextFlags_EscapeClearsAll)) {
+                //save new empty level
+                std::string lvlName = currLevelDir.path + "/" + buf + ".json";
+                saveLevel(lvlName.c_str(), Scene());
+                queryLevelsFolder = true;
+                ImGui::CloseCurrentPopup();
+            }
+            else if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+                ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
         }
+
+        if (ImGui::Button("New Level"))
+            ImGui::OpenPopup("##newlvlpopup");
+
+        // //draw invisible button for clicking rest of empty widget space
+        // buttonSize.y -= borderSize + padding.y + ImGui::GetCursorPosY();
+        // if (ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize)) {
+        //     selectedLevel = -1;
+        // }
+        // if (ImGui::BeginPopupContextItem()) {
+        //     if (ImGui::MenuItem("New Level")) {}
+        //     ImGui::EndPopup();
+        // }
 
         ImGui::PopFont();
     }

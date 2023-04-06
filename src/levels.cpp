@@ -351,3 +351,15 @@ void saveProjectFile(const char* path) {
 
     logging::logInfo("Saved project file at {}\n", path);
 }
+
+bool isDefaultLevel(const std::string& name) {
+    return (name == assetfolder::getName(defaultLevelPath.c_str()));
+}
+
+void setDefaultLevel(const std::string& path) {
+    defaultLevelPath = assetfolder::getRelativePath(path.c_str());
+}
+
+bool isCurrentLevel(const std::string& name) {
+    return (name == assetfolder::getName(currentLevelPath.c_str()));
+}
