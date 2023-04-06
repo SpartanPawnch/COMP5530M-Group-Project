@@ -26,7 +26,7 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	glfwSwapBuffers(aWindow);
 	glfwPollEvents();
 
-	this->programs.clear();
+	//this->programs.clear();
 	this->deltaTime = 0.0f;
 	this->xPos = 0.0f;
 	this->yPos = 0.0f;
@@ -44,8 +44,36 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	this->projectionMatrix = glm::mat4(1.0f);
 }
 
-void RenderManager::addProgram(ShaderProgram aProgram)
+void RenderManager::AddPipeline(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr,
+	const char* computePath = nullptr, const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr)
 {
-	this->programs.push_back(aProgram);
+	RenderPipeline newPipeline = RenderPipeline(vertexPath, fragmentPath, geometryPath,
+		computePath, tessControlPath, tessEvalPath);
+
+	this->pipelines.push_back(newPipeline);
 }
 
+void RenderManager::AddWindow(int width, int height, const char* windowTitle)
+{
+	//init glfw and setup window
+	GLFWwindow* window;
+	glfwInit();
+	glfwWindowHint(GLFW_MAXIMIZED, 1);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	//create window
+	window = glfwCreateWindow(width, height, windowTitle, NULL, NULL);
+	
+	//setup OpenGL
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		std::cout << "Error: " << glewGetErrorString(err) << "\n";
+		return;
+	}
+
+	this->windows.push_back(window);
+}
+
+void RenderManager::RenderScene(Camera camera, GLFWwindow* window)
+{
+	glfwMakeContextCurrent(window);
+}

@@ -5,7 +5,7 @@
 class VertexBuffer
 {
 	private:
-		GLuint vertexbuffer;
+		GLuint vertexBuffer;
 
 	public:
 		void CreateBuffer(GLsizeiptr bufferSize_B, const void* data);
@@ -16,10 +16,10 @@ class VertexBuffer
 class IndexBuffer
 {
 private:
-	GLuint vertexbuffer;
+	GLuint indexBuffer;
 
 public:
-	void CreateBuffer(unsigned int bufferSize);
+	void CreateBuffer(GLsizeiptr bufferSize_B, const void* data);
 
 
 };

@@ -13,7 +13,7 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 #setup executables
 add_executable(
     ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
- "render-engine/RenderManager.cpp" "render-engine/RenderManager.h" "render-engine/ShaderProgram.h" "render-engine/ShaderProgram.cpp" "render-engine/Camera.h" "render-engine/Camera.cpp" "render-engine/Buffer.cpp" "render-engine/Buffer.h" "render-engine/RenderPipeline.h" "render-engine/RenderPipeline.cpp" )
+ "render-engine/RenderManager.cpp" "render-engine/RenderManager.h"   "render-engine/Camera.h" "render-engine/Camera.cpp" "render-engine/Buffer.cpp" "render-engine/Buffer.h" "render-engine/RenderPipeline.h" "render-engine/RenderPipeline.cpp" )
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

@@ -277,7 +277,9 @@ int main() {
     //Render Engine
     renderManager = RenderManager::getInstance();
 
-    renderManager->startUp(window);
+    //After this do
+   // renderManager->AddWindow(600,700,"Rendering Window Name" )
+   // renderManager->startUp(window);
 
     //init shader
     const char* vertexPath = "../../../assets/shaders/colours.vert";

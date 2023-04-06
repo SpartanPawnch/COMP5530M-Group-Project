@@ -4,7 +4,6 @@
 #include <fstream>
 #include <vector>
 
-#include "ShaderProgram.h"
 #include "Camera.h"
 #include "RenderPipeline.h"
 
@@ -67,10 +66,19 @@ public:
 	//When camera is added to scene, initialize and add it to the class vector
 	void AddCamera();
 
-	void AddPipeline();
+	void AddPipeline(const char* vertexPath,
+		const char* fragmentPath,
+		const char* geometryPath = nullptr,
+		const char* computePath = nullptr,
+		const char* tessControlPath = nullptr,
+		const char* tessEvalPath = nullptr);
+
+	void AddWindow(int width, int height, const char* windowTitle);
 
 	// To create the Pipeline-Entity Map
 	void AddToPipeline();
+
+	void RenderScene(Camera camera, GLFWwindow* window);
 
 
 };
