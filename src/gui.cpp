@@ -672,6 +672,35 @@ inline void drawLevels() {
         ImVec2 padding = ImGui::GetStyle().WindowPadding;
         buttonSize.x -= borderSize + 2 * padding.x;
 
+        // mv==rename in **NIX
+        static int mvIdx;
+        static std::string mvNameBuf;
+        static bool mvIsCurr=false;
+        static bool mvIsDef=false;
+        
+        //rename popup
+        if(ImGui::BeginPopup("##mvlvlpopup")){
+            if(ImGui::InputText("Name",&mvNameBuf,ImGuiInputTextFlags_EnterReturnsTrue|
+                ImGuiInputTextFlags_EscapeClearsAll)){
+                std::string newPath=currLevelDir.path+"/"+mvNameBuf;
+                std::rename(levelDescriptors[mvIdx].path.c_str(),
+                    newPath.c_str());
+                if(mvIsDef){
+                    setDefaultLevel(newPath);
+                    saveProjectFile((activePath+"/project.json").c_str());
+                }
+                if(mvIsCurr){
+                    loadLevel(newPath.c_str(),scene);
+                }
+                queryLevelsFolder=true;
+                ImGui::CloseCurrentPopup();
+            }
+            else if(ImGui::IsKeyPressed(ImGuiKey_Escape))
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+        }
+
+        bool useMvPopup=false;
         //draw levels
         for (unsigned int i = 0;i < levelDescriptors.size();i++) {
             ImGui::PushID(i);
@@ -712,8 +741,11 @@ inline void drawLevels() {
                 }
                 
                 if(ImGui::MenuItem("Rename")){
-                    //TODO rename dialog
-                    queryLevelsFolder=true;
+                    mvIdx=i;
+                    mvIsDef=isDefLvl;
+                    mvIsCurr=isCurrLvl;
+                    mvNameBuf=levelDescriptors[i].name;
+                    useMvPopup=true;
                 }
 
                 if(ImGui::MenuItem("Delete")){
@@ -726,12 +758,12 @@ inline void drawLevels() {
                         loadLevel((currLevelDir.path+"/default.json").c_str(),scene);
                     }
                     else if(isCurrLvl){
-                        //current level - switch to another
+                        //current level deleted - switch to another
                         int nextIdx=(i==0)?i+1:i-1;
                         loadLevel(levelDescriptors[nextIdx].path.c_str(),scene);
                     }
                     else if(isDefLvl){
-                        //default level - switch default
+                        //default level deleted - switch default
                         int nextIdx=(i==0)?i+1:i-1;
                         setDefaultLevel(levelDescriptors[nextIdx].path.c_str());
                         saveProjectFile((activePath+"/project.json").c_str());
@@ -749,6 +781,11 @@ inline void drawLevels() {
             ImGui::PopID();
         }
 
+        //check for rename popup
+        if(useMvPopup)
+            ImGui::OpenPopup("##mvlvlpopup");
+
+        //define new level popup
         if (ImGui::BeginPopup("##newlvlpopup")) {
             std::string buf;
             if (ImGui::InputText("Name ##newlvl", &buf, ImGuiInputTextFlags_EnterReturnsTrue |
@@ -764,6 +801,7 @@ inline void drawLevels() {
             ImGui::EndPopup();
         }
 
+        //check for new level popup
         if (ImGui::Button("New Level"))
             ImGui::OpenPopup("##newlvlpopup");
 

@@ -160,7 +160,7 @@ void loadLevel(const char* path, Scene& scene) {
     }
 
     //set level to current if everything is succesful
-    currentLevelPath = assetfolder::getRelativePath(path);
+    currentLevelPath = path;
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
 }
