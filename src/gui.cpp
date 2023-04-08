@@ -685,13 +685,21 @@ inline void drawLevels() {
                 std::string newPath=currLevelDir.path+"/"+mvNameBuf;
                 std::rename(levelDescriptors[mvIdx].path.c_str(),
                     newPath.c_str());
+                
                 if(mvIsDef){
+                    //update default level
                     setDefaultLevel(newPath);
                     saveProjectFile((activePath+"/project.json").c_str());
                 }
+
                 if(mvIsCurr){
+                    //update active level
                     loadLevel(newPath.c_str(),scene);
+                    glfwSetWindowTitle(baseWindow, (mvNameBuf +
+                        " - ONO Engine").c_str());
+
                 }
+
                 queryLevelsFolder=true;
                 ImGui::CloseCurrentPopup();
             }
