@@ -5,13 +5,16 @@
 #include "../../external/stb_image.h"
 
 #include<vector>
+#include<map>
+#include<string>
 #include<cstdio>
 
 #include "../logging.h"
 
+static std::unordered_map<std::string, int> uuidToIdx;
 static std::vector<TextureInfo> textures;
 
-int loadTexture(const char* filename) {
+int loadTexture(const char* filename, const std::string& uuid) {
 
     int width, height, channels;
     unsigned char* data = stbi_load(filename, &width, &height, &channels, 4);
@@ -51,8 +54,19 @@ int loadTexture(const char* filename) {
 
     //add texture to array if valid
     if (texID != 0) {
-        textures.emplace_back(TextureInfo{ width,height,texID });
-        return (textures.size() - 1);
+        //try to add new texture
+        if (uuidToIdx.count(uuid) == 0) {
+            textures.emplace_back(TextureInfo{ width,height,texID });
+            uuidToIdx[uuid] = textures.size() - 1;
+            return (textures.size() - 1);
+        }
+
+        //replace existing otherwise
+        int idx = uuidToIdx[uuid];
+        glDeleteTextures(1, &textures[idx].id);
+        textures[idx].id = texID;
+        textures[idx].width = width;
+        textures[idx].height = height;
     }
 
 
@@ -65,8 +79,15 @@ const TextureInfo& getTexture(int i) {
     return textures[i];
 }
 
+
+const TextureInfo& getTexture(const std::string& uuid){
+    int idx=uuidToIdx[uuid];
+    return textures[idx];
+}
+
 void clearTextures() {
     for (unsigned int i = 0;i < textures.size();i++)
         glDeleteTextures(1, &textures[i].id);
     textures.clear();
+    uuidToIdx.clear();
 }

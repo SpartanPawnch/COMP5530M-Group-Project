@@ -76,7 +76,7 @@ void loadLevel(const char* path, Scene& scene) {
         auto jsonAudio = doc["audio"].GetArray();
         for (unsigned int i = 0;i < jsonAudio.Size();i++) {
             //TODO init with fixed uuid
-            audio::audioLoad(jsonAudio[i]["path"].GetString());
+            //audio::audioLoad(jsonAudio[i]["path"].GetString());
         }
     }
 
@@ -86,7 +86,7 @@ void loadLevel(const char* path, Scene& scene) {
         auto jsonTextures = doc["textures"].GetArray();
         for (unsigned int i = 0;i < jsonTextures.Size();i++) {
             //TODO init with fixed uuid
-            loadTexture(jsonTextures[i]["path"].GetString());
+            //loadTexture(jsonTextures[i]["path"].GetString());
         }
     }
 

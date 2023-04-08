@@ -41,8 +41,6 @@ namespace guicfg {
     const ImVec2 assetMgrPadding(10.0f, 25.0f);
     const ImVec2 assetMgrIconSize(60.0f, 60.0f);
     const ImVec2 assetMgrItemSize(80.0f, 80.0f);
-    const float splitterThickness = 7.f;
-    const ImGuiID dockspaceID = 1;
 
     const char* titleFontPath = "fonts/Phudu-Medium.ttf";
     const char* regularFontPath = "fonts/Armata-Regular.ttf";
@@ -87,7 +85,7 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     ZeroMemory(&pi, sizeof(pi));
 
     CreateProcess(NULL,   // No module name (use command line)
-        "./Debug/BuildTest.exe",        // Command line
+        LPSTR("./Debug/BuildTest.exe"),        // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE
@@ -123,7 +121,7 @@ static glm::vec3 audioPos(.0f);
 static assetfolder::AssetDescriptor currAssetFolder = { "","",
     assetfolder::AssetDescriptor::EFileType::INVALID };
 static std::vector<assetfolder::AssetDescriptor> folderItems;
-static const float QUERY_INTERVAL = 5.0f;
+
 static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
 
@@ -175,8 +173,8 @@ GUIManager::GUIManager(GLFWwindow* window) {
     colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.12f, 0.71f, 0.73f, 1.00f);
 
     //load ui elements
-    fileTexture = loadTexture("assets/fileico.png");
-    folderTexture = loadTexture("assets/folderico.png");
+    fileTexture = loadTexture("assets/fileico.png", "assets/fileico.png");
+    folderTexture = loadTexture("assets/folderico.png", "assets/folderico.png");
 
     //create viewport framebuffer
     glGenFramebuffers(1, &viewportFramebuffer);
@@ -210,7 +208,8 @@ inline void drawAudioDemo() {
                 sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
             if (!path.empty()) {
                 audio::audioStopAll();
-                audioClip = audio::audioLoad(path.c_str());
+                //TODO replace with nicer uuid
+                audioClip = audio::audioLoad(path.c_str(), path);
                 if (audioClip >= 0) {
                     audioPath = path;
                     logging::logInfo("Opened audio file {}\n", path);
@@ -271,13 +270,8 @@ inline float drawMainMenu(const char* executablePath) {
 
                     //try to open level
                     if (!level.empty()) {
-                        //get folder path
-                        //TODO separate function?
-                        int i = path.length() - 1;
-                        while (i > 0 && path[i] != '/' && path[i] != '\\')
-                            i--;
-
-                        activePath = path.substr(0, i);
+                        //get folder path and set as active
+                        activePath = getFolder(path);
                         assetfolder::setActiveDirectory(activePath);
                         currAssetFolder = assetfolder::getAssetsRootDir();
 
@@ -377,7 +371,7 @@ inline void drawTextureDebug() {
 
             if (!path.empty()) {
                 clearTextures();
-                activeTexture = loadTexture(path.c_str());
+                activeTexture = loadTexture(path.c_str(), path.c_str());
             }
         }
         if (activeTexture != -1) {
@@ -507,7 +501,7 @@ inline void drawAssetBrowser() {
                     }
 
                     //draw tooltip - full path
-                    ImGui::SetTooltip(folderItems[i].path.c_str());
+                    ImGui::SetTooltip("%s",folderItems[i].path.c_str());
                 }
 
                 if (i < folderItems.size() - 1) {
@@ -575,7 +569,7 @@ inline void drawEntities() {
         ImGui::PushFont(guicfg::regularFont);
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
             if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
-                ImGuiTreeNodeFlags_DefaultOpen, scene.entities[i].name.c_str())) {
+                ImGuiTreeNodeFlags_DefaultOpen,"%s", scene.entities[i].name.c_str())) {
                 if (ImGui::IsItemClicked()) {
                     if (scene.selectedEntity != &scene.entities[i]) {
                         scene.selectedEntity = &scene.entities[i];
@@ -684,14 +678,17 @@ inline void drawLevels() {
             ImVec2 initialPos = ImGui::GetCursorPos();
             BeginGroup();
             //text
-            ImGui::Text(levelDescriptors[i].name.c_str());
+            ImGui::Text("%s",levelDescriptors[i].name.c_str());
 
-            if (isCurrentLevel(levelDescriptors[i].name)) {
+            bool isCurrLvl=isCurrentLevel(levelDescriptors[i].name);
+            bool isDefLvl=isDefaultLevel(levelDescriptors[i].name);
+
+            if (isCurrLvl) {
                 ImGui::SameLine();
                 ImGui::Text("Current");
             }
 
-            if (isDefaultLevel(levelDescriptors[i].name)) {
+            if (isDefLvl) {
                 ImGui::SameLine();
                 ImGui::Text("Default");
             }
@@ -713,6 +710,35 @@ inline void drawLevels() {
                     glfwSetWindowTitle(baseWindow, (levelDescriptors[i].name +
                         " - ONO Engine").c_str());
                 }
+                
+                if(ImGui::MenuItem("Rename")){
+                    //TODO rename dialog
+                    queryLevelsFolder=true;
+                }
+
+                if(ImGui::MenuItem("Delete")){
+                    std::remove(levelDescriptors[i].path.c_str());
+                    if(levelDescriptors.size()==1){
+                        //last descriptor - generate new empty one
+                        saveLevel((currLevelDir.path+"/default.json").c_str(),Scene());
+                        setDefaultLevel(currLevelDir.path+"/default.json");
+                        saveProjectFile((activePath + "/project.json").c_str());
+                        loadLevel((currLevelDir.path+"/default.json").c_str(),scene);
+                    }
+                    else if(isCurrLvl){
+                        //current level - switch to another
+                        int nextIdx=(i==0)?i+1:i-1;
+                        loadLevel(levelDescriptors[nextIdx].path.c_str(),scene);
+                    }
+                    else if(isDefLvl){
+                        //default level - switch default
+                        int nextIdx=(i==0)?i+1:i-1;
+                        setDefaultLevel(levelDescriptors[nextIdx].path.c_str());
+                        saveProjectFile((activePath+"/project.json").c_str());
+                    }
+                    queryLevelsFolder=true;
+                } 
+
                 if (ImGui::MenuItem("Set as Default")) {
                     setDefaultLevel(levelDescriptors[i].path);
                     saveProjectFile((activePath + "/project.json").c_str());
@@ -763,7 +789,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImVec2 mousePos = ImGui::GetMousePos();
+    // ImVec2 mousePos = ImGui::GetMousePos();
 
     //adjust fullscreen windows size to account for menubar
     float mainMenuHeight = drawMainMenu(executablePath);
