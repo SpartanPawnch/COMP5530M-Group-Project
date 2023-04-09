@@ -3,3 +3,4 @@
 /.vs
 /out
 /.ccls-cache
+.clang-format

@@ -1,9 +1,9 @@
 #ifdef _WIN32
-#include<windows.h>
-#include<direct.h>
+#include <windows.h>
+#include <direct.h>
 #else
-#include<unistd.h>
-#include<limits.h>
+#include <unistd.h>
+#include <limits.h>
 #endif
 
 #include <iostream>
@@ -63,12 +63,12 @@ void createProj(const std::string& path) {
 void buildRunProj(const std::string& activePath, const char* executablePath) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    //change to buildDir
+    // change to buildDir
     std::string buildDir = std::string(activePath) + "/build";
     _mkdir(buildDir.c_str());
     _chdir(buildDir.c_str());
 
-    //build target
+    // build target
     FILE* cmakeProc = _popen("cmake .. && cmake --build . --target BuildTest", "r");
     char buf[1024];
     while (!feof(cmakeProc)) {
@@ -77,32 +77,32 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     }
     logging::logInfo("Building Done!\n");
 
-    //build cleanup
+    // build cleanup
     fclose(cmakeProc);
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    CreateProcess(NULL,   // No module name (use command line)
-        LPSTR("./Debug/BuildTest.exe"),        // Command line
-        NULL,           // Process handle not inheritable
-        NULL,           // Thread handle not inheritable
-        FALSE,          // Set handle inheritance to FALSE
-        0,              // No creation flags
-        NULL,           // Use parent's environment block
-        NULL,           // Use parent's starting directory 
-        &si,            // Pointer to STARTUPINFO structure
-        &pi);           // Pointer to PROCESS_INFORMATION structure
+    CreateProcess(NULL, // No module name (use command line)
+        LPSTR("./Debug/BuildTest.exe"), // Command line
+        NULL, // Process handle not inheritable
+        NULL, // Thread handle not inheritable
+        FALSE, // Set handle inheritance to FALSE
+        0, // No creation flags
+        NULL, // Use parent's environment block
+        NULL, // Use parent's starting directory
+        &si, // Pointer to STARTUPINFO structure
+        &pi); // Pointer to PROCESS_INFORMATION structure
 
     // Wait until child process exits.
     WaitForSingleObject(pi.hProcess, INFINITE);
 
-    // Close process and thread handles. 
+    // Close process and thread handles.
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
-    //restore path
+    // restore path
     _chdir(executablePath);
 }
 
@@ -117,9 +117,9 @@ static int audioClip = -1;
 static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
 
-//asset manager controls
-static assetfolder::AssetDescriptor currAssetFolder = { "","",
-    assetfolder::AssetDescriptor::EFileType::INVALID };
+// asset manager controls
+static assetfolder::AssetDescriptor currAssetFolder = {
+    "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
 static std::vector<assetfolder::AssetDescriptor> folderItems;
 
 static bool queryAssetsFolder = true;
@@ -135,33 +135,33 @@ static Scene scene;
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
 
-//TODO Load/Save style to disk
+// TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
 
 GUIManager::GUIManager(GLFWwindow* window) {
-    //Init ImGui
+    // Init ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 
-    //enable docking
+    // enable docking
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    //load fonts
+    // load fonts
     ImFont* defaultFont = io.Fonts->AddFontDefault();
     guicfg::titleFont = io.Fonts->AddFontFromFileTTF(guicfg::titleFontPath, 16.f);
     guicfg::regularFont = io.Fonts->AddFontFromFileTTF(guicfg::regularFontPath, 15.f);
     io.Fonts->Build();
 
-    //fallback to default if loading fails
+    // fallback to default if loading fails
     guicfg::titleFont = guicfg::titleFont ? guicfg::titleFont : defaultFont;
     guicfg::regularFont = guicfg::regularFont ? guicfg::regularFont : defaultFont;
 
     io.FontDefault = guicfg::titleFont;
 
-    //set UI colors
+    // set UI colors
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.23f, 0.26f, 0.94f);
     colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.21f, 0.24f, 1.00f);
@@ -172,19 +172,17 @@ GUIManager::GUIManager(GLFWwindow* window) {
     colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.38f, 0.42f, 0.86f);
     colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.12f, 0.71f, 0.73f, 1.00f);
 
-    //load ui elements
+    // load ui elements
     fileTexture = loadTexture("assets/fileico.png", "assets/fileico.png");
     folderTexture = loadTexture("assets/folderico.png", "assets/folderico.png");
 
-    //create viewport framebuffer
+    // create viewport framebuffer
     glGenFramebuffers(1, &viewportFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
 
     glGenTextures(1, &viewportTex);
     glBindTexture(GL_TEXTURE_2D, viewportTex);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D, viewportTex, 0);
-
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, viewportTex, 0);
 
     baseWindow = window;
 }
@@ -194,7 +192,6 @@ GUIManager::~GUIManager() {
 
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
-
 }
 
 inline void drawAudioDemo() {
@@ -202,13 +199,13 @@ inline void drawAudioDemo() {
         ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("Active Clip: %s", audioPath.c_str());
         if (ImGui::Button("Load Audio File")) {
-            const char* filters[] = { "*.mp3","*.ogg","*.flac","*.wav" };
+            const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
             const char* filterDesc = "Audio Files";
-            std::string path = fdutil::openFile("Select File", NULL,
-                sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
+            std::string path = fdutil::openFile(
+                "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
             if (!path.empty()) {
                 audio::audioStopAll();
-                //TODO replace with nicer uuid
+                // TODO replace with nicer uuid
                 audioClip = audio::audioLoad(path.c_str(), path);
                 if (audioClip >= 0) {
                     audioPath = path;
@@ -220,12 +217,12 @@ inline void drawAudioDemo() {
             }
         }
 
-        //adjust source position, listening position is center
+        // adjust source position, listening position is center
         if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
             audio::audioSetPosition(audioPos);
         }
 
-        //play audio with 3d effects
+        // play audio with 3d effects
         if (ImGui::Button("Play Audio File")) {
             if (!audioPath.empty())
                 audio::audioPlay(audioClip);
@@ -240,12 +237,12 @@ inline float drawMainMenu(const char* executablePath) {
     if (ImGui::BeginMainMenuBar()) {
         // ImGui::Text("Active Directory: %s", activePath.c_str());
 
-        //file menu
+        // file menu
         if (ImGui::BeginMenu("File##mainmenu")) {
             ImGui::PushFont(guicfg::regularFont);
             if (ImGui::MenuItem("Create Project")) {
                 std::string path = fdutil::selectFolder("Create a Project", NULL);
-                //wait for current op to finish
+                // wait for current op to finish
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
@@ -259,31 +256,31 @@ inline float drawMainMenu(const char* executablePath) {
             }
             if (ImGui::MenuItem("Open Project")) {
                 const char* filter = "project.json";
-                std::string path = fdutil::openFile("Open Project", nullptr, 1,
-                    &filter, "Project File (project.json)");
+                std::string path = fdutil::openFile(
+                    "Open Project", nullptr, 1, &filter, "Project File (project.json)");
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    //try to load project
+                    // try to load project
                     std::string level = loadProjectFile(path.c_str());
 
-                    //try to open level
+                    // try to open level
                     if (!level.empty()) {
-                        //get folder path and set as active
+                        // get folder path and set as active
                         activePath = getFolder(path);
                         assetfolder::setActiveDirectory(activePath);
                         currAssetFolder = assetfolder::getAssetsRootDir();
 
-                        //reset queries
+                        // reset queries
                         queryAssetsFolder = true;
                         queryLevelsFolder = true;
 
                         loadLevel((activePath + "/" + level).c_str(), scene);
 
-                        //set appropriate window title
-                        glfwSetWindowTitle(baseWindow, (assetfolder::getName(level.c_str()) +
-                            " - ONO Engine").c_str());
+                        // set appropriate window title
+                        glfwSetWindowTitle(baseWindow,
+                            (assetfolder::getName(level.c_str()) + " - ONO Engine").c_str());
                     }
                 }
             }
@@ -299,25 +296,23 @@ inline float drawMainMenu(const char* executablePath) {
             ImGui::EndMenu();
         }
 
-        //build menu
+        // build menu
         if (ImGui::BeginMenu("Build##mainmenu")) {
             ImGui::PushFont(guicfg::regularFont);
             if (ImGui::MenuItem("Build and Run")) {
                 if (!activePath.empty()) {
-                    //wait for current op to finish
+                    // wait for current op to finish
                     if (projectThread.joinable())
                         projectThread.join();
 
-                    projectThread = std::thread(buildRunProj, activePath,
-                        executablePath);
-
+                    projectThread = std::thread(buildRunProj, activePath, executablePath);
                 }
             }
             ImGui::PopFont();
             ImGui::EndMenu();
         }
 
-        //get height
+        // get height
         barHeight = ImGui::GetWindowSize().y;
 
         ImGui::EndMainMenuBar();
@@ -332,7 +327,7 @@ inline void drawModelDemo() {
         ImGui::Text("Model Loading Demo");
         if (ImGui::Button("Load Model")) {
             std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL, NULL);
-            //wait for current op to finish
+            // wait for current op to finish
             if (!path.empty()) {
                 model.loadModel(path);
             }
@@ -365,9 +360,9 @@ inline void drawTextureDebug() {
     if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::PushFont(guicfg::regularFont);
         if (ImGui::Button("Load Texture")) {
-            const char* filters[] = { "*.png","*.jpg","*.bmp","*.tga","*.hdr" };
-            std::string path = fdutil::openFile("Load Texture", NULL,
-                sizeof(filters) / sizeof(filters[0]), filters, NULL);
+            const char* filters[] = {"*.png", "*.jpg", "*.bmp", "*.tga", "*.hdr"};
+            std::string path = fdutil::openFile(
+                "Load Texture", NULL, sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
             if (!path.empty()) {
                 clearTextures();
@@ -384,28 +379,27 @@ inline void drawTextureDebug() {
 }
 
 inline void drawAssetBrowser() {
-    //folder debug
+    // folder debug
     if (ImGui::Begin("Asset Browser", NULL)) {
         ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("Current Folder: %s", currAssetFolder.path.c_str());
 
         if (currAssetFolder.type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
             static std::vector<bool> itemIsSelected;
-            int itemsPerLine = int(ImGui::GetWindowSize().x / (guicfg::assetMgrItemSize.x +
-                guicfg::assetMgrPadding.x));
+            int itemsPerLine = int(ImGui::GetWindowSize().x /
+                (guicfg::assetMgrItemSize.x + guicfg::assetMgrPadding.x));
 
-            //refresh folder if needed
+            // refresh folder if needed
             if (queryAssetsFolder) {
                 assetfolder::listDir(currAssetFolder, folderItems);
                 queryAssetsFolder = false;
                 itemIsSelected.resize(folderItems.size(), false);
             }
 
-            //import buttons
+            // import buttons
             if (ImGui::Button("Import File")) {
                 std::vector<std::string> paths;
-                fdutil::openFileMulti("Import File", NULL,
-                    0, NULL, NULL, paths);
+                fdutil::openFileMulti("Import File", NULL, 0, NULL, NULL, paths);
                 if (!paths.empty()) {
                     assetfolder::addAssets(paths, currAssetFolder);
                     queryAssetsFolder = true;
@@ -421,10 +415,10 @@ inline void drawAssetBrowser() {
                 }
             }
 
-            //delete button
+            // delete button
             ImGui::SameLine();
             if (ImGui::Button("Delete") || glfwGetKey(baseWindow, GLFW_KEY_DELETE) == GLFW_PRESS) {
-                for (unsigned int i = 0;i < itemIsSelected.size();i++) {
+                for (unsigned int i = 0; i < itemIsSelected.size(); i++) {
                     if (itemIsSelected[i])
                         assetfolder::delAsset(folderItems[i]);
                 }
@@ -432,7 +426,7 @@ inline void drawAssetBrowser() {
                 queryAssetsFolder = true;
             }
 
-            //outer dir shorcut
+            // outer dir shorcut
             ImGui::SameLine();
             if (ImGui::Button("Root")) {
                 currAssetFolder = assetfolder::getAssetsRootDir();
@@ -446,20 +440,20 @@ inline void drawAssetBrowser() {
                 queryAssetsFolder = true;
             }
 
-            //refresh button
+            // refresh button
             ImGui::SameLine();
             if (ImGui::Button("Refresh")) {
                 queryAssetsFolder = true;
             }
 
-            //draw files in folder
+            // draw files in folder
             ImVec2 winPos = ImGui::GetWindowPos();
             float initialItemPad = ImGui::GetCursorPosX();
-            for (unsigned int i = 0;i < folderItems.size();i++) {
+            for (unsigned int i = 0; i < folderItems.size(); i++) {
                 ImGui::PushID(i);
                 ImVec2 initialPos = ImGui::GetCursorPos();
                 ImGui::BeginGroup();
-                //icon
+                // icon
                 if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
                     TextureInfo texInfo = getTexture(folderTexture);
                     ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
@@ -469,16 +463,18 @@ inline void drawAssetBrowser() {
                     ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
                 }
 
-                //filename
+                // filename
                 ImGui::PushClipRect(ImVec2(winPos.x + initialPos.x, winPos.y + initialPos.y),
                     ImVec2(winPos.x + initialPos.x + guicfg::assetMgrItemSize.x,
-                        winPos.y + initialPos.y + guicfg::assetMgrItemSize.y), false);
+                        winPos.y + initialPos.y + guicfg::assetMgrItemSize.y),
+                    false);
                 ImGui::Text("%s", folderItems[i].name.c_str());
                 ImGui::PopClipRect();
 
-                //selectable
+                // selectable
                 ImGui::SetCursorPos(initialPos);
-                if (ImGui::Selectable("##fileselector", itemIsSelected[i], 0, guicfg::assetMgrItemSize)) {
+                if (ImGui::Selectable(
+                        "##fileselector", itemIsSelected[i], 0, guicfg::assetMgrItemSize)) {
                     if (glfwGetKey(baseWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                         glfwGetKey(baseWindow, GLFW_KEY_RIGHT_CONTROL)) {
                         itemIsSelected[i] = true;
@@ -492,7 +488,7 @@ inline void drawAssetBrowser() {
                 ImGui::EndGroup();
 
                 if (ImGui::IsItemHovered()) {
-                    //check for folder switch
+                    // check for folder switch
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) &&
                         folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
                         currAssetFolder = folderItems[i];
@@ -500,21 +496,19 @@ inline void drawAssetBrowser() {
                         queryAssetsFolder = true;
                     }
 
-                    //draw tooltip - full path
-                    ImGui::SetTooltip("%s",folderItems[i].path.c_str());
+                    // draw tooltip - full path
+                    ImGui::SetTooltip("%s", folderItems[i].path.c_str());
                 }
 
                 if (i < folderItems.size() - 1) {
-                    //wrap to next line if needed
+                    // wrap to next line if needed
                     bool wrap = i % itemsPerLine == itemsPerLine - 1;
-                    ImVec2 nextPos = ImVec2(
-                        wrap ? initialItemPad : (initialPos.x +
-                            guicfg::assetMgrItemSize.x + guicfg::assetMgrPadding.x),
-                        initialPos.y + (guicfg::assetMgrIconSize.y + guicfg::assetMgrPadding.y) *
-                        wrap
-                    );
-                    ImGui::SetCursorPos(
-                        nextPos);
+                    ImVec2 nextPos = ImVec2(wrap ? initialItemPad
+                                                 : (initialPos.x + guicfg::assetMgrItemSize.x +
+                                                       guicfg::assetMgrPadding.x),
+                        initialPos.y +
+                            (guicfg::assetMgrIconSize.y + guicfg::assetMgrPadding.y) * wrap);
+                    ImGui::SetCursorPos(nextPos);
                 }
 
                 ImGui::PopID();
@@ -534,17 +528,17 @@ inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
-        //adjust for titlebar
+        // adjust for titlebar
         ImVec2 windowSize = ImGui::GetWindowSize();
         windowSize.y -= ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
 
         viewportTexWidth = int(windowSize.x);
         viewportTexHeight = int(windowSize.y);
 
-        //adjust to window resize
+        // adjust to window resize
         glBindTexture(GL_TEXTURE_2D, viewportTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth,
-            viewportTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         ImGui::Image((void*)viewportTex, windowSize);
@@ -553,7 +547,6 @@ inline void drawViewport() {
     ImGui::End();
 }
 
-
 inline void drawStyleEditor() {
     if (ImGui::Begin("Style Editor")) {
         ImGui::PushFont(guicfg::regularFont);
@@ -561,28 +554,26 @@ inline void drawStyleEditor() {
         ImGui::PopFont();
     }
     ImGui::End();
-
 }
 
 inline void drawEntities() {
     if (ImGui::Begin("Entities")) {
         ImGui::PushFont(guicfg::regularFont);
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
-            if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
-                ImGuiTreeNodeFlags_DefaultOpen,"%s", scene.entities[i].name.c_str())) {
+            if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen,
+                    "%s", scene.entities[i].name.c_str())) {
                 if (ImGui::IsItemClicked()) {
                     if (scene.selectedEntity != &scene.entities[i]) {
                         scene.selectedEntity = &scene.entities[i];
                     }
                 }
-                //TODO:display children if open
+                // TODO:display children if open
                 ImGui::TreePop();
             }
         }
 
-
-        //draw invisible button to allow context menu for full window
-        //TODO - adjust size and pos when entity children are implemented
+        // draw invisible button to allow context menu for full window
+        // TODO - adjust size and pos when entity children are implemented
         ImGui::SetCursorPos(ImVec2(.0f, .0f));
         ImVec2 buttonSize = ImGui::GetWindowSize();
         float borderSize = ImGui::GetStyle().WindowBorderSize;
@@ -611,9 +602,7 @@ inline void drawEntities() {
     }
 
     ImGui::End();
-
 }
-
 
 void drawComponentProps(TransformComponent& component) {
     ImGui::InputFloat3("Position", &component.position[0]);
@@ -624,16 +613,16 @@ void drawComponentProps(TransformComponent& component) {
 inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
         ImGui::PushFont(guicfg::regularFont);
-        //TODO properties for other item types
+        // TODO properties for other item types
         if (scene.selectedEntity == nullptr) {
             ImGui::Text("Select an Entity to show it's components");
         }
         else {
             for (unsigned int i = 0; i < scene.selectedEntity->components.size(); i++) {
                 if (ImGui::TreeNodeEx(scene.selectedEntity->components[i]->name.c_str())) {
-                    //already running into polymorphism caveats
-                    if (TransformComponent* transform = dynamic_cast<TransformComponent*>
-                        (scene.selectedEntity->components[i])) {
+                    // already running into polymorphism caveats
+                    if (TransformComponent* transform = dynamic_cast<TransformComponent*>(
+                            scene.selectedEntity->components[i])) {
                         drawComponentProps(*transform);
                     }
 
@@ -647,14 +636,14 @@ inline void drawProperties() {
 }
 
 inline void drawLevels() {
-    static assetfolder::AssetDescriptor currLevelDir = { "","",
-        assetfolder::AssetDescriptor::EFileType::INVALID };
+    static assetfolder::AssetDescriptor currLevelDir = {
+        "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
     static std::vector<assetfolder::AssetDescriptor> levelDescriptors;
     static int selectedLevel = -1;
 
     if (ImGui::Begin("Levels")) {
         ImGui::PushFont(guicfg::regularFont);
-        //refresh levels if needed
+        // refresh levels if needed
         if (queryLevelsFolder) {
             currLevelDir = assetfolder::getLevelsRootDir();
             if (currLevelDir.type == assetfolder::AssetDescriptor::EFileType::FOLDER)
@@ -666,7 +655,7 @@ inline void drawLevels() {
             selectedLevel = -1;
         }
 
-        //prepare ui sizes
+        // prepare ui sizes
         ImVec2 buttonSize = ImGui::GetWindowSize();
         float borderSize = ImGui::GetStyle().WindowBorderSize;
         ImVec2 padding = ImGui::GetStyle().WindowPadding;
@@ -675,50 +664,47 @@ inline void drawLevels() {
         // mv==rename in **NIX
         static int mvIdx;
         static std::string mvNameBuf;
-        static bool mvIsCurr=false;
-        static bool mvIsDef=false;
-        
-        //rename popup
-        if(ImGui::BeginPopup("##mvlvlpopup")){
-            if(ImGui::InputText("Name",&mvNameBuf,ImGuiInputTextFlags_EnterReturnsTrue|
-                ImGuiInputTextFlags_EscapeClearsAll)){
-                std::string newPath=currLevelDir.path+"/"+mvNameBuf;
-                std::rename(levelDescriptors[mvIdx].path.c_str(),
-                    newPath.c_str());
-                
-                if(mvIsDef){
-                    //update default level
+        static bool mvIsCurr = false;
+        static bool mvIsDef = false;
+
+        // rename popup
+        if (ImGui::BeginPopup("##mvlvlpopup")) {
+            if (ImGui::InputText("Name", &mvNameBuf,
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
+                std::string newPath = currLevelDir.path + "/" + mvNameBuf;
+                std::rename(levelDescriptors[mvIdx].path.c_str(), newPath.c_str());
+
+                if (mvIsDef) {
+                    // update default level
                     setDefaultLevel(newPath);
-                    saveProjectFile((activePath+"/project.json").c_str());
+                    saveProjectFile((activePath + "/project.json").c_str());
                 }
 
-                if(mvIsCurr){
-                    //update active level
-                    loadLevel(newPath.c_str(),scene);
-                    glfwSetWindowTitle(baseWindow, (mvNameBuf +
-                        " - ONO Engine").c_str());
-
+                if (mvIsCurr) {
+                    // update active level
+                    loadLevel(newPath.c_str(), scene);
+                    glfwSetWindowTitle(baseWindow, (mvNameBuf + " - ONO Engine").c_str());
                 }
 
-                queryLevelsFolder=true;
+                queryLevelsFolder = true;
                 ImGui::CloseCurrentPopup();
             }
-            else if(ImGui::IsKeyPressed(ImGuiKey_Escape))
+            else if (ImGui::IsKeyPressed(ImGuiKey_Escape))
                 ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
         }
 
-        bool useMvPopup=false;
-        //draw levels
-        for (unsigned int i = 0;i < levelDescriptors.size();i++) {
+        bool useMvPopup = false;
+        // draw levels
+        for (unsigned int i = 0; i < levelDescriptors.size(); i++) {
             ImGui::PushID(i);
             ImVec2 initialPos = ImGui::GetCursorPos();
             BeginGroup();
-            //text
-            ImGui::Text("%s",levelDescriptors[i].name.c_str());
+            // text
+            ImGui::Text("%s", levelDescriptors[i].name.c_str());
 
-            bool isCurrLvl=isCurrentLevel(levelDescriptors[i].name);
-            bool isDefLvl=isDefaultLevel(levelDescriptors[i].name);
+            bool isCurrLvl = isCurrentLevel(levelDescriptors[i].name);
+            bool isDefLvl = isDefaultLevel(levelDescriptors[i].name);
 
             if (isCurrLvl) {
                 ImGui::SameLine();
@@ -732,52 +718,52 @@ inline void drawLevels() {
 
             ImGui::SetCursorPos(initialPos);
 
-            //selectable over text
+            // selectable over text
             bool selected = (i == selectedLevel);
             if (ImGui::Selectable("##levelselectable", &selected, 0,
-                ImVec2(buttonSize.x, ImGui::GetItemRectSize().y))) {
+                    ImVec2(buttonSize.x, ImGui::GetItemRectSize().y))) {
                 selectedLevel = i;
             }
 
-            //popup
+            // popup
             if (ImGui::BeginPopupContextItem()) {
                 if (ImGui::MenuItem("Load Level")) {
-                    //load level and change window title
+                    // load level and change window title
                     loadLevel(levelDescriptors[i].path.c_str(), scene);
-                    glfwSetWindowTitle(baseWindow, (levelDescriptors[i].name +
-                        " - ONO Engine").c_str());
-                }
-                
-                if(ImGui::MenuItem("Rename")){
-                    mvIdx=i;
-                    mvIsDef=isDefLvl;
-                    mvIsCurr=isCurrLvl;
-                    mvNameBuf=levelDescriptors[i].name;
-                    useMvPopup=true;
+                    glfwSetWindowTitle(
+                        baseWindow, (levelDescriptors[i].name + " - ONO Engine").c_str());
                 }
 
-                if(ImGui::MenuItem("Delete")){
+                if (ImGui::MenuItem("Rename")) {
+                    mvIdx = i;
+                    mvIsDef = isDefLvl;
+                    mvIsCurr = isCurrLvl;
+                    mvNameBuf = levelDescriptors[i].name;
+                    useMvPopup = true;
+                }
+
+                if (ImGui::MenuItem("Delete")) {
                     std::remove(levelDescriptors[i].path.c_str());
-                    if(levelDescriptors.size()==1){
-                        //last descriptor - generate new empty one
-                        saveLevel((currLevelDir.path+"/default.json").c_str(),Scene());
-                        setDefaultLevel(currLevelDir.path+"/default.json");
+                    if (levelDescriptors.size() == 1) {
+                        // last descriptor - generate new empty one
+                        saveLevel((currLevelDir.path + "/default.json").c_str(), Scene());
+                        setDefaultLevel(currLevelDir.path + "/default.json");
                         saveProjectFile((activePath + "/project.json").c_str());
-                        loadLevel((currLevelDir.path+"/default.json").c_str(),scene);
+                        loadLevel((currLevelDir.path + "/default.json").c_str(), scene);
                     }
-                    else if(isCurrLvl){
-                        //current level deleted - switch to another
-                        int nextIdx=(i==0)?i+1:i-1;
-                        loadLevel(levelDescriptors[nextIdx].path.c_str(),scene);
+                    else if (isCurrLvl) {
+                        // current level deleted - switch to another
+                        int nextIdx = (i == 0) ? i + 1 : i - 1;
+                        loadLevel(levelDescriptors[nextIdx].path.c_str(), scene);
                     }
-                    else if(isDefLvl){
-                        //default level deleted - switch default
-                        int nextIdx=(i==0)?i+1:i-1;
+                    else if (isDefLvl) {
+                        // default level deleted - switch default
+                        int nextIdx = (i == 0) ? i + 1 : i - 1;
                         setDefaultLevel(levelDescriptors[nextIdx].path.c_str());
-                        saveProjectFile((activePath+"/project.json").c_str());
+                        saveProjectFile((activePath + "/project.json").c_str());
                     }
-                    queryLevelsFolder=true;
-                } 
+                    queryLevelsFolder = true;
+                }
 
                 if (ImGui::MenuItem("Set as Default")) {
                     setDefaultLevel(levelDescriptors[i].path);
@@ -789,16 +775,16 @@ inline void drawLevels() {
             ImGui::PopID();
         }
 
-        //check for rename popup
-        if(useMvPopup)
+        // check for rename popup
+        if (useMvPopup)
             ImGui::OpenPopup("##mvlvlpopup");
 
-        //define new level popup
+        // define new level popup
         if (ImGui::BeginPopup("##newlvlpopup")) {
             std::string buf;
-            if (ImGui::InputText("Name ##newlvl", &buf, ImGuiInputTextFlags_EnterReturnsTrue |
-                ImGuiInputTextFlags_EscapeClearsAll)) {
-                //save new empty level
+            if (ImGui::InputText("Name ##newlvl", &buf,
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
+                // save new empty level
                 std::string lvlName = currLevelDir.path + "/" + buf + ".json";
                 saveLevel(lvlName.c_str(), Scene());
                 queryLevelsFolder = true;
@@ -809,7 +795,7 @@ inline void drawLevels() {
             ImGui::EndPopup();
         }
 
-        //check for new level popup
+        // check for new level popup
         if (ImGui::Button("New Level"))
             ImGui::OpenPopup("##newlvlpopup");
 
@@ -828,8 +814,8 @@ inline void drawLevels() {
     ImGui::End();
 }
 
-void prepUI(GLFWwindow* window, const char* executablePath, float dt,
-    int viewportWidth, int viewportHeight) {
+void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,
+    int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -837,7 +823,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     // ImVec2 mousePos = ImGui::GetMousePos();
 
-    //adjust fullscreen windows size to account for menubar
+    // adjust fullscreen windows size to account for menubar
     float mainMenuHeight = drawMainMenu(executablePath);
     windowSize.y -= mainMenuHeight;
 
@@ -847,30 +833,35 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     static ImGuiID dockBotRight;
     static ImGuiID dockBotLeft;
 
-    //TODO save and load dock state
-    //create layout if not present already
+    // TODO save and load dock state
+    // create layout if not present already
     ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
     ImGui::SetNextWindowSize(windowSize);
-    if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
+    if (ImGui::Begin("##FullscreenWindow", nullptr,
+            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoDocking)) {
 
         ImGuiID dockId = ImGui::GetID("DockspaceDefault");
         ImGui::DockSpace(dockId);
         static bool dockSpaceInit = false;
         if (!dockSpaceInit) {
-            //create initial empty node
+            // create initial empty node
             ImGui::DockBuilderRemoveNode(dockId);
             dockCenter = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockCenter, windowSize);
             ImGui::DockBuilderSetNodePos(dockCenter, ImGui::GetMainViewport()->Pos);
 
-            //split vertically
-            dockBotRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
-            dockBotLeft = ImGui::DockBuilderSplitNode(dockBotRight, ImGuiDir_Left, .5f, NULL, &dockBotRight);
+            // split vertically
+            dockBotRight =
+                ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
+            dockBotLeft =
+                ImGui::DockBuilderSplitNode(dockBotRight, ImGuiDir_Left, .5f, NULL, &dockBotRight);
 
-            //split horizontally twice
-            dockLeft = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Left, .25f, NULL, &dockCenter);
-            dockRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Right, .25f, NULL, &dockCenter);
+            // split horizontally twice
+            dockLeft =
+                ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Left, .25f, NULL, &dockCenter);
+            dockRight =
+                ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Right, .25f, NULL, &dockCenter);
 
             ImGui::DockBuilderFinish(dockId);
             dockSpaceInit = true;
@@ -879,7 +870,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     ImGui::End();
 
-    //TODO undocked windows in front
+    // TODO undocked windows in front
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawLevels();
 
@@ -901,15 +892,14 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
 
-    //prepare gui for rendering
+    // prepare gui for rendering
     ImGui::Render();
 }
 
 void drawUI() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
