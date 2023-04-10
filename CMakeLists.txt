@@ -13,7 +13,7 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 #setup executables
 add_executable(
     ${PROJECT_NAME} src/main.cpp src/drawing.cpp external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-)
+ "src/virtual_keys/virtual_keys.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

@@ -22,6 +22,7 @@
 
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
 #include "drawing.h"
+#include "virtual_keys/virtual_keys.h"
 
 struct LogString {
 private:
@@ -118,6 +119,9 @@ int main() {
 #endif
 
     _chdir(executablePath);
+    
+    
+    VirtualKeys vk;
 
 
     //init glfw and setup window
@@ -128,6 +132,8 @@ int main() {
     //create window
     window = glfwCreateWindow(1600, 900, "Build System Test", NULL, NULL);
     glfwMakeContextCurrent(window);
+    glfwSetWindowUserPointer(window, &vk);
+    glfwSetKeyCallback(window, VirtualKeys::glfw_callback_wrapper);
 
     //setup OpenGL
     GLenum err = glewInit();
@@ -202,6 +208,42 @@ int main() {
 
                 }
             }
+            ImGui::End();
+        }
+
+        ImGui::SetNextWindowContentSize(ImVec2(400, 0.0f));
+        if (ImGui::Begin("Virtual Keys", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::Button("Add Key")) {
+                vk.addKey();
+            }
+            for (unsigned int i = 0; i < vk.virtualKeys.size(); i++) {
+                ImGui::Columns(4);
+                ImGui::Text("%s", vk.virtualKeys.at(i).name.c_str());
+                ImGui::NextColumn();
+                if (vk.virtualKeys.at(i).key == -1) {
+                    ImGui::Text("Key Not Set");
+                }
+                else {
+                    const char* keyName = glfwGetKeyName(vk.virtualKeys.at(i).key, 0);
+                    ImGui::Text("%s", keyName);
+                }
+                ImGui::NextColumn();
+                if (ImGui::Button("Set Key")) {
+                    std::string ki = std::to_string(i);
+                    const char* keyindex = ki.c_str();
+                    logString += "Starting scan for key ";
+                    logString += keyindex;
+                    logString += "\n";
+                    vk.listeningForKey = true;
+                    vk.listeningForKeyIndex = i;
+                }
+                ImGui::NextColumn();
+                if (ImGui::Button("Remove Key")) {
+                    vk.removeKey(i);
+                }
+                ImGui::NextColumn();
+            }
+
             ImGui::End();
         }
 
