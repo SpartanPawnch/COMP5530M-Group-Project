@@ -1,3 +1,3 @@
-logInfo("Hello from Lua!\n")
-logWarn("Warning from Lua!\n")
-logErr("Error from Lua!\n")
+logging.logInfo("Hello from Lua!\n")
+logging.logWarn("Warning from Lua!\n")
+logging.logErr("Error from Lua!\n")

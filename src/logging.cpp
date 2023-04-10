@@ -63,9 +63,11 @@ namespace logging {
         logger->set_pattern("%v");
 
         // export log functions to lua
-        scripting::registerFunction("logInfo", &luaLogInfo);
-        scripting::registerFunction("logWarn", &luaLogWarn);
-        scripting::registerFunction("logErr", &luaLogErr);
+        scripting::beginModule(3);
+        scripting::registerModuleFunction("logInfo", &luaLogInfo);
+        scripting::registerModuleFunction("logWarn", &luaLogWarn);
+        scripting::registerModuleFunction("logErr", &luaLogErr);
+        scripting::finalizeModule("logging");
     }
     LogManager::~LogManager() {
     }
