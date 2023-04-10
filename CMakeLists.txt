@@ -15,12 +15,13 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp" "${IMGUIDIR}/bac
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp  external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS} src/model_import/model.cpp src/model_import/mesh.cpp)
+    ${PROJECT_NAME} src/main.cpp src/drawing.cpp  external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS} "src/model_import/model.cpp" "src/model_import/mesh.cpp" "src/skeletalmesh_import/skeletalmodel.cpp" "src/skeletalmesh_import/skeletalmesh.cpp" "src/skeletalmesh_import/animation.cpp" "src/skeletalmesh_import/bone.cpp" "src/skeletalmesh_import/animator.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
 add_subdirectory("external/glfw-3.3.6")
 
 #add glew
