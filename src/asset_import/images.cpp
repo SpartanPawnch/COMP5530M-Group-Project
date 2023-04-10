@@ -4,10 +4,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../external/stb_image.h"
 
-#include<vector>
-#include<map>
-#include<string>
-#include<cstdio>
+#include <vector>
+#include <map>
+#include <string>
+#include <cstdio>
 
 #include "../logging.h"
 
@@ -19,13 +19,13 @@ int loadTexture(const char* filename, const std::string& uuid) {
     int width, height, channels;
     unsigned char* data = stbi_load(filename, &width, &height, &channels, 4);
 
-    //TODO proper log function
+    // TODO proper log function
     if (data == NULL) {
         logging::logErr("Failed to load texture {}\n", filename);
         return -1;
     }
 
-    //choose image format
+    // choose image format
     GLint format;
     switch (channels) {
     case 1:
@@ -42,7 +42,7 @@ int loadTexture(const char* filename, const std::string& uuid) {
         format = GL_RGBA;
     };
 
-    //create opengl texture
+    // create opengl texture
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
@@ -52,16 +52,16 @@ int loadTexture(const char* filename, const std::string& uuid) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     stbi_image_free(data);
 
-    //add texture to array if valid
+    // add texture to array if valid
     if (texID != 0) {
-        //try to add new texture
+        // try to add new texture
         if (uuidToIdx.count(uuid) == 0) {
-            textures.emplace_back(TextureInfo{ width,height,texID });
+            textures.emplace_back(TextureInfo{width, height, texID});
             uuidToIdx[uuid] = textures.size() - 1;
             return (textures.size() - 1);
         }
 
-        //replace existing otherwise
+        // replace existing otherwise
         int idx = uuidToIdx[uuid];
         glDeleteTextures(1, &textures[idx].id);
         textures[idx].id = texID;
@@ -69,8 +69,7 @@ int loadTexture(const char* filename, const std::string& uuid) {
         textures[idx].height = height;
     }
 
-
-    //something went wrong - return failure
+    // something went wrong - return failure
     logging::logErr("Failed to load texture {}\n", filename);
     return -1;
 }
@@ -79,14 +78,26 @@ const TextureInfo& getTexture(int i) {
     return textures[i];
 }
 
-
-const TextureInfo& getTexture(const std::string& uuid){
-    int idx=uuidToIdx[uuid];
+const TextureInfo& getTexture(const std::string& uuid) {
+    int idx = uuidToIdx[uuid];
     return textures[idx];
 }
 
-void clearTextures() {
-    for (unsigned int i = 0;i < textures.size();i++)
+static unsigned int staticThreshold = 0;
+
+void setTexturesStaticThreshold() {
+    staticThreshold = textures.size();
+}
+
+void clearDynamicTextures() {
+    for (unsigned int i = staticThreshold; i < textures.size(); i++)
+        glDeleteTextures(1, &textures[i].id);
+    textures.resize(staticThreshold);
+    // TODO clear map appropriately
+}
+
+void clearAllTextures() {
+    for (unsigned int i = 0; i < textures.size(); i++)
         glDeleteTextures(1, &textures[i].id);
     textures.clear();
     uuidToIdx.clear();

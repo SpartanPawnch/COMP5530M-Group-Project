@@ -176,6 +176,9 @@ GUIManager::GUIManager(GLFWwindow* window) {
     fileTexture = loadTexture("assets/fileico.png", "assets/fileico.png");
     folderTexture = loadTexture("assets/folderico.png", "assets/folderico.png");
 
+    // don't unload ui elements
+    setTexturesStaticThreshold();
+
     // create viewport framebuffer
     glGenFramebuffers(1, &viewportFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
@@ -365,7 +368,7 @@ inline void drawTextureDebug() {
                 "Load Texture", NULL, sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
             if (!path.empty()) {
-                clearTextures();
+                clearDynamicTextures();
                 activeTexture = loadTexture(path.c_str(), path.c_str());
             }
         }
