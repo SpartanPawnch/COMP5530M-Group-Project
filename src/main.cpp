@@ -218,8 +218,9 @@ int main() {
             }
             for (unsigned int i = 0; i < vk.virtualKeys.size(); i++) {
                 ImGui::PushID(i);
-                ImGui::Columns(4);
-                ImGui::Text("%s", vk.virtualKeys.at(i).name.c_str());
+                ImGui::Columns(5);
+                ImGui::InputText("##name", &vk.virtualKeys[i].name[0], vk.virtualKeys[0].name.capacity());
+                vk.virtualKeys[i].name.resize(std::strlen(&vk.virtualKeys[i].name[0]));
                 ImGui::NextColumn();
                 if (vk.virtualKeys.at(i).key == -1) {
                     ImGui::Text("Key Not Set");
@@ -228,6 +229,8 @@ int main() {
                     const char* keyName = glfwGetKeyName(vk.virtualKeys.at(i).key, 0);
                     ImGui::Text("%s", keyName);
                 }
+                ImGui::NextColumn();
+                ImGui::InputFloat("##direction", &vk.virtualKeys.at(i).direction);
                 ImGui::NextColumn();
                 if (ImGui::Button("Set Key")) {
                     std::string ki = std::to_string(i);

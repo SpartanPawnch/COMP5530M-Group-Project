@@ -27,7 +27,7 @@ void VirtualKeys::glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aSc
 	}
 	for (unsigned int i = 0; i < virtualKeys.size(); i++) {
 		if (virtualKeys.at(i).key == aKey) {
-			std::cout << "Fired event " << virtualKeys.at(i).name << std::endl;
+			std::cout << "Fired event " << virtualKeys.at(i).name << " in the " << virtualKeys.at(i).direction << " direction" << std::endl;
 		}
 	}
 }
