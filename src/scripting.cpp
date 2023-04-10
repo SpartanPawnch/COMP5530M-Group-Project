@@ -30,7 +30,13 @@ namespace scripting {
         lua_close(luaState);
     }
 
-    void registerFunction(lua_CFunction fun) {
-        lua_pushcfunction(luaState, fun);
+    void registerFunction(const char* name, lua_CFunction fun) {
+        // table-based namespacing
+        lua_register(luaState, name, fun);
     }
+
+    void runFile(const char* path) {
+        luaL_dofile(luaState, path);
+    }
+
 }

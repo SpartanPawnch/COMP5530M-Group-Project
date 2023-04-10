@@ -7,5 +7,6 @@ namespace scripting {
         ~ScriptManager();
     };
 
-    void registerFunction(lua_CFunction fun);
+    void registerFunction(const char* name, lua_CFunction fun);
+    void runFile(const char* path);
 }

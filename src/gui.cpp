@@ -25,6 +25,7 @@
 #include "levels.h"
 #include "gui.h"
 #include "util.h"
+#include "scripting.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
@@ -335,8 +336,8 @@ inline void drawModelDemo() {
                 model.loadModel(path);
             }
         }
-        ImGui::Text("Model Meshes: %d", model.meshes.size());
-        ImGui::Text("Model Textures: %d", model.textures_loaded.size());
+        ImGui::Text("Model Meshes: %ul", model.meshes.size());
+        ImGui::Text("Model Textures: %ul", model.textures_loaded.size());
         ImGui::Text("From: %s", model.directory.c_str());
         ImGui::PopFont();
     }
@@ -817,6 +818,20 @@ inline void drawLevels() {
     ImGui::End();
 }
 
+inline void drawScriptDemo() {
+    if (ImGui::Begin("Scripting")) {
+        ImGui::PushFont(guicfg::regularFont);
+        if (ImGui::Button("Open Script")) {
+            std::string path = fdutil::openFile("Open Script", nullptr, 0, nullptr, nullptr);
+            if (!path.empty()) {
+                scripting::runFile(path.c_str());
+            }
+        }
+        ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,
     int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -894,6 +909,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
+
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawScriptDemo();
 
     // prepare gui for rendering
     ImGui::Render();

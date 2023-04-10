@@ -20,10 +20,35 @@ namespace logging {
     // --- Lua Function Definitions ---
     static int luaLogInfo(lua_State* L) {
         int argc = lua_gettop(L);
-        for (int i = 0; i < argc; i++) {
+        for (int i = 1; i <= argc; i++) {
             size_t len;
             const char* msg = lua_tolstring(L, i, &len);
-            logInfo("{}", msg);
+            if (msg)
+                logInfo("LUA: {}", msg);
+        }
+
+        return 0;
+    }
+
+    static int luaLogWarn(lua_State* L) {
+        int argc = lua_gettop(L);
+        for (int i = 1; i <= argc; i++) {
+            size_t len;
+            const char* msg = lua_tolstring(L, i, &len);
+            if (msg)
+                logWarn("LUA WARN: {}", msg);
+        }
+
+        return 0;
+    }
+
+    static int luaLogErr(lua_State* L) {
+        int argc = lua_gettop(L);
+        for (int i = 1; i <= argc; i++) {
+            size_t len;
+            const char* msg = lua_tolstring(L, i, &len);
+            if (msg)
+                logErr("LUA ERROR: {}", msg);
         }
 
         return 0;
@@ -38,7 +63,9 @@ namespace logging {
         logger->set_pattern("%v");
 
         // export log functions to lua
-        scripting::registerFunction(&luaLogInfo);
+        scripting::registerFunction("logInfo", &luaLogInfo);
+        scripting::registerFunction("logWarn", &luaLogWarn);
+        scripting::registerFunction("logErr", &luaLogErr);
     }
     LogManager::~LogManager() {
     }
