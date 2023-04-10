@@ -217,6 +217,7 @@ int main() {
                 vk.addKey();
             }
             for (unsigned int i = 0; i < vk.virtualKeys.size(); i++) {
+                ImGui::PushID(i);
                 ImGui::Columns(4);
                 ImGui::Text("%s", vk.virtualKeys.at(i).name.c_str());
                 ImGui::NextColumn();
@@ -242,6 +243,7 @@ int main() {
                     vk.removeKey(i);
                 }
                 ImGui::NextColumn();
+                ImGui::PopID();
             }
 
             ImGui::End();
