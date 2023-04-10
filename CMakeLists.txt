@@ -24,14 +24,19 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp"
   "${IMGUIDIR}/misc/cpp/imgui_stdlib.cpp"
 )
 
+#setup lua interpreter
+set(LUADIR "external/lua-5.4.4/src")
+include_directories(${LUADIR})
+aux_source_directory("${LUADIR}/" LUASRC)
+
 #setup executables
 add_executable(
     ${PROJECT_NAME} src/main.cpp src/drawing.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-    src/asset_import/audio.cpp src/asset_import/images.cpp
+    ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
-    src/logging.cpp src/gui.cpp
+    src/logging.cpp src/gui.cpp src/scripting.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
     src/ECS/Component/TransformComponent.cpp
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
@@ -56,6 +61,8 @@ add_subdirectory("external/glm")
 
 #add spdlog
 add_subdirectory("external/spdlog")
+
+
 
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
