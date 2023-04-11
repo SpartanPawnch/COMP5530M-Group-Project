@@ -13,6 +13,7 @@
 
 #include "logging.h"
 #include "util.h"
+#include "scripting.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
@@ -55,8 +56,9 @@ void loadLevel(const char* path, Scene& scene) {
     assert(doc.IsObject());
 
     // clear all assets
-    audio::audioClearAll();
+    audio::clearAudio();
     clearDynamicTextures();
+    scripting::clearScripts();
     // TODO move cleanup to entity destructor
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         for (unsigned int j = 0; j < scene.entities[i].components.size(); j++) {

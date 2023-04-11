@@ -374,7 +374,7 @@ inline void drawTextureDebug() {
             }
         }
         if (activeTexture != -1) {
-            TextureInfo texInfo = getTexture(activeTexture);
+            const TextureInfo& texInfo = getTexture(activeTexture);
             ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
         }
         ImGui::PopFont();
@@ -459,11 +459,11 @@ inline void drawAssetBrowser() {
                 ImGui::BeginGroup();
                 // icon
                 if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                    TextureInfo texInfo = getTexture(folderTexture);
+                    const TextureInfo& texInfo = getTexture(folderTexture);
                     ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
                 }
                 else {
-                    TextureInfo texInfo = getTexture(fileTexture);
+                    const TextureInfo& texInfo = getTexture(fileTexture);
                     ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
                 }
 
@@ -821,10 +821,10 @@ inline void drawLevels() {
 inline void drawScriptDemo() {
     if (ImGui::Begin("Scripting")) {
         ImGui::PushFont(guicfg::regularFont);
-        if (ImGui::Button("Open Script")) {
+        if (ImGui::Button("Run Script from File")) {
             std::string path = fdutil::openFile("Open Script", nullptr, 0, nullptr, nullptr);
             if (!path.empty()) {
-                scripting::runFile(path.c_str());
+                scripting::runScript(path.c_str());
             }
         }
         ImGui::PopFont();

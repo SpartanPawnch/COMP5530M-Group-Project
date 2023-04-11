@@ -1,10 +1,10 @@
 #include "audio.h"
-#include<soloud.h>
-#include<soloud_wav.h>
-#include<string>
-#include<map>
-#include<vector>
-#include<memory>
+#include <soloud.h>
+#include <soloud_wav.h>
+#include <string>
+#include <map>
+#include <vector>
+#include <memory>
 
 #include "../logging.h"
 
@@ -12,31 +12,31 @@ namespace audio {
     static SoLoud::Soloud* pSoloud;
     static SoLoud::handle playbackHandle;
     static glm::vec3 position = glm::vec3(.0f);
-    //TODO - custom allocator
+    // TODO - custom allocator
     static std::unordered_map<std::string, int> uuidToIdx;
     static std::vector<std::shared_ptr<SoLoud::Wav>> loadedClips;
 
     AudioEngine::AudioEngine() {
-        //TODO - custom allocator
+        // TODO - custom allocator
         pSoloud = new SoLoud::Soloud();
         pSoloud->init();
     }
 
-    void audioClearAll() {
+    void clearAudio() {
         audioStopAll();
         uuidToIdx.clear();
         loadedClips.clear();
     }
 
     AudioEngine::~AudioEngine() {
-        //TODO - custom allocator
-        audioClearAll();
+        // TODO - custom allocator
+        clearAudio();
         pSoloud->deinit();
         delete pSoloud;
     }
 
     int audioLoad(const char* path, const std::string& uuid) {
-        //try to add new clip
+        // try to add new clip
         if (uuidToIdx.count(uuid) == 0) {
             loadedClips.emplace_back(std::make_shared<SoLoud::Wav>());
             SoLoud::result res = loadedClips.back()->load(path);
@@ -52,7 +52,7 @@ namespace audio {
             return -1;
         }
 
-        //replace old clip otherwise
+        // replace old clip otherwise
         int idx = uuidToIdx[uuid];
         loadedClips[idx]->load(path);
         return idx;
@@ -63,20 +63,17 @@ namespace audio {
     }
 
     void audioPlay(int id) {
-        playbackHandle = pSoloud->play3d(*loadedClips[id], position.x,
-            position.y, position.z);
+        playbackHandle = pSoloud->play3d(*loadedClips[id], position.x, position.y, position.z);
     }
 
     void audioPlay(const std::string& uuid) {
         int id = uuidToIdx[uuid];
-        playbackHandle = pSoloud->play3d(*loadedClips[id], position.x,
-            position.y, position.z);
+        playbackHandle = pSoloud->play3d(*loadedClips[id], position.x, position.y, position.z);
     }
 
     void audioSetPosition(const glm::vec3& pos) {
         position = pos;
-        pSoloud->set3dSourcePosition(playbackHandle, position.x,
-            position.y, position.z);
+        pSoloud->set3dSourcePosition(playbackHandle, position.x, position.y, position.z);
         pSoloud->update3dAudio();
     }
 
