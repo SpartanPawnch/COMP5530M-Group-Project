@@ -6,6 +6,7 @@
 
 #include "RenderPipeline.h"
 #include "Camera.h"
+#include "Buffer.h"
 
 #include <GLFW/glfw3.h>
 

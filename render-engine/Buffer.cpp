@@ -7,7 +7,7 @@
 #include "Buffer.h"
 
 
-void VertexBuffer::CreateBuffer(GLsizeiptr bufferSize_B, const void* data)
+VertexBuffer::VertexBuffer(GLsizeiptr bufferSize_B, const void* data)
 {
 
 	// VAO probably with shaders / or in fn thT CALLS THIS FUNCTION
@@ -30,7 +30,7 @@ void VertexBuffer::CreateBuffer(GLsizeiptr bufferSize_B, const void* data)
 }
 
 
-void IndexBuffer::CreateBuffer(GLsizeiptr bufferSize_B, const void* data)
+IndexBuffer::IndexBuffer(GLsizeiptr bufferSize_B, const void* data)
 {
 	glGenBuffers(1, &indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer); //Should go seperate?

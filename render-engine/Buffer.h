@@ -8,7 +8,7 @@ private:
 	GLuint vertexBuffer;
 
 public:
-	void CreateBuffer(GLsizeiptr bufferSize_B, const void* data);
+	VertexBuffer(GLsizeiptr bufferSize_B, const void* data);
 
 
 };
@@ -19,7 +19,7 @@ private:
 	GLuint indexBuffer;
 
 public:
-	void CreateBuffer(GLsizeiptr bufferSize_B, const void* data);
+	IndexBuffer(GLsizeiptr bufferSize_B, const void* data);
 
 
 };
