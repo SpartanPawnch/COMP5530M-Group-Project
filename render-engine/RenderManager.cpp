@@ -122,9 +122,38 @@ void RenderManager::loadScene()
 }
 
 
-void RenderManager::renderScene(Camera camera, GLFWwindow* window)
+void RenderManager::renderScene(Camera* camera, GLFWwindow* window)
 {
+	// get window dimensions
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	//update matrices
+	updateMatrices(&width, &height);
+
+	//adapt to resize
+	glViewport(0, 0, width, height);
+
+
+	//draw background
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//RENDERING
+	glUseProgram(getPipeline(0)->getProgram());
+
+	////handle for uniforms
+	GLuint ModelID = glGetUniformLocation(getPipeline(0)->getProgram(), "model");
+	GLuint ViewID = glGetUniformLocation(getPipeline(0)->getProgram(), "view");
+	GLuint ProjectionID = glGetUniformLocation(getPipeline(0)->getProgram(), "projection");
+
+	glUniformMatrix4fv(ModelID, 1, GL_FALSE, &modelMatrix[0][0]);
+	glUniformMatrix4fv(ViewID, 1, GL_FALSE, &viewMatrix[0][0]);
+	glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
+
+	//// Render the cube
 	glBindVertexArray(getPipeline(0)->getVAO());
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+
 }

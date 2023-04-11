@@ -318,8 +318,8 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
+        //int width, height;
+        //glfwGetFramebufferSize(window, &width, &height);
 
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
@@ -330,7 +330,7 @@ int main() {
         previous_time = current_time;
 
         //update matrices
-        renderManager->updateMatrices(&width, &height);
+        //renderManager->updateMatrices(&width, &height);
 
         //prepare gui
         ImGui_ImplOpenGL3_NewFrame();
@@ -391,11 +391,12 @@ int main() {
 
         //--- Draw Results ---
         //adapt to resize
-        glViewport(0, 0, width, height);
+        //glViewport(0, 0, width, height);
 
         //prepare gui for rendering
         ImGui::Render();
-
+        renderManager->renderScene(renderManager->camera, window);
+        /*
         //draw background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -416,7 +417,7 @@ int main() {
         glBindVertexArray(renderManager->getPipeline(0)->getVAO());
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-
+        */
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);

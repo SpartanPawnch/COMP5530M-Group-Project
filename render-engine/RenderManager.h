@@ -82,7 +82,7 @@ public:
 
 	// Load Models, Cameras, Lights, Shaders etc to RenderEngine
 	void loadScene(); 
-	void renderScene(Camera camera, GLFWwindow* window);
+	void renderScene(Camera* camera, GLFWwindow* window);
 
 	void updateMatrices(int* width, int* height);
 
