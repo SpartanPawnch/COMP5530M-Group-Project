@@ -296,23 +296,22 @@ int main() {
     renderManager->addPipeline(vertexPath, fragPath);
 
     //vertex array object (VAO)
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    //GLuint VAO;
+    //glGenVertexArrays(1, &VAO);
+    //glBindVertexArray(VAO);
 
     //create vertex buffer object(VBO)
-    VertexBuffer posVBO(sizeof(cubePositions), cubePositions);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
+    VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+   // glEnableVertexAttribArray(0);
 
-    VertexBuffer colVBO(sizeof(cubeColors), cubeColors);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(1);
+    VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    //glEnableVertexAttribArray(1);
 
     //create an element buffer object for the indices
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
  
-
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -416,7 +415,7 @@ int main() {
         glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &renderManager->projectionMatrix[0][0]);
 
         //// Render the cube
-        glBindVertexArray(VAO);
+        glBindVertexArray(renderManager->getPipeline(0)->getVAO());
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 

@@ -80,6 +80,8 @@ public:
 	// To create the Pipeline-Entity Map
 	void addEntityToPipeline();
 
+	// Load Models, Cameras, Lights etc to RenderEngine
+	void loadScene(); 
 	void renderScene(Camera camera, GLFWwindow* window);
 
 	void updateMatrices(int* width, int* height);
@@ -90,5 +92,7 @@ public:
 	{
 		return &this->pipelines[index];
 	}
+
+
 
 };

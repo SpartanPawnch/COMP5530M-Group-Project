@@ -21,7 +21,14 @@ private:
 	GLuint teseShader;
 	GLuint geometryShader;
 
+	GLuint VAO;
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
+	void createProgram(const char* vertexPath,
+		const char* fragmentPath,
+		const char* geometryPath,
+		const char* computePath,
+		const char* tessControlPath,
+		const char* tessEvalPath);
 
 public:
 
@@ -33,8 +40,12 @@ public:
 		const char* tessEvalPath = nullptr);
 
 	GLuint getProgram();
+	GLuint getVAO();
 
 	~RenderPipeline();
 
+
+
 	void setAttributeLayouts();
+
 };

@@ -7,7 +7,9 @@
 #include "Buffer.h"
 
 
-VertexBuffer::VertexBuffer(GLsizeiptr bufferSize_B, const void* data)
+
+
+VertexBuffer::VertexBuffer(GLsizeiptr bufferSize_B, const void* data, VertexBufferType bufferType)
 {
 
 	// VAO probably with shaders / or in fn thT CALLS THIS FUNCTION
@@ -16,7 +18,12 @@ VertexBuffer::VertexBuffer(GLsizeiptr bufferSize_B, const void* data)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //Should go seperate?
 	glBufferData(GL_ARRAY_BUFFER, bufferSize_B, data, GL_STATIC_DRAW);
 
+	//
+	unsigned int elementSize = (bufferType == TextureCoordsBuffer) ? 2 : 3;
 
+	glVertexAttribPointer(bufferType, elementSize, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(bufferType);
+	
 	//Depends on the layout in the shader
 	//glEnableVertexAttribArray(0);
 	/*glVertexAttribPointer(

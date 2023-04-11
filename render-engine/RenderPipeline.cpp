@@ -1,5 +1,21 @@
 #include "RenderPipeline.h";
 
+
+RenderPipeline::RenderPipeline(const char* vertexPath,
+	const char* fragmentPath,
+	const char* geometryPath,
+	const char* computePath,
+	const char* tessControlPath,
+	const char* tessEvalPath)
+{
+	RenderPipeline::createProgram(vertexPath, fragmentPath, geometryPath,
+		computePath, tessControlPath, tessEvalPath);
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+		
+}
 //adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
 bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
@@ -49,7 +65,9 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
 	
 }
 
-RenderPipeline::RenderPipeline(const char* vertexPath,
+
+
+void RenderPipeline::createProgram(const char* vertexPath,
 	const char* fragmentPath,
 	const char* geometryPath,
 	const char* computePath,
@@ -139,4 +157,9 @@ RenderPipeline::~RenderPipeline()
 GLuint RenderPipeline::getProgram()
 {
 	return this->shaderProgram;
+}
+
+GLuint RenderPipeline::getVAO()
+{
+	return this->VAO;
 }

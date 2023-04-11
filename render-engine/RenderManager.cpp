@@ -61,3 +61,17 @@ void RenderManager::updateMatrices(int* width, int* height)
 	this->viewMatrix = camera->getViewMatrix();
 	this->projectionMatrix = glm::perspective(glm::radians(45.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
+
+
+void RenderManager::loadScene()
+{
+
+}
+
+
+void RenderManager::renderScene(Camera camera, GLFWwindow* window)
+{
+	glBindVertexArray(getPipeline(0)->getVAO());
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
