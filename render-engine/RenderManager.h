@@ -4,7 +4,7 @@
 #include <fstream>
 #include <vector>
 
-#include "ShaderProgram.h"
+#include "RenderPipeline.h"
 #include "Camera.h"
 
 #include <GLFW/glfw3.h>
@@ -36,7 +36,7 @@ private:
 public:
 
 	//members
-	std::vector<ShaderProgram> programs;
+	std::vector<RenderPipeline> programs;
 	Camera* camera;
 
 	double deltaTime;
@@ -54,7 +54,7 @@ public:
 
 	void startUp(GLFWwindow* aWindow);
 
-	void addProgram(ShaderProgram aProgram);
+	void addProgram(RenderPipeline aProgram);
 
 	void updateMatrices(int* width, int* height);
 

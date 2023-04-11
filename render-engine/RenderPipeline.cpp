@@ -1,7 +1,7 @@
-#include "ShaderProgram.h";
+#include "RenderPipeline.h";
 
 //adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
-bool ShaderProgram::readAndCompileShader(const char* shaderPath, const GLuint& id)
+bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
 	std::string shaderCode;
 	std::ifstream shaderFile;
@@ -49,7 +49,7 @@ bool ShaderProgram::readAndCompileShader(const char* shaderPath, const GLuint& i
 	
 }
 
-ShaderProgram::ShaderProgram(const char* vertexPath,
+RenderPipeline::RenderPipeline(const char* vertexPath,
 	const char* fragmentPath,
 	const char* geometryPath,
 	const char* computePath,
@@ -131,12 +131,12 @@ ShaderProgram::ShaderProgram(const char* vertexPath,
 
 }
 
-ShaderProgram::~ShaderProgram()
+RenderPipeline::~RenderPipeline()
 {
 	
 }
 
-GLuint ShaderProgram::getProgram()
+GLuint RenderPipeline::getProgram()
 {
 	return this->shaderProgram;
 }

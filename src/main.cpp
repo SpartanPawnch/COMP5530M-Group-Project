@@ -292,7 +292,7 @@ int main() {
     //init shader
     const char* vertexPath = "../../../assets/shaders/colours.vert";
     const char* fragPath = "../../../assets/shaders/colours.frag";
-    ShaderProgram* program = new ShaderProgram(vertexPath, fragPath);
+    RenderPipeline* program = new RenderPipeline(vertexPath, fragPath);
     renderManager->addProgram(*program);
 
     //vertex array object (VAO)

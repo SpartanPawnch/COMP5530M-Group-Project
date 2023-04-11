@@ -9,17 +9,8 @@
 
 
 
-class ShaderProgram
+class RenderPipeline
 {
-	enum ShaderStage
-	{
-		VertexShader = 0,
-		FragmentShader = 1,
-		GeometryShader = 2,
-		ComputeShader = 3,
-		TessellationControlShader = 4,
-		TessellationEvaluationShader = 5
-	};
 
 private:
 	GLuint shaderProgram;
@@ -34,7 +25,7 @@ private:
 
 public:
 
-	ShaderProgram(const char* vertexPath,
+	RenderPipeline(const char* vertexPath,
 		const char* fragmentPath,
 		const char* geometryPath = nullptr,
 		const char* computePath = nullptr,
@@ -43,5 +34,7 @@ public:
 
 	GLuint getProgram();
 
-	~ShaderProgram();
+	~RenderPipeline();
+
+	void setAttributeLayouts();
 };

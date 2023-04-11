@@ -44,7 +44,7 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	this->projectionMatrix = glm::mat4(1.0f);
 }
 
-void RenderManager::addProgram(ShaderProgram aProgram)
+void RenderManager::addProgram(RenderPipeline aProgram)
 {
 	this->programs.push_back(aProgram);
 }
