@@ -23,6 +23,12 @@ private:
 	//test output writing for RenderEngine
 	//std::ofstream testOutput;
 
+	//Available Render Pipelines
+	std::vector <RenderPipeline> pipelines; //Pipeline refers to a shader program
+
+	//considering windows
+	//std::vector <GLFWwindow*> windows;
+
 	//default constructor does nothing
 	RenderManager() {}
 
@@ -36,10 +42,13 @@ private:
 public:
 
 	//members
-	std::vector<RenderPipeline> programs;
+	//std::vector<RenderPipeline> programs;
 	Camera* camera;
+	Camera* previewCamera;
 
 	double deltaTime;
+
+	//mouse input variables
 	double xPos, yPos, xPosLast, yPosLast;
 	double xOffset, yOffset;
 	bool firstRClick;
@@ -56,8 +65,29 @@ public:
 
 	void addProgram(RenderPipeline aProgram);
 
+	void addCamera();
+
+	void addPipeline(const char* vertexPath,
+		const char* fragmentPath,
+		const char* geometryPath = nullptr,
+		const char* computePath = nullptr,
+		const char* tessControlPath = nullptr,
+		const char* tessEvalPath = nullptr);
+
+	//void AddWindow(int width, int height, const char* windowTitle);
+
+	// To create the Pipeline-Entity Map
+	void addEntityToPipeline();
+
+	void renderScene(Camera camera, GLFWwindow* window);
+
 	void updateMatrices(int* width, int* height);
 
 	void shutDown();
+
+	RenderPipeline* getPipeline(std::size_t index) 
+	{
+		return &this->pipelines[index];
+	}
 
 };

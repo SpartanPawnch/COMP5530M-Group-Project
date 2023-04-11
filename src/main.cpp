@@ -292,8 +292,8 @@ int main() {
     //init shader
     const char* vertexPath = "../../../assets/shaders/colours.vert";
     const char* fragPath = "../../../assets/shaders/colours.frag";
-    RenderPipeline* program = new RenderPipeline(vertexPath, fragPath);
-    renderManager->addProgram(*program);
+ //   RenderPipeline* program = new RenderPipeline(vertexPath, fragPath);
+    renderManager->addPipeline(vertexPath, fragPath);
 
     //vertex array object (VAO)
     GLuint VAO;
@@ -412,12 +412,12 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //RENDERING
-        glUseProgram(renderManager->programs[0].getProgram());
+        glUseProgram(renderManager->getPipeline(0)->getProgram());
 
         ////handle for uniforms
-        GLuint ModelID = glGetUniformLocation(renderManager->programs[0].getProgram(), "model");
-        GLuint ViewID = glGetUniformLocation(renderManager->programs[0].getProgram(), "view");
-        GLuint ProjectionID = glGetUniformLocation(renderManager->programs[0].getProgram(), "projection");
+        GLuint ModelID = glGetUniformLocation(renderManager->getPipeline(0)->getProgram(), "model");
+        GLuint ViewID = glGetUniformLocation(renderManager->getPipeline(0)->getProgram(), "view");
+        GLuint ProjectionID = glGetUniformLocation(renderManager->getPipeline(0)->getProgram(), "projection");
 
         glUniformMatrix4fv(ModelID, 1, GL_FALSE, &renderManager->modelMatrix[0][0]);
         glUniformMatrix4fv(ViewID, 1, GL_FALSE, &renderManager->viewMatrix[0][0]);

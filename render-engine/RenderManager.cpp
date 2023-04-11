@@ -26,7 +26,7 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	glfwSwapBuffers(aWindow);
 	glfwPollEvents();
 
-	this->programs.clear();
+	this->pipelines.clear();
 	this->deltaTime = 0.0f;
 	this->xPos = 0.0f;
 	this->yPos = 0.0f;
@@ -44,9 +44,13 @@ void RenderManager::startUp(GLFWwindow* aWindow)
 	this->projectionMatrix = glm::mat4(1.0f);
 }
 
-void RenderManager::addProgram(RenderPipeline aProgram)
+void RenderManager::addPipeline(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
+	const char* computePath, const char* tessControlPath, const char* tessEvalPath)
 {
-	this->programs.push_back(aProgram);
+	RenderPipeline newPipeline = RenderPipeline(vertexPath, fragmentPath, geometryPath,
+		computePath, tessControlPath, tessEvalPath);
+
+	this->pipelines.push_back(newPipeline);
 }
 
 void RenderManager::updateMatrices(int* width, int* height)
