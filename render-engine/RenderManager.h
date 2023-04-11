@@ -80,7 +80,7 @@ public:
 	// To create the Pipeline-Entity Map
 	void addEntityToPipeline();
 
-	// Load Models, Cameras, Lights etc to RenderEngine
+	// Load Models, Cameras, Lights, Shaders etc to RenderEngine
 	void loadScene(); 
 	void renderScene(Camera camera, GLFWwindow* window);
 

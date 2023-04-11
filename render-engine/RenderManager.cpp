@@ -66,6 +66,59 @@ void RenderManager::updateMatrices(int* width, int* height)
 void RenderManager::loadScene()
 {
 
+	//TODO: Remove this later and get these values from load-model
+	// Define the cube's vertices positions and colors separately
+	GLfloat cubePositions[] = {
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f
+	};
+
+	GLfloat cubeColors[] = {
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
+	// Define the cube's vertex indices
+	GLuint cubeIndices[] = {
+		0, 1, 2, 2, 3, 0,    // Front face
+		1, 5, 6, 6, 2, 1,    // Right face
+		4, 0, 3, 3, 7, 4,    // Left face
+		5, 4, 7, 7, 6, 5,    // Back face
+		3, 2, 6, 6, 7, 3,    // Top face
+		4, 5, 1, 1, 0, 4     // Bottom face
+	};
+
+	///////////////////////////////////////////////////////
+		
+	//TODO: change path
+	const char* vertexPath = "../../../assets/shaders/colours.vert";
+	const char* fragPath = "../../../assets/shaders/colours.frag";
+
+	addPipeline(vertexPath, fragPath);
+
+	//create vertex buffer object(VBO)
+	VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
+	VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
+
+	//create an element buffer object for the indices
+	IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+
+	//TODO: (Not sure how to manage the below)
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 }
 
 

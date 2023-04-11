@@ -24,6 +24,7 @@
 #include "../render-engine/RenderManager.h"
 #include "drawing.h"
 
+/*
 // Define the cube's vertices positions and colors separately
 GLfloat cubePositions[] = {
     -0.5f, -0.5f, -0.5f,
@@ -58,6 +59,7 @@ GLuint cubeIndices[] = {
     3, 2, 6, 6, 7, 3,    // Top face
     4, 5, 1, 1, 0, 4     // Bottom face
 };
+*/
 
 RenderManager* renderManager;
 
@@ -289,11 +291,12 @@ int main() {
 
     renderManager->startUp(window);
 
+    renderManager->loadScene();
     //init shader
-    const char* vertexPath = "../../../assets/shaders/colours.vert";
-    const char* fragPath = "../../../assets/shaders/colours.frag";
+    //const char* vertexPath = "../../../assets/shaders/colours.vert";
+   // const char* fragPath = "../../../assets/shaders/colours.frag";
  //   RenderPipeline* program = new RenderPipeline(vertexPath, fragPath);
-    renderManager->addPipeline(vertexPath, fragPath);
+   //renderManager->addPipeline(vertexPath, fragPath);
 
     //vertex array object (VAO)
     //GLuint VAO;
@@ -301,20 +304,15 @@ int main() {
     //glBindVertexArray(VAO);
 
     //create vertex buffer object(VBO)
-    VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-   // glEnableVertexAttribArray(0);
-
-    VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    //glEnableVertexAttribArray(1);
-
+    //VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
+    //VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
+   
     //create an element buffer object for the indices
-    IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+    //IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
  
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //glBindVertexArray(0);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     double previous_time = glfwGetTime();
 
