@@ -45,6 +45,7 @@ int main() {
 
     //init fluid drawing
     initGraphics();
+    //RenderEngine.start();
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions

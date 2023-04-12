@@ -43,6 +43,9 @@ add_executable(
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
     src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp 
     src/ECS/System/InterfaceSystem.cpp
+    render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
+    render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
+    render-engine/Buffer.h render-engine/Buffer.cpp
 )
 
 #add glfw

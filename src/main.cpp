@@ -27,6 +27,86 @@
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
 #include "model_import/model.h"
+#include "../render-engine/RenderManager.h"
+
+RenderManager* renderManager;
+
+void handleKeyboardInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        // Move the camera forward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        // Move the camera backward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        // Strafe the camera left
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        // Ascend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        // Descend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        // Reset camera position
+        renderManager->camera->resetPosition();
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+}
+
+void handleMouseInput(GLFWwindow* window) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        if (renderManager->camera->focusState == false) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderManager->camera->focusState = true;
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderManager->camera->focusState = false;
+        }
+
+        if (renderManager->firstRClick == true) {
+            renderManager->xPosLast = renderManager->xPos;
+            renderManager->yPosLast = renderManager->yPos;
+            renderManager->firstRClick = false;
+        }
+    }
+
+    if (renderManager->camera->focusState == true) {
+        // now we can change the orientation of the camera
+        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
+
+        // offset
+        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
+        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
+
+        // send data to camera
+        renderManager->camera->updateInput(
+            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+}
+// set renderEngine instance to nullptr initially
+RenderManager* RenderManager::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -65,7 +145,7 @@ int main() {
     }
 
     // swap buffers to avoid the window not responding
-    glClearColor(.7f, .7f, .7f, 1.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -76,8 +156,13 @@ int main() {
     // init logging
     logging::LogManager logMgr;
 
-    // init graphics
-    initGraphics();
+    // Render Engine
+    renderManager = RenderManager::getInstance();
+
+    renderManager->startUp(window);
+
+    renderManager->loadScene();
+    // init shader
 
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
@@ -90,11 +175,24 @@ int main() {
 
     GUIManager guiInstance(window);
 
+    double previous_time = glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
+
+        double current_time = glfwGetTime();
+        renderManager->deltaTime = current_time - previous_time;
+
+        // handle inputs
+        handleKeyboardInput(window);
+        handleMouseInput(window);
+        previous_time = current_time;
+
+        // update matrices
+        // renderManager->updateMatrices(&width, &height);
 
         // prepare gui
         prepUI(window, executablePath, currTime, width, height);
@@ -104,23 +202,12 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint attachment = GL_COLOR_ATTACHMENT0;
-        glDrawBuffers(1, &attachment);
+        GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        glDrawBuffers(2, attachments);
 
-        // draw background
-        glClearColor(.7f, .7f, .7f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // placeholder triangle to show viewport is working
-        // TODO replace ASAP
-        glBegin(GL_TRIANGLES);
-        glVertex2f(-.5f, .5f);
-        glColor3f(1.f, 1.f, .0f);
-        glVertex2f(.5f, .5f);
-        glColor3f(.0f, 1.f, 1.f);
-        glVertex2f(.0f, -.5f);
-        glColor3f(1.f, .0f, 1.f);
-        glEnd();
+        // draw scene
+        renderManager->renderSceneRefactor(
+            renderManager->camera, viewportTexWidth, viewportTexHeight);
 
         glFlush();
 
