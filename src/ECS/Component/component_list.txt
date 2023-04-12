@@ -1,0 +1,3 @@
+BaseComponent
+TransformComponent
+ScriptComponent
