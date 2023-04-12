@@ -135,6 +135,7 @@ static Scene scene;
 
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
+static GLuint viewportDepthBuf;
 
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
@@ -187,6 +188,13 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glGenTextures(1, &viewportTex);
     glBindTexture(GL_TEXTURE_2D, viewportTex);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, viewportTex, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenRenderbuffers(1, &viewportDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
+    glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
 }
@@ -545,7 +553,13 @@ inline void drawViewport() {
             GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        ImGui::Image((void*)viewportTex, windowSize);
+        glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
+        glRenderbufferStorage(
+            GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewportTexWidth, viewportTexHeight);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        // draw viewport
+        ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
     }
     ImGui::PopStyleVar(2);
     ImGui::End();

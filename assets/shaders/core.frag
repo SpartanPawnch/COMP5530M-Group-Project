@@ -35,6 +35,6 @@ void main()
     vec3 specularFinal = vec3(1.f, 1.f, 1.f) * specularConstant;
 
 
-    fs_color = texture(grassTexture, vs_tex_coordinate) *
+    fs_color = vec4(texture(grassTexture, vs_tex_coordinate).xyz,1.f) *
             (vec4(ambientLight, 1.f) + vec4(diffuseFinal, 1.f) + vec4(specularFinal,1.f));
 }
