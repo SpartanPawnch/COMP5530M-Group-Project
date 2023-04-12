@@ -10,10 +10,9 @@ struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
     std::vector<TransformComponent> vecTransformComponent;
     std::vector<ScriptComponent> vecScriptComponent;
-    
     //add component, type is inferred by compiler
     template<typename T>
-    void addComponent(T&& component);
+    void addComponent(const T& component);
 
     //update all components of specific type
     template<typename T>
@@ -24,4 +23,42 @@ struct ComponentStorage{
     
     //clear all components
     void clearAll();
+
+    // --- Template Specializations ---
+    template<>
+    void addComponent<BaseComponent>(const BaseComponent& component){
+        vecBaseComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<TransformComponent>(const TransformComponent& component){
+        vecTransformComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<ScriptComponent>(const ScriptComponent& component){
+        vecScriptComponent.emplace_back(component);
+    }
+
+    template<>
+    void update<BaseComponent>(float dt){
+        for(unsigned int i=0;i<vecBaseComponent.size();i++){
+            vecBaseComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<TransformComponent>(float dt){
+        for(unsigned int i=0;i<vecTransformComponent.size();i++){
+            vecTransformComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<ScriptComponent>(float dt){
+        for(unsigned int i=0;i<vecScriptComponent.size();i++){
+            vecScriptComponent[i].update(dt);
+        }
+    }
+
 };

@@ -35,12 +35,11 @@ for _, type in ipairs(types) do
 	headerFile:write("    std::vector<" .. type .. "> vec" .. type .. ";\n")
 end
 
--- end struct
+-- define methods
 headerFile:write([[
-    
     //add component, type is inferred by compiler
     template<typename T>
-    void addComponent(T&& component);
+    void addComponent(const T& component);
 
     //update all components of specific type
     template<typename T>
@@ -51,8 +50,36 @@ headerFile:write([[
     
     //clear all components
     void clearAll();
-};
+
+    // --- Template Specializations ---
 ]])
+
+-- specialize add methods
+for _, type in ipairs(types) do
+	headerFile:write([[
+    template<>
+    void addComponent<]] .. type .. [[>(const ]] .. type .. [[& component){
+        vec]] .. type .. [[.emplace_back(component);
+    }
+
+]])
+end
+
+-- specialize update methods
+for _, type in ipairs(types) do
+	headerFile:write([[
+    template<>
+    void update<]] .. type .. [[>(float dt){
+        for(unsigned int i=0;i<vec]] .. type .. [[.size();i++){
+            vec]] .. type .. [[[i].update(dt);
+        }
+    }
+
+]])
+end
+
+-- end struct
+headerFile:write("};")
 headerFile:close()
 
 --create source file
@@ -65,30 +92,6 @@ sourceFile:write([[
 #include "ComponentStorage.h"
 
 ]])
-
--- specialize add methods
-for _, type in ipairs(types) do
-	sourceFile:write([[
-template<>
-void ComponentStorage::addComponent<]] .. type .. [[>(]] .. type .. [[&& component){
-    vec]] .. type .. [[.emplace_back(component);
-}
-
-]])
-end
-
--- specialize update methods
-for _, type in ipairs(types) do
-	sourceFile:write([[
-template<>
-void ComponentStorage::update<]] .. type .. [[>(float dt){
-    for(unsigned int i=0;i<vec]] .. type .. [[.size();i++){
-        vec]] .. type .. [[[i].update(dt);
-    }
-}
-
-]])
-end
 
 -- create updateAll method
 sourceFile:write([[

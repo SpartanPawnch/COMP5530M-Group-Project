@@ -581,9 +581,7 @@ inline void drawEntities() {
             if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen,
                     "%s", scene.entities[i].name.c_str())) {
                 if (ImGui::IsItemClicked()) {
-                    if (scene.selectedEntity != &scene.entities[i]) {
-                        scene.selectedEntity = &scene.entities[i];
-                    }
+                    scene.selectedEntity = &scene.entities[i];
                 }
                 // TODO:display children if open
                 ImGui::TreePop();
@@ -636,17 +634,17 @@ inline void drawProperties() {
             ImGui::Text("Select an Entity to show it's components");
         }
         else {
-            for (unsigned int i = 0; i < scene.selectedEntity->components.size(); i++) {
-                if (ImGui::TreeNodeEx(scene.selectedEntity->components[i]->name.c_str())) {
-                    // already running into polymorphism caveats
-                    if (TransformComponent* transform = dynamic_cast<TransformComponent*>(
-                            scene.selectedEntity->components[i])) {
-                        drawComponentProps(*transform);
-                    }
+            // TransformComponent
+            std::vector<TransformComponent>& transformComponents =
+                scene.selectedEntity->components.vecTransformComponent;
+            for (unsigned int i = 0; i < transformComponents.size(); i++) {
+                if (ImGui::TreeNodeEx(transformComponents[i].name.c_str())) {
+                    drawComponentProps(transformComponents[i]);
 
                     ImGui::TreePop();
                 }
             }
+            // Other Component Types...
         }
         ImGui::PopFont();
     }

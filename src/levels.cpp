@@ -59,14 +59,6 @@ void loadLevel(const char* path, Scene& scene) {
     audio::clearAudio();
     clearDynamicTextures();
     scripting::clearScripts();
-    // TODO move cleanup to entity destructor
-    for (unsigned int i = 0; i < scene.entities.size(); i++) {
-        for (unsigned int j = 0; j < scene.entities[i].components.size(); j++) {
-            if (scene.entities[i].components[j])
-                delete scene.entities[i].components[j];
-        }
-        scene.entities[i].components.clear();
-    }
     scene.entities.clear();
     scene.selectedEntity = nullptr;
 
@@ -128,24 +120,32 @@ void loadLevel(const char* path, Scene& scene) {
 
                 // TransformComponent
                 if (strcmp(jsonComponent["type"].GetString(), "TransformComponent") == 0) {
-                    TransformComponent* trComponent = new TransformComponent();
-                    trComponent->position = glm::vec3(jsonComponent["position"][0].GetFloat(),
+                    TransformComponent trComponent;
+                    trComponent.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
                         jsonComponent["position"][1].GetFloat(),
                         jsonComponent["position"][2].GetFloat());
-                    trComponent->rotation = glm::vec4(jsonComponent["rotation"][0].GetFloat(),
+
+                    trComponent.rotation = glm::vec4(jsonComponent["rotation"][0].GetFloat(),
                         jsonComponent["rotation"][1].GetFloat(),
                         jsonComponent["rotation"][2].GetFloat(),
                         jsonComponent["rotation"][3].GetFloat());
-                    trComponent->scale = glm::vec3(jsonComponent["scale"][0].GetFloat(),
+
+                    trComponent.scale = glm::vec3(jsonComponent["scale"][0].GetFloat(),
                         jsonComponent["scale"][1].GetFloat(), jsonComponent["scale"][2].GetFloat());
-                    jsonEntity.components.emplace_back(trComponent);
+
+                    trComponent.name = std::string(jsonComponent["name"].GetString());
+                    trComponent.uuid = jsonComponent["uuid"].GetInt();
+
+                    jsonEntity.components.addComponent(trComponent);
                 }
                 // BaseComponent
                 else {
-                    jsonEntity.components.emplace_back(new BaseComponent());
+                    BaseComponent base;
+                    base.name = std::string(jsonComponent["name"].GetString());
+                    base.uuid = jsonComponent["uuid"].GetInt();
+
+                    jsonEntity.components.addComponent(base);
                 }
-                jsonEntity.components.back()->name = std::string(jsonComponent["name"].GetString());
-                jsonEntity.components.back()->uuid = jsonComponent["uuid"].GetInt();
             }
             scene.entities.emplace_back(jsonEntity);
         }
@@ -155,6 +155,55 @@ void loadLevel(const char* path, Scene& scene) {
     currentLevelPath = path;
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
+}
+
+static rapidjson::Value saveComponent(
+    const TransformComponent& trComponent, rapidjson::Document& d) {
+    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+
+    jsonComponent.AddMember(
+        "name", rapidjson::Value(trComponent.name.c_str(), d.GetAllocator()), d.GetAllocator());
+    jsonComponent.AddMember("uuid", rapidjson::Value(trComponent.uuid), d.GetAllocator());
+
+    jsonComponent.AddMember(
+        "type", rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
+
+    // position
+    rapidjson::Value pos(rapidjson::kArrayType);
+    pos.PushBack(trComponent.position[0], d.GetAllocator());
+    pos.PushBack(trComponent.position[1], d.GetAllocator());
+    pos.PushBack(trComponent.position[2], d.GetAllocator());
+    jsonComponent.AddMember("position", pos, d.GetAllocator());
+
+    // rotation
+    rapidjson::Value rot(rapidjson::kArrayType);
+    rot.PushBack(trComponent.rotation[0], d.GetAllocator());
+    rot.PushBack(trComponent.rotation[1], d.GetAllocator());
+    rot.PushBack(trComponent.rotation[2], d.GetAllocator());
+    rot.PushBack(trComponent.rotation[3], d.GetAllocator());
+    jsonComponent.AddMember("rotation", rot, d.GetAllocator());
+
+    // scale
+    rapidjson::Value scale(rapidjson::kArrayType);
+    scale.PushBack(trComponent.scale[0], d.GetAllocator());
+    scale.PushBack(trComponent.scale[1], d.GetAllocator());
+    scale.PushBack(trComponent.scale[2], d.GetAllocator());
+    jsonComponent.AddMember("scale", scale, d.GetAllocator());
+
+    return jsonComponent;
+}
+
+static rapidjson::Value saveComponent(const BaseComponent& component, rapidjson::Document& d) {
+    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+
+    jsonComponent.AddMember(
+        "name", rapidjson::Value(component.name.c_str(), d.GetAllocator()), d.GetAllocator());
+    jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
+
+    jsonComponent.AddMember(
+        "type", rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
+
+    return jsonComponent;
 }
 
 // save level to manifest in path
@@ -191,52 +240,23 @@ void saveLevel(const char* path, const Scene& scene) {
 
             // encode components
             rapidjson::Value jsonComponents(rapidjson::kArrayType);
-            for (unsigned int j = 0; j < scene.entities[i].components.size(); j++) {
-                rapidjson::Value jsonComponent(rapidjson::kObjectType);
 
-                jsonComponent.AddMember("name",
-                    rapidjson::Value(
-                        scene.entities[i].components[j]->name.c_str(), d.GetAllocator()),
-                    d.GetAllocator());
-                jsonComponent.AddMember("uuid",
-                    rapidjson::Value(scene.entities[i].components[j]->uuid), d.GetAllocator());
-
-                // TransformComponent
-                if (auto trComponent =
-                        dynamic_cast<TransformComponent*>(scene.entities[i].components[j])) {
-                    jsonComponent.AddMember("type",
-                        rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
-
-                    // position
-                    rapidjson::Value pos(rapidjson::kArrayType);
-                    pos.PushBack(trComponent->position[0], d.GetAllocator());
-                    pos.PushBack(trComponent->position[1], d.GetAllocator());
-                    pos.PushBack(trComponent->position[2], d.GetAllocator());
-                    jsonComponent.AddMember("position", pos, d.GetAllocator());
-
-                    // rotation
-                    rapidjson::Value rot(rapidjson::kArrayType);
-                    rot.PushBack(trComponent->rotation[0], d.GetAllocator());
-                    rot.PushBack(trComponent->rotation[1], d.GetAllocator());
-                    rot.PushBack(trComponent->rotation[2], d.GetAllocator());
-                    rot.PushBack(trComponent->rotation[3], d.GetAllocator());
-                    jsonComponent.AddMember("rotation", rot, d.GetAllocator());
-
-                    // scale
-                    rapidjson::Value scale(rapidjson::kArrayType);
-                    scale.PushBack(trComponent->scale[0], d.GetAllocator());
-                    scale.PushBack(trComponent->scale[1], d.GetAllocator());
-                    scale.PushBack(trComponent->scale[2], d.GetAllocator());
-                    jsonComponent.AddMember("scale", scale, d.GetAllocator());
-                }
-                // BaseComponent
-                else {
-                    jsonComponent.AddMember("type",
-                        rapidjson::Value("BaseComponent", d.GetAllocator()), d.GetAllocator());
-                }
-
+            // TransformComponent
+            const std::vector<TransformComponent>& transformComponents =
+                scene.entities[i].components.vecTransformComponent;
+            for (unsigned int j = 0; j < transformComponents.size(); j++) {
+                rapidjson::Value jsonComponent = saveComponent(transformComponents[j], d);
                 jsonComponents.PushBack(jsonComponent, d.GetAllocator());
             }
+
+            // BaseComponent
+            const std::vector<BaseComponent>& baseComponents =
+                scene.entities[i].components.vecBaseComponent;
+            for (unsigned int j = 0; j < baseComponents.size(); j++) {
+                rapidjson::Value jsonComponent = saveComponent(baseComponents[i], d);
+                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+            }
+
             jsonEntity.AddMember("components", jsonComponents, d.GetAllocator());
 
             jsonEntities.PushBack(jsonEntity, d.GetAllocator());
