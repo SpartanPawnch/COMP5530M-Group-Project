@@ -8,7 +8,6 @@
 #include <GL/glew.h>
 
 
-
 class RenderPipeline
 {
 
@@ -44,8 +43,7 @@ public:
 
 	~RenderPipeline();
 
-
-
 	void setAttributeLayouts();
+	
 
 };

@@ -102,10 +102,12 @@ void RenderManager::loadScene()
 	///////////////////////////////////////////////////////
 		
 	//TODO: change path
-	const char* vertexPath = "../../../assets/shaders/colours.vert";
-	const char* fragPath = "../../../assets/shaders/colours.frag";
+	const char* colorVertexPath = "../../../assets/shaders/colours.vert";
+	const char* colorFragPath = "../../../assets/shaders/colours.frag";
 
-	addPipeline(vertexPath, fragPath);
+	//TODO: Should probably be called in the Constructor
+	//Should be made in the order of Enum Pipeline
+	addPipeline(colorVertexPath, colorFragPath); // ColorPipeline - 0
 
 	//create vertex buffer object(VBO)
 	VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
@@ -134,26 +136,83 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window)
 	//adapt to resize
 	glViewport(0, 0, width, height);
 
-
 	//draw background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//RENDERING
-	glUseProgram(getPipeline(0)->getProgram());
+	//Go through all the Pipelines
+	//TODO: Check if it is necessary to use the given pipeline and the call the following fn
+	runPipeline(ColorPipeline);
+	
+
+}
+
+void RenderManager::runPipeline(Pipeline pipeline)
+{
+	switch (pipeline)
+	{
+		case ColorPipeline:
+			runColorPipeline();
+			break;
+		case TexturePipeline:
+			runTexturePipeline();
+			break;
+		case ShadowPipeline:
+			runShadowPipeline();
+			break;
+		case BillboardPipeline:
+			runBillboardPipeline();
+			break;
+		case WaterPipeline:
+			runWaterPipeline();
+			break;
+		case Render2DPipeline:
+			run2DPipeline();
+			break;
+		
+	}
+	
+}
+
+void RenderManager::runColorPipeline()
+{
+	glUseProgram(getPipeline(ColorPipeline)->getProgram());
 
 	////handle for uniforms
-	GLuint ModelID = glGetUniformLocation(getPipeline(0)->getProgram(), "model");
-	GLuint ViewID = glGetUniformLocation(getPipeline(0)->getProgram(), "view");
-	GLuint ProjectionID = glGetUniformLocation(getPipeline(0)->getProgram(), "projection");
+	GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
+	GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
+	GLuint ProjectionID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
 
 	glUniformMatrix4fv(ModelID, 1, GL_FALSE, &modelMatrix[0][0]);
 	glUniformMatrix4fv(ViewID, 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
 
 	//// Render the cube
-	glBindVertexArray(getPipeline(0)->getVAO());
+	glBindVertexArray(getPipeline(ColorPipeline)->getVAO());
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	glBindVertexArray(0); //TODO: Does this go here?
+}
+
+void RenderManager::runTexturePipeline()
+{
+
+}
+
+void RenderManager::runShadowPipeline()
+{
+
+}
+
+void RenderManager::runBillboardPipeline()
+{
+
+}
+void RenderManager::runWaterPipeline()
+{
+
+}
+void RenderManager::run2DPipeline()
+{
 
 }

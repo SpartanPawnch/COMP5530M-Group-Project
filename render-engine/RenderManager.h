@@ -12,6 +12,16 @@
 
 #include <glm/ext.hpp>
 
+enum Pipeline
+{
+	ColorPipeline = 0,
+	TexturePipeline = 1,
+	ShadowPipeline = 2,
+	BillboardPipeline = 3,
+	WaterPipeline = 4,
+	Render2DPipeline = 5
+};
+
 
 class RenderManager
 {
@@ -25,6 +35,7 @@ private:
 	//std::ofstream testOutput;
 
 	//Available Render Pipelines
+	//The Index of Pipeline Should match the Enum
 	std::vector <RenderPipeline> pipelines; //Pipeline refers to a shader program
 
 	//considering windows
@@ -40,10 +51,20 @@ private:
 	//default destructor does nothing
 	~RenderManager() {}
 
+
+	///
+	void runColorPipeline();
+	void runTexturePipeline();
+	void runShadowPipeline();
+	void runBillboardPipeline();
+	void runWaterPipeline();
+	void run2DPipeline();
+
 public:
 
 	//members
 	//std::vector<RenderPipeline> programs;
+	//TODO
 	Camera* camera;
 	Camera* previewCamera;
 
@@ -64,10 +85,9 @@ public:
 
 	void startUp(GLFWwindow* aWindow);
 
-	void addProgram(RenderPipeline aProgram);
-
 	void addCamera();
 
+	//TODO: Should probably be called in the Constructor - Now in loadScene()
 	void addPipeline(const char* vertexPath,
 		const char* fragmentPath,
 		const char* geometryPath = nullptr,
@@ -93,6 +113,6 @@ public:
 		return &this->pipelines[index];
 	}
 
-
+	void runPipeline(Pipeline pipeline);
 
 };

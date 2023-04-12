@@ -163,3 +163,5 @@ GLuint RenderPipeline::getVAO()
 {
 	return this->VAO;
 }
+
+
