@@ -70,7 +70,7 @@ int main() {
     }
 
     // swap buffers to avoid the window not responding
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -137,6 +137,8 @@ int main() {
         // draw UI to full window
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, width, height);
+        glClearColor(.2f, .2f, .2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         drawUI();
 
         glfwSwapBuffers(window);
