@@ -118,3 +118,5 @@ end
 sourceFile:write("}\n")
 
 sourceFile:close()
+
+print("Generated source files for ComponentStorage struct!")

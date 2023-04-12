@@ -65,17 +65,25 @@ add_subdirectory("external/glm")
 #add spdlog
 add_subdirectory("external/spdlog")
 
-
-
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
     ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
 )
 target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog)
 
+#generate ComponentStorage code if necessary
+add_custom_target(ComponentStorageGen
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${CMAKE_SOURCE_DIR}/build-util/lua.exe 
+        ${CMAKE_CURRENT_SOURCE_DIR}/build-util/gen_component_storage.lua
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/build-util/gen_component_storage.lua
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/ECS/Component/component_list.txt
+)
+add_dependencies(${PROJECT_NAME} ComponentStorageGen)
+
 #copy dirs after build
 add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD
+  TARGET ${PROJECT_NAME} POST_BUILD 
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_CURRENT_SOURCE_DIR}/template
     $<TARGET_FILE_DIR:${PROJECT_NAME}>/template

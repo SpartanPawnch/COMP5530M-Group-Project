@@ -1,5 +1,8 @@
 #include "logging.h"
 
+// supress spdlog depracation warning
+#pragma warning(disable : 4996)
+
 #include <string>
 #include <sstream>
 #include <memory>

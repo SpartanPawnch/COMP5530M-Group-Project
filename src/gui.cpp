@@ -6,6 +6,9 @@
 #include <limits.h>
 #endif
 
+#pragma warning(disable : 4312)
+#pragma warning(disable : 4244)
+
 #include <iostream>
 #include <stdio.h>
 #include <imgui.h>
@@ -34,6 +37,7 @@
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
+#include "../render-engine/RenderManager.h"
 
 using namespace ImGui;
 
@@ -50,6 +54,7 @@ namespace guicfg {
     ImFont* regularFont = nullptr;
 };
 
+// --- Build System Utilities ---
 void createProj(const std::string& path) {
     char buf[1024];
     FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
@@ -107,13 +112,17 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     _chdir(executablePath);
 }
 
+// --- Internal GUI State ---
+
+// base functionality vars
 static GLFWwindow* baseWindow;
 static std::string activePath;
-
 static std::thread projectThread;
 
+// texture demo vars
 static int activeTexture = -1;
 
+// audio demo vars
 static int audioClip = -1;
 static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
@@ -122,17 +131,23 @@ static glm::vec3 audioPos(.0f);
 static assetfolder::AssetDescriptor currAssetFolder = {
     "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
 static std::vector<assetfolder::AssetDescriptor> folderItems;
-
 static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
 
+// ui textures
 static int fileTexture;
 static int folderTexture;
 
+// model demo vars
 static Model model;
 
+// renderer vars
+static RenderManager* renderManager;
+
+// editor vars
 static Scene scene;
 
+// viewport widget vars
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
 static GLuint viewportDepthBuf;
@@ -140,6 +155,7 @@ static GLuint viewportDepthBuf;
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
 
+// --- Module Init/Deinit
 GUIManager::GUIManager(GLFWwindow* window) {
     // Init ImGui
     IMGUI_CHECKVERSION();
@@ -197,6 +213,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
+    renderManager = RenderManager::getInstance();
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -205,6 +222,86 @@ GUIManager::~GUIManager() {
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
 }
+
+// --- Custom Input Handlers ---
+static void handleKeyboardInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        // Move the camera forward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        // Move the camera backward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        // Strafe the camera left
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        // Ascend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        // Descend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        // Reset camera position
+        renderManager->camera->resetPosition();
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+}
+
+static void handleMouseInput(GLFWwindow* window) {
+    glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
+
+    // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+        if (renderManager->camera->focusState == false) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderManager->camera->focusState = true;
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderManager->camera->focusState = false;
+        }
+
+        // if (renderManager->firstRClick  == true) {
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        // renderManager->firstRClick = false;
+        // }
+    }
+
+    if (renderManager->camera->focusState == true) {
+        // now we can change the orientation of the camera
+
+        // offset
+        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
+        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
+
+        // send data to camera
+        renderManager->camera->updateInput(
+            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+}
+
+// --- GUI Widgets ---
 
 inline void drawAudioDemo() {
     if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -540,6 +637,13 @@ inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
+        // send input to renderer if window is hovered
+        if (ImGui::IsWindowHovered() || ImGui::IsWindowFocused() ||
+            renderManager->camera->focusState) {
+            handleKeyboardInput(baseWindow);
+            handleMouseInput(baseWindow);
+        }
+
         // adjust for titlebar
         ImVec2 windowSize = ImGui::GetWindowSize();
         windowSize.y -= ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
@@ -580,11 +684,11 @@ inline void drawEntities() {
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
             if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen,
                     "%s", scene.entities[i].name.c_str())) {
-                if (ImGui::IsItemClicked()) {
-                    scene.selectedEntity = &scene.entities[i];
-                }
                 // TODO:display children if open
                 ImGui::TreePop();
+            }
+            if (ImGui::IsItemClicked()) {
+                scene.selectedEntity = &scene.entities[i];
             }
         }
 
@@ -917,13 +1021,13 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawViewport();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawScriptDemo();
+
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawStyleEditor();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
-
-    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawScriptDemo();
 
     // prepare gui for rendering
     ImGui::Render();
