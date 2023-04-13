@@ -66,7 +66,6 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
 }
 
 
-
 void RenderPipeline::createProgram(const char* vertexPath,
 	const char* fragmentPath,
 	const char* geometryPath,

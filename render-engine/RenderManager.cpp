@@ -22,6 +22,7 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     glfwPollEvents();
 
     this->pipelines.clear();
+    this->lights.clear();
     this->deltaTime = 0.0f;
     this->xPos = 0.0f;
     this->yPos = 0.0f;
@@ -38,6 +39,7 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     this->projectionMatrix = glm::mat4(1.0f);
+
 }
 
 void RenderManager::addPipeline(const char* vertexPath, const char* fragmentPath,
@@ -77,6 +79,10 @@ void RenderManager::loadScene() {
         3, 2, 6, 6, 7, 3, // Top face
         4, 5, 1, 1, 0, 4 // Bottom face
     };
+
+    //ADD LIGHT SOURCES
+
+    this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
 
@@ -177,6 +183,21 @@ void RenderManager::runColorPipeline() {
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); // TODO: Does this go here?
 }
+
+void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour)
+{
+    LightSource* light = new LightSource(position, colour);
+    lights.push_back(*light);
+}
+
+RenderPipeline* RenderManager::getPipeline(std::size_t index) {
+    return &this->pipelines[index];
+}
+
+LightSource* RenderManager::getLightSource(std::size_t index) {
+    return &this->lights[index];
+}
+
 
 void RenderManager::runTexturePipeline() {
 }

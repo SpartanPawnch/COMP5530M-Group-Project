@@ -7,6 +7,7 @@
 #include "RenderPipeline.h"
 #include "Camera.h"
 #include "Buffer.h"
+#include "LightSource.h"
 
 #include <GLFW/glfw3.h>
 
@@ -33,6 +34,8 @@ class RenderManager {
     // Available Render Pipelines
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
+    //Light Sources
+    std::vector<LightSource> lights;
 
     // considering windows
     // std::vector <GLFWwindow*> windows;
@@ -83,6 +86,8 @@ class RenderManager {
 
     void addCamera();
 
+    void addLightSource(glm::vec3& position, glm::vec3& colour);
+
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(const char* vertexPath, const char* fragmentPath,
         const char* geometryPath = nullptr, const char* computePath = nullptr,
@@ -102,9 +107,9 @@ class RenderManager {
 
     void shutDown();
 
-    RenderPipeline* getPipeline(std::size_t index) {
-        return &this->pipelines[index];
-    }
+    RenderPipeline* getPipeline(std::size_t index);
+
+    LightSource* getLightSource(std::size_t index);
 
     void runPipeline(Pipeline pipeline);
 };
