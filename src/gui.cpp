@@ -692,8 +692,17 @@ inline void drawEntities() {
         int targetParent = -1;
 
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
+            // get current node depth
             int currDepth = scene.entities[i].parent < 0 ? 0 : depths[scene.entities[i].parent] + 1;
             depths[i] = currDepth;
+
+            // check if node is leaf based on next element
+            int isLeaf = (i == scene.entities.size() - 1);
+            if (isLeaf == 0) {
+                int nextDepth =
+                    scene.entities[i + 1].parent < 0 ? 0 : depths[scene.entities[i + 1].parent] + 1;
+                isLeaf = (nextDepth <= currDepth);
+            }
 
             // close all previous nodes at same or higher depth
             while (currDepth < openDepth) {
@@ -704,7 +713,8 @@ inline void drawEntities() {
             if (currDepth <= openDepth) {
                 // start new tree node if visible
                 if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
-                        ImGuiTreeNodeFlags_DefaultOpen, "%s", scene.entities[i].name.c_str())) {
+                        ImGuiTreeNodeFlags_DefaultOpen | (ImGuiTreeNodeFlags_Leaf * isLeaf), "%s",
+                        scene.entities[i].name.c_str())) {
                     openDepth = currDepth + 1;
                 }
 
