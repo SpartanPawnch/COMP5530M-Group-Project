@@ -56,7 +56,7 @@ void Scene::setParent(int childIdx, int parentIdx) {
         // TODO children of child
         // correct parent if needed
         if (entities[newIdx + 1].parent > childIdx)
-            entities[newIdx + 1].parent++;
+            entities[newIdx + 1].parent--;
         std::swap(entities[newIdx], entities[newIdx + 1]);
     }
 
@@ -65,7 +65,7 @@ void Scene::setParent(int childIdx, int parentIdx) {
         // TODO children of child
         // correct parent if needed
         if (entities[newIdx - 1].parent > parentIdx)
-            entities[newIdx - 1].parent--;
+            entities[newIdx - 1].parent++;
         std::swap(entities[newIdx], entities[newIdx - 1]);
     }
 }
