@@ -37,6 +37,7 @@ Level files are json files with the following structure:
         {
             "name":"<name0>",
             "id":"<id0>",
+            "parent":"<parentIdx>"
             //TODO - innate entity subclass properties?
             "components":[
                 {
@@ -48,7 +49,7 @@ Level files are json files with the following structure:
                     //TransformComponent
                     "position":[],//vec3
                     "rotation":[],//vec4
-                    "scale":[],
+                    "scale":[]//vec3,
                 }
             ]
         },

@@ -112,6 +112,7 @@ void loadLevel(const char* path, Scene& scene) {
 
             jsonEntity.uuid = entity["uuid"].GetInt();
             jsonEntity.name = std::string(entity["name"].GetString());
+            jsonEntity.parent = entity["parent"].GetInt();
 
             // add components
             auto jsonComponents = entity["components"].GetArray();
@@ -237,7 +238,8 @@ void saveLevel(const char* path, const Scene& scene) {
                 d.GetAllocator());
             jsonEntity.AddMember(
                 "uuid", rapidjson::Value(scene.entities[i].uuid), d.GetAllocator());
-
+            jsonEntity.AddMember(
+                "parent", rapidjson::Value(scene.entities[i].parent), d.GetAllocator());
             // encode components
             rapidjson::Value jsonComponents(rapidjson::kArrayType);
 
