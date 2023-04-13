@@ -681,25 +681,80 @@ inline void drawStyleEditor() {
 inline void drawEntities() {
     if (ImGui::Begin("Entities")) {
         ImGui::PushFont(guicfg::regularFont);
+
+        // drawing info vars
+        int openDepth = 0;
+        std::vector<int> depths(scene.entities.size());
+        setVec(depths, 0);
+
+        // context menu vars
+        BaseEntity targetChild;
+        int targetParent = -1;
+
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
-            if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen,
-                    "%s", scene.entities[i].name.c_str())) {
-                // TODO:display children if open
+            int currDepth = scene.entities[i].parent < 0 ? 0 : depths[scene.entities[i].parent] + 1;
+            depths[i] = currDepth;
+
+            // close all previous nodes at same or higher depth
+            while (currDepth < openDepth) {
                 ImGui::TreePop();
+                openDepth--;
             }
-            if (ImGui::IsItemClicked()) {
-                scene.selectedEntity = &scene.entities[i];
+
+            if (currDepth <= openDepth) {
+                // start new tree node if visible
+                if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
+                        ImGuiTreeNodeFlags_DefaultOpen, "%s", scene.entities[i].name.c_str())) {
+                    openDepth = currDepth + 1;
+                }
+
+                // handle select
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+                    scene.selectedEntity = &scene.entities[i];
+                }
+
+                // handle context menu
+                if (ImGui::BeginPopupContextItem()) {
+                    if (ImGui::MenuItem("Add Child Entity")) {
+                        targetChild = BaseEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Camera Entity")) {
+                        targetChild = CameraEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Model Entity")) {
+                        targetChild = ModelEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Skeletal Mesh Entity")) {
+                        targetChild = SkeletalMeshEntity();
+                        targetParent = i;
+                    }
+                    ImGui::EndPopup();
+                }
             }
+        }
+
+        // close off all remaining tree nodes
+        while (openDepth > 0) {
+            ImGui::TreePop();
+            openDepth--;
+        }
+
+        // add new child if requested
+        if (targetParent >= 0) {
+            scene.addChild(targetChild, targetParent);
         }
 
         // draw invisible button to allow context menu for full window
         // TODO - adjust size and pos when entity children are implemented
-        ImGui::SetCursorPos(ImVec2(.0f, .0f));
+        ImVec2 restPos = ImGui::GetCursorPos();
         ImVec2 buttonSize = ImGui::GetWindowSize();
         float borderSize = ImGui::GetStyle().WindowBorderSize;
         ImVec2 padding = ImGui::GetStyle().WindowPadding;
-        buttonSize.x -= borderSize + 2 * padding.x;
-        buttonSize.y -= borderSize + 2 * padding.y;
+        buttonSize.x -= borderSize + 2 * padding.x + restPos.x;
+        buttonSize.y -= borderSize + 2 * padding.y + restPos.y;
 
         ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize);
 

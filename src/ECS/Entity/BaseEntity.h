@@ -19,5 +19,8 @@ class BaseEntity {
     // look for the best uuid generator
     int uuid;
     std::string name;
+
+    int parent = -1;
+
     ComponentStorage components;
 };
