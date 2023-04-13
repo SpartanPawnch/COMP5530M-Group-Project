@@ -46,7 +46,7 @@ add_executable(
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
     render-engine/Buffer.h render-engine/Buffer.cpp
-)
+ "render-engine/LightSource.h" "render-engine/LightSource.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
