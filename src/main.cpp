@@ -271,7 +271,8 @@ int main() {
             ImGui::Separator();
             for (unsigned int i = 0; i < animator.animations.size(); i++) {
                 ImGui::PushID(i);
-                ImGui::Text("%s", animator.animations[i].name.c_str());
+                ImGui::InputText("##anim_name", &animator.animations[i].name[0], animator.animations[i].name.capacity());
+                animator.animations[i].name.resize(std::strlen(&animator.animations[i].name[0]));
                 ImGui::NextColumn();
                 ImGui::Text("%f", animator.animations[i].duration);
                 ImGui::NextColumn();
@@ -282,18 +283,36 @@ int main() {
                 animator.addNode();
             }
             ImGui::Text("Nodes:");
-            ImGui::Columns(2);
+            ImGui::Columns(4);
             ImGui::Separator();
             ImGui::Text("Name");
             ImGui::NextColumn();
+            ImGui::Text("Animation");
+            ImGui::NextColumn();
             ImGui::Text("Loop Count");
+            ImGui::NextColumn();
+            ImGui::Text("Select Node");
             ImGui::NextColumn();
             ImGui::Separator();
             for (unsigned int i = 0; i < animator.nodes.size(); i++) {
                 ImGui::PushID(i);
-                ImGui::Text("%s", animator.nodes[i].animation->name.c_str());
+                ImGui::InputText("##node_name", &animator.nodes[i].name[0], animator.nodes[i].name.capacity());
+                animator.nodes[i].name.resize(std::strlen(&animator.nodes[i].name[0]));
                 ImGui::NextColumn();
-                ImGui::Text("%d", animator.nodes[i].loopCount);
+                if (ImGui::BeginCombo("##animation", animator.nodes[i].animation->name.c_str())) {
+                    for (unsigned int j = 0; j < animator.animations.size(); j++) {
+                        if (ImGui::Selectable(animator.animations[j].name.c_str(), (animator.nodes[i].animation == &animator.animations[j]))) {
+                            animator.nodes[i].animation = &animator.animations[j];
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::NextColumn();
+                ImGui::InputScalar("##loop_count", ImGuiDataType_U32 , &animator.nodes[i].loopCount);
+                ImGui::NextColumn();
+                if (ImGui::Button("Select Node")) {
+                    animator.selectedNode = &animator.nodes[i];
+                }
                 ImGui::NextColumn();
                 ImGui::PopID();
             }
@@ -319,7 +338,14 @@ int main() {
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->noConditionTransitions.size(); i++) {
                     ImGui::PushID(i);
-                    ImGui::Text("%s", animator.selectedNode->noConditionTransitions[i].transitionTo->name.c_str());
+                    if (ImGui::BeginCombo("##transition_to_nocond", animator.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
+                        for (unsigned int j = 0; j < animator.nodes.size(); j++) {
+                            if (ImGui::Selectable(animator.nodes[j].name.c_str(), animator.selectedNode->noConditionTransitions[i].transitionTo == &animator.nodes[j])) {
+                                animator.selectedNode->noConditionTransitions[i].transitionTo = &animator.nodes[j];
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
                     ImGui::NextColumn();
                     ImGui::PopID();
                 }
@@ -336,13 +362,20 @@ int main() {
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->boolTransitions.size(); i++) {
                     ImGui::PushID(i);
-                    ImGui::Text("%s", animator.selectedNode->boolTransitions[i].transitionTo->name.c_str());
+                    if (ImGui::BeginCombo("##transition_to_bool", animator.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
+                        for (unsigned int j = 0; j < animator.nodes.size(); j++) {
+                            if (ImGui::Selectable(animator.nodes[j].name.c_str(), animator.selectedNode->boolTransitions[i].transitionTo == &animator.nodes[j])) {
+                                animator.selectedNode->boolTransitions[i].transitionTo = &animator.nodes[j];
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].immediate);
+                    ImGui::Checkbox("##immediate_bool", &animator.selectedNode->boolTransitions[i].immediate);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].condition);
+                    ImGui::Checkbox("##condition_bool", &animator.selectedNode->boolTransitions[i].condition);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].desiredValue);
+                    ImGui::Checkbox("##desired_bool", &animator.selectedNode->boolTransitions[i].desiredValue);
                     ImGui::NextColumn();
                     ImGui::PopID();
                 }
@@ -365,19 +398,26 @@ int main() {
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->intTransitions.size(); i++) {
                     ImGui::PushID(i);
-                    ImGui::Text("%s", animator.selectedNode->intTransitions[i].transitionTo->name.c_str());
+                    if (ImGui::BeginCombo("##transition_to_int", animator.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
+                        for (unsigned int j = 0; j < animator.nodes.size(); j++) {
+                            if (ImGui::Selectable(animator.nodes[j].name.c_str(), animator.selectedNode->intTransitions[i].transitionTo == &animator.nodes[j])) {
+                                animator.selectedNode->intTransitions[i].transitionTo = &animator.nodes[j];
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].immediate);
+                    ImGui::Checkbox("##immediate_int", &animator.selectedNode->intTransitions[i].immediate);
                     ImGui::NextColumn();
                     ImGui::Text("%d", animator.selectedNode->intTransitions[i].condition);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].desiredValue);
+                    ImGui::InputInt("##desired_int", &animator.selectedNode->intTransitions[i].desiredValue);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeLower);
+                    ImGui::Checkbox("##should_lower_int", &animator.selectedNode->intTransitions[i].shouldBeLower);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeEqual);
+                    ImGui::Checkbox("##should_equal_int", &animator.selectedNode->intTransitions[i].shouldBeEqual);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeGreater);
+                    ImGui::Checkbox("##should_greater_int", &animator.selectedNode->intTransitions[i].shouldBeGreater);
                     ImGui::NextColumn();
                     ImGui::PopID();
                 }
@@ -400,19 +440,26 @@ int main() {
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->floatTransitions.size(); i++) {
                     ImGui::PushID(i);
-                    ImGui::Text("%s", animator.selectedNode->floatTransitions[i].transitionTo->name.c_str());
+                    if (ImGui::BeginCombo("##transition_to_float", animator.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
+                        for (unsigned int j = 0; j < animator.nodes.size(); j++) {
+                            if (ImGui::Selectable(animator.nodes[j].name.c_str(), animator.selectedNode->floatTransitions[i].transitionTo == &animator.nodes[j])) {
+                                animator.selectedNode->floatTransitions[i].transitionTo = &animator.nodes[j];
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].immediate);
+                    ImGui::Checkbox("##immediate_float", &animator.selectedNode->floatTransitions[i].immediate);
                     ImGui::NextColumn();
                     ImGui::Text("%f", animator.selectedNode->floatTransitions[i].condition);
                     ImGui::NextColumn();
-                    ImGui::Text("%f", animator.selectedNode->floatTransitions[i].desiredValue);
+                    ImGui::InputFloat("##desired_float", &animator.selectedNode->floatTransitions[i].desiredValue);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeLower);
+                    ImGui::Checkbox("##should_lower_float", &animator.selectedNode->floatTransitions[i].shouldBeLower);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeEqual);
+                    ImGui::Checkbox("##should_equal_float", &animator.selectedNode->floatTransitions[i].shouldBeEqual);
                     ImGui::NextColumn();
-                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeGreater);
+                    ImGui::Checkbox("##should_greater_float", &animator.selectedNode->floatTransitions[i].shouldBeGreater);
                     ImGui::NextColumn();
                     ImGui::PopID();
                 }
