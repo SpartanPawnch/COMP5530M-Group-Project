@@ -7,6 +7,7 @@
 #include "RenderPipeline.h"
 #include "Camera.h"
 #include "Buffer.h"
+#include "../src/ECS/Scene/Scene.h"
 
 #include <GLFW/glfw3.h>
 
@@ -97,6 +98,7 @@ class RenderManager {
     void loadScene();
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
+    void renderEntities(const Scene& scene, Camera* camera, int width, int height);
 
     void updateMatrices(int* width, int* height);
 

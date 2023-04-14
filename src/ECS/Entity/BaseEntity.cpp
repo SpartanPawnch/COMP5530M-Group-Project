@@ -1,5 +1,7 @@
 #include "BaseEntity.h"
 
+#include <glm/gtx/transform.hpp>
+
 BaseEntity::BaseEntity() {
     uuid = 10;
     name = "Base Entity";
@@ -19,6 +21,11 @@ void BaseEntity::update(float dt) {
 }
 
 void BaseEntity::stop() {
+}
+
+void BaseEntity::genTransform(const glm::mat4& parentMat) {
+    runtimeTransform =
+        parentMat * glm::translate(position) * glm::mat4_cast(rotation) * glm::scale(scale);
 }
 
 // void BaseEntity::removeComponent(int uuid)

@@ -136,6 +136,22 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
     runPipeline(ColorPipeline);
 }
 
+void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
+    updateMatrices(&width, &height);
+
+    // draw background
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // RENDERING
+    // Go through all the Pipelines
+    // TODO: Check if it is necessary to use the given pipeline and the call the following fn
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        modelMatrix = scene.entities[i].runtimeTransform;
+        runPipeline(ColorPipeline);
+    }
+}
+
 void RenderManager::runPipeline(Pipeline pipeline) {
     switch (pipeline) {
     case ColorPipeline:

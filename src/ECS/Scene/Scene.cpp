@@ -1,5 +1,7 @@
 #include "Scene.h"
 
+#include <glm/mat4x4.hpp>
+
 Scene::Scene() {
     selectedEntity = nullptr;
     start();
@@ -10,6 +12,14 @@ Scene::~Scene() {
 }
 
 void Scene::start() {
+}
+
+void Scene::updatePositions() {
+    for (unsigned int i = 0; i < entities.size(); i++) {
+        entities[i].genTransform(entities[i].parent < 0
+                ? glm::mat4(1.0f)
+                : entities[entities[i].parent].runtimeTransform);
+    }
 }
 
 void Scene::update(float dt) {

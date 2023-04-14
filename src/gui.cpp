@@ -145,7 +145,7 @@ static Model model;
 static RenderManager* renderManager;
 
 // editor vars
-static Scene scene;
+Scene scene;
 
 // viewport widget vars
 GLuint viewportFramebuffer;
@@ -799,10 +799,17 @@ inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
         ImGui::PushFont(guicfg::regularFont);
         // TODO properties for other item types
+
         if (scene.selectedEntity == nullptr) {
             ImGui::Text("Select an Entity to show it's components");
         }
         else {
+            // entitity transform
+            ImGui::InputFloat3("Position", &scene.selectedEntity->position[0]);
+            ImGui::InputFloat4("Rotation", &scene.selectedEntity->rotation[0]);
+            ImGui::InputFloat3("Scale", &scene.selectedEntity->scale[0]);
+
+            // components
             // TransformComponent
             std::vector<TransformComponent>& transformComponents =
                 scene.selectedEntity->components.vecTransformComponent;

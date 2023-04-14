@@ -3,6 +3,10 @@
 #include <vector>
 #include <string>
 
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+
 #include "../Component/BaseComponent.h"
 #include "../ComponentStorage/ComponentStorage.h"
 
@@ -12,6 +16,7 @@ class BaseEntity {
     BaseEntity();
     ~BaseEntity();
     virtual void start();
+    void genTransform(const glm::mat4& parentMat);
     virtual void update(float dt);
     virtual void stop();
     // void removeComponent(int uuid);
@@ -21,6 +26,14 @@ class BaseEntity {
     std::string name;
 
     int parent = -1;
+
+    // local transform
+    glm::vec3 position = glm::vec3(.0f);
+    glm::quat rotation = glm::quat(1.0f, glm::vec3(.0f)); //== 0 rad
+    glm::vec3 scale = glm::vec3(1.0f);
+
+    // world-space transform
+    glm::mat4 runtimeTransform;
 
     ComponentStorage components;
 };

@@ -117,8 +117,11 @@ int main() {
         // update matrices
         // renderManager->updateMatrices(&width, &height);
 
-        // prepare gui
+        // prepare gui and get input
         prepUI(window, executablePath, currTime, width, height);
+
+        // update editor state
+        scene.updatePositions();
 
         //--- Draw Results ---
         // draw scene to texture
@@ -129,8 +132,10 @@ int main() {
         glDrawBuffers(2, attachments);
 
         // draw scene
-        renderManager->renderSceneRefactor(
-            renderManager->camera, viewportTexWidth, viewportTexHeight);
+        renderManager->renderEntities(
+            scene, renderManager->camera, viewportTexWidth, viewportTexHeight);
+        // renderSceneRefactor(
+        // renderManager->camera, viewportTexWidth, viewportTexHeight);
 
         glFlush();
 

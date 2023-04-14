@@ -10,6 +10,7 @@ class Scene {
     Scene();
     ~Scene();
     void start();
+    void updatePositions();
     void update(float dt);
     void stop();
     void addEntity(const BaseEntity& entity);
