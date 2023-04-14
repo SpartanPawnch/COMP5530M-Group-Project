@@ -108,11 +108,18 @@ void loadLevel(const char* path, Scene& scene) {
 
             // add entity
             // TODO - currently ignoring type, need to think about component only vs entity params
-            BaseEntity jsonEntity;
+            BaseEntity baseEntity;
 
-            jsonEntity.uuid = entity["uuid"].GetInt();
-            jsonEntity.name = std::string(entity["name"].GetString());
-            jsonEntity.parent = entity["parent"].GetInt();
+            baseEntity.uuid = entity["uuid"].GetInt();
+            baseEntity.name = std::string(entity["name"].GetString());
+            baseEntity.parent = entity["parent"].GetInt();
+            baseEntity.position = glm::vec3(entity["position"][0].GetFloat(),
+                entity["position"][1].GetFloat(), entity["position"][2].GetFloat());
+            baseEntity.rotation =
+                glm::quat(entity["rotation"][0].GetFloat(), entity["rotation"][1].GetFloat(),
+                    entity["rotation"][2].GetFloat(), entity["rotation"][3].GetFloat());
+            baseEntity.scale = glm::vec3(entity["scale"][0].GetFloat(),
+                entity["scale"][1].GetFloat(), entity["scale"][2].GetFloat());
 
             // add components
             auto jsonComponents = entity["components"].GetArray();
@@ -137,7 +144,7 @@ void loadLevel(const char* path, Scene& scene) {
                     trComponent.name = std::string(jsonComponent["name"].GetString());
                     trComponent.uuid = jsonComponent["uuid"].GetInt();
 
-                    jsonEntity.components.addComponent(trComponent);
+                    baseEntity.components.addComponent(trComponent);
                 }
                 // BaseComponent
                 else {
@@ -145,10 +152,10 @@ void loadLevel(const char* path, Scene& scene) {
                     base.name = std::string(jsonComponent["name"].GetString());
                     base.uuid = jsonComponent["uuid"].GetInt();
 
-                    jsonEntity.components.addComponent(base);
+                    baseEntity.components.addComponent(base);
                 }
             }
-            scene.entities.emplace_back(jsonEntity);
+            scene.entities.emplace_back(baseEntity);
         }
     }
 
@@ -233,6 +240,7 @@ void saveLevel(const char* path, const Scene& scene) {
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
             rapidjson::Value jsonEntity(rapidjson::kObjectType);
 
+            // encode entity properties
             jsonEntity.AddMember("name",
                 rapidjson::Value(scene.entities[i].name.c_str(), d.GetAllocator()),
                 d.GetAllocator());
@@ -240,6 +248,29 @@ void saveLevel(const char* path, const Scene& scene) {
                 "uuid", rapidjson::Value(scene.entities[i].uuid), d.GetAllocator());
             jsonEntity.AddMember(
                 "parent", rapidjson::Value(scene.entities[i].parent), d.GetAllocator());
+
+            // position
+            rapidjson::Value pos(rapidjson::kArrayType);
+            pos.PushBack(scene.entities[i].position[0], d.GetAllocator());
+            pos.PushBack(scene.entities[i].position[1], d.GetAllocator());
+            pos.PushBack(scene.entities[i].position[2], d.GetAllocator());
+            jsonEntity.AddMember("position", pos, d.GetAllocator());
+
+            // rotation
+            rapidjson::Value rot(rapidjson::kArrayType);
+            rot.PushBack(scene.entities[i].rotation[0], d.GetAllocator());
+            rot.PushBack(scene.entities[i].rotation[1], d.GetAllocator());
+            rot.PushBack(scene.entities[i].rotation[2], d.GetAllocator());
+            rot.PushBack(scene.entities[i].rotation[3], d.GetAllocator());
+            jsonEntity.AddMember("rotation", rot, d.GetAllocator());
+
+            // scale
+            rapidjson::Value scale(rapidjson::kArrayType);
+            scale.PushBack(scene.entities[i].scale[0], d.GetAllocator());
+            scale.PushBack(scene.entities[i].scale[1], d.GetAllocator());
+            scale.PushBack(scene.entities[i].scale[2], d.GetAllocator());
+            jsonEntity.AddMember("scale", scale, d.GetAllocator());
+
             // encode components
             rapidjson::Value jsonComponents(rapidjson::kArrayType);
 
