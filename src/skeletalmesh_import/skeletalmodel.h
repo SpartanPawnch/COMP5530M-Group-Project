@@ -17,7 +17,7 @@ public:
     SkeletalModel();
 
     std::vector<SkeletalMesh> meshes;
-    std::vector<Texture> textures_loaded;
+    std::vector<SkeletalTexture> textures_loaded;
     std::string directory;
 
     //skeleton information
@@ -27,8 +27,8 @@ public:
     void loadModel(const std::string& path);
     void processNode(aiNode* node, const aiScene* scene);
     SkeletalMesh processMesh(aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+    std::vector<SkeletalTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
     //skeleton methods
-    void getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+    void getSkeletonInfo(std::vector<SkeletalVertex>& vertices, aiMesh* mesh, const aiScene* scene);
 };

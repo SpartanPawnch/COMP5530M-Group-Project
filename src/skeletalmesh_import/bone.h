@@ -37,6 +37,9 @@ public:
     std::vector<KeyPosition> positionKeys;
     std::vector<KeyRotation> rotationKeys;
     std::vector<KeyScale> scaleKeys;
+    int positionKeysCount;
+    int rotationKeysCount;
+    int scaleKeysCount;
 
     Bone(const std::string& name, int id, const aiNodeAnim* channel);
     void update(float animationTime);

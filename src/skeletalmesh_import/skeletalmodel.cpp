@@ -29,12 +29,12 @@ void SkeletalModel::processNode(aiNode* node, const aiScene* scene) {
 }
 
 SkeletalMesh SkeletalModel::processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vertices;
+    std::vector<SkeletalVertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<SkeletalTexture> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-        Vertex vertex;
+        SkeletalVertex vertex;
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if (mesh->mTextureCoords[0]) {
@@ -54,17 +54,17 @@ SkeletalMesh SkeletalModel::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<SkeletalTexture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        std::vector<SkeletalTexture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
     getSkeletonInfo(vertices, mesh, scene);
     return SkeletalMesh(vertices, indices, textures);
 }
 
-std::vector<Texture> SkeletalModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName) {
-    std::vector<Texture> textures;
+std::vector<SkeletalTexture> SkeletalModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName) {
+    std::vector<SkeletalTexture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
         aiString path;
         mat->GetTexture(type, i, &path);
@@ -77,7 +77,7 @@ std::vector<Texture> SkeletalModel::loadMaterialTextures(aiMaterial* mat, aiText
             }
         }
         if (!skip) {
-            Texture texture;
+            SkeletalTexture texture;
             //TODO:generate texture id
             texture.id = 1;
             texture.type = typeName;
@@ -89,7 +89,7 @@ std::vector<Texture> SkeletalModel::loadMaterialTextures(aiMaterial* mat, aiText
     return textures;
 }
 
-void SkeletalModel::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
+void SkeletalModel::getSkeletonInfo(std::vector<SkeletalVertex>& vertices, aiMesh* mesh, const aiScene* scene) {
     for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
     {
         unsigned int boneID = 0;

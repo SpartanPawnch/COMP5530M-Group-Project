@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <assimp/scene.h>
 
-struct Vertex {
+struct SkeletalVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
@@ -24,7 +24,7 @@ struct BoneInfo
     glm::mat4 offset;
 };
 
-struct Texture {
+struct SkeletalTexture {
     unsigned int id;
     std::string type;
     std::string path;
@@ -32,9 +32,9 @@ struct Texture {
 
 class SkeletalMesh {
 public:
-    std::vector<Vertex> vertices;
+    std::vector<SkeletalVertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<SkeletalTexture> textures;
 
-    SkeletalMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    SkeletalMesh(std::vector<SkeletalVertex> vertices, std::vector<unsigned int> indices, std::vector<SkeletalTexture> textures);
 };  

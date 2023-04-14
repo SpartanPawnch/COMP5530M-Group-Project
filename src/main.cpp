@@ -23,6 +23,7 @@
 #include "../external/tinyfiledialogs/tinyfiledialogs.h"
 #include "drawing.h"
 #include "model_import/model.h"
+#include "skeletalmesh_import/animator.h"
 
 struct LogString {
 private:
@@ -155,6 +156,8 @@ int main() {
     initGraphics();
 
     Model model;
+    SkeletalModel skeletalmodel;
+    Animator animator;
 
     while (!glfwWindowShouldClose(window)) {
         // get window dimensions
@@ -229,6 +232,194 @@ int main() {
             if (logString.scrollToBot) {
                 logString.scrollToBot = false;
                 ImGui::SetScrollHereY(1.0f);
+            }
+            ImGui::End();
+        }
+
+        if (ImGui::Begin("Skeletal Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Skeletal Model Loading Demo");
+            if (ImGui::Button("Load Skeletal Model")) {
+                const char* path = tinyfd_openFileDialog("Select a Skeletal Model File to Import", NULL, 0, NULL, NULL, 1);
+                //wait for current op to finish
+                if (path != NULL) {
+                    skeletalmodel.loadModel(path);
+                }
+            }
+            ImGui::Text("Model Meshes: %d", skeletalmodel.meshes.size());
+            ImGui::Text("Model Textures: %d", skeletalmodel.textures_loaded.size());
+            ImGui::Text("From: %s", skeletalmodel.directory.c_str());
+            ImGui::Text("Bones: %d", skeletalmodel.boneCounter);
+            ImGui::End();
+        }
+
+        ImGui::SetNextWindowContentSize(ImVec2(800, 0.0f));
+        if (ImGui::Begin("Virtual Keys", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::Button("Add Animation")) {
+                const char* path = tinyfd_openFileDialog("Select Animation to Import", NULL, 0, NULL, NULL, 1);
+                //wait for current op to finish
+                if (path != NULL) {
+                    animator.loadAnimation(path, &skeletalmodel);
+                }
+            }
+            ImGui::Text("Animations:");
+            ImGui::Columns(2);
+            ImGui::Separator();
+            ImGui::Text("Name");
+            ImGui::NextColumn();
+            ImGui::Text("Duration");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < animator.animations.size(); i++) {
+                ImGui::PushID(i);
+                ImGui::Text("%s", animator.animations[i].name.c_str());
+                ImGui::NextColumn();
+                ImGui::Text("%f", animator.animations[i].duration);
+                ImGui::NextColumn();
+                ImGui::PopID();
+            }
+            ImGui::Columns(1);
+            if (ImGui::Button("Add Node")) {
+                animator.addNode();
+            }
+            ImGui::Text("Nodes:");
+            ImGui::Columns(2);
+            ImGui::Separator();
+            ImGui::Text("Name");
+            ImGui::NextColumn();
+            ImGui::Text("Loop Count");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < animator.nodes.size(); i++) {
+                ImGui::PushID(i);
+                ImGui::Text("%s", animator.nodes[i].animation->name.c_str());
+                ImGui::NextColumn();
+                ImGui::Text("%d", animator.nodes[i].loopCount);
+                ImGui::NextColumn();
+                ImGui::PopID();
+            }
+            ImGui::Columns(1);
+            if (ImGui::Button("Add No Condition Transition")) {
+                animator.addNoConditionTransition();
+            }
+            if (ImGui::Button("Add Boolean Transition")) {
+                animator.addBoolACTransition();
+            }
+            if (ImGui::Button("Add Integer Transition")) {
+                animator.addIntACTransition();
+            }
+            if (ImGui::Button("Add Float Transition")) {
+                animator.addFloatACTransition();
+            }
+            ImGui::Text("Transitions:");
+            if (animator.selectedNode) {
+                ImGui::Columns(1);
+                ImGui::Separator();
+                ImGui::Text("Destination Node");
+                ImGui::NextColumn();
+                ImGui::Separator();
+                for (unsigned int i = 0; i < animator.selectedNode->noConditionTransitions.size(); i++) {
+                    ImGui::PushID(i);
+                    ImGui::Text("%s", animator.selectedNode->noConditionTransitions[i].transitionTo->name.c_str());
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                }
+                ImGui::Columns(4);
+                ImGui::Separator();
+                ImGui::Text("Destination Node");
+                ImGui::NextColumn();
+                ImGui::Text("Transition Immediately?");
+                ImGui::NextColumn();
+                ImGui::Text("Current Value");
+                ImGui::NextColumn();
+                ImGui::Text("Desired Value");
+                ImGui::NextColumn();
+                ImGui::Separator();
+                for (unsigned int i = 0; i < animator.selectedNode->boolTransitions.size(); i++) {
+                    ImGui::PushID(i);
+                    ImGui::Text("%s", animator.selectedNode->boolTransitions[i].transitionTo->name.c_str());
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].immediate);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].condition);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->boolTransitions[i].desiredValue);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                }
+                ImGui::Columns(7);
+                ImGui::Separator();
+                ImGui::Text("Destination Node");
+                ImGui::NextColumn();
+                ImGui::Text("Transition Immediately?");
+                ImGui::NextColumn();
+                ImGui::Text("Current Value");
+                ImGui::NextColumn();
+                ImGui::Text("Desired Value");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Lower?");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Equal?");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Greater?");
+                ImGui::NextColumn();
+                ImGui::Separator();
+                for (unsigned int i = 0; i < animator.selectedNode->intTransitions.size(); i++) {
+                    ImGui::PushID(i);
+                    ImGui::Text("%s", animator.selectedNode->intTransitions[i].transitionTo->name.c_str());
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].immediate);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].condition);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].desiredValue);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeLower);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeEqual);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->intTransitions[i].shouldBeGreater);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                }
+                ImGui::Columns(7);
+                ImGui::Separator();
+                ImGui::Text("Destination Node");
+                ImGui::NextColumn();
+                ImGui::Text("Transition Immediately?");
+                ImGui::NextColumn();
+                ImGui::Text("Current Value");
+                ImGui::NextColumn();
+                ImGui::Text("Desired Value");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Lower?");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Equal?");
+                ImGui::NextColumn();
+                ImGui::Text("Condition Greater?");
+                ImGui::NextColumn();
+                ImGui::Separator();
+                for (unsigned int i = 0; i < animator.selectedNode->floatTransitions.size(); i++) {
+                    ImGui::PushID(i);
+                    ImGui::Text("%s", animator.selectedNode->floatTransitions[i].transitionTo->name.c_str());
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].immediate);
+                    ImGui::NextColumn();
+                    ImGui::Text("%f", animator.selectedNode->floatTransitions[i].condition);
+                    ImGui::NextColumn();
+                    ImGui::Text("%f", animator.selectedNode->floatTransitions[i].desiredValue);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeLower);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeEqual);
+                    ImGui::NextColumn();
+                    ImGui::Text("%d", animator.selectedNode->floatTransitions[i].shouldBeGreater);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                }
+                ImGui::Columns(1);
+            }
+            else {
+                ImGui::Text("Select a node to show it's transitions");
             }
             ImGui::End();
         }

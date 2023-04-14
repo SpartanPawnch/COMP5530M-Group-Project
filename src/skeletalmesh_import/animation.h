@@ -20,6 +20,7 @@ struct AssimpNodeData
 class Animation
 {
 public:
+    std::string name;
     float duration;
     int framesPerSecond;
     std::vector<Bone> bones;

@@ -9,7 +9,11 @@ Bone::Bone(const std::string& n, int i, const aiNodeAnim* c) {
 	rotationKeys.resize(c->mNumRotationKeys);
 	scaleKeys.resize(c->mNumScalingKeys);
 
-	for (unsigned int i = 0; i < positionKeys.size(); i++) {
+	positionKeysCount = c->mNumPositionKeys;
+	rotationKeysCount = c->mNumRotationKeys;
+	scaleKeysCount = c->mNumScalingKeys;
+
+	for (unsigned int i = 0; i < positionKeysCount; i++) {
 		aiVector3D aiPosition = c->mPositionKeys[i].mValue;
 		float time = c->mPositionKeys[i].mTime;
 
@@ -20,7 +24,7 @@ Bone::Bone(const std::string& n, int i, const aiNodeAnim* c) {
 		positionKeys.push_back(currentKey);
 	}
 
-	for (unsigned int i = 0; i < rotationKeys.size(); i++) {
+	for (unsigned int i = 0; i < rotationKeysCount; i++) {
 		aiQuaternion aiRotation = c->mRotationKeys[i].mValue;
 		float time = c->mRotationKeys[i].mTime;
 
@@ -31,7 +35,7 @@ Bone::Bone(const std::string& n, int i, const aiNodeAnim* c) {
 		rotationKeys.push_back(currentKey);
 	}
 
-	for (unsigned int i = 0; i < scaleKeys.size(); i++) {
+	for (unsigned int i = 0; i < scaleKeysCount; i++) {
 		aiVector3D aiScale = c->mScalingKeys[i].mValue;
 		float time = c->mScalingKeys[i].mTime;
 
@@ -51,7 +55,7 @@ void Bone::update(float animationTime) {
 }
 
 int Bone::getPositionIndex(float animationTime) {
-	for (unsigned int i = 0; i < positionKeys.size()-1; i++) {
+	for (unsigned int i = 0; i < positionKeysCount -1; i++) {
 		if (animationTime < positionKeys.at(i + 1).time) {
 			return i;
 		}
@@ -60,7 +64,7 @@ int Bone::getPositionIndex(float animationTime) {
 }
 
 int Bone::getRotationIndex(float animationTime) {
-	for (unsigned int i = 0; i < rotationKeys.size() - 1; i++) {
+	for (unsigned int i = 0; i < rotationKeysCount - 1; i++) {
 		if (animationTime < rotationKeys.at(i + 1).time) {
 			return i;
 		}
@@ -69,7 +73,7 @@ int Bone::getRotationIndex(float animationTime) {
 }
 
 int Bone::getScaleIndex(float animationTime) {
-	for (unsigned int i = 0; i < scaleKeys.size() - 1; i++) {
+	for (unsigned int i = 0; i < scaleKeysCount - 1; i++) {
 		if (animationTime < scaleKeys.at(i + 1).time) {
 			return i;
 		}

@@ -5,6 +5,7 @@ Animation::Animation(const std::string& animationPath, SkeletalModel* model) {
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
     assert(scene && scene->mRootNode);
     auto animation = scene->mAnimations[0];
+    name = "New Animation";
     duration = animation->mDuration;
     framesPerSecond = animation->mTicksPerSecond;
     readHierarchyData(rootNode, scene->mRootNode);
