@@ -717,8 +717,10 @@ inline void drawEntities() {
                 // start new tree node if visible
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
-                        ImGuiTreeNodeFlags_DefaultOpen | (ImGuiTreeNodeFlags_Leaf * isLeaf), "%s",
-                        scene.entities[i].name.c_str())) {
+                        ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
+                            ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                            (ImGuiTreeNodeFlags_Leaf * isLeaf),
+                        "%s", scene.entities[i].name.c_str())) {
                     openDepth = currDepth + 1;
                 }
                 else {
@@ -734,7 +736,7 @@ inline void drawEntities() {
                 if (ImGui::BeginDragDropSource()) {
                     entityPayload = i;
                     ImGui::SetDragDropPayload("entityIdx", &entityPayload, sizeof(int));
-                    ImGui::Text("%s #%i", scene.entities[i].name.c_str(), i);
+                    ImGui::Text("%s", scene.entities[i].name.c_str());
                     ImGui::EndDragDropSource();
                 }
 
@@ -832,12 +834,14 @@ inline void drawProperties() {
             ImGui::Text("Select an Entity to show it's components");
         }
         else {
+            ImGui::InputText("Name", &scene.selectedEntity->name);
             // entitity transform
             ImGui::InputFloat3("Position", &scene.selectedEntity->position[0]);
             ImGui::InputFloat4("Rotation", &scene.selectedEntity->rotation[0]);
             ImGui::InputFloat3("Scale", &scene.selectedEntity->scale[0]);
 
             // components
+            ImGui::Separator();
             // TransformComponent
             std::vector<TransformComponent>& transformComponents =
                 scene.selectedEntity->components.vecTransformComponent;

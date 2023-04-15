@@ -1,3 +1,37 @@
+-- get working directory
+local workdir = io.popen("cd"):read()
+workdir = string.gsub(workdir, "\\", "\\\\")
+
+-- get timestamp for component list
+local dateModCmd = 'wmic datafile where Name="'
+	.. workdir
+	.. '\\\\src\\\\ECS\\\\Component\\\\component_list.txt" '
+	.. "get LastModified"
+local dateModHndl = io.popen(dateModCmd)
+
+local datemodified = ""
+
+if dateModHndl then
+	-- ignore first line
+	_ = dateModHndl:read()
+
+	-- get date modified
+	datemodified = dateModHndl:read()
+
+	dateModHndl:close()
+end
+-- check if we need to do anything
+local cacheFile = io.open("src/ECS/ComponentStorage/codegen.cache", "r")
+if cacheFile then
+	local dt = cacheFile:read()
+	cacheFile:close()
+	-- cache matches - do nothing
+	if dt == datemodified and datemodified ~= "" then
+		print("Codegen cache up to date")
+		return
+	end
+end
+
 local complistFile = io.open("src/ECS/Component/component_list.txt", "r")
 assert(complistFile ~= nil, "Failed to open component_list.txt")
 local types = {}
@@ -119,4 +153,9 @@ sourceFile:write("}\n")
 
 sourceFile:close()
 
+cacheFile = io.open("src/ECS/ComponentStorage/codegen.cache", "w")
+if cacheFile then
+	cacheFile:write(datemodified)
+	cacheFile:close()
+end
 print("Generated source files for ComponentStorage struct!")
