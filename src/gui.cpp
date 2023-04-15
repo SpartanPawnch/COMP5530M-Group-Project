@@ -691,6 +691,8 @@ inline void drawEntities() {
         BaseEntity targetChild;
         int targetParent = -1;
 
+        static int entityPayload = -1;
+
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
             // get current node depth
             int currDepth = scene.entities[i].parent < 0 ? 0 : depths[scene.entities[i].parent] + 1;
@@ -707,20 +709,39 @@ inline void drawEntities() {
             // close all previous nodes at same or higher depth
             while (currDepth < openDepth) {
                 ImGui::TreePop();
+                ImGui::PopID();
                 openDepth--;
             }
 
             if (currDepth <= openDepth) {
                 // start new tree node if visible
+                ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
                         ImGuiTreeNodeFlags_DefaultOpen | (ImGuiTreeNodeFlags_Leaf * isLeaf), "%s",
                         scene.entities[i].name.c_str())) {
                     openDepth = currDepth + 1;
                 }
+                else {
+                    ImGui::PopID();
+                }
 
                 // handle select
                 if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                     scene.selectedEntity = &scene.entities[i];
+                }
+
+                // handle drag and drop
+                if (ImGui::BeginDragDropSource()) {
+                    entityPayload = i;
+                    ImGui::SetDragDropPayload("entityIdx", &entityPayload, sizeof(int));
+                    ImGui::Text("%s #%i", scene.entities[i].name.c_str(), i);
+                    ImGui::EndDragDropSource();
+                }
+
+                if (ImGui::BeginDragDropTarget()) {
+                    if (const ImGuiPayload* target = ImGui::AcceptDragDropPayload("entityIdx"))
+                        scene.setParent(*((int*)target->Data), i);
+                    ImGui::EndDragDropTarget();
                 }
 
                 // handle context menu
@@ -749,6 +770,7 @@ inline void drawEntities() {
         // close off all remaining tree nodes
         while (openDepth > 0) {
             ImGui::TreePop();
+            ImGui::PopID();
             openDepth--;
         }
 
@@ -767,6 +789,12 @@ inline void drawEntities() {
         buttonSize.y -= borderSize + 2 * padding.y + restPos.y;
 
         ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize);
+
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* target = ImGui::AcceptDragDropPayload("entityIdx"))
+                scene.setParent(*((int*)target->Data), -1);
+            ImGui::EndDragDropTarget();
+        }
 
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Add Entity")) {

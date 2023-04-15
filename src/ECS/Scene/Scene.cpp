@@ -62,20 +62,33 @@ void Scene::setParent(int childIdx, int parentIdx) {
     // TODO linked list struct?
     // swap right if needed
     int newIdx = childIdx;
-    for (; newIdx < parentIdx; newIdx++) {
-        // TODO children of child
-        // correct parent if needed
-        if (entities[newIdx + 1].parent > childIdx)
-            entities[newIdx + 1].parent--;
-        std::swap(entities[newIdx], entities[newIdx + 1]);
-    }
+    if (newIdx < parentIdx) {
+        for (; newIdx < parentIdx; newIdx++) {
+            // correct parent if needed
+            if (entities[newIdx + 1].parent > childIdx)
+                entities[newIdx + 1].parent--;
+            std::swap(entities[newIdx], entities[newIdx + 1]);
+        }
+        entities[newIdx].parent = newIdx - 1;
 
-    // swap left if needed
-    for (; newIdx > parentIdx + 1; newIdx--) {
-        // TODO children of child
-        // correct parent if needed
-        if (entities[newIdx - 1].parent > parentIdx)
-            entities[newIdx - 1].parent++;
-        std::swap(entities[newIdx], entities[newIdx - 1]);
+        // handle children
+        while (entities[childIdx].parent == childIdx) {
+            setParent(childIdx, newIdx);
+            newIdx--;
+        }
+    }
+    else {
+        // swap left if needed
+        for (; newIdx > parentIdx + 1; newIdx--) {
+            // correct parent if needed
+            if (entities[newIdx - 1].parent > parentIdx)
+                entities[newIdx - 1].parent++;
+            std::swap(entities[newIdx], entities[newIdx - 1]);
+        }
+
+        // handle children
+        for (int i = childIdx + 1; i < entities.size() && entities[i].parent == childIdx; i++) {
+            setParent(i, newIdx);
+        }
     }
 }
