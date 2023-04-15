@@ -20,6 +20,12 @@ private:
 	GLuint teseShader;
 	GLuint geometryShader;
 
+	GLuint ModelID;
+	GLuint ViewID;
+	GLuint ProjectionID;
+	GLuint lightPosID;
+	GLuint lightColID;
+
 	GLuint VAO;
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
 	void createProgram(const char* vertexPath,
@@ -40,10 +46,16 @@ public:
 
 	GLuint getProgram();
 	GLuint getVAO();
+	GLuint getModelID();
+	GLuint getViewID();
+	GLuint getProjectionID();
+	GLuint getLightPosID();
+	GLuint getLightColID();
 
 	~RenderPipeline();
 
 	void setAttributeLayouts();
-	
 
+	void setUniformLocations();
+	
 };

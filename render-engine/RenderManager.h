@@ -14,7 +14,7 @@
 #include <glm/ext.hpp>
 
 enum Pipeline {
-    ColorPipeline = 0,
+    ColourPipeline = 0,
     TexturePipeline = 1,
     ShadowPipeline = 2,
     BillboardPipeline = 3,
@@ -53,7 +53,8 @@ class RenderManager {
     }
 
     ///
-    void runColorPipeline();
+
+    void runColourPipeline();
     void runTexturePipeline();
     void runShadowPipeline();
     void runBillboardPipeline();
@@ -111,5 +112,6 @@ class RenderManager {
 
     LightSource* getLightSource(std::size_t index);
 
+    void setupColourPipelineUniforms();
     void runPipeline(Pipeline pipeline);
 };

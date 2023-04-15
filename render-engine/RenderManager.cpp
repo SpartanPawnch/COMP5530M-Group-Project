@@ -125,7 +125,7 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
-    runPipeline(ColorPipeline);
+    runPipeline(ColourPipeline);
 }
 
 void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
@@ -139,13 +139,13 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
-    runPipeline(ColorPipeline);
+    runPipeline(ColourPipeline);
 }
 
 void RenderManager::runPipeline(Pipeline pipeline) {
     switch (pipeline) {
-    case ColorPipeline:
-        runColorPipeline();
+    case ColourPipeline:
+        runColourPipeline();
         break;
     case TexturePipeline:
         runTexturePipeline();
@@ -165,29 +165,33 @@ void RenderManager::runPipeline(Pipeline pipeline) {
     }
 }
 
-void RenderManager::runColorPipeline() {
-    glUseProgram(getPipeline(ColorPipeline)->getProgram());
+void RenderManager::setupColourPipelineUniforms()
+{
+    getPipeline(ColourPipeline)->setUniformLocations();
+}
+
+void RenderManager::runColourPipeline() {
+    glUseProgram(getPipeline(ColourPipeline)->getProgram());
 
     ////handle for uniforms
-    GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
-    GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
-    GLuint ProjectionID =
-        glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
+    //GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
+    //GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
+    //GLuint ProjectionID =
+    //    glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
 
-    glUniformMatrix4fv(ModelID, 1, GL_FALSE, &modelMatrix[0][0]);
-    glUniformMatrix4fv(ViewID, 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
 
     //// Render the cube
-    glBindVertexArray(getPipeline(ColorPipeline)->getVAO());
+    glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); // TODO: Does this go here?
 }
 
 void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour)
 {
-    LightSource* light = new LightSource(position, colour);
-    lights.push_back(*light);
+    lights.emplace_back(position, colour);
 }
 
 RenderPipeline* RenderManager::getPipeline(std::size_t index) {

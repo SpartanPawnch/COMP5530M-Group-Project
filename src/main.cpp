@@ -164,10 +164,10 @@ int main() {
     renderManager->loadScene();
     // init shader
 
-    LightSource* test = renderManager->getLightSource(0);
-        std::cout << test->getPosition().x << std::endl;
-        std::cout << test->getPosition().y << std::endl;
-        std::cout << test->getPosition().z << std::endl;
+    //LightSource* test = renderManager->getLightSource(0);
+    std::cout << renderManager->getLightSource(0)->getPosition().x << std::endl;
+    std::cout << renderManager->getLightSource(0)->getPosition().y << std::endl;
+    std::cout << renderManager->getLightSource(0)->getPosition().z << std::endl;
 
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
@@ -181,6 +181,9 @@ int main() {
     GUIManager guiInstance(window);
 
     double previous_time = glfwGetTime();
+
+    // ------------- UNIFORMS --------------------------
+    renderManager->setupColourPipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());

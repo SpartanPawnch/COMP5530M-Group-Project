@@ -148,19 +148,27 @@ void RenderPipeline::createProgram(const char* vertexPath,
 
 }
 
-RenderPipeline::~RenderPipeline()
-{
-	
-}
+RenderPipeline::~RenderPipeline(){	}
 
-GLuint RenderPipeline::getProgram()
-{
-	return this->shaderProgram;
-}
+GLuint RenderPipeline::getProgram(){ return this->shaderProgram;}
+GLuint RenderPipeline::getVAO(){ return this->VAO;}
+GLuint RenderPipeline::getModelID(){ return this->ModelID;}
+GLuint RenderPipeline::getViewID(){ return this->ViewID;}
+GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
+GLuint RenderPipeline::getLightPosID(){ return this->lightPosID;}
+GLuint RenderPipeline::getLightColID(){	return this->lightColID;}
 
-GLuint RenderPipeline::getVAO()
+void RenderPipeline::setUniformLocations()
 {
-	return this->VAO;
+	//GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
+	//GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
+	//GLuint ProjectionID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
+
+	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
+	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
+	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
+	//this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
+	//this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
 }
 
 
