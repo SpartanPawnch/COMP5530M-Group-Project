@@ -15,7 +15,7 @@ class Scene {
     void stop();
     void addEntity(const BaseEntity& entity);
     void addChild(const BaseEntity& entity, int parentIdx);
-    void removeEntity(int uuid);
+    void removeEntityByIdx(int idx);
     void selectEntity(BaseEntity* entity);
     void setParent(int childIdx, int parentIdx);
 

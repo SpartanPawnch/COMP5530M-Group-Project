@@ -42,13 +42,22 @@ void Scene::addChild(const BaseEntity& entity, int parentIdx) {
     setParent(entities.size() - 1, parentIdx);
 }
 
-// void Scene::removeEntity(int uuid) {
-//     for (unsigned int i = 0; i < entities.size(); i++) {
-//         if (entities[i].uuid == uuid) {
-//             entities.erase(entities.begin() + i);
-//         }
-//     }
-// }
+void Scene::removeEntityByIdx(int idx) {
+    // move to back
+    int parentIdx = entities[idx].parent;
+    for (int i = idx; i < entities.size() - 1; i++) {
+        if (entities[i + 1].parent == idx)
+            entities[i + 1].parent = parentIdx;
+
+        else if (entities[i + 1].parent > idx)
+            entities[i + 1].parent--;
+
+        std::swap(entities[i], entities[i + 1]);
+    }
+
+    // delete
+    entities.pop_back();
+}
 
 void Scene::selectEntity(BaseEntity* entity) {
     selectedEntity = entity;

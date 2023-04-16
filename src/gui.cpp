@@ -441,8 +441,8 @@ inline void drawModelDemo() {
                 model.loadModel(path);
             }
         }
-        ImGui::Text("Model Meshes: %ul", model.meshes.size());
-        ImGui::Text("Model Textures: %ul", model.textures_loaded.size());
+        ImGui::Text("Model Meshes: %llu", model.meshes.size());
+        ImGui::Text("Model Textures: %llu", model.textures_loaded.size());
         ImGui::Text("From: %s", model.directory.c_str());
         ImGui::PopFont();
     }
@@ -690,6 +690,7 @@ inline void drawEntities() {
         // context menu vars
         BaseEntity targetChild;
         int targetParent = -1;
+        int targetToDelete = -1;
 
         static int entityPayload = -1;
 
@@ -764,6 +765,9 @@ inline void drawEntities() {
                         targetChild = SkeletalMeshEntity();
                         targetParent = i;
                     }
+                    if (ImGui::MenuItem("Delete Entity")) {
+                        targetToDelete = i;
+                    }
                     ImGui::EndPopup();
                 }
             }
@@ -779,6 +783,11 @@ inline void drawEntities() {
         // add new child if requested
         if (targetParent >= 0) {
             scene.addChild(targetChild, targetParent);
+        }
+
+        // delete entity if requested
+        if (targetToDelete >= 0) {
+            scene.removeEntityByIdx(targetToDelete);
         }
 
         // draw invisible button to allow context menu for full window
