@@ -7,6 +7,7 @@ enum VertexBufferType
 	TextureCoordsBuffer = 1,
 	NormalsBuffer = 2,
 	ColorsBuffer = 3,
+	CombinedColorsBuffer = 4
 };
 
 class VertexBuffer

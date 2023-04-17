@@ -72,7 +72,6 @@ void RenderManager::loadScene() {
     //  Define the cube's vertices positions and colors separately
     GLfloat cubePositions[] = {-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f,
         0.5f, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f};
-
     GLfloat cubeColors[] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
         1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     // Define the cube's vertex indices
@@ -91,37 +90,85 @@ void RenderManager::loadScene() {
         0.0f,  0.0f, -1.0f,
         0.0f,  0.0f, -1.0f,
         0.0f,  0.0f, -1.0f,
-
         // Right face
         1.0f,  0.0f,  0.0f,
         1.0f,  0.0f,  0.0f,
         1.0f,  0.0f,  0.0f,
         1.0f,  0.0f,  0.0f,
-
         // Left face
        -1.0f,  0.0f,  0.0f,
        -1.0f,  0.0f,  0.0f,
        -1.0f,  0.0f,  0.0f,
        -1.0f,  0.0f,  0.0f,
-
        // Back face
        0.0f,  0.0f,  1.0f,
        0.0f,  0.0f,  1.0f,
        0.0f,  0.0f,  1.0f,
        0.0f,  0.0f,  1.0f,
-
        // Top face
        0.0f,  1.0f,  0.0f,
        0.0f,  1.0f,  0.0f,
        0.0f,  1.0f,  0.0f,
        0.0f,  1.0f,  0.0f,
-
-       // Bottom face
+       //Bottom face
        0.0f, -1.0f,  0.0f,
        0.0f, -1.0f,  0.0f,
        0.0f, -1.0f,  0.0f,
        0.0f, -1.0f,  0.0f,
     };
+
+    //GLfloat cubeVertices[] = {
+    //    // Front face
+    //    // Position          // Color         // Normal
+    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, 0.0f, 1.0f,
+    //     1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
+    //     1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f, 1.0f,
+    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
+
+    //    // Back face 
+    //    // Position          // Color         // Normal
+    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, 0.0f, -1.0f,
+    //     1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
+    //     1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
+    //    -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 0.0f, -1.0f,
+
+    //    // Left face
+    //    // Position          // Color         // Normal
+    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
+    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
+    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
+    //    -1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
+
+    //    // Right face
+    //    // Position          // Color         // Normal
+    //    1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
+    //    1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+    //    1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     1.0f, 0.0f, 0.0f,
+    //    1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
+
+    //    // Top face
+    //    // Position          // Color         // Normal
+    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+    //    1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f, 0.0f,
+    //    1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 1.0f, 0.0f,
+    //    -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+
+    //    // Bottom face
+    //    // Position          // Color         // Normal
+    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,
+    //    1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, -1.0f, 0.0f,
+    //    1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, -1.0f, 0.0f,
+    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, -1.0f, 0.0f
+    //};
+
+    //GLuint cubeIndices[] = {
+    //    0, 1, 2, 2, 3, 0,      // Front face
+    //    4, 5, 6, 6, 7, 4,      // Back face
+    //    8, 9, 10, 10, 11, 8,   // Left face
+    //    12, 13, 14, 14, 15, 12, // Right face
+    //    16, 17, 18, 18, 19, 16, // Top face
+    //    20, 21, 22, 22, 23, 20  // Bottom face
+    //};
 
     //ADD LIGHT SOURCES
 
@@ -141,6 +188,25 @@ void RenderManager::loadScene() {
     VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
     VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
     VertexBuffer normalVBO(sizeof(cubeNormals), cubeNormals, NormalsBuffer);
+
+    // Set up the VAO
+    //GLuint VAO;
+    //glGenVertexArrays(1, &VAO);
+    //glBindVertexArray(VAO);
+
+    //// Set up the VBO for positions, colors, and normals
+    //GLuint VBO;
+    //glGenBuffers(1, &VBO);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+
+    //// Set up the vertex attributes
+    //glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
+    //glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(2);
+    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
 
     // create an element buffer object for the indices
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);

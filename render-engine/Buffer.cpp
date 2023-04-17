@@ -23,17 +23,6 @@ VertexBuffer::VertexBuffer(GLsizeiptr bufferSize_B, const void* data, VertexBuff
 
 	glVertexAttribPointer(bufferType, elementSize, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(bufferType);
-	
-	//Depends on the layout in the shader
-	//glEnableVertexAttribArray(0);
-	/*glVertexAttribPointer(
-		0,                  // attribute
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);*/
 }
 
 
@@ -43,15 +32,4 @@ IndexBuffer::IndexBuffer(GLsizeiptr bufferSize_B, const void* data)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer); //Should go seperate?
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize_B, data, GL_STATIC_DRAW);
 
-
-	//Depends on the layout in the shader
-	//glEnableVertexAttribArray(0);
-	/*glVertexAttribPointer(
-		0,                  // attribute
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);*/
 }
