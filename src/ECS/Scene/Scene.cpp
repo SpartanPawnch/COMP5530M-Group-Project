@@ -71,14 +71,14 @@ void Scene::setParent(int childIdx, int parentIdx) {
     // TODO linked list struct?
     // swap right if needed
     int newIdx = childIdx;
-    if (newIdx < parentIdx) {
-        for (; newIdx < parentIdx; newIdx++) {
+    if (newIdx < parentIdx || parentIdx < 0) {
+        for (; newIdx < parentIdx || (parentIdx < 0 && newIdx < entities.size() - 1); newIdx++) {
             // correct parent if needed
             if (entities[newIdx + 1].parent > childIdx)
                 entities[newIdx + 1].parent--;
             std::swap(entities[newIdx], entities[newIdx + 1]);
         }
-        entities[newIdx].parent = newIdx - 1;
+        entities[newIdx].parent = parentIdx >= 0 ? newIdx - 1 : -1;
 
         // handle children
         while (entities[childIdx].parent == childIdx) {
