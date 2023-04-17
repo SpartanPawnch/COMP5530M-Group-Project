@@ -122,6 +122,8 @@ void RenderPipeline::createProgram(const char* vertexPath,
 	glLinkProgram(shaderProgram);
 
 	//Delete shaders
+	glDetachShader(shaderProgram, vertexShader);
+	glDetachShader(shaderProgram, fragmentShader);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
@@ -167,8 +169,8 @@ void RenderPipeline::setUniformLocations()
 	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
 	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
-	//this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
-	//this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+	this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
+	this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
 }
 
 

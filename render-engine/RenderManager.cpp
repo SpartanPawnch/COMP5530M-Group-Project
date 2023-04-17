@@ -42,6 +42,11 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
 
 }
 
+void RenderManager::shutDown()
+{
+    this->pipelines.clear();
+}
+
 void RenderManager::addPipeline(const char* vertexPath, const char* fragmentPath,
     const char* geometryPath, const char* computePath, const char* tessControlPath,
     const char* tessEvalPath) {
@@ -80,6 +85,44 @@ void RenderManager::loadScene() {
         4, 5, 1, 1, 0, 4 // Bottom face
     };
 
+    GLfloat cubeNormals[] = {
+        // Front face
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+
+        // Right face
+        1.0f,  0.0f,  0.0f,
+        1.0f,  0.0f,  0.0f,
+        1.0f,  0.0f,  0.0f,
+        1.0f,  0.0f,  0.0f,
+
+        // Left face
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+
+       // Back face
+       0.0f,  0.0f,  1.0f,
+       0.0f,  0.0f,  1.0f,
+       0.0f,  0.0f,  1.0f,
+       0.0f,  0.0f,  1.0f,
+
+       // Top face
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f,
+
+       // Bottom face
+       0.0f, -1.0f,  0.0f,
+       0.0f, -1.0f,  0.0f,
+       0.0f, -1.0f,  0.0f,
+       0.0f, -1.0f,  0.0f,
+    };
+
     //ADD LIGHT SOURCES
 
     this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -97,6 +140,7 @@ void RenderManager::loadScene() {
     // create vertex buffer object(VBO)
     VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
     VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
+    VertexBuffer normalVBO(sizeof(cubeNormals), cubeNormals, NormalsBuffer);
 
     // create an element buffer object for the indices
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
@@ -173,20 +217,23 @@ void RenderManager::setupColourPipelineUniforms()
 void RenderManager::runColourPipeline() {
     glUseProgram(getPipeline(ColourPipeline)->getProgram());
 
-    ////handle for uniforms
-    //GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
-    //GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
-    //GLuint ProjectionID =
-    //    glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
-
+    //sending uniform data
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniform3f(getPipeline(ColourPipeline)->getLightPosID(),
+        lights[0].getPosition().x,
+        lights[0].getPosition().y,
+        lights[0].getPosition().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightColID(),
+        lights[0].getColour().x,
+        lights[0].getColour().y,
+        lights[0].getColour().z);
 
     //// Render the cube
     glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0); // TODO: Does this go here?
+    glBindVertexArray(0); // TODO: Does this go here? - ALEX: VAO is unbound before next operation
 }
 
 void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour)

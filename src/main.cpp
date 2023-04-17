@@ -228,5 +228,7 @@ int main() {
         glfwPollEvents();
     }
 
+    renderManager->shutDown();
+
     return 0;
 }

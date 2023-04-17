@@ -85,6 +85,8 @@ class RenderManager {
 
     void startUp(GLFWwindow* aWindow);
 
+    void shutDown();
+
     void addCamera();
 
     void addLightSource(glm::vec3& position, glm::vec3& colour);
@@ -105,8 +107,6 @@ class RenderManager {
     void renderSceneRefactor(Camera* camera, int width, int height);
 
     void updateMatrices(int* width, int* height);
-
-    void shutDown();
 
     RenderPipeline* getPipeline(std::size_t index);
 
