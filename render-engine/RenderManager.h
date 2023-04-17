@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Buffer.h"
 #include "LightSource.h"
+#include "../src/model_import/model.h"
 
 #include <GLFW/glfw3.h>
 

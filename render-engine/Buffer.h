@@ -1,13 +1,10 @@
 #pragma once
-
+#include "../src//model_import/mesh.h"
 
 enum VertexBufferType
 {
-	PositionsBuffer = 0,
-	TextureCoordsBuffer = 1,
-	NormalsBuffer = 2,
-	ColorsBuffer = 3,
-	CombinedColorsBuffer = 4
+	ColoredObjectBuffer = 0,
+	TexturedObjectBuffer = 1
 };
 
 class VertexBuffer
@@ -16,7 +13,7 @@ private:
 	GLuint vertexBuffer;
 
 public:
-	VertexBuffer(GLsizeiptr bufferSize_B, const void* data, VertexBufferType bufferType);
+	VertexBuffer( unsigned int nVertices, const void* data, VertexBufferType bufferType);
 
 
 };

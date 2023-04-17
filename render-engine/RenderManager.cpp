@@ -68,108 +68,9 @@ void RenderManager::updateMatrices(int* width, int* height) {
 
 void RenderManager::loadScene() {
 
-    // TODO: Remove this later and get these values from load-model
-    //  Define the cube's vertices positions and colors separately
-    GLfloat cubePositions[] = {-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f};
-    GLfloat cubeColors[] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    // Define the cube's vertex indices
-    GLuint cubeIndices[] = {
-        0, 1, 2, 2, 3, 0, // Front face
-        1, 5, 6, 6, 2, 1, // Right face
-        4, 0, 3, 3, 7, 4, // Left face
-        5, 4, 7, 7, 6, 5, // Back face
-        3, 2, 6, 6, 7, 3, // Top face
-        4, 5, 1, 1, 0, 4 // Bottom face
-    };
-
-    GLfloat cubeNormals[] = {
-        // Front face
-        0.0f,  0.0f, -1.0f,
-        0.0f,  0.0f, -1.0f,
-        0.0f,  0.0f, -1.0f,
-        0.0f,  0.0f, -1.0f,
-        // Right face
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        // Left face
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       // Back face
-       0.0f,  0.0f,  1.0f,
-       0.0f,  0.0f,  1.0f,
-       0.0f,  0.0f,  1.0f,
-       0.0f,  0.0f,  1.0f,
-       // Top face
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       //Bottom face
-       0.0f, -1.0f,  0.0f,
-       0.0f, -1.0f,  0.0f,
-       0.0f, -1.0f,  0.0f,
-       0.0f, -1.0f,  0.0f,
-    };
-
-    //GLfloat cubeVertices[] = {
-    //    // Front face
-    //    // Position          // Color         // Normal
-    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, 0.0f, 1.0f,
-    //     1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
-    //     1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f, 1.0f,
-    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
-
-    //    // Back face 
-    //    // Position          // Color         // Normal
-    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-    //     1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-    //     1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-    //    -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 0.0f, -1.0f,
-
-    //    // Left face
-    //    // Position          // Color         // Normal
-    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
-    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
-    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
-    //    -1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
-
-    //    // Right face
-    //    // Position          // Color         // Normal
-    //    1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
-    //    1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-    //    1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     1.0f, 0.0f, 0.0f,
-    //    1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
-
-    //    // Top face
-    //    // Position          // Color         // Normal
-    //    -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-    //    1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f, 0.0f,
-    //    1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 1.0f, 0.0f,
-    //    -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-
-    //    // Bottom face
-    //    // Position          // Color         // Normal
-    //    -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,
-    //    1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, -1.0f, 0.0f,
-    //    1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, -1.0f, 0.0f,
-    //    -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, -1.0f, 0.0f
-    //};
-
-    //GLuint cubeIndices[] = {
-    //    0, 1, 2, 2, 3, 0,      // Front face
-    //    4, 5, 6, 6, 7, 4,      // Back face
-    //    8, 9, 10, 10, 11, 8,   // Left face
-    //    12, 13, 14, 14, 15, 12, // Right face
-    //    16, 17, 18, 18, 19, 16, // Top face
-    //    20, 21, 22, 22, 23, 20  // Bottom face
-    //};
-
+    //Load entity models
+    Model model;
+    model.loadModel("assets/tree.obj");
     //ADD LIGHT SOURCES
 
     this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -185,9 +86,15 @@ void RenderManager::loadScene() {
     addPipeline(colorVertexPath, colorFragPath); // ColorPipeline - 0
 
     // create vertex buffer object(VBO)
-    VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
-    VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
-    VertexBuffer normalVBO(sizeof(cubeNormals), cubeNormals, NormalsBuffer);
+    //for (unsigned int i = 0; i < model.meshes.size(); i++)
+    //{
+    //    VertexBuffer *vertexBuffer;
+    //    vertexBuffer = VertexBuffer::VertexBuffer(model.meshes[i].vertices.size(), model.meshes[i].vertices);
+    //}
+    VertexBuffer vBuffer(model.meshes[0].vertices.size(), &model.meshes[0].vertices, TexturedObjectBuffer);
+        
+    //VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
+    
 
     // Set up the VAO
     //GLuint VAO;
@@ -209,7 +116,7 @@ void RenderManager::loadScene() {
     //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
 
     // create an element buffer object for the indices
-    IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+    IndexBuffer EBO(model.meshes[0].indices.size() * sizeof(int), &model.meshes[0].indices);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
