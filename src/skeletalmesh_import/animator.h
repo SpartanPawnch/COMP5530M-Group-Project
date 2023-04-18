@@ -67,7 +67,7 @@ public:
 	Animator();
 	void onStart();
 	void onUpdate(float df);
-	void onLoop();
+	void onFinalLoopEnd();
 	void transitionToNode(AnimationControllerNode* node);
 	void loadAnimation(const std::string& animationPath, SkeletalModel* model);
 	void onEnd();

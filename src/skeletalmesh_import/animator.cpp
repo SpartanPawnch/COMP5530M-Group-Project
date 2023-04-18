@@ -20,14 +20,16 @@ void Animator::updateAnimation(float dt) {
 	Animation* currentAnimation = currentNode->animation;
 	if (currentAnimation) {
 		currentTime += currentAnimation->framesPerSecond * dt;
+		if (currentTime > currentAnimation->duration) {
+			loopCount++;
+			if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
+				onFinalLoopEnd();
+				return;
+			}
+		}
 		currentTime = fmod(currentTime, currentAnimation->duration);
 		calculateBoneTransform(&currentAnimation->rootNode, glm::mat4(1.0f));
 	}
-}
-
-void Animator::playAnimation(Animation* Animation) {
-	//currentAnimation = Animation;
-	//currentTime = 0.0f;
 }
 
 void Animator::calculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform) {
@@ -89,7 +91,7 @@ void Animator::onUpdate(float df) {
 				transitionToNode(transition.transitionTo);
 				return;
 			}
-			else if(!(nextNode)){
+			else if (!(nextNode)) {
 				nextNode = transition.transitionTo;
 			}
 		}
@@ -122,10 +124,12 @@ void Animator::onUpdate(float df) {
 	}
 }
 
-void Animator::onLoop() {
-	currentLoopCount++;
+void Animator::onFinalLoopEnd() {
 	if (nextNode) {
 		transitionToNode(nextNode);
+	}
+	else {
+		currentNode = nullptr;
 	}
 }
 
@@ -149,7 +153,7 @@ void Animator::addNode() {
 	AnimationControllerNode node;
 	node.name = "New Node";
 	node.animation = &animations[0];
-	node.loopCount=0;
+	node.loopCount = 0;
 	nodes.push_back(node);
 	selectedNode = &nodes[nodes.size() - 1];
 }
@@ -262,5 +266,3 @@ void Animator::removeFloatACTransition(int id) {
 	assert(selectedNode->floatTransitions.size() > id);
 	selectedNode->floatTransitions.erase(selectedNode->floatTransitions.begin() + id);
 }
-
-
