@@ -840,10 +840,13 @@ void drawComponentProps(TransformComponent& component) {
 void drawComponentProps(AudioSourceComponent& component) {
     // clip selector
     std::string previewPath = "";
-    if (component.clipDescriptor && component.clipDescriptor->path)
+    std::string previewStr = "None";
+    if (component.clipDescriptor && component.clipDescriptor->path) {
         previewPath = *component.clipDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewPath.c_str());
+    }
 
-    if (ImGui::BeginCombo("Audio File", previewPath.c_str())) {
+    if (ImGui::BeginCombo("Audio File", previewStr.c_str())) {
         // get available audio clips
         static std::vector<assetfolder::AssetDescriptor> audioFiles;
         assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::AUDIO, audioFiles);
@@ -864,7 +867,7 @@ void drawComponentProps(AudioSourceComponent& component) {
                 }
 
                 std::swap(component.clipDescriptor, desc);
-                component.clipUuid = uuid;
+                component.clipUuid = component.clipDescriptor ? uuid : "";
             }
 
             ImGui::PopID();

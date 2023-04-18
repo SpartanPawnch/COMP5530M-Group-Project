@@ -23,6 +23,7 @@
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Component/BaseComponent.h"
 #include "ECS/Component/TransformComponent.h"
+#include "ECS/Component/AudioSourceComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -63,12 +64,14 @@ void loadLevel(const char* path, Scene& scene) {
     scene.selectedEntity = nullptr;
 
     // load audio
+    // store set of shared pointers temporarily before components are initialized
+    std::vector<std::shared_ptr<audio::AudioDescriptor>> audioPtrs;
     {
         assert(doc.HasMember("audio"));
         auto jsonAudio = doc["audio"].GetArray();
         for (unsigned int i = 0; i < jsonAudio.Size(); i++) {
-            // TODO init with fixed uuid
-            // audio::audioLoad(jsonAudio[i]["path"].GetString());
+            audioPtrs.emplace_back(audio::audioLoad(
+                jsonAudio[i]["path"].GetString(), jsonAudio[i]["uuid"].GetString()));
         }
     }
 
@@ -146,6 +149,20 @@ void loadLevel(const char* path, Scene& scene) {
 
                     baseEntity.components.addComponent(trComponent);
                 }
+
+                // AudioSourceComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "AudioSourceComponent") == 0) {
+                    AudioSourceComponent audioSrc;
+                    audioSrc.uuid = jsonComponent["uuid"].GetInt();
+                    audioSrc.name = std::string(jsonComponent["name"].GetString());
+                    audioSrc.clipUuid = std::string(jsonComponent["clipUuid"].GetString());
+                    audioSrc.clipDescriptor = audio::audioGetByUuid(audioSrc.clipUuid);
+                    audioSrc.loop = jsonComponent["loop"].GetBool();
+                    audioSrc.directional = jsonComponent["directional"].GetBool();
+
+                    baseEntity.components.addComponent(audioSrc);
+                }
+
                 // BaseComponent
                 else {
                     BaseComponent base;
@@ -165,6 +182,7 @@ void loadLevel(const char* path, Scene& scene) {
     logging::logInfo("Opened level {}\n", path);
 }
 
+// --- Per-Component-Type serialization functions
 static rapidjson::Value saveComponent(
     const TransformComponent& trComponent, rapidjson::Document& d) {
     rapidjson::Value jsonComponent(rapidjson::kObjectType);
@@ -209,7 +227,26 @@ static rapidjson::Value saveComponent(const BaseComponent& component, rapidjson:
     jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
 
     jsonComponent.AddMember(
-        "type", rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
+        "type", rapidjson::Value("BaseComponent", d.GetAllocator()), d.GetAllocator());
+
+    return jsonComponent;
+}
+
+static rapidjson::Value saveComponent(
+    const AudioSourceComponent& component, rapidjson::Document& d) {
+    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+
+    jsonComponent.AddMember(
+        "name", rapidjson::Value(component.name.c_str(), d.GetAllocator()), d.GetAllocator());
+    jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
+
+    jsonComponent.AddMember(
+        "type", rapidjson::Value("AudioSourceComponent", d.GetAllocator()), d.GetAllocator());
+
+    jsonComponent.AddMember("clipUuid",
+        rapidjson::Value(component.clipUuid.c_str(), d.GetAllocator()), d.GetAllocator());
+    jsonComponent.AddMember("loop", component.loop, d.GetAllocator());
+    jsonComponent.AddMember("directional", component.directional, d.GetAllocator());
 
     return jsonComponent;
 }
@@ -228,7 +265,6 @@ void saveLevel(const char* path, const Scene& scene) {
     d.SetObject();
 
     // save ECS and enumerate dependencies
-    std::vector<int> audioIds;
     std::vector<int> modelIds;
     std::vector<int> textureIds;
     std::vector<int> scriptIds;
@@ -282,6 +318,14 @@ void saveLevel(const char* path, const Scene& scene) {
                 jsonComponents.PushBack(jsonComponent, d.GetAllocator());
             }
 
+            // AudioSourceComponent
+            const std::vector<AudioSourceComponent>& audioSrcComponents =
+                scene.entities[i].components.vecAudioSourceComponent;
+            for (unsigned int j = 0; j < audioSrcComponents.size(); j++) {
+                rapidjson::Value jsonComponent = saveComponent(audioSrcComponents[j], d);
+                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+            }
+
             // BaseComponent
             const std::vector<BaseComponent>& baseComponents =
                 scene.entities[i].components.vecBaseComponent;
@@ -297,9 +341,21 @@ void saveLevel(const char* path, const Scene& scene) {
         d.AddMember("entities", jsonEntities, d.GetAllocator());
     }
 
-    // TODO - save audio
+    // save audio
     {
         rapidjson::Value jsonAudio(rapidjson::kArrayType);
+        std::vector<audio::AudioDiskData> data;
+        audio::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            rapidjson::Value jsonAudioClip(rapidjson::kObjectType);
+            jsonAudioClip.AddMember(
+                "uuid", rapidjson::Value(data[i].uuid.c_str(), d.GetAllocator()), d.GetAllocator());
+            jsonAudioClip.AddMember(
+                "path", rapidjson::Value(data[i].path.c_str(), d.GetAllocator()), d.GetAllocator());
+            jsonAudio.PushBack(jsonAudioClip, d.GetAllocator());
+        }
+
         d.AddMember("audio", jsonAudio, d.GetAllocator());
     }
 

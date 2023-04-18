@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/vec3.hpp>
 
+#include <vector>
 #include <memory>
 #include <string>
 
@@ -46,4 +47,11 @@ namespace audio {
 
     // get clips count
     int getAudioClipCount();
+
+    // get clips array
+    struct AudioDiskData {
+        std::string uuid;
+        std::string path;
+    };
+    void getDiskData(std::vector<AudioDiskData>& data);
 }

@@ -202,4 +202,12 @@ namespace audio {
     int getAudioClipCount() {
         return loadedClips.size();
     }
+
+    void getDiskData(std::vector<AudioDiskData>& data) {
+        data.resize(loadedClips.size());
+        for (unsigned int i = 0; i < loadedClips.size(); i++) {
+            data[i].uuid = loadedClips[i].uuid;
+            data[i].path = loadedClips[i].path;
+        }
+    }
 }
