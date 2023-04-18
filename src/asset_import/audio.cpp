@@ -111,6 +111,9 @@ namespace audio {
     }
 
     AudioDescriptor::~AudioDescriptor() {
+        // stop everything to avoid issues
+        audioStopAll();
+
         // skip if bulk clear has been performed
         if (loadedClips.size() == 0)
             return;

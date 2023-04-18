@@ -790,6 +790,7 @@ inline void drawEntities() {
         // delete entity if requested
         if (targetToDelete >= 0) {
             scene.removeEntityByIdx(targetToDelete);
+            scene.selectedEntity = nullptr;
         }
 
         // draw invisible button to allow context menu for full window
@@ -865,13 +866,27 @@ void drawComponentProps(AudioSourceComponent& component) {
                 std::swap(component.clipDescriptor, desc);
                 component.clipUuid = uuid;
             }
+
             ImGui::PopID();
         }
 
         ImGui::EndCombo();
     }
 
-    // controls
+    // sound demo
+    ImGui::BeginDisabled(!component.clipDescriptor);
+    if (ImGui::Button("Start")) {
+        audio::audioStopAll();
+        audio::audioPlay(component.clipDescriptor->idx);
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Stop")) {
+        audio::audioStopAll();
+    }
+    ImGui::EndDisabled();
+
+    // sound options
     ImGui::Checkbox("Loop", &component.loop);
     ImGui::Checkbox("Directional", &component.directional);
 }
