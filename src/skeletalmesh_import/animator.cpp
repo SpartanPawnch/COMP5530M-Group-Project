@@ -21,7 +21,7 @@ void Animator::updateAnimation(float dt) {
 	if (currentAnimation) {
 		currentTime += currentAnimation->framesPerSecond * dt;
 		if (currentTime > currentAnimation->duration) {
-			loopCount++;
+			currentLoopCount++;
 			if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
 				onFinalLoopEnd();
 				return;

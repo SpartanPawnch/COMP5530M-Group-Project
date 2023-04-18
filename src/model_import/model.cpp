@@ -66,6 +66,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
         aiString path;
         mat->GetTexture(type, i, &path);
+        std::cout << path.C_Str() << std::endl;
         bool skip = false;
         for (unsigned int j = 0; j < textures_loaded.size(); ++j) {
             if (std::strcmp(textures_loaded[j].path.data(), path.C_Str()) == 0) {
