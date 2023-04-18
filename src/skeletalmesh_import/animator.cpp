@@ -205,3 +205,62 @@ void Animator::addFloatACTransition() {
 	selectedNode->floatTransitions.push_back(transition);
 }
 
+void Animator::removeNode(int id) {
+	assert(nodes.size() > id);
+	AnimationControllerNode* node = &nodes[id];
+	for (size_t i = 0; i < nodes.size(); i++) {
+		for (size_t j = 0; j < nodes[i].noConditionTransitions.size(); j++) {
+			if (nodes[i].noConditionTransitions[j].transitionTo == node) {
+				nodes[i].noConditionTransitions.erase(nodes[i].noConditionTransitions.begin() + j);
+				j--;
+			}
+		}
+		for (size_t j = 0; j < nodes[i].boolTransitions.size(); j++) {
+			if (nodes[i].boolTransitions[j].transitionTo == node) {
+				nodes[i].boolTransitions.erase(nodes[i].boolTransitions.begin() + j);
+				j--;
+			}
+		}
+		for (size_t j = 0; j < nodes[i].intTransitions.size(); j++) {
+			if (nodes[i].intTransitions[j].transitionTo == node) {
+				nodes[i].intTransitions.erase(nodes[i].intTransitions.begin() + j);
+				j--;
+			}
+		}
+		for (size_t j = 0; j < nodes[i].floatTransitions.size(); j++) {
+			if (nodes[i].floatTransitions[j].transitionTo == node) {
+				nodes[i].floatTransitions.erase(nodes[i].floatTransitions.begin() + j);
+				j--;
+			}
+		}
+	}
+	nodes.erase(nodes.begin() + id);
+	if (selectedNode == node) {
+		selectedNode = nullptr;
+	}
+	if (currentNode == node) {
+		currentNode = nullptr;
+	}
+}
+
+void Animator::removeNoConditionTransition(int id) {
+	assert(selectedNode->noConditionTransitions.size() > id);
+	selectedNode->noConditionTransitions.erase(selectedNode->noConditionTransitions.begin() + id);
+}
+
+void Animator::removeBoolACTransition(int id) {
+	assert(selectedNode->boolTransitions.size() > id);
+	selectedNode->boolTransitions.erase(selectedNode->boolTransitions.begin() + id);
+}
+
+void Animator::removeIntACTransition(int id) {
+	assert(selectedNode->intTransitions.size() > id);
+	selectedNode->intTransitions.erase(selectedNode->intTransitions.begin() + id);
+}
+
+void Animator::removeFloatACTransition(int id) {
+	assert(selectedNode->floatTransitions.size() > id);
+	selectedNode->floatTransitions.erase(selectedNode->floatTransitions.begin() + id);
+}
+
+

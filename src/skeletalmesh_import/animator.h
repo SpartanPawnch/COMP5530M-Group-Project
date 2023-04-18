@@ -77,6 +77,11 @@ public:
 	void addBoolACTransition();
 	void addIntACTransition();
 	void addFloatACTransition();
+	void removeNode(int id);
+	void removeNoConditionTransition(int id);
+	void removeBoolACTransition(int id);
+	void removeIntACTransition(int id);
+	void removeFloatACTransition(int id);
 	
 	void updateAnimation(float dt);
 	void playAnimation(Animation* Animation);

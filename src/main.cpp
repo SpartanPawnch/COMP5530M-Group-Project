@@ -283,7 +283,7 @@ int main() {
                 animator.addNode();
             }
             ImGui::Text("Nodes:");
-            ImGui::Columns(4);
+            ImGui::Columns(5);
             ImGui::Separator();
             ImGui::Text("Name");
             ImGui::NextColumn();
@@ -292,6 +292,8 @@ int main() {
             ImGui::Text("Loop Count");
             ImGui::NextColumn();
             ImGui::Text("Select Node");
+            ImGui::NextColumn();
+            ImGui::Text("Remove Node");
             ImGui::NextColumn();
             ImGui::Separator();
             for (unsigned int i = 0; i < animator.nodes.size(); i++) {
@@ -314,6 +316,10 @@ int main() {
                     animator.selectedNode = &animator.nodes[i];
                 }
                 ImGui::NextColumn();
+                if (ImGui::Button("Remove Node")) {
+                    animator.removeNode(i);
+                }
+                ImGui::NextColumn();
                 ImGui::PopID();
             }
             ImGui::Columns(1);
@@ -331,9 +337,11 @@ int main() {
             }
             ImGui::Text("Transitions:");
             if (animator.selectedNode) {
-                ImGui::Columns(1);
+                ImGui::Columns(2);
                 ImGui::Separator();
                 ImGui::Text("Destination Node");
+                ImGui::NextColumn();
+                ImGui::Text("Remove Transition");
                 ImGui::NextColumn();
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->noConditionTransitions.size(); i++) {
@@ -347,9 +355,13 @@ int main() {
                         ImGui::EndCombo();
                     }
                     ImGui::NextColumn();
+                    if (ImGui::Button("Remove Transition")) {
+                        animator.removeNoConditionTransition(i);
+                    }
+                    ImGui::NextColumn();
                     ImGui::PopID();
                 }
-                ImGui::Columns(4);
+                ImGui::Columns(5);
                 ImGui::Separator();
                 ImGui::Text("Destination Node");
                 ImGui::NextColumn();
@@ -358,6 +370,8 @@ int main() {
                 ImGui::Text("Current Value");
                 ImGui::NextColumn();
                 ImGui::Text("Desired Value");
+                ImGui::NextColumn();
+                ImGui::Text("Remove Transition");
                 ImGui::NextColumn();
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->boolTransitions.size(); i++) {
@@ -377,9 +391,13 @@ int main() {
                     ImGui::NextColumn();
                     ImGui::Checkbox("##desired_bool", &animator.selectedNode->boolTransitions[i].desiredValue);
                     ImGui::NextColumn();
+                    if (ImGui::Button("Remove Transition")) {
+                        animator.removeBoolACTransition(i);
+                    }
+                    ImGui::NextColumn();
                     ImGui::PopID();
                 }
-                ImGui::Columns(7);
+                ImGui::Columns(8);
                 ImGui::Separator();
                 ImGui::Text("Destination Node");
                 ImGui::NextColumn();
@@ -394,6 +412,8 @@ int main() {
                 ImGui::Text("Condition Equal?");
                 ImGui::NextColumn();
                 ImGui::Text("Condition Greater?");
+                ImGui::NextColumn();
+                ImGui::Text("Remove Transition");
                 ImGui::NextColumn();
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->intTransitions.size(); i++) {
@@ -419,9 +439,13 @@ int main() {
                     ImGui::NextColumn();
                     ImGui::Checkbox("##should_greater_int", &animator.selectedNode->intTransitions[i].shouldBeGreater);
                     ImGui::NextColumn();
+                    if (ImGui::Button("Remove Transition")) {
+                        animator.removeIntACTransition(i);
+                    }
+                    ImGui::NextColumn();
                     ImGui::PopID();
                 }
-                ImGui::Columns(7);
+                ImGui::Columns(8);
                 ImGui::Separator();
                 ImGui::Text("Destination Node");
                 ImGui::NextColumn();
@@ -436,6 +460,8 @@ int main() {
                 ImGui::Text("Condition Equal?");
                 ImGui::NextColumn();
                 ImGui::Text("Condition Greater?");
+                ImGui::NextColumn();
+                ImGui::Text("Remove Transition");
                 ImGui::NextColumn();
                 ImGui::Separator();
                 for (unsigned int i = 0; i < animator.selectedNode->floatTransitions.size(); i++) {
@@ -460,6 +486,10 @@ int main() {
                     ImGui::Checkbox("##should_equal_float", &animator.selectedNode->floatTransitions[i].shouldBeEqual);
                     ImGui::NextColumn();
                     ImGui::Checkbox("##should_greater_float", &animator.selectedNode->floatTransitions[i].shouldBeGreater);
+                    ImGui::NextColumn();
+                    if (ImGui::Button("Remove Transition")) {
+                        animator.removeFloatACTransition(i);
+                    }
                     ImGui::NextColumn();
                     ImGui::PopID();
                 }
