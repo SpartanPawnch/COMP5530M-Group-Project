@@ -71,7 +71,8 @@ void handleKeyboardInput(GLFWwindow* window) {
 }
 
 void handleMouseInput(GLFWwindow* window) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
         if (renderManager->camera->focusState == false) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             renderManager->camera->focusState = true;
@@ -184,6 +185,7 @@ int main() {
 
     // ------------- UNIFORMS --------------------------
     renderManager->setupColourPipelineUniforms();
+    renderManager->setupTexturePipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -216,8 +218,7 @@ int main() {
         // draw scene
         renderManager->renderSceneRefactor(
             renderManager->camera, viewportTexWidth, viewportTexHeight);
-        
-
+       
         glFlush();
 
         // draw UI to full window

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 
+
 #include "RenderPipeline.h"
 #include "Camera.h"
 #include "Buffer.h"
@@ -35,6 +36,7 @@ class RenderManager {
     // Available Render Pipelines
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
+    // 
     //Light Sources
     std::vector<LightSource> lights;
 
@@ -93,7 +95,7 @@ class RenderManager {
     void addLightSource(glm::vec3& position, glm::vec3& colour);
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
-    void addPipeline(const char* vertexPath, const char* fragmentPath,
+    void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
         const char* geometryPath = nullptr, const char* computePath = nullptr,
         const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
@@ -109,10 +111,11 @@ class RenderManager {
 
     void updateMatrices(int* width, int* height);
 
-    RenderPipeline* getPipeline(std::size_t index);
+    RenderPipeline* getPipeline(Pipeline pipe);
 
     LightSource* getLightSource(std::size_t index);
 
     void setupColourPipelineUniforms();
+    void setupTexturePipelineUniforms();
     void runPipeline(Pipeline pipeline);
 };

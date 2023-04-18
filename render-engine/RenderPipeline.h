@@ -27,6 +27,7 @@ private:
 	GLuint lightColID;
 
 	GLuint VAO;
+	
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
 	void createProgram(const char* vertexPath,
 		const char* fragmentPath,
@@ -36,6 +37,10 @@ private:
 		const char* tessEvalPath);
 
 public:
+
+	bool initialised = false;
+
+	RenderPipeline();
 
 	RenderPipeline(const char* vertexPath,
 		const char* fragmentPath,

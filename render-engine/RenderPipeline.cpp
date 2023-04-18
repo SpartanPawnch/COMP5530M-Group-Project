@@ -1,5 +1,8 @@
 #include "RenderPipeline.h";
 
+RenderPipeline::RenderPipeline()
+{
+}
 
 RenderPipeline::RenderPipeline(const char* vertexPath,
 	const char* fragmentPath,
@@ -10,6 +13,8 @@ RenderPipeline::RenderPipeline(const char* vertexPath,
 {
 	RenderPipeline::createProgram(vertexPath, fragmentPath, geometryPath,
 		computePath, tessControlPath, tessEvalPath);
+
+	this->initialised = true;
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -162,10 +167,6 @@ GLuint RenderPipeline::getLightColID(){	return this->lightColID;}
 
 void RenderPipeline::setUniformLocations()
 {
-	//GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
-	//GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
-	//GLuint ProjectionID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
-
 	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
 	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");

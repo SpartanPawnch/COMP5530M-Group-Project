@@ -9,31 +9,33 @@
 
 
 
-VertexBuffer::VertexBuffer(unsigned int nVertices, const void* data, VertexBufferType bufferType)
+VertexBuffer::VertexBuffer( GLsizeiptr bufferSize_B, const void* data, VertexBufferType bufferType)
 {
 
-	// VAO probably with shaders / or in fn thT CALLS THIS FUNCTION
 
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //Should go seperate?
 	if (bufferType == TexturedObjectBuffer)
-	{
-		glBufferData(GL_ARRAY_BUFFER, nVertices*sizeof(Vertex), data, GL_STATIC_DRAW);
+	{	//models imported from assimp with struct Vertex format
+		glBufferData(GL_ARRAY_BUFFER, bufferSize_B, data, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::position));
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::normal));
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::texCoords));
-
 	}
-		
-	//else if (bufferType == ColoredObjectBuffer)
-	//	glBufferData(GL_ARRAY_BUFFER, nVertices * 9* sizeof(float), data, GL_STATIC_DRAW);
-	////
-	//unsigned int elementSize = (bufferType == TextureCoordsBuffer) ? 2 : 3;
-	/*glVertexAttribPointer(bufferType, elementSize, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(bufferType);*/
+	else if (bufferType == ColoredObjectBuffer)
+	{
+		glBufferData(GL_ARRAY_BUFFER, bufferSize_B, data, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+	}
+
 }
 
 
