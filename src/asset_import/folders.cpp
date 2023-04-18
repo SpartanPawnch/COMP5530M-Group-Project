@@ -1,9 +1,9 @@
 #include "folders.h"
 #ifdef _WIN32
-#include<windows.h>
-#include<direct.h>
+#include <windows.h>
+#include <direct.h>
 #else
-//TODO Linux version?
+// TODO Linux version?
 #endif
 #include <cstring>
 #include <cassert>
@@ -14,13 +14,13 @@
 
 #include "../logging.h"
 
-//disable POSIX deprecation warning
-#pragma warning(disable:4996)
+// disable POSIX deprecation warning
+#pragma warning(disable : 4996)
 
 static std::string activeDirectory;
 
 namespace assetfolder {
-    //extract file name from path
+    // extract file name from path
     std::string getName(const char* path) {
         int i = strlen(path) - 1;
         while (i > 0 && path[i] != '/' && path[i] != '\\')
@@ -28,7 +28,7 @@ namespace assetfolder {
         return std::string((path + i + (i != 0)));
     }
 
-    //extract file extension from path
+    // extract file extension from path
     static std::string getExtension(const char* path) {
         int i = strlen(path) - 1;
         while (i > 0 && path[i] != '.' && path[i] != '/' && path[i] != '\\')
@@ -39,19 +39,19 @@ namespace assetfolder {
             return std::string("");
     }
 
-    //find file type from path
+    // find file type from path
     static AssetDescriptor::EFileType getType(const char* path) {
         std::string ext = getExtension(path);
 
-        //models
+        // models
         if (ext == ".obj" || ext == ".fbx" || ext == ".dae" || ext == ".gltf")
             return AssetDescriptor::EFileType::MODEL;
 
-        //textures
+        // textures
         if (ext == ".png" || ext == ".jpg" || ext == ".bmp" || ext == ".tga" || ext == ".hdr")
             return AssetDescriptor::EFileType::TEXTURE;
 
-        //audio
+        // audio
         if (ext == ".mp3" || ext == ".ogg" || ext == ".flac" || ext == ".wav")
             return AssetDescriptor::EFileType::AUDIO;
 
@@ -61,15 +61,15 @@ namespace assetfolder {
     static AssetDescriptor::EFileType getType(const std::string& path) {
         std::string ext = getExtension(path.c_str());
 
-        //models
+        // models
         if (ext == ".obj" || ext == ".fbx" || ext == ".dae" || ext == ".gltf")
             return AssetDescriptor::EFileType::MODEL;
 
-        //textures
+        // textures
         if (ext == ".png" || ext == ".jpg" || ext == ".bmp" || ext == ".tga" || ext == ".hdr")
             return AssetDescriptor::EFileType::TEXTURE;
 
-        //audio
+        // audio
         if (ext == ".mp3" || ext == ".ogg" || ext == ".flac" || ext == ".wav")
             return AssetDescriptor::EFileType::AUDIO;
 
@@ -83,31 +83,19 @@ namespace assetfolder {
     AssetDescriptor getAssetsRootDir() {
         if (activeDirectory.empty())
             return AssetDescriptor{
-            std::string(""),
-            std::string(""),
-            AssetDescriptor::EFileType::INVALID
-        };
+                std::string(""), std::string(""), AssetDescriptor::EFileType::INVALID};
 
-        return AssetDescriptor{
-            std::string(activeDirectory) + "/assets",
-            std::string("assets"),
-            AssetDescriptor::EFileType::FOLDER
-        };
+        return AssetDescriptor{std::string(activeDirectory) + "/assets", std::string("assets"),
+            AssetDescriptor::EFileType::FOLDER};
     }
 
     AssetDescriptor getLevelsRootDir() {
         if (activeDirectory.empty())
             return AssetDescriptor{
-            std::string(""),
-            std::string(""),
-            AssetDescriptor::EFileType::INVALID
-        };
+                std::string(""), std::string(""), AssetDescriptor::EFileType::INVALID};
 
-        return AssetDescriptor{
-            std::string(activeDirectory) + "/levels",
-            std::string("levels"),
-            AssetDescriptor::EFileType::FOLDER
-        };
+        return AssetDescriptor{std::string(activeDirectory) + "/levels", std::string("levels"),
+            AssetDescriptor::EFileType::FOLDER};
     }
 
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res) {
@@ -119,44 +107,61 @@ namespace assetfolder {
         HANDLE hFind;
         hFind = FindFirstFileA((dir.path + "/*").c_str(), &findData);
         if (hFind != 0) {
-            //add first result
+            // add first result
             if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
-                res.emplace_back(AssetDescriptor{
-                    std::string(dir.path + findData.cFileName),
+                res.emplace_back(AssetDescriptor{std::string(dir.path + findData.cFileName),
                     std::string(findData.cFileName),
-                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
-                        AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
-                    });
+                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
+                        ? AssetDescriptor::EFileType::FOLDER
+                        : getType(findData.cFileName)});
             }
 
-            //add other results
-            for (bool found = FindNextFileA(hFind, &findData);found;
-                found = FindNextFileA(hFind, &findData)) {
-                //skip "." and ".."
+            // add other results
+            for (bool found = FindNextFileA(hFind, &findData); found;
+                 found = FindNextFileA(hFind, &findData)) {
+                // skip "." and ".."
                 if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0)
                     continue;
 
-                res.emplace_back(AssetDescriptor{
-                std::string(dir.path + "/" + findData.cFileName),
-                std::string(findData.cFileName),
-                findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ?
-                    AssetDescriptor::EFileType::FOLDER : getType(findData.cFileName)
-                    });
+                res.emplace_back(AssetDescriptor{std::string(dir.path + "/" + findData.cFileName),
+                    std::string(findData.cFileName),
+                    findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
+                        ? AssetDescriptor::EFileType::FOLDER
+                        : getType(findData.cFileName)});
             }
         }
 #else
-        //TODO - Linux Version?
+        // TODO - Linux Version?
 #endif
 
-        //bubble sort for folders first
-        for (int i = res.size() - 1;i > 0;i--) {
-            for (int j = 0;j < i;j++) {
+        // bubble sort for folders first
+        for (int i = res.size() - 1; i > 0; i--) {
+            for (int j = 0; j < i; j++) {
                 if (res[j].type != AssetDescriptor::EFileType::FOLDER &&
                     res[j + 1].type == AssetDescriptor::EFileType::FOLDER)
                     std::swap(res[j], res[j + 1]);
             }
         }
+    }
 
+    static void findAssetsByTypeInner(AssetDescriptor::EFileType type, const AssetDescriptor& root,
+        std::vector<AssetDescriptor>& res) {
+        std::vector<AssetDescriptor> contents;
+        listDir(root, contents);
+        for (unsigned int i = 0; i < contents.size(); i++) {
+            // search recursively
+            if (contents[i].type == AssetDescriptor::EFileType::FOLDER)
+                findAssetsByTypeInner(type, contents[i], res);
+
+            // add relevant results
+            if (contents[i].type == type)
+                res.push_back(contents[i]);
+        }
+    }
+
+    void findAssetsByType(AssetDescriptor::EFileType type, std::vector<AssetDescriptor>& res) {
+        res.resize(0);
+        findAssetsByTypeInner(type, getAssetsRootDir(), res);
     }
 
     AssetDescriptor outerDir(const AssetDescriptor& dir) {
@@ -164,20 +169,18 @@ namespace assetfolder {
         while (i > 0 && dir.path[i] != '/' && dir.path[i] != '\\')
             i--;
 
-        //reached topmost folder
+        // reached topmost folder
         if (i == 0)
             return dir;
 
         std::string newPath = dir.path.substr(0, i);
         return AssetDescriptor{
-            newPath,
-            getName(newPath.c_str()),
-            AssetDescriptor::EFileType::FOLDER
-        };
+            newPath, getName(newPath.c_str()), AssetDescriptor::EFileType::FOLDER};
     }
 
-    static void addAssets_internal(const std::vector<AssetDescriptor>& assets, const AssetDescriptor& dir) {
-        for (unsigned int i = 0;i < assets.size();i++) {
+    static void addAssets_internal(
+        const std::vector<AssetDescriptor>& assets, const AssetDescriptor& dir) {
+        for (unsigned int i = 0; i < assets.size(); i++) {
             addAsset(assets[i].path, dir);
         }
     }
@@ -189,32 +192,28 @@ namespace assetfolder {
         std::string newPath = dir.path + "/" + name;
         size_t bytesRead;
 
-        //check if file is directory
+        // check if file is directory
         struct stat s;
         if (stat(path.c_str(), &s) != 0)
             return;
 
         if (s.st_mode & S_IFDIR) {
-            //directory
+            // directory
 
-            //create folder in destination
+            // create folder in destination
             _mkdir(newPath.c_str());
-            AssetDescriptor dirDesc = {
-                path,
-                name,
-                AssetDescriptor::EFileType::FOLDER
-            };
+            AssetDescriptor dirDesc = {path, name, AssetDescriptor::EFileType::FOLDER};
 
-            //get source contents
+            // get source contents
             std::vector<AssetDescriptor> contents;
             listDir(dirDesc, contents);
 
-            //copy source contents
+            // copy source contents
             dirDesc.path = newPath;
             addAssets_internal(contents, dirDesc);
         }
         else if (s.st_mode & S_IFREG) {
-            //file - copy using POSIX descriptors
+            // file - copy using POSIX descriptors
             char buf[BUFSIZ];
             int src = _open(path.c_str(), O_RDONLY | O_BINARY, 0);
             if (src == NULL) {
@@ -237,13 +236,13 @@ namespace assetfolder {
     }
 
     void addAssets(const std::vector<std::string>& paths, const AssetDescriptor& dir) {
-        for (unsigned int i = 0;i < paths.size();i++) {
+        for (unsigned int i = 0; i < paths.size(); i++) {
             addAsset(paths[i], dir);
         }
     }
 
     void delAsset(const AssetDescriptor& asset) {
-        //remove directory
+        // remove directory
         if (asset.type == AssetDescriptor::EFileType::FOLDER) {
             std::vector<AssetDescriptor> contents;
             listDir(asset, contents);
@@ -252,27 +251,19 @@ namespace assetfolder {
             return;
         }
 
-
-        //remove single file
+        // remove single file
         int res = std::remove(asset.path.c_str());
-        //TODO log
+        // TODO log
         if (res != 0)
             logging::logErr("Failed to delete asset {}, got error {}\n", asset.path.c_str(), res);
     }
 
     void delAssets(const std::vector<AssetDescriptor>& assets) {
-        for (unsigned int i = 0;i < assets.size();i++)
+        for (unsigned int i = 0; i < assets.size(); i++)
             delAsset(assets[i]);
     }
     const char* typeToString(const AssetDescriptor::EFileType& type) {
-        const char* literals[] = {
-            "FOLDER",
-            "MODEL",
-            "TEXTURE",
-            "AUDIO",
-            "MISC",
-            "INVALID"
-        };
+        const char* literals[] = {"FOLDER", "MODEL", "TEXTURE", "AUDIO", "MISC", "INVALID"};
         return literals[int(type)];
     }
 

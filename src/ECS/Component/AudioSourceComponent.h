@@ -5,6 +5,7 @@
 #include <glm/vec3.hpp>
 
 #include "BaseComponent.h"
+#include "../../asset_import/audio.h"
 
 struct AudioSourceComponent : BaseComponent {
     AudioSourceComponent() {
@@ -18,7 +19,7 @@ struct AudioSourceComponent : BaseComponent {
 
     // audio info
     std::string clipUuid = std::string("");
-    int clipIdx = -1;
+    std::shared_ptr<audio::AudioDescriptor> clipDescriptor;
 
     // controls
     bool loop = false;

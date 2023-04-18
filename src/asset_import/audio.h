@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/vec3.hpp>
+
+#include <memory>
 #include <string>
 
 namespace audio {
@@ -9,11 +11,20 @@ namespace audio {
         ~AudioEngine();
     };
 
-    // load file with selected path. Returns non-negative index on success
-    int audioLoad(const char* path, std::string uuid);
+    // Object representing internal audio clip.
+    // Returned as shared pointer and to be used as such
+    struct AudioDescriptor {
+        int idx;
+        std::string* path;
+        AudioDescriptor(int _idx, std::string* _path);
+        ~AudioDescriptor();
+    };
 
-    // get internal id corresponding to uuid
-    inline int audioGetId(const std::string& uuid);
+    // load file with selected path. Returns non-negative index on success
+    std::shared_ptr<AudioDescriptor> audioLoad(const char* path, const std::string& uuid);
+
+    // get descriptor corresponding to uuid
+    std::shared_ptr<AudioDescriptor> audioGetByUuid(const std::string& uuid);
 
     // play the selected audioclip
     void audioPlay(int id);
@@ -30,5 +41,9 @@ namespace audio {
     // stop all clips
     void audioStopAll();
 
+    // clear all loaded clips
     void clearAudio();
+
+    // get clips count
+    int getAudioClipCount();
 }

@@ -305,43 +305,43 @@ static void handleMouseInput(GLFWwindow* window) {
 
 // --- GUI Widgets ---
 
-inline void drawAudioDemo() {
-    if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::PushFont(guicfg::regularFont);
-        ImGui::Text("Active Clip: %s", audioPath.c_str());
-        if (ImGui::Button("Load Audio File")) {
-            const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
-            const char* filterDesc = "Audio Files";
-            std::string path = fdutil::openFile(
-                "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
-            if (!path.empty()) {
-                audio::audioStopAll();
-                // TODO replace with nicer uuid
-                audioClip = audio::audioLoad(path.c_str(), path);
-                if (audioClip >= 0) {
-                    audioPath = path;
-                    logging::logInfo("Opened audio file {}\n", path);
-                }
-                else {
-                    logging::logErr("Failed to load audio file ", path);
-                }
-            }
-        }
-
-        // adjust source position, listening position is center
-        if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
-            audio::audioSetPosition(audioPos);
-        }
-
-        // play audio with 3d effects
-        if (ImGui::Button("Play Audio File")) {
-            if (!audioPath.empty())
-                audio::audioPlay(audioClip);
-        }
-        ImGui::PopFont();
-    }
-    ImGui::End();
-}
+// inline void drawAudioDemo() {
+//     if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+//         ImGui::PushFont(guicfg::regularFont);
+//         ImGui::Text("Active Clip: %s", audioPath.c_str());
+//         if (ImGui::Button("Load Audio File")) {
+//             const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
+//             const char* filterDesc = "Audio Files";
+//             std::string path = fdutil::openFile(
+//                 "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
+//             if (!path.empty()) {
+//                 audio::audioStopAll();
+//                 // TODO replace with nicer uuid
+//                 audioClip = audio::audioLoad(path.c_str(), path);
+//                 if (audioClip >= 0) {
+//                     audioPath = path;
+//                     logging::logInfo("Opened audio file {}\n", path);
+//                 }
+//                 else {
+//                     logging::logErr("Failed to load audio file ", path);
+//                 }
+//             }
+//         }
+//
+//         // adjust source position, listening position is center
+//         if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+//             audio::audioSetPosition(audioPos);
+//         }
+//
+//         // play audio with 3d effects
+//         if (ImGui::Button("Play Audio File")) {
+//             if (!audioPath.empty())
+//                 audio::audioPlay(audioClip);
+//         }
+//         ImGui::PopFont();
+//     }
+//     ImGui::End();
+// }
 
 inline float drawMainMenu(const char* executablePath) {
     float barHeight = .0f;
@@ -837,6 +837,41 @@ void drawComponentProps(TransformComponent& component) {
 }
 
 void drawComponentProps(AudioSourceComponent& component) {
+    // clip selector
+    std::string previewPath = "";
+    if (component.clipDescriptor && component.clipDescriptor->path)
+        previewPath = *component.clipDescriptor->path;
+
+    if (ImGui::BeginCombo("Audio File", previewPath.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> audioFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::AUDIO, audioFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < audioFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (previewPath == audioFiles[i].path);
+            if (ImGui::Selectable(audioFiles[i].name.c_str(), &isSelected)) {
+                // check if we need to load file
+                // TODO better unique id scheme
+                std::string uuid = assetfolder::getRelativePath(audioFiles[i].path.c_str());
+                auto desc = audio::audioGetByUuid(uuid);
+
+                if (!desc) {
+                    // load file from disk
+                    desc = audio::audioLoad(audioFiles[i].path.c_str(), uuid);
+                }
+
+                std::swap(component.clipDescriptor, desc);
+                component.clipUuid = uuid;
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    // controls
     ImGui::Checkbox("Loop", &component.loop);
     ImGui::Checkbox("Directional", &component.directional);
 }
@@ -1115,6 +1150,15 @@ inline void drawScriptDemo() {
     ImGui::End();
 }
 
+void drawStats() {
+    if (ImGui::Begin("Statistics")) {
+        ImGui::PushFont(guicfg::regularFont);
+        ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+        ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,
     int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -1180,6 +1224,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser();
+
+    ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
+    drawStats();
 
     ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
     drawLog();
