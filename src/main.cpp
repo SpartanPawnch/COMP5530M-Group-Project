@@ -165,10 +165,6 @@ int main() {
     renderManager->loadScene();
     // init shader
 
-    //LightSource* test = renderManager->getLightSource(0);
-    std::cout << renderManager->getLightSource(0)->getPosition().x << std::endl;
-    std::cout << renderManager->getLightSource(0)->getPosition().y << std::endl;
-    std::cout << renderManager->getLightSource(0)->getPosition().z << std::endl;
 
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());

@@ -139,16 +139,32 @@ void RenderManager::loadScene() {
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
 
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
+    std::cout << "we have " << model.meshes.size() << " meshes in model\n";
+    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
+    {
+        std::cout << model.meshes[0].vertices[i].position.x << " "
+            << model.meshes[0].vertices[i].position.y << " "
+            << model.meshes[0].vertices[i].position.z << std::endl;
+    }
+    
+    VertexBuffer vBuffer(model.meshes[0].vertices.size() * sizeof(Vertex), &model.meshes[0].vertices, TexturedObjectBuffer);
+    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices);
 
-    // create vertex buffer object(VBO)
-    //for (unsigned int i = 0; i < model.meshes.size(); i++)
-    //{
-    //    VertexBuffer *vertexBuffer;
-    //    vertexBuffer = VertexBuffer::VertexBuffer(model.meshes[i].vertices.size(), model.meshes[i].vertices);
-    //}
+    //GLuint VBO1;
+    //glGenBuffers(1, &VBO1);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    //glBufferData(GL_ARRAY_BUFFER, model.meshes[0].vertices.size() * sizeof(Vertex), &model.meshes[0].vertices, GL_STATIC_DRAW);
+    //glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::position));
+    //glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::normal));
+    //glEnableVertexAttribArray(2);
+    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::texCoords));
 
-    VertexBuffer vBuffer(model.meshes[0].vertices.size(), &model.meshes[0].vertices, TexturedObjectBuffer);
-    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(int), &model.meshes[0].indices);
+    //GLuint EBO1;
+    //glGenBuffers(1, &EBO1);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1); //Should go seperate?
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices, GL_STATIC_DRAW);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
