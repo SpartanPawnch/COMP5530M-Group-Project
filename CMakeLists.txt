@@ -38,6 +38,7 @@ add_executable(
     src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp src/gui.cpp src/scripting.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
+    src/ECS/Component/AudioSourceComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp

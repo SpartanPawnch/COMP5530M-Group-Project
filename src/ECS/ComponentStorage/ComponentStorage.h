@@ -5,11 +5,13 @@
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
 #include "../Component/ScriptComponent.h"
+#include "../Component/AudioSourceComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
     std::vector<TransformComponent> vecTransformComponent;
     std::vector<ScriptComponent> vecScriptComponent;
+    std::vector<AudioSourceComponent> vecAudioSourceComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -41,6 +43,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<AudioSourceComponent>(const AudioSourceComponent& component){
+        vecAudioSourceComponent.emplace_back(component);
+    }
+
+    template<>
     void update<BaseComponent>(float dt){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt);
@@ -58,6 +65,13 @@ struct ComponentStorage{
     void update<ScriptComponent>(float dt){
         for(unsigned int i=0;i<vecScriptComponent.size();i++){
             vecScriptComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<AudioSourceComponent>(float dt){
+        for(unsigned int i=0;i<vecAudioSourceComponent.size();i++){
+            vecAudioSourceComponent[i].update(dt);
         }
     }
 
