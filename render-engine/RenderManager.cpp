@@ -75,41 +75,41 @@ void RenderManager::loadScene() {
 
     GLfloat cubeVertices[] = {
         // Front face
-        // Position          // Color         // Normal
-        -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, 0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
-         1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f, 1.0f,
-        -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 0.0f, 1.0f,
+        // Position                 // Normal               // Color  
+        -1.0f, -1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
+        -1.0f,  1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
         // Back face 
-        // Position          // Color         // Normal
-        -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 0.0f, -1.0f,
+        // Position                 // Normal               // Color  
+        -1.0f, -1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
         // Left face
-        // Position          // Color         // Normal
-        -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
-        -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
-        -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
-        -1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
+        // Position                 // Normal               // Color  
+        -1.0f, -1.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
+        -1.0f,  1.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
         // Right face
-        // Position          // Color         // Normal
-        1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
-        1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-        1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     1.0f, 0.0f, 0.0f,
-        1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
+        // Position                 // Normal               // Color  
+        1.0f, -1.0f, -1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+        1.0f,  1.0f, -1.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
         // Top face
-        // Position          // Color         // Normal
-        -1.0f,  1.0f,  1.0f,     1.0f, 1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-        1.0f,  1.0f,  1.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f, 0.0f,
-        1.0f,  1.0f, -1.0f,     1.0f, 1.0f, 1.0f,     0.0f, 1.0f, 0.0f,
-        -1.0f,  1.0f, -1.0f,     0.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+        // Position                 // Normal               // Color  
+        -1.0f,  1.0f,  1.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+        1.0f,  1.0f, -1.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -1.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
         // Bottom face
-        // Position          // Color         // Normal
-        -1.0f, -1.0f,  1.0f,     1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,
-        1.0f, -1.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, -1.0f,     0.0f, 1.0f, 1.0f,     0.0f, -1.0f, 0.0f,
-        -1.0f, -1.0f, -1.0f,     1.0f, 0.0f, 1.0f,     0.0f, -1.0f, 0.0f
+        // Position                 // Normal               // Color         
+        -1.0f, -1.0f,  1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
     };
     GLuint cubeIndices[] = {
         0, 1, 2, 2, 3, 0,      // Front face
@@ -138,7 +138,7 @@ void RenderManager::loadScene() {
     VertexBuffer cubeBuffer(sizeof(cubeVertices), cubeVertices, ColoredObjectBuffer);
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
 
-    //addPipeline(TexturePipeline,texVertexPath, texFragPath);
+    addPipeline(TexturePipeline,texVertexPath, texFragPath);
 
     // create vertex buffer object(VBO)
     //for (unsigned int i = 0; i < model.meshes.size(); i++)
@@ -147,10 +147,8 @@ void RenderManager::loadScene() {
     //    vertexBuffer = VertexBuffer::VertexBuffer(model.meshes[i].vertices.size(), model.meshes[i].vertices);
     //}
 
-    //VertexBuffer vBuffer(model.meshes[0].vertices.size(), &model.meshes[0].vertices, TexturedObjectBuffer);
-
-    //// create an element buffer object for the indices
-    //IndexBuffer EBO(model.meshes[0].indices.size() * sizeof(int), &model.meshes[0].indices);
+    VertexBuffer vBuffer(model.meshes[0].vertices.size(), &model.meshes[0].vertices, TexturedObjectBuffer);
+    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(int), &model.meshes[0].indices);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -172,6 +170,7 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     // draw background
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glShadeModel(GL_FLAT);
 
     // RENDERING
     // Go through all the Pipelines
