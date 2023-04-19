@@ -28,16 +28,16 @@ namespace audio {
     std::shared_ptr<AudioDescriptor> audioGetByUuid(const std::string& uuid);
 
     // play the selected audioclip
-    void audioPlay(int id);
+    int audioPlay(int idx);
 
-    // convenience function - directly play clip by uuid
-    void audioPlay(std::string uuid);
+    // set whether source should loop
+    void audioSetLoop(int idx, bool loop);
 
     // set position for selected audio clip
-    void audioSetPosition(const glm::vec3& pos);
+    void audioSetPosition(int idx, const glm::vec3& pos);
 
     // stop selected clip
-    void audioStop();
+    void audioStop(int idx);
 
     // stop all clips
     void audioStopAll();

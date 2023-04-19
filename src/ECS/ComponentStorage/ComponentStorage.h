@@ -16,11 +16,18 @@ struct ComponentStorage{
     template<typename T>
     void addComponent(const T& component);
 
+    //start all components of specific type
+    template<typename T>
+    void start();
+
     //update all components of specific type
     template<typename T>
     void update(float dt);
 
-    //calls update for all types
+    //call start for all types
+    void startAll();
+
+    //call update for all types
     void updateAll(float dt);
     
     //clear all components
@@ -45,6 +52,34 @@ struct ComponentStorage{
     template<>
     void addComponent<AudioSourceComponent>(const AudioSourceComponent& component){
         vecAudioSourceComponent.emplace_back(component);
+    }
+
+    template<>
+    void start<BaseComponent>(){
+        for(unsigned int i=0;i<vecBaseComponent.size();i++){
+            vecBaseComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<TransformComponent>(){
+        for(unsigned int i=0;i<vecTransformComponent.size();i++){
+            vecTransformComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<ScriptComponent>(){
+        for(unsigned int i=0;i<vecScriptComponent.size();i++){
+            vecScriptComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<AudioSourceComponent>(){
+        for(unsigned int i=0;i<vecAudioSourceComponent.size();i++){
+            vecAudioSourceComponent[i].start();
+        }
     }
 
     template<>

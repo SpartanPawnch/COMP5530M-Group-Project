@@ -16,6 +16,9 @@ struct AudioSourceComponent : BaseComponent {
     void start() override;
     void update(float dt) override;
     void stop() override;
+    void startSound();
+
+    // internal
 
     // audio info
     std::string clipUuid = std::string("");
@@ -24,5 +27,6 @@ struct AudioSourceComponent : BaseComponent {
     // controls
     bool loop = false;
     bool directional = false;
+    bool playOnStart = true;
     glm::vec3 position = glm::vec3(.0f);
 };

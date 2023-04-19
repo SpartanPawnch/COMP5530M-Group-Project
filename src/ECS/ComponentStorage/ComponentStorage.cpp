@@ -1,5 +1,11 @@
 #include "ComponentStorage.h"
 
+void ComponentStorage::startAll(){
+    start<BaseComponent>();
+    start<TransformComponent>();
+    start<ScriptComponent>();
+    start<AudioSourceComponent>();
+}
 void ComponentStorage::updateAll(float dt){
     update<BaseComponent>(dt);
     update<TransformComponent>(dt);

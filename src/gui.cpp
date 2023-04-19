@@ -214,7 +214,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glGenRenderbuffers(1, &viewportDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
     glFramebufferRenderbuffer(
-        GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
@@ -664,7 +664,7 @@ inline void drawViewport() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
         glRenderbufferStorage(
-            GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewportTexWidth, viewportTexHeight);
+            GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         // draw viewport
@@ -883,7 +883,7 @@ void drawComponentProps(AudioSourceComponent& component) {
     ImGui::BeginDisabled(!component.clipDescriptor);
     if (ImGui::Button("Start")) {
         audio::audioStopAll();
-        audio::audioPlay(component.clipDescriptor->idx);
+        component.startSound();
     }
 
     ImGui::SameLine();
@@ -893,6 +893,7 @@ void drawComponentProps(AudioSourceComponent& component) {
     ImGui::EndDisabled();
 
     // sound options
+    ImGui::Checkbox("Play on Start", &component.playOnStart);
     ImGui::Checkbox("Loop", &component.loop);
     ImGui::Checkbox("Directional", &component.directional);
 }

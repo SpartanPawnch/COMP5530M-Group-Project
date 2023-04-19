@@ -11,7 +11,6 @@
 namespace audio {
     // --- Internal State ---
     static SoLoud::Soloud* pSoloud;
-    static SoLoud::handle playbackHandle;
     static glm::vec3 position = glm::vec3(.0f);
     // TODO - custom allocator
     static std::unordered_map<std::string, int> uuidToIdx;
@@ -115,8 +114,8 @@ namespace audio {
         if (loadedClips.size() == 0)
             return;
 
-        // stop everything to avoid issues
-        audioStopAll();
+        // stop clip being deleted
+        loadedClips[idx].wav->stop();
 
         // clear related index
         uuidToIdx.erase(loadedClips[idx].uuid);
@@ -148,6 +147,10 @@ namespace audio {
             SoLoud::result res = loadedClips.back().wav->load(path);
 
             if (res == SoLoud::SO_NO_ERROR) {
+                // prep audio source
+                // TODO support multi-instance
+                loadedClips.back().wav->setSingleInstance(true);
+
                 // loading succeeded
                 uuidToIdx[uuid] = loadedClips.size() - 1;
                 std::shared_ptr<AudioDescriptor> ptr = std::make_shared<AudioDescriptor>(
@@ -179,23 +182,20 @@ namespace audio {
         return std::shared_ptr<AudioDescriptor>();
     }
 
-    void audioPlay(int id) {
-        playbackHandle = pSoloud->play3d(*loadedClips[id].wav, position.x, position.y, position.z);
+    int audioPlay(int idx) {
+        int playbackHandle =
+            pSoloud->play3d(*loadedClips[idx].wav, position.x, position.y, position.z);
+        return playbackHandle;
     }
 
-    void audioPlay(const std::string& uuid) {
-        int id = uuidToIdx[uuid];
-        playbackHandle = pSoloud->play3d(*loadedClips[id].wav, position.x, position.y, position.z);
+    void audioSetLoop(int idx, bool loop) {
+        loadedClips[idx].wav->setLooping(loop);
     }
 
-    void audioSetPosition(const glm::vec3& pos) {
+    void audioSetPosition(int playbackHandle, const glm::vec3& pos) {
         position = pos;
         pSoloud->set3dSourcePosition(playbackHandle, position.x, position.y, position.z);
         pSoloud->update3dAudio();
-    }
-
-    void audioStop() {
-        pSoloud->stop(playbackHandle);
     }
 
     void audioStopAll() {

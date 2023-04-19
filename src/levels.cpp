@@ -136,7 +136,7 @@ void loadLevel(const char* path, Scene& scene) {
                         jsonComponent["position"][1].GetFloat(),
                         jsonComponent["position"][2].GetFloat());
 
-                    trComponent.rotation = glm::vec4(jsonComponent["rotation"][0].GetFloat(),
+                    trComponent.rotation = glm::quat(jsonComponent["rotation"][0].GetFloat(),
                         jsonComponent["rotation"][1].GetFloat(),
                         jsonComponent["rotation"][2].GetFloat(),
                         jsonComponent["rotation"][3].GetFloat());
@@ -157,6 +157,9 @@ void loadLevel(const char* path, Scene& scene) {
                     audioSrc.name = std::string(jsonComponent["name"].GetString());
                     audioSrc.clipUuid = std::string(jsonComponent["clipUuid"].GetString());
                     audioSrc.clipDescriptor = audio::audioGetByUuid(audioSrc.clipUuid);
+                    audioSrc.playOnStart = jsonComponent.HasMember("playOnStart")
+                        ? jsonComponent["playOnStart"].GetBool()
+                        : false;
                     audioSrc.loop = jsonComponent["loop"].GetBool();
                     audioSrc.directional = jsonComponent["directional"].GetBool();
 
@@ -247,6 +250,7 @@ static rapidjson::Value saveComponent(
         rapidjson::Value(component.clipUuid.c_str(), d.GetAllocator()), d.GetAllocator());
     jsonComponent.AddMember("loop", component.loop, d.GetAllocator());
     jsonComponent.AddMember("directional", component.directional, d.GetAllocator());
+    jsonComponent.AddMember("playOnStart", component.playOnStart, d.GetAllocator());
 
     return jsonComponent;
 }

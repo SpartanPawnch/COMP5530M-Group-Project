@@ -75,11 +75,18 @@ headerFile:write([[
     template<typename T>
     void addComponent(const T& component);
 
+    //start all components of specific type
+    template<typename T>
+    void start();
+
     //update all components of specific type
     template<typename T>
     void update(float dt);
 
-    //calls update for all types
+    //call start for all types
+    void startAll();
+
+    //call update for all types
     void updateAll(float dt);
     
     //clear all components
@@ -94,6 +101,19 @@ for _, type in ipairs(types) do
     template<>
     void addComponent<]] .. type .. [[>(const ]] .. type .. [[& component){
         vec]] .. type .. [[.emplace_back(component);
+    }
+
+]])
+end
+
+-- specialize start methods
+for _, type in ipairs(types) do
+	headerFile:write([[
+    template<>
+    void start<]] .. type .. [[>(){
+        for(unsigned int i=0;i<vec]] .. type .. [[.size();i++){
+            vec]] .. type .. [[[i].start();
+        }
     }
 
 ]])
@@ -126,6 +146,18 @@ sourceFile:write([[
 #include "ComponentStorage.h"
 
 ]])
+
+-- create startAll method
+sourceFile:write([[
+void ComponentStorage::startAll(){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    start<]] .. type .. [[>();
+]])
+end
+sourceFile:write("}\n")
 
 -- create updateAll method
 sourceFile:write([[
