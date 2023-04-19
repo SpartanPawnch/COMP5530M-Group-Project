@@ -31,7 +31,7 @@ aux_source_directory("${LUADIR}/" LUASRC)
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp 
+    ${PROJECT_NAME} src/main.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp

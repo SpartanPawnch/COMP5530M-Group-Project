@@ -4,3 +4,4 @@
 /out
 /.ccls-cache
 .clang-format
+/template/build

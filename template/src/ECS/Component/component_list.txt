@@ -1,0 +1,4 @@
+BaseComponent
+TransformComponent
+ScriptComponent
+AudioSourceComponent

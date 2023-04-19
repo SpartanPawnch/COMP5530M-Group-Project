@@ -18,7 +18,6 @@
 #include <mutex>
 
 #include "fdutil.h"
-#include "drawing.h"
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
