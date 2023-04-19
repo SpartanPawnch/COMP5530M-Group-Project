@@ -35,6 +35,9 @@ namespace assetfolder {
     //list items in directory given. dir.type must be EFileType::FOLDER
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res);
 
+    // recursively search for specific file type in asset folder
+    void findAssetsByType(AssetDescriptor::EFileType type, std::vector<AssetDescriptor>& res);
+
     //go to outer directory
     AssetDescriptor outerDir(const AssetDescriptor& dir);
 

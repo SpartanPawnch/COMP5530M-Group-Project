@@ -5,16 +5,17 @@ Model::Model() {
 
 }
 
-void Model::loadModel(const std::string& filename) {
+bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
     //this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "Error loading model file: " << importer.GetErrorString() << std::endl;
-        return;
+        return false;
     }
     directory = filename.substr(0, filename.find_last_of('\\'));
     processNode(scene->mRootNode, scene);
+    return true;
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
