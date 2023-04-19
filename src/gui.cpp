@@ -66,6 +66,8 @@ void createProj(const std::string& path) {
     }
     logging::logInfo("Created project at {}\n", path);
     fclose(copyProc);
+
+    _mkdir((path + "/assets").c_str());
 }
 
 void buildRunProj(const std::string& activePath, const char* executablePath) {
