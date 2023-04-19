@@ -13,7 +13,7 @@ private:
 	GLuint vertexBuffer;
 
 public:
-	VertexBuffer(GLsizeiptr bufferSize_B, const void* data, VertexBufferType bufferType);
+	VertexBuffer(GLsizeiptr bufferSize_B, const void *data, VertexBufferType bufferType);
 
 
 };

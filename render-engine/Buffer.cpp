@@ -10,13 +10,12 @@
 
 
 
-VertexBuffer::VertexBuffer( GLsizeiptr bufferSize_B, const void* data, VertexBufferType bufferType)
+VertexBuffer::VertexBuffer( GLsizeiptr bufferSize_B, const void *data, VertexBufferType bufferType)
 {
 
 
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //Should go seperate?
-	std::cout << bufferSize_B << " is the buffersize in bytes\n";
 	if (bufferType == TexturedObjectBuffer)
 	{	//models imported from assimp with struct Vertex format
 		glBufferData(GL_ARRAY_BUFFER, bufferSize_B, data, GL_STATIC_DRAW);

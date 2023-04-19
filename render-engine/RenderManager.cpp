@@ -76,40 +76,40 @@ void RenderManager::loadScene() {
     GLfloat cubeVertices[] = {
         // Front face
         // Position                 // Normal               // Color  
-        -1.0f, -1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
-        -1.0f,  1.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f,  5.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f,  5.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
+         1.0f,  1.0f,  5.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
+        -1.0f,  1.0f,  5.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
         // Back face 
         // Position                 // Normal               // Color  
-        -1.0f, -1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
-         1.0f, -1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
-         1.0f,  1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -5.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, -5.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -5.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -5.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
         // Left face
         // Position                 // Normal               // Color  
-        -1.0f, -1.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-        -1.0f,  1.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
-        -1.0f,  1.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -5.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f,  5.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f,  5.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
+        -1.0f,  1.0f, -5.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
         // Right face
         // Position                 // Normal               // Color  
-        1.0f, -1.0f, -1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
-        1.0f, -1.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
-        1.0f,  1.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-        1.0f,  1.0f, -1.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -5.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f,  5.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  5.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+        1.0f,  1.0f, -5.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
         // Top face
         // Position                 // Normal               // Color  
-        -1.0f,  1.0f,  1.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
-        1.0f,  1.0f,  1.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-        1.0f,  1.0f, -1.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, -1.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f,  5.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  5.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+        1.0f,  1.0f, -5.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -5.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
         // Bottom face
         // Position                 // Normal               // Color         
-        -1.0f, -1.0f,  1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-        1.0f, -1.0f,  1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-        1.0f, -1.0f, -1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
-        -1.0f, -1.0f, -1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f,  5.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f,  5.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, -5.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -5.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
     };
     GLuint cubeIndices[] = {
         0, 1, 2, 2, 3, 0,      // Front face
@@ -119,6 +119,72 @@ void RenderManager::loadScene() {
         16, 17, 18, 18, 19, 16, // Top face
         20, 21, 22, 22, 23, 20  // Bottom face
     };
+    //GLfloat cubeVertices1[] = {
+    //    // Front face
+    //    // Position                 // Normal               // Color  
+    //    -1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
+    //     1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
+    //     1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
+    //    -1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
+    //    // Back face 
+    //    // Position                 // Normal               // Color  
+    //    -1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
+    //     1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
+    //     1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
+    //    -1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
+    //    // Left face
+    //    // Position                 // Normal               // Color  
+    //    -1.0f, -5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
+    //    -1.0f, -5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+    //    -1.0f,  5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
+    //    -1.0f,  5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
+    //    // Right face
+    //    // Position                 // Normal               // Color  
+    //    1.0f, -5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
+    //    1.0f, -5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
+    //    1.0f,  5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+    //    1.0f,  5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
+    //    // Top face
+    //    // Position                 // Normal               // Color  
+    //    -1.0f,  5.0f,  1.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
+    //    1.0f,  5.0f,  1.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+    //    1.0f,  5.0f, -1.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
+    //    -1.0f,  5.0f, -1.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
+    //    // Bottom face
+    //    // Position                 // Normal               // Color         
+    //    -1.0f, -5.0f,  1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
+    //    1.0f, -5.0f,  1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+    //    1.0f, -5.0f, -1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
+    //    -1.0f, -5.0f, -1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
+    //};
+    //GLuint cubeIndices1[] = {
+    //    0, 1, 2, 2, 3, 0,      // Front face
+    //    4, 5, 6, 6, 7, 4,      // Back face
+    //    8, 9, 10, 10, 11, 8,   // Left face
+    //    12, 13, 14, 14, 15, 12, // Right face
+    //    16, 17, 18, 18, 19, 16, // Top face
+    //    20, 21, 22, 22, 23, 20  // Bottom face
+    //};
+
+    std::vector<float> allVertices;
+    std::vector<unsigned int> allIndices;
+    allVertices.clear();
+    allIndices.clear();
+    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
+    {
+        allVertices.push_back(model.meshes[0].vertices[i].position.x);
+        allVertices.push_back(model.meshes[0].vertices[i].position.y);
+        allVertices.push_back(model.meshes[0].vertices[i].position.z);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.x);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.y);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.z);
+        allVertices.push_back(model.meshes[0].vertices[i].texCoords.x);
+        allVertices.push_back(model.meshes[0].vertices[i].texCoords.y);
+    }
+    for (std::size_t i = 0; i < model.meshes[0].indices.size(); i++)
+    {
+        allIndices.push_back(model.meshes[0].indices[i]);
+    }
 
     //ADD LIGHT SOURCES
 
@@ -138,6 +204,7 @@ void RenderManager::loadScene() {
     VertexBuffer cubeBuffer(sizeof(cubeVertices), cubeVertices, ColoredObjectBuffer);
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
 
+
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
     std::cout << "we have " << model.meshes.size() << " meshes in model\n";
     for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
@@ -146,25 +213,11 @@ void RenderManager::loadScene() {
             << model.meshes[0].vertices[i].position.y << " "
             << model.meshes[0].vertices[i].position.z << std::endl;
     }
-    
-    VertexBuffer vBuffer(model.meshes[0].vertices.size() * sizeof(Vertex), &model.meshes[0].vertices, TexturedObjectBuffer);
-    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices);
+    std::cout << "We have " << model.meshes[0].indices.size() << " indices and " << model.meshes[0].indices.size() / 3 << "triangles";
 
-    //GLuint VBO1;
-    //glGenBuffers(1, &VBO1);
-    //glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    //glBufferData(GL_ARRAY_BUFFER, model.meshes[0].vertices.size() * sizeof(Vertex), &model.meshes[0].vertices, GL_STATIC_DRAW);
-    //glEnableVertexAttribArray(0);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::position));
-    //glEnableVertexAttribArray(1);
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::normal));
-    //glEnableVertexAttribArray(2);
-    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::texCoords));
+    VertexBuffer vBuffer(model.meshes[0].vertices.size()* sizeof(Vertex), &model.meshes[0].vertices[0], TexturedObjectBuffer);
+    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
 
-    //GLuint EBO1;
-    //glGenBuffers(1, &EBO1);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1); //Should go seperate?
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices, GL_STATIC_DRAW);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -204,15 +257,15 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 
     // RENDERING
     // Go through all the Pipelines
-    if (this->pipelines[ColourPipeline].initialised == true)
-    {
-        runPipeline(ColourPipeline);
-    }
+    //if (this->pipelines[ColourPipeline].initialised == true)
+    //{
+    //    runPipeline(ColourPipeline);
+    //}
     if (this->pipelines[TexturePipeline].initialised == true)
     {
         runPipeline(TexturePipeline);
     }
-    if (this->pipelines[ShadowPipeline].initialised == true)
+ /*   if (this->pipelines[ShadowPipeline].initialised == true)
     {
         runPipeline(ShadowPipeline);
     }
@@ -227,7 +280,7 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
     if (this->pipelines[Render2DPipeline].initialised == true)
     {
         runPipeline(Render2DPipeline);
-    }
+    }*/
 
     
 }
@@ -305,7 +358,7 @@ void RenderManager::runTexturePipeline() {
 
     //// Render the cube
     glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); 
 }
 
