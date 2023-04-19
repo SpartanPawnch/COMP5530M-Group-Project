@@ -295,6 +295,18 @@ inline float drawMainMenu(const char* executablePath) {
             ImGui::EndMenu();
         }
 
+        if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
+            ImGui::Button("Game Editor");
+            ImGui::SameLine();
+            ImGui::Button("UI Editor");
+            ImGui::SameLine();
+            ImGui::Button("Character Editor");
+            ImGui::SameLine();
+            ImGui::Button("World Editor");
+            ImGui::End();
+        }
+
         //get height
         barHeight = ImGui::GetWindowSize().y;
 
@@ -508,19 +520,7 @@ inline void drawAssetBrowser(GLFWwindow* window) {
 int viewportTexWidth = 0;
 int viewportTexHeight = 0;
 
-inline void drawTab()
-{
-    if (ImGui::Begin("Tab",0,ImGuiWindowFlags_NoTitleBar)) {
-        ImGui::Button("Game Editor");
-        ImGui::SameLine();
-        ImGui::Button("Character Editor");
-        ImGui::SameLine();
-        ImGui::Button("UI Editor");
-        ImGui::SameLine();
-        ImGui::Button("World Editor");
-    }
-    ImGui::End();
-}
+
 
 inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
@@ -651,7 +651,8 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     float mainMenuHeight = drawMainMenu(executablePath);
     windowSize.y -= mainMenuHeight;
 
-    static ImGuiID dockTab;
+
+
     static ImGuiID dockCenter = 0;
     static ImGuiID dockLeft;
     static ImGuiID dockRight;
@@ -661,7 +662,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     //TODO save and load dock state
     //create layout if not present already
     ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
-    ImGui::SetNextWindowSize(windowSize);
+    ImGui::SetNextWindowSize(ImVec2(windowSize.x,windowSize.y));
     if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
 
@@ -674,9 +675,6 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
             dockCenter = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockCenter, windowSize);
             ImGui::DockBuilderSetNodePos(dockCenter, ImGui::GetMainViewport()->Pos);
-            
-            //split vertically
-            dockTab = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Up,.05f, NULL, &dockCenter);
 
             //split vertically
             dockBotRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
@@ -694,9 +692,6 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     ImGui::End();
 
     //TODO undocked windows in front
-
-    ImGui::SetNextWindowDockID(dockTab, ImGuiCond_Once);
-    drawTab();
 
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
