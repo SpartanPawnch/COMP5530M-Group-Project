@@ -193,7 +193,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glGenRenderbuffers(1, &viewportDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
     glFramebufferRenderbuffer(
-        GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
