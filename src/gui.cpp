@@ -59,15 +59,16 @@ namespace guicfg {
 void createProj(const std::string& path) {
     char buf[1024];
     FILE* copyProc =
-        _popen((std::string("xcopy /s /e /q /y .\\template ") + path + " 2>>&1").c_str(), "r");
+        _popen((std::string("xcopy /s /e /q /y .\\template \"") + path + "\" 2>>&1").c_str(), "r");
     while (!feof(copyProc)) {
         fgets(buf, sizeof(char) * 1024, copyProc);
         logging::logInfo(buf);
     }
-    logging::logInfo("Created project at {}\n", path);
-    fclose(copyProc);
-
-    _mkdir((path + "/assets").c_str());
+    int res = _pclose(copyProc);
+    if (res == 0) {
+        logging::logInfo("Created project at {}\n", path);
+        _mkdir((path + "/assets").c_str());
+    }
 }
 
 void buildRunProj(const std::string& activePath, const char* executablePath) {
@@ -913,18 +914,32 @@ inline void drawProperties() {
 
             ImGui::Separator();
 
-            ImVec2 initialPos = ImGui::GetCursorPos();
-
             // component lists
 
             // AudioSourceComponent
             std::vector<AudioSourceComponent>& audioSrcComponents =
                 scene.selectedEntity->components.vecAudioSourceComponent;
+            int componentToDelete = -1;
             for (unsigned int i = 0; i < audioSrcComponents.size(); i++) {
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(audioSrcComponents[i].name.c_str(),
                         ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
                             ImGuiTreeNodeFlags_DefaultOpen)) {
+
+                    if (ImGui::BeginPopupContextItem()) {
+                        if (ImGui::MenuItem("Add Audio Source Component")) {
+                            scene.selectedEntity->components.addComponent(AudioSourceComponent());
+                        }
+                        if (ImGui::MenuItem("Add Script Component")) {
+                        }
+                        if (ImGui::MenuItem("Add Transform Component")) {
+                            scene.selectedEntity->components.addComponent(TransformComponent());
+                        }
+                        if (ImGui::MenuItem("Delete Component")) {
+                            componentToDelete = i;
+                        }
+                        ImGui::EndPopup();
+                    }
 
                     drawComponentProps(audioSrcComponents[i]);
                     ImGui::TreePop();
@@ -932,14 +947,35 @@ inline void drawProperties() {
                 ImGui::PopID();
             }
 
+            // handle delete requests
+            if (componentToDelete >= 0) {
+                audioSrcComponents.erase(audioSrcComponents.begin() + componentToDelete);
+            }
+
             // TransformComponent
             std::vector<TransformComponent>& transformComponents =
                 scene.selectedEntity->components.vecTransformComponent;
+            componentToDelete = -1;
             for (unsigned int i = 0; i < transformComponents.size(); i++) {
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(transformComponents[i].name.c_str(),
                         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
                             ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
+
+                    if (ImGui::BeginPopupContextItem()) {
+                        if (ImGui::MenuItem("Add Audio Source Component")) {
+                            scene.selectedEntity->components.addComponent(AudioSourceComponent());
+                        }
+                        if (ImGui::MenuItem("Add Script Component")) {
+                        }
+                        if (ImGui::MenuItem("Add Transform Component")) {
+                            scene.selectedEntity->components.addComponent(TransformComponent());
+                        }
+                        if (ImGui::MenuItem("Delete Component")) {
+                            componentToDelete = i;
+                        }
+                        ImGui::EndPopup();
+                    }
                     drawComponentProps(transformComponents[i]);
 
                     ImGui::TreePop();
@@ -947,15 +983,20 @@ inline void drawProperties() {
                 ImGui::PopID();
             }
 
+            // handle delete requests
+            if (componentToDelete >= 0) {
+                transformComponents.erase(transformComponents.begin() + componentToDelete);
+            }
+
             // Other Component Types...
 
             // Context Menu
-            ImGui::SetCursorPos(initialPos);
+            ImVec2 currPos = ImGui::GetCursorPos();
             ImVec2 buttonSize = ImGui::GetWindowSize();
             float borderSize = ImGui::GetStyle().WindowBorderSize;
             ImVec2 padding = ImGui::GetStyle().WindowPadding;
-            buttonSize.x -= borderSize + 2 * padding.x + initialPos.x;
-            buttonSize.y -= borderSize + 2 * padding.y + initialPos.y;
+            buttonSize.x -= borderSize + 2 * padding.x + currPos.x;
+            buttonSize.y -= borderSize + 2 * padding.y + currPos.y;
 
             ImGui::InvisibleButton("##propertiesinvisblebutton", buttonSize);
             if (ImGui::BeginPopupContextItem()) {
