@@ -3,16 +3,20 @@
 
 enum VertexBufferType
 {
-	ColoredObjectBuffer = 0,
-	TexturedObjectBuffer = 1
+	Unassigned = 0,
+	ColoredObjectBuffer = 1,
+	TexturedObjectBuffer = 2
 };
 
 class VertexBuffer
 {
 private:
 	GLuint vertexBuffer;
+	VertexBufferType type;
 
 public:
+	VertexBuffer();
+	VertexBuffer(VertexBufferType aType);
 	VertexBuffer(GLsizeiptr bufferSize_B, const void *data, VertexBufferType bufferType);
 
 

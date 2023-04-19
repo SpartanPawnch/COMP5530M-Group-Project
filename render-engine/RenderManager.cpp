@@ -204,16 +204,15 @@ void RenderManager::loadScene() {
     VertexBuffer cubeBuffer(sizeof(cubeVertices), cubeVertices, ColoredObjectBuffer);
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
 
-
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
-    std::cout << "we have " << model.meshes.size() << " meshes in model\n";
-    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    {
-        std::cout << model.meshes[0].vertices[i].position.x << " "
-            << model.meshes[0].vertices[i].position.y << " "
-            << model.meshes[0].vertices[i].position.z << std::endl;
-    }
-    std::cout << "We have " << model.meshes[0].indices.size() << " indices and " << model.meshes[0].indices.size() / 3 << "triangles";
+    //std::cout << "we have " << model.meshes.size() << " meshes in model\n";
+    //for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
+    //{
+    //    std::cout << model.meshes[0].vertices[i].position.x << " "
+    //        << model.meshes[0].vertices[i].position.y << " "
+    //        << model.meshes[0].vertices[i].position.z << std::endl;
+    //}
+    //std::cout << "We have " << model.meshes[0].indices.size() << " indices and " << model.meshes[0].indices.size() / 3 << "triangles";
 
     VertexBuffer vBuffer(model.meshes[0].vertices.size()* sizeof(Vertex), &model.meshes[0].vertices[0], TexturedObjectBuffer);
     IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);

@@ -7,13 +7,20 @@
 
 #include "Buffer.h"
 
+VertexBuffer::VertexBuffer()
+{
+	this->type = Unassigned;
+}
 
+VertexBuffer::VertexBuffer(VertexBufferType aType)
+{
+	this->type = aType;
+}
 
 
 VertexBuffer::VertexBuffer( GLsizeiptr bufferSize_B, const void *data, VertexBufferType bufferType)
 {
-
-
+	this->type = bufferType;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //Should go seperate?
 	if (bufferType == TexturedObjectBuffer)
