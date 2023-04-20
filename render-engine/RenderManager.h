@@ -114,7 +114,7 @@ class RenderManager {
     // void AddWindow(int width, int height, const char* windowTitle);
 
     // To create the Pipeline-Entity Map
-    void addMeshToPipeline(Pipeline, VertexBuffer, IndexBuffer);
+    void addMeshToPipeline(std::vector<Pipeline>, VertexBuffer, IndexBuffer, GLuint VAO);
 
     // Load Models, Cameras, Lights, Shaders etc to RenderEngine
     void loadScene();
