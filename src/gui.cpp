@@ -837,11 +837,13 @@ void drawComponentProps(TransformComponent& component) {
 }
 
 void drawComponentProps(ModelComponent& component) {
-    std::string previewPath = "";
-    if (component.modelDescriptor && component.modelDescriptor->path)
-        previewPath = *component.modelDescriptor->path;
+    std::string previewStr = "Select a Model";
+    if (component.modelDescriptor && component.modelDescriptor->path) {
+        previewStr = *component.modelDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewStr.c_str());
+    }
 
-    if (ImGui::BeginCombo("Model File", previewPath.c_str())) {
+    if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
         // get available audio clips
         static std::vector<assetfolder::AssetDescriptor> modelFiles;
         assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
@@ -849,7 +851,7 @@ void drawComponentProps(ModelComponent& component) {
         // list available audio clips
         for (unsigned int i = 0; i < modelFiles.size(); i++) {
             ImGui::PushID(i);
-            bool isSelected = (previewPath == modelFiles[i].path);
+            bool isSelected = (previewStr == modelFiles[i].path);
             if (ImGui::Selectable(modelFiles[i].name.c_str(), &isSelected)) {
                 // check if we need to load file
                 // TODO better unique id scheme
@@ -862,7 +864,7 @@ void drawComponentProps(ModelComponent& component) {
                 }
 
                 std::swap(component.modelDescriptor, desc);
-                component.modelUuid = uuid;
+                component.modelUuid = component.modelDescriptor ? uuid : "";
             }
             ImGui::PopID();
         }

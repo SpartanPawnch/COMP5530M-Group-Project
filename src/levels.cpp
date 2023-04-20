@@ -23,6 +23,7 @@
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Component/BaseComponent.h"
 #include "ECS/Component/TransformComponent.h"
+#include "ECS/Component/ModelComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -83,9 +84,13 @@ void loadLevel(const char* path, Scene& scene) {
     }
 
     // TODO - load models
+    std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
         assert(doc.HasMember("models"));
         auto jsonModels = doc["models"].GetArray();
+        for (unsigned int i = 0; i < jsonModels.Size(); i++) {
+            modelPtrs.emplace_back(model::modelLoad(jsonModels[i]["path"].GetString(), jsonModels[i]["uuid"].GetString()));
+        }
     }
 
     // TODO load scripts
@@ -145,6 +150,15 @@ void loadLevel(const char* path, Scene& scene) {
                     trComponent.uuid = jsonComponent["uuid"].GetInt();
 
                     baseEntity.components.addComponent(trComponent);
+                }
+                // ModelComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
+                    ModelComponent model;
+                    model.uuid = jsonComponent["uuid"].GetInt();
+                    model.name = std::string(jsonComponent["name"].GetString());
+                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
+                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
+                    baseEntity.components.addComponent(model);
                 }
                 // BaseComponent
                 else {
@@ -209,8 +223,25 @@ static rapidjson::Value saveComponent(const BaseComponent& component, rapidjson:
     jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
 
     jsonComponent.AddMember(
-        "type", rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
+        "type", rapidjson::Value("BaseComponent", d.GetAllocator()), d.GetAllocator());
 
+    return jsonComponent;
+}
+
+static rapidjson::Value saveComponent(
+    const ModelComponent& component, rapidjson::Document& d) {
+    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+
+    jsonComponent.AddMember(
+        "name", rapidjson::Value(component.name.c_str(), d.GetAllocator()), d.GetAllocator());
+    jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
+
+    jsonComponent.AddMember(
+        "type", rapidjson::Value("ModelComponent", d.GetAllocator()), d.GetAllocator());
+
+    jsonComponent.AddMember("modelUuid",
+        rapidjson::Value(component.modelUuid.c_str(), d.GetAllocator()), d.GetAllocator());
+    
     return jsonComponent;
 }
 
@@ -229,7 +260,6 @@ void saveLevel(const char* path, const Scene& scene) {
 
     // save ECS and enumerate dependencies
     std::vector<int> audioIds;
-    std::vector<int> modelIds;
     std::vector<int> textureIds;
     std::vector<int> scriptIds;
     std::vector<int> miscIds;
@@ -282,6 +312,14 @@ void saveLevel(const char* path, const Scene& scene) {
                 jsonComponents.PushBack(jsonComponent, d.GetAllocator());
             }
 
+            // ModelComponent
+            const std::vector<ModelComponent>& modelComponents =
+                scene.entities[i].components.vecModelComponent;
+            for (unsigned int j = 0; j < modelComponents.size(); j++) {
+                rapidjson::Value jsonComponent = saveComponent(modelComponents[j], d);
+                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+            }
+
             // BaseComponent
             const std::vector<BaseComponent>& baseComponents =
                 scene.entities[i].components.vecBaseComponent;
@@ -306,6 +344,17 @@ void saveLevel(const char* path, const Scene& scene) {
     // TODO - save models
     {
         rapidjson::Value jsonModels(rapidjson::kArrayType);
+        std::vector<model::ModelDiskData> data;
+        model::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            rapidjson::Value jsonModel(rapidjson::kObjectType);
+            jsonModel.AddMember(
+                "uuid", rapidjson::Value(data[i].uuid.c_str(), d.GetAllocator()), d.GetAllocator());
+            jsonModel.AddMember(
+                "path", rapidjson::Value(data[i].path.c_str(), d.GetAllocator()), d.GetAllocator());
+            jsonModels.PushBack(jsonModel, d.GetAllocator());
+        }
         d.AddMember("models", jsonModels, d.GetAllocator());
     }
 

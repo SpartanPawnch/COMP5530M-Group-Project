@@ -148,4 +148,12 @@ namespace model {
 
         return std::shared_ptr<ModelDescriptor>();
     }
+
+    void getDiskData(std::vector<ModelDiskData>& data) {
+        data.resize(loadedModels.size());
+        for (unsigned int i = 0; i < loadedModels.size(); i++) {
+            data[i].uuid = loadedModels[i].uuid;
+            data[i].path = loadedModels[i].path;
+        }
+    }
 }

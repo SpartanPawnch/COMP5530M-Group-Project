@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace model {
     struct ModelDescriptor {
@@ -16,4 +17,11 @@ namespace model {
 
     // get descriptor corresponding to uuid
     std::shared_ptr<ModelDescriptor> modelGetByUuid(const std::string& uuid);
+
+    // get clips array
+    struct ModelDiskData {
+        std::string uuid;
+        std::string path;
+    };
+    void getDiskData(std::vector<ModelDiskData>& data);
 }
