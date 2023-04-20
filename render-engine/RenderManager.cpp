@@ -67,6 +67,24 @@ void RenderManager::updateMatrices(int* width, int* height) {
         glm::perspective(glm::radians(45.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
+void RenderManager::addMeshToPipeline(Pipeline pipeline, VertexBuffer vBuffer, IndexBuffer iBuffer)
+{
+    if (PipelineMeshBufferMap.find(pipeline) == PipelineMeshBufferMap.end())
+    {
+        PipelineMeshBufferMap[pipeline] = std::vector <Buffer>{ Buffer(vBuffer, iBuffer) };
+    }
+    else
+    {
+        PipelineMeshBufferMap[pipeline].push_back(Buffer(vBuffer, iBuffer));
+    }
+       
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    
+    pipelines[pipeline].addVAO(VAO);
+}
+
 void RenderManager::loadScene() {
 
     //Load entity models
@@ -119,52 +137,7 @@ void RenderManager::loadScene() {
         16, 17, 18, 18, 19, 16, // Top face
         20, 21, 22, 22, 23, 20  // Bottom face
     };
-    //GLfloat cubeVertices1[] = {
-    //    // Front face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
-    //     1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
-    //     1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
-    //    -1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
-    //    // Back face 
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
-    //     1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
-    //     1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
-    //    -1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
-    //    // Left face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
-    //    -1.0f, -5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-    //    -1.0f,  5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
-    //    -1.0f,  5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
-    //    // Right face
-    //    // Position                 // Normal               // Color  
-    //    1.0f, -5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
-    //    1.0f, -5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
-    //    1.0f,  5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-    //    1.0f,  5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
-    //    // Top face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f,  5.0f,  1.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
-    //    1.0f,  5.0f,  1.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-    //    1.0f,  5.0f, -1.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
-    //    -1.0f,  5.0f, -1.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
-    //    // Bottom face
-    //    // Position                 // Normal               // Color         
-    //    -1.0f, -5.0f,  1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-    //    1.0f, -5.0f,  1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-    //    1.0f, -5.0f, -1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
-    //    -1.0f, -5.0f, -1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
-    //};
-    //GLuint cubeIndices1[] = {
-    //    0, 1, 2, 2, 3, 0,      // Front face
-    //    4, 5, 6, 6, 7, 4,      // Back face
-    //    8, 9, 10, 10, 11, 8,   // Left face
-    //    12, 13, 14, 14, 15, 12, // Right face
-    //    16, 17, 18, 18, 19, 16, // Top face
-    //    20, 21, 22, 22, 23, 20  // Bottom face
-    //};
+
 
     std::vector<float> allVertices;
     std::vector<unsigned int> allIndices;
@@ -203,6 +176,7 @@ void RenderManager::loadScene() {
     addPipeline(ColourPipeline, colorVertexPath, colorFragPath); // ColorPipeline - 0
     VertexBuffer cubeBuffer(sizeof(cubeVertices), cubeVertices, ColoredObjectBuffer);
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+    addMeshToPipeline(ColourPipeline, cubeBuffer, EBO);
 
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
     //std::cout << "we have " << model.meshes.size() << " meshes in model\n";
@@ -216,7 +190,7 @@ void RenderManager::loadScene() {
 
     VertexBuffer vBuffer(model.meshes[0].vertices.size()* sizeof(Vertex), &model.meshes[0].vertices[0], TexturedObjectBuffer);
     IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
-
+    addMeshToPipeline(TexturePipeline, vBuffer, ebo);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -256,10 +230,11 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 
     // RENDERING
     // Go through all the Pipelines
-    //if (this->pipelines[ColourPipeline].initialised == true)
-    //{
-    //    runPipeline(ColourPipeline);
-    //}
+    //TODO: Also check if the pipeline has models
+    if (this->pipelines[ColourPipeline].initialised == true)
+    {
+        runPipeline(ColourPipeline);
+    }
     if (this->pipelines[TexturePipeline].initialised == true)
     {
         runPipeline(TexturePipeline);
@@ -329,8 +304,12 @@ void RenderManager::runColourPipeline() {
         lights[0].getColour().z);
 
     //// Render the cube
-    glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    for (unsigned int i = 0; i < getPipeline(ColourPipeline)->getNoOfMeshes(); i++)
+    {
+        glBindVertexArray(getPipeline(ColourPipeline)->getVAO(i));
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); //TODO:: Change 36 to dynamic
+    }
+    
     glBindVertexArray(0); 
 }
 
@@ -356,8 +335,13 @@ void RenderManager::runTexturePipeline() {
         lights[0].getColour().z);
 
     //// Render the cube
-    glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
-    glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0);
+    printf("TP : NoM = %d", getPipeline(TexturePipeline)->getNoOfMeshes());
+    for (unsigned int i = 0; i < getPipeline(TexturePipeline)->getNoOfMeshes(); i++)
+    {
+        glBindVertexArray(getPipeline(TexturePipeline)->getVAO(i));
+        glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0); //TODO:: Change 36 to dynamic
+    }
+    
     glBindVertexArray(0); 
 }
 

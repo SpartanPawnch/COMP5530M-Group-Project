@@ -157,6 +157,14 @@ int main() {
     // init logging
     logging::LogManager logMgr;
 
+    // Probably the job of Asset Manager
+    ///////////////////////////////////
+    //Load entity models
+    Model model;
+    model.loadModel("assets/tree.obj");
+
+    //////////////////////////////////
+
     // Render Engine
     renderManager = RenderManager::getInstance();
 

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-
+#include<unordered_map>
 
 #include "RenderPipeline.h"
 #include "Camera.h"
@@ -24,6 +24,18 @@ enum Pipeline {
     Render2DPipeline = 5
 };
 
+struct Buffer
+{
+    VertexBuffer vBuffer;
+    IndexBuffer iBuffer;
+
+    Buffer(VertexBuffer v, IndexBuffer i)
+    {
+        vBuffer = v;
+        iBuffer = i;
+    }
+};
+
 class RenderManager {
   private:
     // pointer to single instance of RenderEngine
@@ -36,6 +48,7 @@ class RenderManager {
     // Available Render Pipelines
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
+    std::unordered_map<Pipeline, std::vector<Buffer>> PipelineMeshBufferMap;
     // 
     //Light Sources
     std::vector<LightSource> lights;
@@ -66,7 +79,6 @@ class RenderManager {
 
   public:
     // members
-    // std::vector<RenderPipeline> programs;
     // TODO
     Camera* camera;
     Camera* previewCamera;
@@ -102,7 +114,7 @@ class RenderManager {
     // void AddWindow(int width, int height, const char* windowTitle);
 
     // To create the Pipeline-Entity Map
-    void addEntityToPipeline();
+    void addMeshToPipeline(Pipeline, VertexBuffer, IndexBuffer);
 
     // Load Models, Cameras, Lights, Shaders etc to RenderEngine
     void loadScene();

@@ -15,12 +15,9 @@ RenderPipeline::RenderPipeline(const char* vertexPath,
 		computePath, tessControlPath, tessEvalPath);
 
 	this->initialised = true;
-
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-		
+	VAOs = {};
 }
+
 //adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
 bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
@@ -158,7 +155,8 @@ void RenderPipeline::createProgram(const char* vertexPath,
 RenderPipeline::~RenderPipeline(){	}
 
 GLuint RenderPipeline::getProgram(){ return this->shaderProgram;}
-GLuint RenderPipeline::getVAO(){ return this->VAO;}
+GLuint RenderPipeline::getVAO(unsigned int index){ return this->VAOs[index];}
+unsigned int RenderPipeline::getNoOfMeshes(){ return this->VAOs.size(); }
 GLuint RenderPipeline::getModelID(){ return this->ModelID;}
 GLuint RenderPipeline::getViewID(){ return this->ViewID;}
 GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
@@ -174,4 +172,4 @@ void RenderPipeline::setUniformLocations()
 	this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
 }
 
-
+void RenderPipeline::addVAO(GLuint VAO) { VAOs.push_back(VAO); }

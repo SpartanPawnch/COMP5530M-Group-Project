@@ -28,7 +28,7 @@ private:
 	GLuint indexBuffer;
 
 public:
+	IndexBuffer() {};
 	IndexBuffer(GLsizeiptr bufferSize_B, const void* data);
-
 
 };

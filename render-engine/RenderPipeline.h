@@ -26,7 +26,7 @@ private:
 	GLuint lightPosID;
 	GLuint lightColID;
 
-	GLuint VAO;
+	std::vector <GLuint> VAOs;
 	
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
 	void createProgram(const char* vertexPath,
@@ -50,7 +50,7 @@ public:
 		const char* tessEvalPath = nullptr);
 
 	GLuint getProgram();
-	GLuint getVAO();
+	GLuint getVAO(unsigned int index);
 	GLuint getModelID();
 	GLuint getViewID();
 	GLuint getProjectionID();
@@ -62,5 +62,8 @@ public:
 	void setAttributeLayouts();
 
 	void setUniformLocations();
+
+	unsigned int getNoOfMeshes();
+	void addVAO(GLuint VAO);
 	
 };
