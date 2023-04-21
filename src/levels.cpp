@@ -63,6 +63,10 @@ void loadLevel(const char* path, Scene& scene) {
     scene.entities.clear();
     scene.selectedEntity = nullptr;
 
+    std::string projRoot = assetfolder::getProjectRoot();
+    if (!projRoot.empty())
+        projRoot += "/";
+
     // load audio
     // store set of shared pointers temporarily before components are initialized
     std::vector<std::shared_ptr<audio::AudioDescriptor>> audioPtrs;
@@ -70,8 +74,9 @@ void loadLevel(const char* path, Scene& scene) {
         assert(doc.HasMember("audio"));
         auto jsonAudio = doc["audio"].GetArray();
         for (unsigned int i = 0; i < jsonAudio.Size(); i++) {
-            audioPtrs.emplace_back(audio::audioLoad(
-                jsonAudio[i]["path"].GetString(), jsonAudio[i]["uuid"].GetString()));
+            audioPtrs.emplace_back(
+                audio::audioLoad((projRoot + jsonAudio[i]["path"].GetString()).c_str(),
+                    jsonAudio[i]["uuid"].GetString()));
         }
     }
 
@@ -355,8 +360,10 @@ void saveLevel(const char* path, const Scene& scene) {
             rapidjson::Value jsonAudioClip(rapidjson::kObjectType);
             jsonAudioClip.AddMember(
                 "uuid", rapidjson::Value(data[i].uuid.c_str(), d.GetAllocator()), d.GetAllocator());
-            jsonAudioClip.AddMember(
-                "path", rapidjson::Value(data[i].path.c_str(), d.GetAllocator()), d.GetAllocator());
+            jsonAudioClip.AddMember("path",
+                rapidjson::Value(
+                    assetfolder::getRelativePath(data[i].path.c_str()).c_str(), d.GetAllocator()),
+                d.GetAllocator());
             jsonAudio.PushBack(jsonAudioClip, d.GetAllocator());
         }
 

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildSys CXX C)
 
+#common vars
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 #setup SoLoud

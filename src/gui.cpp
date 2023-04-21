@@ -79,7 +79,8 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     _chdir(buildDir.c_str());
 
     // build target
-    FILE* cmakeProc = _popen("cmake .. 2>>&1 && cmake --build . --target BuildTest 2>>&1", "r");
+    FILE* cmakeProc =
+        _popen("cmake .. 2>>&1 && cmake --build . -j 24 --target BuildTest 2>>&1", "r");
     char buf[1024];
     while (!feof(cmakeProc)) {
         fgets(buf, sizeof(char) * 1024, cmakeProc);
@@ -88,7 +89,13 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
     logging::logInfo("Building Done!\n");
 
     // build cleanup
-    fclose(cmakeProc);
+    int res = _pclose(cmakeProc);
+
+    if (res != 0) {
+        logging::logErr("Build returned error {}\n\n", res);
+        return;
+    }
+    logging::logInfo("Build returned 0\n\n");
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
