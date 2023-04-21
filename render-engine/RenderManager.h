@@ -42,14 +42,11 @@ class RenderManager {
     static RenderManager* instance;
     bool initialized = false;
 
-    // test output writing for RenderEngine
-    // std::ofstream testOutput;
-
     // Available Render Pipelines
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
     std::unordered_map<Pipeline, std::vector<Buffer>> PipelineMeshBufferMap;
-    // 
+    
     //Light Sources
     std::vector<LightSource> lights;
 
@@ -57,8 +54,7 @@ class RenderManager {
     // std::vector <GLFWwindow*> windows;
 
     // default constructor does nothing
-    RenderManager() {
-    }
+    RenderManager() { }
 
     // no copy constructor or copy operator
     RenderManager(const RenderManager&) = delete;
@@ -67,8 +63,6 @@ class RenderManager {
     // default destructor does nothing
     ~RenderManager() {
     }
-
-    ///
 
     void runColourPipeline();
     void runTexturePipeline();
@@ -105,6 +99,8 @@ class RenderManager {
     void addCamera();
 
     void addLightSource(glm::vec3& position, glm::vec3& colour);
+
+    void addMesh();
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,

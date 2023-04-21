@@ -69,8 +69,6 @@ void RenderManager::updateMatrices(int* width, int* height) {
 
 void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuffer vBuffer, IndexBuffer iBuffer, GLuint VAO)
 {
-    
-
     for (unsigned int i = 0; i < pipeline.size(); i++)
     {
         if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end())
@@ -84,18 +82,18 @@ void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuff
 
         pipelines[pipeline[i]].addVAO(VAO);
     }
-    
-       
-    
-    
-    
+   
 }
 
 void RenderManager::loadScene() {
 
+    // Probably the job of Asset Manager
+    ///////////////////////////////////
     //Load entity models
     Model model;
     model.loadModel("assets/tree.obj");
+
+    //////////////////////////////////
 
     GLfloat cubeVertices[] = {
         // Front face
@@ -145,28 +143,9 @@ void RenderManager::loadScene() {
     };
 
 
-    std::vector<float> allVertices;
-    std::vector<unsigned int> allIndices;
-    allVertices.clear();
-    allIndices.clear();
-    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    {
-        allVertices.push_back(model.meshes[0].vertices[i].position.x);
-        allVertices.push_back(model.meshes[0].vertices[i].position.y);
-        allVertices.push_back(model.meshes[0].vertices[i].position.z);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.x);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.y);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.z);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.x);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.y);
-    }
-    for (std::size_t i = 0; i < model.meshes[0].indices.size(); i++)
-    {
-        allIndices.push_back(model.meshes[0].indices[i]);
-    }
+ 
 
     //ADD LIGHT SOURCES
-
     this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
@@ -190,14 +169,6 @@ void RenderManager::loadScene() {
     addMeshToPipeline(std::vector<Pipeline>{ColourPipeline}, cubeBuffer, EBO, VAO1);
 
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
-    //std::cout << "we have " << model.meshes.size() << " meshes in model\n";
-    //for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    //{
-    //    std::cout << model.meshes[0].vertices[i].position.x << " "
-    //        << model.meshes[0].vertices[i].position.y << " "
-    //        << model.meshes[0].vertices[i].position.z << std::endl;
-    //}
-    //std::cout << "We have " << model.meshes[0].indices.size() << " indices and " << model.meshes[0].indices.size() / 3 << "triangles";
     GLuint VAO2;
     glGenVertexArrays(1, &VAO2);
     glBindVertexArray(VAO2);
