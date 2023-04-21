@@ -289,17 +289,15 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         //bind model matrix
 
 
-        if (scene.entities[i].components.vecModelComponent.size() > 0) {
-            for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
-                auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
-                if (!desc) {
-                    continue;
-                }
-                for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
-                    glBindVertexArray(desc->getVAO(k));
-                    glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
-                    glBindVertexArray(0);
-                }
+        for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
+            auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
             }
         }
 
@@ -417,10 +415,36 @@ void RenderManager::runWaterPipeline() {
 void RenderManager::run2DPipeline() {
 }
 
+//adapted from https://learnopengl.com/Model-Loading/Mesh
 void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, VBO);
+    glGenBuffers(1, EBO);
 
+    glBindVertexArray(*VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, (*v).size() * sizeof(Vertex), &(*v)[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*i).size() * sizeof(unsigned int),
+        &(*i)[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+
+    glBindVertexArray(0);
 }
 
-void RenderManager::deleteMesh(unsigned int VAO, unsigned int VBO, unsigned int EBO) {
-
+void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+    glDeleteVertexArrays(1, VAO);
+    glDeleteBuffers(1, VBO);
+    glDeleteBuffers(1, EBO);
 }

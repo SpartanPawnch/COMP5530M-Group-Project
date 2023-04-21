@@ -226,8 +226,8 @@ int main() {
         // renderSceneRefactor(
         // renderManager->camera, viewportTexWidth, viewportTexHeight);
 
-        renderManager->renderSceneRefactor(
-            renderManager->camera, viewportTexWidth, viewportTexHeight);
+        //renderManager->renderSceneRefactor(
+        //    renderManager->camera, viewportTexWidth, viewportTexHeight);
        
         glFlush();
 
