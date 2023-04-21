@@ -644,7 +644,19 @@ inline void drawProperties() {
     ImGui::End();
 }
 
-void gameEditor(float mainMenuHeight,ImVec2 windowSize,GLFWwindow* window)
+inline void drawAddUI()
+{
+    if (ImGui::Begin("add"))
+    {
+        if (ImGui::Button("+"))
+        {
+
+        }
+    }
+    ImGui::End();
+}
+
+void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
 {
     static ImGuiID dockCenter = 0;
     static ImGuiID dockLeft;
@@ -705,6 +717,55 @@ void gameEditor(float mainMenuHeight,ImVec2 windowSize,GLFWwindow* window)
     drawProperties();
 }
 
+void uiEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
+{
+    static ImGuiID dockRight;
+    static ImGuiID dockCenter = 0;
+
+    //TODO save and load dock state
+    //create layout if not present already
+    ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
+    ImGui::SetNextWindowSize(ImVec2(windowSize.x,windowSize.y));
+    if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
+
+        ImGuiID dockId = ImGui::GetID("DockspaceDefault");
+        ImGui::DockSpace(dockId);
+        static bool dockSpaceInit = false;
+        if (!dockSpaceInit) {
+            //create initial empty node
+            ImGui::DockBuilderRemoveNode(dockId);
+            dockCenter = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockCenter, windowSize);
+            ImGui::DockBuilderSetNodePos(dockCenter, ImGui::GetMainViewport()->Pos);
+
+            //split vertically
+            dockRight = ImGui::DockBuilderSplitNode(dockCenter, ImGuiDir_Down, .4f, NULL, &dockCenter);
+
+            ImGui::DockBuilderFinish(dockId);
+            dockSpaceInit = true;
+        }
+    }
+
+    ImGui::End();
+
+    ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
+    drawViewport();
+
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    drawAddUI();
+}
+
+void characterEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
+{
+
+}
+
+void worldEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
+{
+
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     int viewportWidth, int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
@@ -719,19 +780,19 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
     windowSize.y -= mainMenuHeight;
     if(GameEditor)
     {
-        gameEditor(mainMenuHeight,windowSize,window);
+        gameEditor(mainMenuHeight, windowSize, window);
     }
     else if(UIEditor)
     {
-
+        uiEditor(mainMenuHeight, windowSize, window);
     }
     else if(CharacterEditor)
     {
-
+        characterEditor(mainMenuHeight, windowSize, window);
     }
     else if(WorldEditor)
     {
-
+        worldEditor(mainMenuHeight, windowSize, window);
     }
 
     
