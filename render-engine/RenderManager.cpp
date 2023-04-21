@@ -140,7 +140,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     updateMatrices(&width, &height);
 
     // draw background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // RENDERING
@@ -148,7 +148,27 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         modelMatrix = scene.entities[i].runtimeTransform;
-        runPipeline(ColorPipeline);
+        
+        //bind model matrix
+
+
+        if (scene.entities[i].components.vecModelComponent.size() > 0) {
+            for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
+                auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
+                if (!desc) {
+                    continue;
+                }
+                for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                    glBindVertexArray(desc->getVAO(k));
+                    glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+                    glBindVertexArray(0);
+                }
+            }
+        }
+
+        
+
+        //runPipeline(ColorPipeline);
     }
 }
 
@@ -205,4 +225,12 @@ void RenderManager::runBillboardPipeline() {
 void RenderManager::runWaterPipeline() {
 }
 void RenderManager::run2DPipeline() {
+}
+
+void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+
+}
+
+void RenderManager::deleteMesh(unsigned int VAO, unsigned int VBO, unsigned int EBO) {
+
 }

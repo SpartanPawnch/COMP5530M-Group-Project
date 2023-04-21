@@ -123,6 +123,7 @@ namespace model {
                 std::shared_ptr<ModelDescriptor> ptr = std::make_shared<ModelDescriptor>(
                     loadedModels.size() - 1, &loadedModels.back().path);
                 loadedModels.back().ref = std::weak_ptr<ModelDescriptor>(ptr);
+
                 return ptr;
             }
 
@@ -155,5 +156,25 @@ namespace model {
             data[i].uuid = loadedModels[i].uuid;
             data[i].path = loadedModels[i].path;
         }
+    }
+
+    unsigned int ModelDescriptor::getVAO(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].VAO;
+    }
+
+    unsigned int ModelDescriptor::getVBO(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].VBO;
+    }
+
+    unsigned int ModelDescriptor::getEBO(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].EBO;
+    }
+
+    unsigned int ModelDescriptor::getIndexCount(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].vertices.size();
+    }
+
+    unsigned int ModelDescriptor::getMeshCount() {
+        return loadedModels[idx].model->meshes.size();
     }
 }

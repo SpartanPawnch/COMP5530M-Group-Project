@@ -109,4 +109,7 @@ class RenderManager {
     }
 
     void runPipeline(Pipeline pipeline);
+
+    static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
+    static void deleteMesh(unsigned int VAO, unsigned int VBO, unsigned int EBO);
 };

@@ -10,6 +10,11 @@ namespace model {
         std::string* path;
         ModelDescriptor(int _idx, std::string* _path);
         ~ModelDescriptor();
+        unsigned int getVAO(int meshIndex);
+        unsigned int getVBO(int meshIndex);
+        unsigned int getEBO(int meshIndex);
+        unsigned int getIndexCount(int meshIndex);
+        unsigned int getMeshCount();
     };
 
     // load file with selected path. Returns non-negative index on success
