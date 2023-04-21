@@ -793,6 +793,7 @@ inline void drawEntities() {
 
         // add new child if requested
         if (targetParent >= 0) {
+            scene.selectedEntity = nullptr;
             scene.addChild(targetChild, targetParent);
         }
 
@@ -822,15 +823,19 @@ inline void drawEntities() {
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Add Entity")) {
                 scene.addEntity(BaseEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Camera Entity")) {
                 scene.addEntity(CameraEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Model Entity")) {
                 scene.addEntity(ModelEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
                 scene.addEntity(SkeletalMeshEntity());
+                scene.selectedEntity = nullptr;
             }
             ImGui::EndPopup();
         }
