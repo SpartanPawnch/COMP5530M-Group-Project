@@ -1,12 +1,13 @@
 #version 330 core
 
-in vec3 vsCol;
+in vec2 vsTex;
 in vec3 vsNormal;
 
 out vec4 fsColour;
 
 void main()
 {
+  
    vec3 normal;
    if(vsNormal.x < 0.0)
    {

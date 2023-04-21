@@ -1,5 +1,8 @@
 #include "RenderPipeline.h";
 
+RenderPipeline::RenderPipeline()
+{
+}
 
 RenderPipeline::RenderPipeline(const char* vertexPath,
 	const char* fragmentPath,
@@ -11,11 +14,10 @@ RenderPipeline::RenderPipeline(const char* vertexPath,
 	RenderPipeline::createProgram(vertexPath, fragmentPath, geometryPath,
 		computePath, tessControlPath, tessEvalPath);
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-		
+	this->initialised = true;
+	VAOs = {};
 }
+
 //adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
 bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
@@ -39,7 +41,7 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
 			shaderPath
 			<<" ::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
 	}
-	std::cout << shaderCode.c_str() << std::endl;
+	
 	
 	char const* sCode = shaderCode.c_str();
 	glShaderSource(id, 1, &sCode, NULL);
@@ -64,7 +66,6 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
 	return res == 1;
 	
 }
-
 
 
 void RenderPipeline::createProgram(const char* vertexPath,
@@ -123,6 +124,8 @@ void RenderPipeline::createProgram(const char* vertexPath,
 	glLinkProgram(shaderProgram);
 
 	//Delete shaders
+	glDetachShader(shaderProgram, vertexShader);
+	glDetachShader(shaderProgram, fragmentShader);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
@@ -149,19 +152,24 @@ void RenderPipeline::createProgram(const char* vertexPath,
 
 }
 
-RenderPipeline::~RenderPipeline()
+RenderPipeline::~RenderPipeline(){	}
+
+GLuint RenderPipeline::getProgram(){ return this->shaderProgram;}
+GLuint RenderPipeline::getVAO(unsigned int index){ return this->VAOs[index];}
+unsigned int RenderPipeline::getNoOfMeshes(){ return this->VAOs.size(); }
+GLuint RenderPipeline::getModelID(){ return this->ModelID;}
+GLuint RenderPipeline::getViewID(){ return this->ViewID;}
+GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
+GLuint RenderPipeline::getLightPosID(){ return this->lightPosID;}
+GLuint RenderPipeline::getLightColID(){	return this->lightColID;}
+
+void RenderPipeline::setUniformLocations()
 {
-	
+	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
+	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
+	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
+	this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
+	this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
 }
 
-GLuint RenderPipeline::getProgram()
-{
-	return this->shaderProgram;
-}
-
-GLuint RenderPipeline::getVAO()
-{
-	return this->VAO;
-}
-
-
+void RenderPipeline::addVAO(GLuint VAO) { VAOs.push_back(VAO); }

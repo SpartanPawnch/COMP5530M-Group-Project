@@ -29,6 +29,86 @@
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 
+<<<<<<< HEAD
+=======
+RenderManager* renderManager;
+
+void handleKeyboardInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        // Move the camera forward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        // Move the camera backward
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        // Strafe the camera left
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        // Strafe the camera right
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        // Ascend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        // Descend camera
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        // Reset camera position
+        renderManager->camera->resetPosition();
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+}
+
+void handleMouseInput(GLFWwindow* window) {
+    //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+        if (renderManager->camera->focusState == false) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderManager->camera->focusState = true;
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderManager->camera->focusState = false;
+        }
+
+        if (renderManager->firstRClick == true) {
+            renderManager->xPosLast = renderManager->xPos;
+            renderManager->yPosLast = renderManager->yPos;
+            renderManager->firstRClick = false;
+        }
+    }
+
+    if (renderManager->camera->focusState == true) {
+        // now we can change the orientation of the camera
+        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
+
+        // offset
+        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
+        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
+
+        // send data to camera
+        renderManager->camera->updateInput(
+            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+}
+>>>>>>> ad2fb36ed9c50e0303b82f6e32d5760502a46f93
 // set renderEngine instance to nullptr initially
 RenderManager* renderManager;
 RenderManager* RenderManager::instance = nullptr;
@@ -81,6 +161,14 @@ int main() {
     // init logging
     logging::LogManager logMgr;
 
+    // Probably the job of Asset Manager
+    ///////////////////////////////////
+    //Load entity models
+    Model model;
+    model.loadModel("assets/tree.obj");
+
+    //////////////////////////////////
+
     // Render Engine
     renderManager = RenderManager::getInstance();
 
@@ -88,6 +176,7 @@ int main() {
 
     renderManager->loadScene();
     // init shader
+
 
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
@@ -101,6 +190,10 @@ int main() {
     GUIManager guiInstance(window);
 
     double previous_time = glfwGetTime();
+
+    // ------------- UNIFORMS --------------------------
+    renderManager->setupColourPipelineUniforms();
+    renderManager->setupTexturePipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -132,11 +225,17 @@ int main() {
         glDrawBuffers(2, attachments);
 
         // draw scene
+<<<<<<< HEAD
         renderManager->renderEntities(
             scene, renderManager->camera, viewportTexWidth, viewportTexHeight);
         // renderSceneRefactor(
         // renderManager->camera, viewportTexWidth, viewportTexHeight);
 
+=======
+        renderManager->renderSceneRefactor(
+            renderManager->camera, viewportTexWidth, viewportTexHeight);
+       
+>>>>>>> ad2fb36ed9c50e0303b82f6e32d5760502a46f93
         glFlush();
 
         // draw UI to full window
@@ -149,6 +248,8 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    renderManager->shutDown();
 
     return 0;
 }

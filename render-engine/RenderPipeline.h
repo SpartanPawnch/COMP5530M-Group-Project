@@ -20,7 +20,14 @@ private:
 	GLuint teseShader;
 	GLuint geometryShader;
 
-	GLuint VAO;
+	GLuint ModelID;
+	GLuint ViewID;
+	GLuint ProjectionID;
+	GLuint lightPosID;
+	GLuint lightColID;
+
+	std::vector <GLuint> VAOs;
+	
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
 	void createProgram(const char* vertexPath,
 		const char* fragmentPath,
@@ -31,6 +38,10 @@ private:
 
 public:
 
+	bool initialised = false;
+
+	RenderPipeline();
+
 	RenderPipeline(const char* vertexPath,
 		const char* fragmentPath,
 		const char* geometryPath = nullptr,
@@ -39,11 +50,20 @@ public:
 		const char* tessEvalPath = nullptr);
 
 	GLuint getProgram();
-	GLuint getVAO();
+	GLuint getVAO(unsigned int index);
+	GLuint getModelID();
+	GLuint getViewID();
+	GLuint getProjectionID();
+	GLuint getLightPosID();
+	GLuint getLightColID();
 
 	~RenderPipeline();
 
 	void setAttributeLayouts();
-	
 
+	void setUniformLocations();
+
+	unsigned int getNoOfMeshes();
+	void addVAO(GLuint VAO);
+	
 };
