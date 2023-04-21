@@ -144,6 +144,12 @@ static GLuint viewportTex;
 //TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
 
+//menu selector
+bool GameEditor = true;
+bool UIEditor = false;
+bool CharacterEditor = false;
+bool WorldEditor = false;
+
 GUIManager::GUIManager(GLFWwindow* window) {
     //Init ImGui
     IMGUI_CHECKVERSION();
@@ -297,13 +303,17 @@ inline float drawMainMenu(const char* executablePath) {
 
         if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
-            ImGui::Button("Game Editor");
+            if (ImGui::Button("Game Editor"))
+            {GameEditor=true,UIEditor=false,CharacterEditor=false,WorldEditor=false;}
             ImGui::SameLine();
-            ImGui::Button("UI Editor");
+            if (ImGui::Button("UI Editor"))
+            {GameEditor=false,UIEditor=true,CharacterEditor=false,WorldEditor=false;}
             ImGui::SameLine();
-            ImGui::Button("Character Editor");
+            if (ImGui::Button("Character Editor"))
+            {GameEditor=false,UIEditor=false,CharacterEditor=true,WorldEditor=false;}
             ImGui::SameLine();
-            ImGui::Button("World Editor");
+            if (ImGui::Button("World Editor"))
+            {GameEditor=false,UIEditor=false,CharacterEditor=false,WorldEditor=true;}
             ImGui::End();
         }
 
@@ -520,8 +530,6 @@ inline void drawAssetBrowser(GLFWwindow* window) {
 int viewportTexWidth = 0;
 int viewportTexHeight = 0;
 
-
-
 inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
@@ -544,7 +552,6 @@ inline void drawViewport() {
     ImGui::PopStyleVar(2);
     ImGui::End();
 }
-
 
 inline void drawStyleEditor() {
     if (ImGui::Begin("Style Editor")) {
@@ -606,7 +613,6 @@ inline void drawEntities() {
 
 }
 
-
 void drawComponentProps(TransformComponent& component) {
     ImGui::InputFloat3("Position", &component.position[0]);
     ImGui::InputFloat4("Rotation", &component.rotation[0]);
@@ -638,21 +644,8 @@ inline void drawProperties() {
     ImGui::End();
 }
 
-void prepUI(GLFWwindow* window, const char* executablePath, float dt,
-    int viewportWidth, int viewportHeight) {
-    ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImVec2 mousePos = ImGui::GetMousePos();
-
-    //adjust fullscreen windows size to account for menubar
-    float mainMenuHeight = drawMainMenu(executablePath);
-    windowSize.y -= mainMenuHeight;
-
-
-
+void gameEditor(float mainMenuHeight,ImVec2 windowSize,GLFWwindow* window)
+{
     static ImGuiID dockCenter = 0;
     static ImGuiID dockLeft;
     static ImGuiID dockRight;
@@ -710,6 +703,38 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt,
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
+}
+
+void prepUI(GLFWwindow* window, const char* executablePath, float dt,
+    int viewportWidth, int viewportHeight) {
+    ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+
+    //adjust fullscreen windows size to account for menubar
+    float mainMenuHeight = drawMainMenu(executablePath);
+    windowSize.y -= mainMenuHeight;
+    if(GameEditor)
+    {
+        gameEditor(mainMenuHeight,windowSize,window);
+    }
+    else if(UIEditor)
+    {
+
+    }
+    else if(CharacterEditor)
+    {
+
+    }
+    else if(WorldEditor)
+    {
+
+    }
+
+    
 
     //prepare gui for rendering
     ImGui::Render();
