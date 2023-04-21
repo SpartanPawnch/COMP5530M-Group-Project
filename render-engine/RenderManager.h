@@ -8,12 +8,9 @@
 #include "RenderPipeline.h"
 #include "Camera.h"
 #include "Buffer.h"
-<<<<<<< HEAD
 #include "../src/ECS/Scene/Scene.h"
-=======
 #include "LightSource.h"
 #include "../src/model_import/model.h"
->>>>>>> ad2fb36ed9c50e0303b82f6e32d5760502a46f93
 
 #include <GLFW/glfw3.h>
 

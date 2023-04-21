@@ -29,8 +29,6 @@
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 
-<<<<<<< HEAD
-=======
 RenderManager* renderManager;
 
 void handleKeyboardInput(GLFWwindow* window) {
@@ -108,9 +106,7 @@ void handleMouseInput(GLFWwindow* window) {
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
 }
->>>>>>> ad2fb36ed9c50e0303b82f6e32d5760502a46f93
 // set renderEngine instance to nullptr initially
-RenderManager* renderManager;
 RenderManager* RenderManager::instance = nullptr;
 
 int main() {
@@ -225,17 +221,14 @@ int main() {
         glDrawBuffers(2, attachments);
 
         // draw scene
-<<<<<<< HEAD
         renderManager->renderEntities(
             scene, renderManager->camera, viewportTexWidth, viewportTexHeight);
         // renderSceneRefactor(
         // renderManager->camera, viewportTexWidth, viewportTexHeight);
 
-=======
         renderManager->renderSceneRefactor(
             renderManager->camera, viewportTexWidth, viewportTexHeight);
        
->>>>>>> ad2fb36ed9c50e0303b82f6e32d5760502a46f93
         glFlush();
 
         // draw UI to full window
