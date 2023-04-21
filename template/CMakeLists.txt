@@ -5,15 +5,18 @@ project(BuildTest CXX C)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 #setup SoLoud
-set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
-set(SOLOUD_BACKEND_WASAPI ON CACHE BOOL "" FORCE)
-add_subdirectory("external/soloud/contrib")
+#set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
+#set(SOLOUD_BACKEND_WASAPI ON CACHE BOOL "" FORCE)
+#add_subdirectory("external/soloud/contrib")
+find_package(soloud CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/external/soloud/cmake)
 
 #setup assimp
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
-add_subdirectory("external/assimp-5.2.5")
+#set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+#set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+#set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+#add_subdirectory("external/assimp-5.2.5")
+#include_directories(external/assimp-5.2.5/include)
+find_package(assimp CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/external/assimp/lib/cmake/assimp-5.2)
 
 #setup Imgui
 set(IMGUIDIR "external/imgui")
@@ -50,11 +53,13 @@ add_executable(
 )
 
 #add glfw
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
-add_subdirectory("external/glfw-3.3.6")
+#set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+#set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+#set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+#set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
+#add_subdirectory("external/glfw-3.3.6")
+#include_directories(external/glfw-3.3.6/include)
+find_package(glfw3 CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw-3.3.6/lib/cmake/glfw3)
 
 #add glew
 set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
@@ -68,9 +73,11 @@ add_subdirectory("external/spdlog")
 
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
-    ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
+    ${PROJECT_SOURCE_DIR}/external/soloud/include/soloud ${PROJECT_SOURCE_DIR}/external/rapidjson
+	${ASSIMP_INCLUDE_DIRS} glfw
 )
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog)
+
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm ${ASSIMP_LIBRARIES} soloud spdlog)
 
 #generate ComponentStorage code if necessary
 add_custom_target(ComponentStorageGen

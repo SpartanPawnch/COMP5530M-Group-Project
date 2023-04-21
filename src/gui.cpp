@@ -54,75 +54,6 @@ namespace guicfg {
     ImFont* regularFont = nullptr;
 };
 
-// --- Build System Utilities ---
-void createProj(const std::string& path) {
-    char buf[1024];
-    FILE* copyProc =
-        _popen((std::string("xcopy /s /e /q /y .\\template \"") + path + "\" 2>>&1").c_str(), "r");
-    while (!feof(copyProc)) {
-        fgets(buf, sizeof(char) * 1024, copyProc);
-        logging::logInfo(buf);
-    }
-    int res = _pclose(copyProc);
-    if (res == 0) {
-        logging::logInfo("Created project at {}\n", path);
-        _mkdir((path + "/assets").c_str());
-    }
-}
-
-void buildRunProj(const std::string& activePath, const char* executablePath) {
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    // change to buildDir
-    std::string buildDir = std::string(activePath) + "/build";
-    _mkdir(buildDir.c_str());
-    _chdir(buildDir.c_str());
-
-    // build target
-    FILE* cmakeProc =
-        _popen("cmake .. 2>>&1 && cmake --build . -j 24 --target BuildTest 2>>&1", "r");
-    char buf[1024];
-    while (!feof(cmakeProc)) {
-        fgets(buf, sizeof(char) * 1024, cmakeProc);
-        logging::logInfo(buf);
-    }
-    logging::logInfo("Building Done!\n");
-
-    // build cleanup
-    int res = _pclose(cmakeProc);
-
-    if (res != 0) {
-        logging::logErr("Build returned error {}\n\n", res);
-        return;
-    }
-    logging::logInfo("Build returned 0\n\n");
-
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-
-    CreateProcess(NULL, // No module name (use command line)
-        LPSTR("./Debug/BuildTest.exe"), // Command line
-        NULL, // Process handle not inheritable
-        NULL, // Thread handle not inheritable
-        FALSE, // Set handle inheritance to FALSE
-        0, // No creation flags
-        NULL, // Use parent's environment block
-        NULL, // Use parent's starting directory
-        &si, // Pointer to STARTUPINFO structure
-        &pi); // Pointer to PROCESS_INFORMATION structure
-
-    // Wait until child process exits.
-    WaitForSingleObject(pi.hProcess, INFINITE);
-
-    // Close process and thread handles.
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-
-    // restore path
-    _chdir(executablePath);
-}
-
 // --- Internal GUI State ---
 
 // base functionality vars
@@ -232,6 +163,84 @@ GUIManager::~GUIManager() {
 
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
+}
+
+// --- Build System Utilities ---
+void createProj(const std::string& path) {
+    char buf[1024];
+    FILE* copyProc =
+        _popen((std::string("xcopy /s /e /q /y .\\template \"") + path + "\" 2>>&1").c_str(), "r");
+    while (!feof(copyProc)) {
+        fgets(buf, sizeof(char) * 1024, copyProc);
+        logging::logInfo(buf);
+    }
+    int res = _pclose(copyProc);
+    if (res == 0) {
+        logging::logInfo("Created project at {}\n", path);
+        _mkdir((path + "/assets").c_str());
+        activePath = path;
+        assetfolder::setActiveDirectory(path);
+        currAssetFolder = assetfolder::getAssetsRootDir();
+        std::string level = loadProjectFile((path + "/project.json").c_str());
+        if (!level.empty())
+            loadLevel((activePath + "/" + level).c_str(), scene);
+
+        queryAssetsFolder = true;
+        queryLevelsFolder = true;
+    }
+}
+
+void buildRunProj(const std::string& activePath, const char* executablePath) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    // change to buildDir
+    std::string buildDir = std::string(activePath) + "/build";
+    _mkdir(buildDir.c_str());
+    _chdir(buildDir.c_str());
+
+    // build target
+    FILE* cmakeProc =
+        _popen("cmake .. 2>>&1 && cmake --build . -j 24 --target BuildTest 2>>&1", "r");
+    char buf[1024];
+    while (!feof(cmakeProc)) {
+        fgets(buf, sizeof(char) * 1024, cmakeProc);
+        logging::logInfo(buf);
+    }
+    logging::logInfo("Building Done!\n");
+
+    // build cleanup
+    int res = _pclose(cmakeProc);
+
+    if (res != 0) {
+        logging::logErr("Build returned error {}\n\n", res);
+        return;
+    }
+    logging::logInfo("Build returned 0\n\n");
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    CreateProcess(NULL, // No module name (use command line)
+        LPSTR("./Debug/BuildTest.exe"), // Command line
+        NULL, // Process handle not inheritable
+        NULL, // Thread handle not inheritable
+        FALSE, // Set handle inheritance to FALSE
+        0, // No creation flags
+        NULL, // Use parent's environment block
+        NULL, // Use parent's starting directory
+        &si, // Pointer to STARTUPINFO structure
+        &pi); // Pointer to PROCESS_INFORMATION structure
+
+    // Wait until child process exits.
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Close process and thread handles.
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    // restore path
+    _chdir(executablePath);
 }
 
 // --- Custom Input Handlers ---
@@ -367,11 +376,6 @@ inline float drawMainMenu(const char* executablePath) {
                     if (projectThread.joinable())
                         projectThread.join();
                     projectThread = std::thread(createProj, path);
-                    activePath = path;
-                    assetfolder::setActiveDirectory(path);
-                    currAssetFolder = assetfolder::getAssetsRootDir();
-                    queryAssetsFolder = true;
-                    queryLevelsFolder = true;
                 }
             }
             if (ImGui::MenuItem("Open Project")) {
