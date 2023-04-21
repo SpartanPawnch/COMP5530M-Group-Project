@@ -76,39 +76,39 @@ void RenderPipeline::createProgram(const char* vertexPath,
 	const char* tessEvalPath)
 {
 	//Load and compile vertex shader
-	this->vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	readAndCompileShader(vertexPath, this->vertexShader);
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	readAndCompileShader(vertexPath, vertexShader);
 
 	//Load and compile fragment shader
-	this->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	readAndCompileShader(fragmentPath, this->fragmentShader);
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	readAndCompileShader(fragmentPath, fragmentShader);
 
 	//Optional shaders
-	this->tescShader = 0;
-	this->teseShader = 0;
-	this->geometryShader = 0;
-	this->computeShader = 0;
+	GLuint tescShader = 0;
+	GLuint teseShader = 0;
+	GLuint geometryShader = 0;
+	GLuint computeShader = 0;
 
 	//if tesselation shaders are used
 	if (tessControlPath && tessEvalPath)
 	{
-		this->tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
-		readAndCompileShader(tessControlPath, this->tescShader);
+		tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+		readAndCompileShader(tessControlPath, tescShader);
 
-		this->teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
-		readAndCompileShader(tessEvalPath, this->teseShader);
+		teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+		readAndCompileShader(tessEvalPath, teseShader);
 	}
 
 	if (geometryPath)
 	{
-		this->geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-		readAndCompileShader(geometryPath, this->geometryShader);
+		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+		readAndCompileShader(geometryPath, geometryShader);
 	}
 
 	//Link shaders
 	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, this->vertexShader);
-	glAttachShader(shaderProgram, this->fragmentShader);
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
 	
 	if (tessControlPath && tessEvalPath)
 	{

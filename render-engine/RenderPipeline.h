@@ -13,12 +13,6 @@ class RenderPipeline
 
 private:
 	GLuint shaderProgram;
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint computeShader;
-	GLuint tescShader;
-	GLuint teseShader;
-	GLuint geometryShader;
 
 	GLuint ModelID;
 	GLuint ViewID;
