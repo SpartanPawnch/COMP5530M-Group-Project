@@ -1,7 +1,6 @@
 #include "Camera.h"
 
-void Camera::updateCameraProperties()
-{
+void Camera::updateCameraProperties() {
     this->front.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
     this->front.y = sin(glm::radians(this->pitch));
     this->front.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
@@ -11,8 +10,7 @@ void Camera::updateCameraProperties()
     this->up = glm::normalize(glm::cross(this->right, this->front));
 }
 
-Camera::Camera(glm::vec3 position, glm::vec3 direction)
-{
+Camera::Camera(glm::vec3 position, glm::vec3 direction) {
     this->viewMatrix = glm::mat4(1.f);
 
     this->defaultSpeed = 1.0f;
@@ -35,8 +33,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction)
     this->updateCameraProperties();
 }
 
-const glm::mat4 Camera::getViewMatrix()
-{
+const glm::mat4 Camera::getViewMatrix() {
     this->updateCameraProperties();
 
     this->viewMatrix = glm::lookAt(this->position, this->position + this->front, this->up);
@@ -44,19 +41,16 @@ const glm::mat4 Camera::getViewMatrix()
     return this->viewMatrix;
 }
 
-const glm::vec3 Camera::getPosition()
-{
+const glm::vec3 Camera::getPosition() {
     return this->position;
 }
 
-void Camera::resetPosition()
-{
+void Camera::resetPosition() {
     this->position = this->initialPosition;
 }
 
-void Camera::updateKeyboardInput(const float& deltaTime, const int direction)
-{
-    //Update position vector
+void Camera::updateKeyboardInput(const float& deltaTime, const int direction) {
+    // Update position vector
     switch (direction) {
     case FORWARD:
         this->position += this->front * this->movementSpeed * deltaTime;
@@ -77,33 +71,28 @@ void Camera::updateKeyboardInput(const float& deltaTime, const int direction)
         this->position -= glm::vec3(0.0f, 1.0f, 0.0f) * this->movementSpeed * deltaTime;
         break;
     case FAST:
-        if (this->movementSpeed < this->highSpeed)
-        {
+        if (this->movementSpeed < this->highSpeed) {
             this->movementSpeed = this->highSpeed;
         }
-        else
-        {
+        else {
             this->movementSpeed = this->defaultSpeed;
         }
         break;
     case SLOW:
-        if (this->movementSpeed > this->lowSpeed)
-        {
+        if (this->movementSpeed > this->lowSpeed) {
             this->movementSpeed = this->lowSpeed;
         }
-        else
-        {
+        else {
             this->movementSpeed = this->defaultSpeed;
         }
     default:
         break;
-
     }
 }
 
-void Camera::updateMouseInput(const float& deltaTime, const double& offsetX, const double& offsetY)
-{
-    //Update pitch, yaw and roll
+void Camera::updateMouseInput(
+    const float& deltaTime, const double& offsetX, const double& offsetY) {
+    // Update pitch, yaw and roll
     this->pitch += static_cast<GLfloat>(-offsetY) * this->sensitivity * deltaTime;
     this->yaw += static_cast<GLfloat>(offsetX) * this->sensitivity * deltaTime;
 
@@ -119,8 +108,12 @@ void Camera::updateMouseInput(const float& deltaTime, const double& offsetX, con
     }
 }
 
-void Camera::updateInput(const float& deltaTime, const int direction, const double& offsetX, const double& offsetY)
-{
+void Camera::updateInput(
+    const float& deltaTime, const int direction, const double& offsetX, const double& offsetY) {
     this->updateKeyboardInput(deltaTime, direction);
     this->updateMouseInput(deltaTime, offsetX, offsetY);
+}
+void Camera::setDirect(const glm::mat4& _view, const float _fov) {
+    viewMatrix = _view;
+    fov = _fov;
 }

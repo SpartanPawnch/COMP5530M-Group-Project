@@ -30,6 +30,11 @@ set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
 aux_source_directory("${LUADIR}/" LUASRC)
 
+#setup icon on windows
+if(WIN32)
+    set(ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
+endif(WIN32)
+
 #setup executables
 add_executable(
     ${PROJECT_NAME} src/main.cpp 
@@ -39,7 +44,7 @@ add_executable(
     src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp src/gui.cpp src/scripting.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
-    src/ECS/Component/AudioSourceComponent.cpp
+    src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
@@ -48,6 +53,7 @@ add_executable(
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
     render-engine/Buffer.h render-engine/Buffer.cpp
+    ${ICON_RESOURCE}
 )
 
 #add glfw
@@ -103,4 +109,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_CURRENT_SOURCE_DIR}/fonts/
     $<TARGET_FILE_DIR:${PROJECT_NAME}>/fonts
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/logo.ico
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/Launcher/logo.png
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )

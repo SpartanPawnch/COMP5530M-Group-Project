@@ -56,7 +56,7 @@ void RenderManager::updateMatrices(int* width, int* height) {
     // glm::vec3(0.0f, 1.0f, 0.0f));
     this->viewMatrix = camera->getViewMatrix();
     this->projectionMatrix =
-        glm::perspective(glm::radians(45.0f), (float)*width / (float)*height, 0.01f, 100.0f);
+        glm::perspective(camera->fov, (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
 void RenderManager::loadScene() {

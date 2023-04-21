@@ -5,12 +5,14 @@
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
 #include "../Component/ScriptComponent.h"
+#include "../Component/CameraComponent.h"
 #include "../Component/AudioSourceComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
     std::vector<TransformComponent> vecTransformComponent;
     std::vector<ScriptComponent> vecScriptComponent;
+    std::vector<CameraComponent> vecCameraComponent;
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
     //add component, type is inferred by compiler
     template<typename T>
@@ -50,6 +52,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<CameraComponent>(const CameraComponent& component){
+        vecCameraComponent.emplace_back(component);
+    }
+
+    template<>
     void addComponent<AudioSourceComponent>(const AudioSourceComponent& component){
         vecAudioSourceComponent.emplace_back(component);
     }
@@ -72,6 +79,13 @@ struct ComponentStorage{
     void start<ScriptComponent>(){
         for(unsigned int i=0;i<vecScriptComponent.size();i++){
             vecScriptComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<CameraComponent>(){
+        for(unsigned int i=0;i<vecCameraComponent.size();i++){
+            vecCameraComponent[i].start();
         }
     }
 
@@ -100,6 +114,13 @@ struct ComponentStorage{
     void update<ScriptComponent>(float dt){
         for(unsigned int i=0;i<vecScriptComponent.size();i++){
             vecScriptComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<CameraComponent>(float dt){
+        for(unsigned int i=0;i<vecCameraComponent.size();i++){
+            vecCameraComponent[i].update(dt);
         }
     }
 

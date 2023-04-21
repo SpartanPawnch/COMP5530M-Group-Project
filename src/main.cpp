@@ -13,6 +13,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../external/stb_image.h"
+
 #include <string>
 #include <thread>
 #include <mutex>
@@ -64,6 +66,15 @@ int main() {
     window = glfwCreateWindow(1600, 900, "ONO Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
 
+    // set icon
+    {
+        GLFWimage icon;
+        unsigned char* iconPixels = stbi_load("assets/logo.png", &icon.width, &icon.height, 0, 4);
+        assert(iconPixels != nullptr);
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+        stbi_image_free(icon.pixels);
+    }
     // setup OpenGL
     GLenum err = glewInit();
     if (err != GLEW_OK) {
