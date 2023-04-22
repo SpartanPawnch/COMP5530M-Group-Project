@@ -277,8 +277,10 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     updateMatrices(&width, &height);
 
     // draw background
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
     // RENDERING
     // Go through all the Pipelines
@@ -287,7 +289,17 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         modelMatrix = scene.entities[i].runtimeTransform;
         
         //bind model matrix
-
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(TexturePipeline)->getLightPosID(),
+            lights[0].getPosition().x,
+            lights[0].getPosition().y,
+            lights[0].getPosition().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightColID(),
+            lights[0].getColour().x,
+            lights[0].getColour().y,
+            lights[0].getColour().z);
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
             auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
@@ -297,13 +309,9 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
             }
         }
-
-        
-
-        //runPipeline(ColorPipeline);
+        glBindVertexArray(0);
     }
 }
 
@@ -417,6 +425,7 @@ void RenderManager::run2DPipeline() {
 
 //adapted from https://learnopengl.com/Model-Loading/Mesh
 void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+    std::cout << "upload" << std::endl;
     glGenVertexArrays(1, VAO);
     glGenBuffers(1, VBO);
     glGenBuffers(1, EBO);
@@ -444,7 +453,8 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
 }
 
 void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
-    glDeleteVertexArrays(1, VAO);
-    glDeleteBuffers(1, VBO);
-    glDeleteBuffers(1, EBO);
+    //glDeleteVertexArrays(1, VAO);
+    //glDeleteBuffers(1, VBO);
+    //glDeleteBuffers(1, EBO);
+    std::cout << "delete" << std::endl;
 }

@@ -7,27 +7,5 @@ out vec4 fsColour;
 
 void main()
 {
-  
-   vec3 normal;
-   if(vsNormal.x < 0.0)
-   {
-        normal.x = -vsNormal.x; 
-   }
-   else{ normal.x = vsNormal.x;
-   }
-
-   if(vsNormal.y < 0.0)
-   {
-        normal.y = -vsNormal.y; 
-   }
-   else{ normal.y = vsNormal.y;
-   }
-
-   if(vsNormal.z < 0.0)
-   {
-        normal.z = -vsNormal.z; 
-   }
-   else{ normal.z = vsNormal.z;
-   }
-    fsColour = vec4(normal, 1.0f);
+    fsColour = vec4(abs(vsNormal), 1.0f);
 }
