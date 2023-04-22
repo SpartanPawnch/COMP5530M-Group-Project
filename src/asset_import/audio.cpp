@@ -111,7 +111,7 @@ namespace audio {
 
     AudioDescriptor::~AudioDescriptor() {
         // skip if bulk clear has been performed
-        if (loadedClips.size() == 0)
+        if (loadedClips.size() <= idx)
             return;
 
         // stop clip being deleted

@@ -62,7 +62,7 @@ static std::string activePath;
 static std::thread projectThread;
 
 // texture demo vars
-static int activeTexture = -1;
+static std::shared_ptr<TextureDescriptor> activeTexture;
 
 // audio demo vars
 static int audioClip = -1;
@@ -77,8 +77,8 @@ static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
 
 // ui textures
-static int fileTexture;
-static int folderTexture;
+static std::shared_ptr<TextureDescriptor> fileTexture;
+static std::shared_ptr<TextureDescriptor> folderTexture;
 
 // model demo vars
 static Model model;
@@ -489,13 +489,15 @@ inline void drawTextureDebug() {
                 "Load Texture", NULL, sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
             if (!path.empty()) {
-                clearDynamicTextures();
                 activeTexture = loadTexture(path.c_str(), path.c_str());
             }
         }
-        if (activeTexture != -1) {
-            const TextureInfo& texInfo = getTexture(activeTexture);
-            ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+        ImGui::SameLine();
+        if (ImGui::Button("Clear")) {
+            activeTexture.reset();
+        }
+        if (activeTexture) {
+            ImGui::Image((void*)activeTexture->texId, ImVec2(400, 400));
         }
         ImGui::PopFont();
     }
@@ -579,12 +581,10 @@ inline void drawAssetBrowser() {
                 ImGui::BeginGroup();
                 // icon
                 if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                    const TextureInfo& texInfo = getTexture(folderTexture);
-                    ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    ImGui::Image((void*)folderTexture->texId, guicfg::assetMgrIconSize);
                 }
                 else {
-                    const TextureInfo& texInfo = getTexture(fileTexture);
-                    ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    ImGui::Image((void*)fileTexture->texId, guicfg::assetMgrIconSize);
                 }
 
                 // filename
@@ -1231,6 +1231,7 @@ void drawStats() {
     if (ImGui::Begin("Statistics")) {
         ImGui::PushFont(guicfg::regularFont);
         ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+        ImGui::Text("TEXTURES %i loaded", getTextureCount());
         ImGui::PopFont();
     }
     ImGui::End();
@@ -1312,7 +1313,8 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawViewport();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawScriptDemo();
+    // drawScriptDemo();
+    drawTextureDebug();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawStyleEditor();
