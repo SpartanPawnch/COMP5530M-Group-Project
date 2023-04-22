@@ -10,5 +10,8 @@ Mesh::Mesh(std::vector<Vertex> v, std::vector<unsigned int> i, std::vector<Textu
     RenderManager::uploadMesh(&vertices, &indices, &VAO, &VBO, &EBO);
 }
 Mesh::~Mesh() {
+
+}
+void Mesh::deleteBuffers() {
     RenderManager::deleteMesh(&VAO, &VBO, &EBO);
 }

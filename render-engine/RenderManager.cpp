@@ -425,7 +425,6 @@ void RenderManager::run2DPipeline() {
 
 //adapted from https://learnopengl.com/Model-Loading/Mesh
 void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
-    std::cout << "upload" << std::endl;
     glGenVertexArrays(1, VAO);
     glGenBuffers(1, VBO);
     glGenBuffers(1, EBO);
@@ -453,8 +452,7 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
 }
 
 void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
-    //glDeleteVertexArrays(1, VAO);
-    //glDeleteBuffers(1, VBO);
-    //glDeleteBuffers(1, EBO);
-    std::cout << "delete" << std::endl;
+    glDeleteVertexArrays(1, VAO);
+    glDeleteBuffers(1, VBO);
+    glDeleteBuffers(1, EBO);
 }

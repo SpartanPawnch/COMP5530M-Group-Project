@@ -91,6 +91,8 @@ namespace model {
         if (loadedModels.size() == 0)
             return;
 
+        loadedModels[idx].model->deleteBuffers();
+
         // clear related index
         uuidToIdx.erase(loadedModels[idx].uuid);
 

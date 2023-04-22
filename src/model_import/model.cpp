@@ -18,6 +18,12 @@ bool Model::loadModel(const std::string& filename) {
     return true;
 }
 
+void Model::deleteBuffers() {
+    for (unsigned int i = 0; i < meshes.size(); ++i) {
+        meshes[i].deleteBuffers();
+    }
+}
+
 void Model::processNode(aiNode* node, const aiScene* scene) {
     for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];

@@ -19,6 +19,7 @@ public:
     std::string directory;
 
     bool loadModel(const std::string& path);
+    void deleteBuffers();
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
