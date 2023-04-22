@@ -81,12 +81,14 @@ void loadLevel(const char* path, Scene& scene) {
     }
 
     // load textures
+    std::vector<std::shared_ptr<TextureDescriptor>> texturePtrs;
     {
         assert(doc.HasMember("textures"));
         auto jsonTextures = doc["textures"].GetArray();
         for (unsigned int i = 0; i < jsonTextures.Size(); i++) {
-            // TODO init with fixed uuid
-            // loadTexture(jsonTextures[i]["path"].GetString());
+            texturePtrs.emplace_back(
+                loadTexture((projRoot + jsonTextures[i]["path"].GetString()).c_str(),
+                    jsonTextures[i]["uuid"].GetString()));
         }
     }
 

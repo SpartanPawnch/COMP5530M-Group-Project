@@ -19,7 +19,9 @@ enum Pipeline {
     ShadowPipeline = 2,
     BillboardPipeline = 3,
     WaterPipeline = 4,
-    Render2DPipeline = 5
+    Render2DPipeline = 5,
+    GridPipeline = 6,
+    Pipeline_MAX
 };
 
 class RenderManager {
@@ -57,6 +59,7 @@ class RenderManager {
     void runBillboardPipeline();
     void runWaterPipeline();
     void run2DPipeline();
+    void runGridPipeline();
 
   public:
     // members
@@ -99,6 +102,7 @@ class RenderManager {
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
+    void renderGrid(int width, int height);
 
     void updateMatrices(int* width, int* height);
 

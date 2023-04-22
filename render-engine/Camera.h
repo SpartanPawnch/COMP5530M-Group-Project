@@ -50,7 +50,7 @@ class Camera {
 
   public:
     bool focusState;
-    float fov = 45.0f;
+    float fov = 90.0f;
 
     Camera(glm::vec3 position, glm::vec3 direction);
 
@@ -61,6 +61,8 @@ class Camera {
     const glm::mat4 getViewMatrix();
 
     const glm::vec3 getPosition();
+
+    glm::vec3 getCenter();
 
     void resetPosition();
 

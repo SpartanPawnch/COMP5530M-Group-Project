@@ -33,6 +33,7 @@
 #include "asset_import/folders.h"
 #include "model_import/model.h"
 #include "ECS/Component/AudioSourceComponent.h"
+#include "ECS/Component/CameraComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
@@ -913,6 +914,64 @@ void drawComponentProps(AudioSourceComponent& component) {
     ImGui::Checkbox("Directional", &component.directional);
 }
 
+void drawComponentProps(CameraComponent& component) {
+    // cam properties
+    ImGui::InputFloat3("Eye", &component.eye[0]);
+    ImGui::InputFloat3("Center", &component.center[0]);
+    ImGui::InputFloat3("Up", &component.up[0]);
+    ImGui::InputFloat("FOV", &component.fov);
+
+    // active on start
+    bool isCamActive = component.uuid == CameraComponent::activeUuid;
+    if (ImGui::Checkbox("Default Active", &isCamActive))
+        CameraComponent::activeUuid = component.uuid;
+}
+
+void drawComponentContextMenu(int i, int& componentToDelete) {
+    if (ImGui::BeginPopupContextItem()) {
+        if (ImGui::MenuItem("Add Audio Source Component")) {
+            scene.selectedEntity->components.addComponent(AudioSourceComponent());
+        }
+        if (ImGui::MenuItem("Add Camera Component")) {
+            scene.selectedEntity->components.addComponent(CameraComponent());
+        }
+        if (ImGui::MenuItem("Add Script Component")) {
+        }
+        if (ImGui::MenuItem("Add Transform Component")) {
+            scene.selectedEntity->components.addComponent(TransformComponent());
+        }
+        if (ImGui::MenuItem("Delete Component")) {
+            componentToDelete = i;
+        }
+        ImGui::EndPopup();
+    }
+}
+
+template <typename T>
+
+void drawComponentList(std::vector<T>& components) {
+    int componentToDelete = -1;
+
+    // draw list
+    for (int i = 0; i < components.size(); i++) {
+        ImGui::PushID(i);
+        if (ImGui::TreeNodeEx(components[i].name.c_str(),
+                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
+            drawComponentContextMenu(i, componentToDelete);
+
+            drawComponentProps(components[i]);
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+
+    // handle deletion requests
+    if (componentToDelete >= 0) {
+        components.erase(components.begin() + componentToDelete);
+    }
+}
+
 inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
         ImGui::PushFont(guicfg::regularFont);
@@ -931,82 +990,16 @@ inline void drawProperties() {
             ImGui::Separator();
 
             // component lists
-
             // AudioSourceComponent
-            std::vector<AudioSourceComponent>& audioSrcComponents =
-                scene.selectedEntity->components.vecAudioSourceComponent;
-            int componentToDelete = -1;
-            for (unsigned int i = 0; i < audioSrcComponents.size(); i++) {
-                ImGui::PushID(i);
-                if (ImGui::TreeNodeEx(audioSrcComponents[i].name.c_str(),
-                        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                            ImGuiTreeNodeFlags_DefaultOpen)) {
-
-                    if (ImGui::BeginPopupContextItem()) {
-                        if (ImGui::MenuItem("Add Audio Source Component")) {
-                            scene.selectedEntity->components.addComponent(AudioSourceComponent());
-                        }
-                        if (ImGui::MenuItem("Add Script Component")) {
-                        }
-                        if (ImGui::MenuItem("Add Transform Component")) {
-                            scene.selectedEntity->components.addComponent(TransformComponent());
-                        }
-                        if (ImGui::MenuItem("Delete Component")) {
-                            componentToDelete = i;
-                        }
-                        ImGui::EndPopup();
-                    }
-
-                    drawComponentProps(audioSrcComponents[i]);
-                    ImGui::TreePop();
-                }
-                ImGui::PopID();
-            }
-
-            // handle delete requests
-            if (componentToDelete >= 0) {
-                audioSrcComponents.erase(audioSrcComponents.begin() + componentToDelete);
-            }
+            drawComponentList(scene.selectedEntity->components.vecAudioSourceComponent);
 
             // TransformComponent
-            std::vector<TransformComponent>& transformComponents =
-                scene.selectedEntity->components.vecTransformComponent;
-            componentToDelete = -1;
-            for (unsigned int i = 0; i < transformComponents.size(); i++) {
-                ImGui::PushID(i);
-                if (ImGui::TreeNodeEx(transformComponents[i].name.c_str(),
-                        ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
-                            ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
+            drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
-                    if (ImGui::BeginPopupContextItem()) {
-                        if (ImGui::MenuItem("Add Audio Source Component")) {
-                            scene.selectedEntity->components.addComponent(AudioSourceComponent());
-                        }
-                        if (ImGui::MenuItem("Add Script Component")) {
-                        }
-                        if (ImGui::MenuItem("Add Transform Component")) {
-                            scene.selectedEntity->components.addComponent(TransformComponent());
-                        }
-                        if (ImGui::MenuItem("Delete Component")) {
-                            componentToDelete = i;
-                        }
-                        ImGui::EndPopup();
-                    }
-                    drawComponentProps(transformComponents[i]);
+            // CameraComponent
+            drawComponentList(scene.selectedEntity->components.vecCameraComponent);
 
-                    ImGui::TreePop();
-                }
-                ImGui::PopID();
-            }
-
-            // handle delete requests
-            if (componentToDelete >= 0) {
-                transformComponents.erase(transformComponents.begin() + componentToDelete);
-            }
-
-            // Other Component Types...
-
-            // Context Menu
+            // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();
             ImVec2 buttonSize = ImGui::GetWindowSize();
             float borderSize = ImGui::GetStyle().WindowBorderSize;
@@ -1018,6 +1011,9 @@ inline void drawProperties() {
             if (ImGui::BeginPopupContextItem()) {
                 if (ImGui::MenuItem("Add Audio Source Component")) {
                     scene.selectedEntity->components.addComponent(AudioSourceComponent());
+                }
+                if (ImGui::MenuItem("Add Camera Component")) {
+                    scene.selectedEntity->components.addComponent(CameraComponent());
                 }
                 if (ImGui::MenuItem("Add Script Component")) {
                 }

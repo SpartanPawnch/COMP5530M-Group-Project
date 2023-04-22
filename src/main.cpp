@@ -144,11 +144,16 @@ int main() {
         GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
         glDrawBuffers(2, attachments);
 
+        // clear screen
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // draw grid
+        renderManager->renderGrid(viewportTexWidth, viewportTexHeight);
+
         // draw scene
         renderManager->renderEntities(
             scene, renderManager->camera, viewportTexWidth, viewportTexHeight);
-        // renderSceneRefactor(
-        // renderManager->camera, viewportTexWidth, viewportTexHeight);
 
         glFlush();
 

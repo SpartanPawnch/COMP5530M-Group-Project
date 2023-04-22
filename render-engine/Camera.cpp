@@ -45,6 +45,10 @@ const glm::vec3 Camera::getPosition() {
     return this->position;
 }
 
+glm::vec3 Camera::getCenter() {
+    return (position + front);
+}
+
 void Camera::resetPosition() {
     this->position = this->initialPosition;
 }

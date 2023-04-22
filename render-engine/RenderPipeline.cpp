@@ -27,7 +27,7 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
         std::cout << " ERROR::SHADER:: " << shaderPath << " ::FILE_NOT_SUCCESSFULLY_READ"
                   << std::endl;
     }
-    std::cout << shaderCode.c_str() << std::endl;
+    // std::cout << shaderCode.c_str() << std::endl;
 
     char const* sCode = shaderCode.c_str();
     glShaderSource(id, 1, &sCode, NULL);

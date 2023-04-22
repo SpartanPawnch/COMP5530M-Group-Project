@@ -15,9 +15,11 @@ RenderManager* RenderManager::getInstance() {
 
 void RenderManager::startUp(GLFWwindow* aWindow) {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LINE_SMOOTH);
     glClearColor(0.2f, 0.2f, .2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glLineWidth(1.0f);
     glfwSwapBuffers(aWindow);
     glfwPollEvents();
 
@@ -32,11 +34,11 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->yOffset = 0.0f;
 
     // Initialise the camera
-    this->camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f, 0.f, 0.f));
+    this->camera = new Camera(glm::vec3(.0f, 2.f, 8.f), glm::vec3(.0f, -2.f, -8.f));
 
     this->modelMatrix = glm::mat4(1.0f);
     this->viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec3(0.0f, 3.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     this->projectionMatrix = glm::mat4(1.0f);
 }
 
@@ -55,8 +57,8 @@ void RenderManager::updateMatrices(int* width, int* height) {
     // this->viewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
     // glm::vec3(0.0f, 1.0f, 0.0f));
     this->viewMatrix = camera->getViewMatrix();
-    this->projectionMatrix =
-        glm::perspective(camera->fov, (float)*width / (float)*height, 0.01f, 100.0f);
+    this->projectionMatrix = glm::perspective(
+        glm::radians(camera->fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
 void RenderManager::loadScene() {
@@ -83,6 +85,8 @@ void RenderManager::loadScene() {
     // TODO: change path
     const char* colorVertexPath = "assets/shaders/colours.vert";
     const char* colorFragPath = "assets/shaders/colours.frag";
+    const char* gridVertPath = "assets/shaders/grid.vert";
+    const char* gridFragPath = "assets/shaders/grid.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -94,6 +98,10 @@ void RenderManager::loadScene() {
 
     // create an element buffer object for the indices
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+
+    // TODO: Decide whether we are doing fixed number of pipelines or an
+    // arbitrary number. This is incredibly inconvenient and hard to maintain.
+    addPipeline(gridVertPath, gridFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -113,7 +121,7 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     glViewport(0, 0, width, height);
 
     // draw background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // RENDERING
@@ -127,7 +135,7 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
     updateMatrices(&width, &height);
 
     // draw background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // RENDERING
@@ -139,10 +147,6 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
     updateMatrices(&width, &height);
 
-    // draw background
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
@@ -150,6 +154,11 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         modelMatrix = scene.entities[i].runtimeTransform;
         runPipeline(ColorPipeline);
     }
+}
+void RenderManager::renderGrid(int width, int height) {
+    updateMatrices(&width, &height);
+
+    runGridPipeline();
 }
 
 void RenderManager::runPipeline(Pipeline pipeline) {
@@ -172,6 +181,7 @@ void RenderManager::runPipeline(Pipeline pipeline) {
     case Render2DPipeline:
         run2DPipeline();
         break;
+    default:;
     }
 }
 
@@ -191,7 +201,6 @@ void RenderManager::runColorPipeline() {
     //// Render the cube
     glBindVertexArray(getPipeline(ColorPipeline)->getVAO());
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0); // TODO: Does this go here?
 }
 
 void RenderManager::runTexturePipeline() {
@@ -205,4 +214,30 @@ void RenderManager::runBillboardPipeline() {
 void RenderManager::runWaterPipeline() {
 }
 void RenderManager::run2DPipeline() {
+}
+void RenderManager::runGridPipeline() {
+    // TODO more maintainable way to get pipeline
+    RenderPipeline pipeline = pipelines[1];
+    glUseProgram(pipeline.getProgram());
+
+    const int GRIDSIZE = 60;
+
+    // get uniform ids
+    GLuint gridSizeID = glGetUniformLocation(pipeline.getProgram(), "size");
+    GLuint offsetID = glGetUniformLocation(pipeline.getProgram(), "offset");
+    GLuint ViewID = glGetUniformLocation(pipeline.getProgram(), "view");
+    GLuint ProjectionID = glGetUniformLocation(pipeline.getProgram(), "projection");
+
+    // upload uniforms
+    glm::vec3 camCenter = camera->getCenter();
+    glm::vec3 offset;
+    glm::modf(camCenter, offset);
+    glUniform1i(gridSizeID, GRIDSIZE);
+    glUniform2f(offsetID, offset.x, offset.z);
+    glUniformMatrix4fv(ViewID, 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
+
+    // Render the grid
+    glBindVertexArray(pipeline.getVAO());
+    glDrawArrays(GL_LINES, 0, 4 * GRIDSIZE + 4);
 }

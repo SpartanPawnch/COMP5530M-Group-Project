@@ -7,43 +7,31 @@
 
 #include <GL/glew.h>
 
+class RenderPipeline {
 
-class RenderPipeline
-{
+  private:
+    GLuint shaderProgram;
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    GLuint computeShader;
+    GLuint tescShader;
+    GLuint teseShader;
+    GLuint geometryShader;
 
-private:
-	GLuint shaderProgram;
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint computeShader;
-	GLuint tescShader;
-	GLuint teseShader;
-	GLuint geometryShader;
+    GLuint VAO;
+    bool readAndCompileShader(const char* shaderPath, const GLuint& id);
+    void createProgram(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
+        const char* computePath, const char* tessControlPath, const char* tessEvalPath);
 
-	GLuint VAO;
-	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
-	void createProgram(const char* vertexPath,
-		const char* fragmentPath,
-		const char* geometryPath,
-		const char* computePath,
-		const char* tessControlPath,
-		const char* tessEvalPath);
+  public:
+    RenderPipeline(const char* vertexPath, const char* fragmentPath,
+        const char* geometryPath = nullptr, const char* computePath = nullptr,
+        const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
-public:
+    GLuint getProgram();
+    GLuint getVAO();
 
-	RenderPipeline(const char* vertexPath,
-		const char* fragmentPath,
-		const char* geometryPath = nullptr,
-		const char* computePath = nullptr,
-		const char* tessControlPath = nullptr,
-		const char* tessEvalPath = nullptr);
+    ~RenderPipeline();
 
-	GLuint getProgram();
-	GLuint getVAO();
-
-	~RenderPipeline();
-
-	void setAttributeLayouts();
-	
-
+    void setAttributeLayouts();
 };
