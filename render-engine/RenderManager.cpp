@@ -24,6 +24,8 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     glfwPollEvents();
 
     this->pipelines.clear();
+    this->pipelines.resize(Pipeline_MAX);
+    this->lights.clear();
     this->deltaTime = 0.0f;
     this->xPos = 0.0f;
     this->yPos = 0.0f;
@@ -42,13 +44,17 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->projectionMatrix = glm::mat4(1.0f);
 }
 
-void RenderManager::addPipeline(const char* vertexPath, const char* fragmentPath,
+void RenderManager::shutDown() {
+    this->pipelines.clear();
+}
+
+void RenderManager::addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
     const char* geometryPath, const char* computePath, const char* tessControlPath,
     const char* tessEvalPath) {
     RenderPipeline newPipeline = RenderPipeline(
         vertexPath, fragmentPath, geometryPath, computePath, tessControlPath, tessEvalPath);
 
-    this->pipelines.push_back(newPipeline);
+    this->pipelines[pipe] = newPipeline;
 }
 
 void RenderManager::updateMatrices(int* width, int* height) {
@@ -61,24 +67,287 @@ void RenderManager::updateMatrices(int* width, int* height) {
         glm::radians(camera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
+void RenderManager::addMeshToPipeline(
+    std::vector<Pipeline> pipeline, VertexBuffer vBuffer, IndexBuffer iBuffer, GLuint VAO) {
+
+    for (unsigned int i = 0; i < pipeline.size(); i++) {
+        if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end()) {
+            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{Buffer(vBuffer, iBuffer)};
+        }
+        else {
+            PipelineMeshBufferMap[pipeline[i]].push_back(Buffer(vBuffer, iBuffer));
+        }
+
+        pipelines[pipeline[i]].addVAO(VAO);
+    }
+}
+
 void RenderManager::loadScene() {
 
-    // TODO: Remove this later and get these values from load-model
-    //  Define the cube's vertices positions and colors separately
-    GLfloat cubePositions[] = {-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f};
+    // Load entity models
+    Model model;
+    model.loadModel("assets/tree.obj");
 
-    GLfloat cubeColors[] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    // Define the cube's vertex indices
+    GLfloat cubeVertices[] = {
+        // Front face
+        // Position                 // Normal               // Color
+        -1.0f,
+        -1.0f,
+        5.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        5.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        5.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        5.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        // Back face
+        // Position                 // Normal               // Color
+        -1.0f,
+        -1.0f,
+        -5.0f,
+        0.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        -5.0f,
+        0.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -5.0f,
+        0.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        -5.0f,
+        0.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        // Left face
+        // Position                 // Normal               // Color
+        -1.0f,
+        -1.0f,
+        -5.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        -1.0f,
+        5.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        5.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        -5.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        // Right face
+        // Position                 // Normal               // Color
+        1.0f,
+        -1.0f,
+        -5.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        5.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        5.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -5.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        // Top face
+        // Position                 // Normal               // Color
+        -1.0f,
+        1.0f,
+        5.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        5.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -5.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        -5.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        // Bottom face
+        // Position                 // Normal               // Color
+        -1.0f,
+        -1.0f,
+        5.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        5.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        -5.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        -1.0f,
+        -5.0f,
+        0.0f,
+        -1.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+    };
     GLuint cubeIndices[] = {
         0, 1, 2, 2, 3, 0, // Front face
-        1, 5, 6, 6, 2, 1, // Right face
-        4, 0, 3, 3, 7, 4, // Left face
-        5, 4, 7, 7, 6, 5, // Back face
-        3, 2, 6, 6, 7, 3, // Top face
-        4, 5, 1, 1, 0, 4 // Bottom face
+        4, 5, 6, 6, 7, 4, // Back face
+        8, 9, 10, 10, 11, 8, // Left face
+        12, 13, 14, 14, 15, 12, // Right face
+        16, 17, 18, 18, 19, 16, // Top face
+        20, 21, 22, 22, 23, 20 // Bottom face
     };
+
+    std::vector<float> allVertices;
+    std::vector<unsigned int> allIndices;
+    allVertices.clear();
+    allIndices.clear();
+    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++) {
+        allVertices.push_back(model.meshes[0].vertices[i].position.x);
+        allVertices.push_back(model.meshes[0].vertices[i].position.y);
+        allVertices.push_back(model.meshes[0].vertices[i].position.z);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.x);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.y);
+        allVertices.push_back(model.meshes[0].vertices[i].normal.z);
+        allVertices.push_back(model.meshes[0].vertices[i].texCoords.x);
+        allVertices.push_back(model.meshes[0].vertices[i].texCoords.y);
+    }
+    for (std::size_t i = 0; i < model.meshes[0].indices.size(); i++) {
+        allIndices.push_back(model.meshes[0].indices[i]);
+    }
+
+    // ADD LIGHT SOURCES
+
+    this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
     const char* colorVertexPath = "assets/shaders/colours.vert";
@@ -86,24 +355,44 @@ void RenderManager::loadScene() {
     const char* gridVertPath = "assets/shaders/grid.vert";
     const char* gridFragPath = "assets/shaders/grid.frag";
     const char* frustumVisVertPath = "assets/shaders/frustum.vert";
+    const char* texVertexPath = "assets/shaders/tex.vert";
+    const char* texFragPath = "assets/shaders/tex.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
-    addPipeline(colorVertexPath, colorFragPath); // ColorPipeline - 0
+    addPipeline(ColourPipeline, colorVertexPath, colorFragPath); // ColorPipeline - 0
+    // Vertex Array Object
+    GLuint VAO1;
+    glGenVertexArrays(1, &VAO1);
+    glBindVertexArray(VAO1);
 
-    // create vertex buffer object(VBO)
-    VertexBuffer posVBO(sizeof(cubePositions), cubePositions, PositionsBuffer);
-    VertexBuffer colVBO(sizeof(cubeColors), cubeColors, ColorsBuffer);
-
-    // create an element buffer object for the indices
+    VertexBuffer cubeBuffer(sizeof(cubeVertices), cubeVertices, ColoredObjectBuffer);
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
+    addMeshToPipeline(std::vector<Pipeline>{ColourPipeline}, cubeBuffer, EBO, VAO1);
 
-    // TODO: Decide whether we are doing fixed number of pipelines or an
-    // arbitrary number. This is incredibly inconvenient and hard to maintain.
-    // skip unimplemented stuff
-    pipelines.resize(GridPipeline);
-    addPipeline(gridVertPath, gridFragPath);
-    addPipeline(frustumVisVertPath, gridFragPath);
+    addPipeline(TexturePipeline, texVertexPath, texFragPath);
+    // std::cout << "we have " << model.meshes.size() << " meshes in model\n";
+    // for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
+    //{
+    //     std::cout << model.meshes[0].vertices[i].position.x << " "
+    //         << model.meshes[0].vertices[i].position.y << " "
+    //         << model.meshes[0].vertices[i].position.z << std::endl;
+    // }
+    // std::cout << "We have " << model.meshes[0].indices.size() << " indices and " <<
+    // model.meshes[0].indices.size() / 3 << "triangles";
+    GLuint VAO2;
+    glGenVertexArrays(1, &VAO2);
+    glBindVertexArray(VAO2);
+
+    VertexBuffer vBuffer(model.meshes[0].vertices.size() * sizeof(Vertex),
+        &model.meshes[0].vertices[0], TexturedObjectBuffer);
+    IndexBuffer ebo(
+        model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
+    addMeshToPipeline(std::vector<Pipeline>{TexturePipeline}, vBuffer, ebo, VAO2);
+
+    // add vis pipelines
+    addPipeline(GridPipeline, gridVertPath, gridFragPath);
+    addPipeline(FrustumVisPipeline, frustumVisVertPath, gridFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -125,11 +414,12 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     // draw background
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glShadeModel(GL_FLAT);
 
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
-    runPipeline(ColorPipeline);
+    runPipeline(ColourPipeline);
 }
 
 void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
@@ -137,24 +427,74 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
     updateMatrices(&width, &height);
 
     // draw background
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // RENDERING
     // Go through all the Pipelines
-    // TODO: Check if it is necessary to use the given pipeline and the call the following fn
-    runPipeline(ColorPipeline);
+    // TODO: Also check if the pipeline has models
+    if (this->pipelines[ColourPipeline].initialised == true) {
+        runPipeline(ColourPipeline);
+    }
+    if (this->pipelines[TexturePipeline].initialised == true) {
+        runPipeline(TexturePipeline);
+    }
+    /*   if (this->pipelines[ShadowPipeline].initialised == true)
+       {
+           runPipeline(ShadowPipeline);
+       }
+       if (this->pipelines[BillboardPipeline].initialised == true)
+       {
+           runPipeline(BillboardPipeline);
+       }
+       if (this->pipelines[WaterPipeline].initialised == true)
+       {
+           runPipeline(WaterPipeline);
+       }
+       if (this->pipelines[Render2DPipeline].initialised == true)
+       {
+           runPipeline(Render2DPipeline);
+       }*/
 }
 
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
     updateMatrices(&width, &height);
+
+    // draw background
+    // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         modelMatrix = scene.entities[i].runtimeTransform;
-        runPipeline(ColorPipeline);
+
+        // bind model matrix
+        glUniformMatrix4fv(
+            getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
+            lights[0].getPosition().y, lights[0].getPosition().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
+            lights[0].getColour().y, lights[0].getColour().z);
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
+            auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
+        glBindVertexArray(0);
     }
 }
 void RenderManager::renderGrid(int width, int height) {
@@ -180,8 +520,8 @@ void RenderManager::renderCamPreview(const Scene& scene, int width, int height) 
 
 void RenderManager::runPipeline(Pipeline pipeline) {
     switch (pipeline) {
-    case ColorPipeline:
-        runColorPipeline();
+    case ColourPipeline:
+        runColourPipeline();
         break;
     case TexturePipeline:
         runTexturePipeline();
@@ -202,25 +542,68 @@ void RenderManager::runPipeline(Pipeline pipeline) {
     }
 }
 
-void RenderManager::runColorPipeline() {
-    glUseProgram(getPipeline(ColorPipeline)->getProgram());
+void RenderManager::setupColourPipelineUniforms() {
+    getPipeline(ColourPipeline)->setUniformLocations();
+}
 
-    ////handle for uniforms
-    GLuint ModelID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "model");
-    GLuint ViewID = glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "view");
-    GLuint ProjectionID =
-        glGetUniformLocation(getPipeline(ColorPipeline)->getProgram(), "projection");
+void RenderManager::runColourPipeline() {
+    glUseProgram(getPipeline(ColourPipeline)->getProgram());
 
-    glUniformMatrix4fv(ModelID, 1, GL_FALSE, &modelMatrix[0][0]);
-    glUniformMatrix4fv(ViewID, 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
+    // sending uniform data
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(
+        getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniform3f(getPipeline(ColourPipeline)->getLightPosID(), lights[0].getPosition().x,
+        lights[0].getPosition().y, lights[0].getPosition().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightColID(), lights[0].getColour().x,
+        lights[0].getColour().y, lights[0].getColour().z);
 
     //// Render the cube
-    glBindVertexArray(getPipeline(ColorPipeline)->getVAO());
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    for (unsigned int i = 0; i < getPipeline(ColourPipeline)->getNoOfMeshes(); i++) {
+        glBindVertexArray(getPipeline(ColourPipeline)->getVAO(i));
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); // TODO:: Change 36 to dynamic
+    }
+
+    glBindVertexArray(0);
+}
+
+void RenderManager::setupTexturePipelineUniforms() {
+    getPipeline(TexturePipeline)->setUniformLocations();
 }
 
 void RenderManager::runTexturePipeline() {
+    glUseProgram(getPipeline(TexturePipeline)->getProgram());
+
+    // sending uniform data
+    glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(
+        getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
+        lights[0].getPosition().y, lights[0].getPosition().z);
+    glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
+        lights[0].getColour().y, lights[0].getColour().z);
+
+    //// Render the cube
+    for (unsigned int i = 0; i < getPipeline(TexturePipeline)->getNoOfMeshes(); i++) {
+        glBindVertexArray(getPipeline(TexturePipeline)->getVAO(i));
+        glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0); // TODO:: Change 36 to dynamic
+    }
+
+    glBindVertexArray(0);
+}
+
+void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour) {
+    lights.emplace_back(position, colour);
+}
+
+RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {
+    return &this->pipelines[pipe];
+}
+
+LightSource* RenderManager::getLightSource(std::size_t index) {
+    return &this->lights[index];
 }
 
 void RenderManager::runShadowPipeline() {
@@ -255,7 +638,7 @@ void RenderManager::runGridPipeline() {
     glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
 
     // Render the grid
-    glBindVertexArray(pipeline.getVAO());
+    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
     glDrawArrays(GL_LINES, 0, 4 * GRIDSIZE + 4);
 }
 void RenderManager::runFrustumVisPipeline() {
@@ -273,6 +656,42 @@ void RenderManager::runFrustumVisPipeline() {
     glUniformMatrix4fv(previewInverseID, 1, GL_FALSE, &previewInverse[0][0]);
 
     // Render the grid
-    glBindVertexArray(pipeline.getVAO());
+    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
     glDrawArrays(GL_LINES, 0, 16);
+}
+// adapted from https://learnopengl.com/Model-Loading/Mesh
+void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i,
+    unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, VBO);
+    glGenBuffers(1, EBO);
+
+    glBindVertexArray(*VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, (*v).size() * sizeof(Vertex), &(*v)[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER, (*i).size() * sizeof(unsigned int), &(*i)[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+
+    glBindVertexArray(0);
+}
+
+void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
+    glDeleteVertexArrays(1, VAO);
+    glDeleteBuffers(1, VBO);
+    glDeleteBuffers(1, EBO);
 }

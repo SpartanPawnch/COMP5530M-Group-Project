@@ -1,14 +1,18 @@
 #include "RenderPipeline.h"
 
+RenderPipeline::RenderPipeline() {
+}
+
 RenderPipeline::RenderPipeline(const char* vertexPath, const char* fragmentPath,
     const char* geometryPath, const char* computePath, const char* tessControlPath,
     const char* tessEvalPath) {
     RenderPipeline::createProgram(
         vertexPath, fragmentPath, geometryPath, computePath, tessControlPath, tessEvalPath);
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    this->initialised = true;
+    VAOs = {};
 }
+
 // adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
 bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id) {
     std::string shaderCode;
@@ -27,7 +31,6 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
         std::cout << " ERROR::SHADER:: " << shaderPath << " ::FILE_NOT_SUCCESSFULLY_READ"
                   << std::endl;
     }
-    // std::cout << shaderCode.c_str() << std::endl;
 
     char const* sCode = shaderCode.c_str();
     glShaderSource(id, 1, &sCode, NULL);
@@ -62,12 +65,6 @@ void RenderPipeline::createProgram(const char* vertexPath, const char* fragmentP
     this->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     readAndCompileShader(fragmentPath, this->fragmentShader);
 
-    // Optional shaders
-    this->tescShader = 0;
-    this->teseShader = 0;
-    this->geometryShader = 0;
-    this->computeShader = 0;
-
     // if tesselation shaders are used
     if (tessControlPath && tessEvalPath) {
         this->tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
@@ -99,13 +96,10 @@ void RenderPipeline::createProgram(const char* vertexPath, const char* fragmentP
     glLinkProgram(shaderProgram);
 
     // Delete shaders
+    glDetachShader(shaderProgram, vertexShader);
+    glDetachShader(shaderProgram, fragmentShader);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    if (tescShader != 0 && teseShader != 0) {
-        glDeleteShader(tescShader);
-        glDeleteShader(teseShader);
-    }
 
     if (geometryShader != 0) {
         glDeleteShader(geometryShader);
@@ -127,7 +121,36 @@ RenderPipeline::~RenderPipeline() {
 GLuint RenderPipeline::getProgram() {
     return this->shaderProgram;
 }
+GLuint RenderPipeline::getVAO(unsigned int index) {
+    return this->VAOs[index];
+}
+unsigned int RenderPipeline::getNoOfMeshes() {
+    return this->VAOs.size();
+}
+GLuint RenderPipeline::getModelID() {
+    return this->ModelID;
+}
+GLuint RenderPipeline::getViewID() {
+    return this->ViewID;
+}
+GLuint RenderPipeline::getProjectionID() {
+    return this->ProjectionID;
+}
+GLuint RenderPipeline::getLightPosID() {
+    return this->lightPosID;
+}
+GLuint RenderPipeline::getLightColID() {
+    return this->lightColID;
+}
 
-GLuint RenderPipeline::getVAO() {
-    return this->VAO;
+void RenderPipeline::setUniformLocations() {
+    this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
+    this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
+    this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
+    this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
+    this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+}
+
+void RenderPipeline::addVAO(GLuint VAO) {
+    VAOs.push_back(VAO);
 }

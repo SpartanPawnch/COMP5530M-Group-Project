@@ -3,18 +3,21 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include<unordered_map>
 
 #include "RenderPipeline.h"
 #include "Camera.h"
 #include "Buffer.h"
 #include "../src/ECS/Scene/Scene.h"
+#include "LightSource.h"
+#include "../src/model_import/model.h"
 
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
 
 enum Pipeline {
-    ColorPipeline = 0,
+    ColourPipeline = 0,
     TexturePipeline = 1,
     ShadowPipeline = 2,
     BillboardPipeline = 3,
@@ -23,6 +26,18 @@ enum Pipeline {
     GridPipeline = 6,
     FrustumVisPipeline = 7,
     Pipeline_MAX
+};
+
+struct Buffer
+{
+    VertexBuffer vBuffer;
+    IndexBuffer iBuffer;
+
+    Buffer(VertexBuffer v, IndexBuffer i)
+    {
+        vBuffer = v;
+        iBuffer = i;
+    }
 };
 
 class RenderManager {
@@ -37,6 +52,10 @@ class RenderManager {
     // Available Render Pipelines
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
+    std::unordered_map<Pipeline, std::vector<Buffer>> PipelineMeshBufferMap;
+    // 
+    //Light Sources
+    std::vector<LightSource> lights;
 
     // considering windows
     // std::vector <GLFWwindow*> windows;
@@ -54,7 +73,8 @@ class RenderManager {
     }
 
     ///
-    void runColorPipeline();
+
+    void runColourPipeline();
     void runTexturePipeline();
     void runShadowPipeline();
     void runBillboardPipeline();
@@ -65,7 +85,6 @@ class RenderManager {
 
   public:
     // members
-    // std::vector<RenderPipeline> programs;
     // TODO
     Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
     Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
@@ -88,17 +107,21 @@ class RenderManager {
 
     void startUp(GLFWwindow* aWindow);
 
+    void shutDown();
+
     void addCamera();
 
+    void addLightSource(glm::vec3& position, glm::vec3& colour);
+
     // TODO: Should probably be called in the Constructor - Now in loadScene()
-    void addPipeline(const char* vertexPath, const char* fragmentPath,
+    void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
         const char* geometryPath = nullptr, const char* computePath = nullptr,
         const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
     // void AddWindow(int width, int height, const char* windowTitle);
 
     // To create the Pipeline-Entity Map
-    void addEntityToPipeline();
+    void addMeshToPipeline(std::vector<Pipeline>, VertexBuffer, IndexBuffer, GLuint VAO);
 
     // Load Models, Cameras, Lights, Shaders etc to RenderEngine
     void loadScene();
@@ -110,11 +133,14 @@ class RenderManager {
 
     void updateMatrices(int* width, int* height);
 
-    void shutDown();
+    RenderPipeline* getPipeline(Pipeline pipe);
 
-    RenderPipeline* getPipeline(std::size_t index) {
-        return &this->pipelines[index];
-    }
+    LightSource* getLightSource(std::size_t index);
 
+    void setupColourPipelineUniforms();
+    void setupTexturePipelineUniforms();
     void runPipeline(Pipeline pipeline);
+
+    static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
+    static void deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
 };

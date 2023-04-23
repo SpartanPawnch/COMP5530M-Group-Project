@@ -24,6 +24,7 @@
 #include "ECS/Component/BaseComponent.h"
 #include "ECS/Component/TransformComponent.h"
 #include "ECS/Component/AudioSourceComponent.h"
+#include "ECS/Component/ModelComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -93,9 +94,15 @@ void loadLevel(const char* path, Scene& scene) {
     }
 
     // TODO - load models
+    std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
         assert(doc.HasMember("models"));
         auto jsonModels = doc["models"].GetArray();
+        for (unsigned int i = 0; i < jsonModels.Size(); i++) {
+            modelPtrs.emplace_back(
+                model::modelLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
+                    jsonModels[i]["uuid"].GetString()));
+        }
     }
 
     // TODO load scripts
@@ -190,6 +197,15 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(cam);
                 }
 
+                // ModelComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
+                    ModelComponent model;
+                    model.uuid = jsonComponent["uuid"].GetInt();
+                    model.name = std::string(jsonComponent["name"].GetString());
+                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
+                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
+                    baseEntity.components.addComponent(model);
+                }
                 // BaseComponent
                 else {
                     BaseComponent base;
@@ -333,6 +349,25 @@ static void saveComponent(
     writer.EndObject();
 }
 
+static void saveComponent(
+    const ModelComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("ModelComponent");
+
+    writer.Key("modelUuid");
+    writer.String(component.modelUuid.c_str());
+
+    writer.EndObject();
+}
+
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene) {
     // open document for writing
@@ -429,6 +464,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 saveComponent(cameraComponents[j], writer);
             }
 
+            // ModelComponent
+            const std::vector<ModelComponent>& modelComponents =
+                scene.entities[i].components.vecModelComponent;
+            for (unsigned int j = 0; j < modelComponents.size(); j++) {
+                saveComponent(modelComponents[j], writer);
+            }
+
             // BaseComponent
             const std::vector<BaseComponent>& baseComponents =
                 scene.entities[i].components.vecBaseComponent;
@@ -468,6 +510,21 @@ void saveLevel(const char* path, const Scene& scene) {
     {
         writer.Key("models");
         writer.StartArray();
+        std::vector<model::ModelDiskData> data;
+        model::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
+        }
+
         writer.EndArray();
     }
 

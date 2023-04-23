@@ -6,6 +6,7 @@ void ComponentStorage::startAll(){
     start<ScriptComponent>();
     start<CameraComponent>();
     start<AudioSourceComponent>();
+    start<ModelComponent>();
 }
 void ComponentStorage::updateAll(float dt){
     update<BaseComponent>(dt);
@@ -13,6 +14,7 @@ void ComponentStorage::updateAll(float dt){
     update<ScriptComponent>(dt);
     update<CameraComponent>(dt);
     update<AudioSourceComponent>(dt);
+    update<ModelComponent>(dt);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
@@ -20,4 +22,5 @@ void ComponentStorage::clearAll(){
     vecScriptComponent.clear();
     vecCameraComponent.clear();
     vecAudioSourceComponent.clear();
+    vecModelComponent.clear();
 }

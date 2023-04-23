@@ -34,6 +34,7 @@
 #include "model_import/model.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/CameraComponent.h"
+#include "ECS/Component/ModelComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
@@ -82,7 +83,7 @@ static std::shared_ptr<TextureDescriptor> fileTexture;
 static std::shared_ptr<TextureDescriptor> folderTexture;
 
 // model demo vars
-static Model model;
+// static Model model;
 
 // renderer vars
 static RenderManager* renderManager;
@@ -446,24 +447,25 @@ inline float drawMainMenu(const char* executablePath) {
     return barHeight;
 }
 
-inline void drawModelDemo() {
-    if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::PushFont(guicfg::regularFont);
-        ImGui::Text("Model Loading Demo");
-        if (ImGui::Button("Load Model")) {
-            std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL, NULL);
-            // wait for current op to finish
-            if (!path.empty()) {
-                model.loadModel(path);
-            }
-        }
-        ImGui::Text("Model Meshes: %llu", model.meshes.size());
-        ImGui::Text("Model Textures: %llu", model.textures_loaded.size());
-        ImGui::Text("From: %s", model.directory.c_str());
-        ImGui::PopFont();
-    }
-    ImGui::End();
-}
+// inline void drawModelDemo() {
+//     if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+//         ImGui::PushFont(guicfg::regularFont);
+//         ImGui::Text("Model Loading Demo");
+//         if (ImGui::Button("Load Model")) {
+//             std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL,
+//             NULL);
+//             // wait for current op to finish
+//             if (!path.empty()) {
+//                 model.loadModel(path);
+//             }
+//         }
+//         ImGui::Text("Model Meshes: %llu", model.meshes.size());
+//         ImGui::Text("Model Textures: %llu", model.textures_loaded.size());
+//         ImGui::Text("From: %s", model.directory.c_str());
+//         ImGui::PopFont();
+//     }
+//     ImGui::End();
+// }
 
 inline void drawLog() {
     if (ImGui::Begin("Log", NULL, NULL)) {
@@ -856,6 +858,43 @@ void drawComponentProps(TransformComponent& component) {
     ImGui::InputFloat3("Scale", &component.scale[0]);
 }
 
+void drawComponentProps(ModelComponent& component) {
+    std::string previewStr = "Select a Model";
+    if (component.modelDescriptor && component.modelDescriptor->path) {
+        previewStr = *component.modelDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewStr.c_str());
+    }
+
+    if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> modelFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < modelFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (previewStr == modelFiles[i].path);
+            if (ImGui::Selectable(modelFiles[i].name.c_str(), &isSelected)) {
+                // check if we need to load file
+                // TODO better unique id scheme
+                std::string uuid = assetfolder::getRelativePath(modelFiles[i].path.c_str());
+                auto desc = model::modelGetByUuid(uuid);
+
+                if (!desc) {
+                    // load file from disk
+                    desc = model::modelLoad(modelFiles[i].path.c_str(), uuid);
+                }
+
+                std::swap(component.modelDescriptor, desc);
+                component.modelUuid = component.modelDescriptor ? uuid : "";
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+}
+
 void drawComponentProps(AudioSourceComponent& component) {
     // clip selector
     std::string previewPath = "";
@@ -988,16 +1027,18 @@ inline void drawProperties() {
             ImGui::InputFloat3("Scale", &scene.selectedEntity->scale[0]);
 
             ImGui::Separator();
-
             // component lists
             // AudioSourceComponent
             drawComponentList(scene.selectedEntity->components.vecAudioSourceComponent);
 
-            // TransformComponent
-            drawComponentList(scene.selectedEntity->components.vecTransformComponent);
-
             // CameraComponent
             drawComponentList(scene.selectedEntity->components.vecCameraComponent);
+
+            // ModelComponent
+            drawComponentList(scene.selectedEntity->components.vecModelComponent);
+
+            // TransformComponent
+            drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
             // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();
@@ -1015,6 +1056,9 @@ inline void drawProperties() {
                 if (ImGui::MenuItem("Add Camera Component")) {
                     scene.selectedEntity->components.addComponent(CameraComponent());
                 }
+                if (ImGui::MenuItem("Add Model Component")) {
+                    scene.selectedEntity->components.addComponent(ModelComponent());
+                }
                 if (ImGui::MenuItem("Add Script Component")) {
                 }
                 if (ImGui::MenuItem("Add Transform Component")) {
@@ -1023,7 +1067,6 @@ inline void drawProperties() {
                 ImGui::EndPopup();
             }
         }
-
         ImGui::PopFont();
     }
     ImGui::End();

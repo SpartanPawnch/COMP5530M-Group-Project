@@ -164,6 +164,26 @@ namespace assetfolder {
         findAssetsByTypeInner(type, getAssetsRootDir(), res);
     }
 
+    static void findAssetsByTypeInner(AssetDescriptor::EFileType type, const AssetDescriptor& root,
+        std::vector<AssetDescriptor>& res) {
+        std::vector<AssetDescriptor> contents;
+        listDir(root, contents);
+        for (unsigned int i = 0; i < contents.size(); i++) {
+            // search recursively
+            if (contents[i].type == AssetDescriptor::EFileType::FOLDER)
+                findAssetsByTypeInner(type, contents[i], res);
+
+            // add relevant results
+            if (contents[i].type == type)
+                res.push_back(contents[i]);
+        }
+    }
+
+    void findAssetsByType(AssetDescriptor::EFileType type, std::vector<AssetDescriptor>& res) {
+        res.resize(0);
+        findAssetsByTypeInner(type, getAssetsRootDir(), res);
+    }
+
     AssetDescriptor outerDir(const AssetDescriptor& dir) {
         int i = dir.path.length() - 1;
         while (i > 0 && dir.path[i] != '/' && dir.path[i] != '\\')

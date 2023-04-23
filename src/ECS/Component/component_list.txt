@@ -3,3 +3,4 @@ TransformComponent
 ScriptComponent
 CameraComponent
 AudioSourceComponent
+ModelComponent

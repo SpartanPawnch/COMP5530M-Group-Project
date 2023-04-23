@@ -18,25 +18,42 @@ class RenderPipeline {
     GLuint teseShader;
     GLuint geometryShader;
 
+  public:
     GLuint VAO;
     bool readAndCompileShader(const char* shaderPath, const GLuint& id);
     void createProgram(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
         const char* computePath, const char* tessControlPath, const char* tessEvalPath);
 
-  public:
-    RenderPipeline() {
-        // invalidate everything, shouldn't be used with this constructor
-        VAO = 0;
-        shaderProgram = 0;
-    }
+    GLuint ModelID;
+    GLuint ViewID;
+    GLuint ProjectionID;
+    GLuint lightPosID;
+    GLuint lightColID;
+
+    std::vector<GLuint> VAOs;
+
+    bool initialised = false;
+
+    RenderPipeline();
+
     RenderPipeline(const char* vertexPath, const char* fragmentPath,
         const char* geometryPath = nullptr, const char* computePath = nullptr,
         const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
     GLuint getProgram();
-    GLuint getVAO();
+    GLuint getVAO(unsigned int index);
+    GLuint getModelID();
+    GLuint getViewID();
+    GLuint getProjectionID();
+    GLuint getLightPosID();
+    GLuint getLightColID();
 
     ~RenderPipeline();
 
     void setAttributeLayouts();
+
+    void setUniformLocations();
+
+    unsigned int getNoOfMeshes();
+    void addVAO(GLuint VAO);
 };

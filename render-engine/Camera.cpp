@@ -14,7 +14,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction) {
     this->viewMatrix = glm::mat4(1.f);
 
     this->defaultSpeed = 1.0f;
-    this->highSpeed = 3.0f;
+    this->highSpeed = 10.0f;
     this->lowSpeed = 0.3f;
     this->movementSpeed = this->defaultSpeed;
     this->sensitivity = 5.0f;
