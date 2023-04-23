@@ -273,5 +273,5 @@ void RenderManager::runFrustumVisPipeline() {
 
     // Render the grid
     glBindVertexArray(pipeline.getVAO());
-    glDrawArrays(GL_LINES, 0, 24);
+    glDrawArrays(GL_LINES, 0, 16);
 }

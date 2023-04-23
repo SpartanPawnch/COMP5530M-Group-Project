@@ -173,6 +173,23 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(audioSrc);
                 }
 
+                // CameraComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "CameraComponent") == 0) {
+                    CameraComponent cam;
+                    cam.uuid = jsonComponent["uuid"].GetInt();
+                    cam.name = std::string(jsonComponent["name"].GetString());
+                    cam.eye = glm::vec3(jsonComponent["eye"][0].GetFloat(),
+                        jsonComponent["eye"][1].GetFloat(), jsonComponent["eye"][2].GetFloat());
+                    cam.center = glm::vec3(jsonComponent["center"][0].GetFloat(),
+                        jsonComponent["center"][1].GetFloat(),
+                        jsonComponent["center"][2].GetFloat());
+                    cam.up = glm::vec3(jsonComponent["up"][0].GetFloat(),
+                        jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
+                    cam.fov = jsonComponent["fov"].GetFloat();
+
+                    baseEntity.components.addComponent(cam);
+                }
+
                 // BaseComponent
                 else {
                     BaseComponent base;
@@ -276,6 +293,46 @@ static void saveComponent(
     writer.EndObject();
 }
 
+static void saveComponent(
+    const CameraComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("CameraComponent");
+
+    writer.Key("eye");
+    writer.StartArray();
+    writer.Double(float(component.eye[0]));
+    writer.Double(float(component.eye[1]));
+    writer.Double(float(component.eye[2]));
+    writer.EndArray();
+
+    writer.Key("center");
+    writer.StartArray();
+    writer.Double(float(component.center[0]));
+    writer.Double(float(component.center[1]));
+    writer.Double(float(component.center[2]));
+    writer.EndArray();
+
+    writer.Key("up");
+    writer.StartArray();
+    writer.Double(float(component.up[0]));
+    writer.Double(float(component.up[1]));
+    writer.Double(float(component.up[2]));
+    writer.EndArray();
+
+    writer.Key("fov");
+    writer.Double(double(component.fov));
+
+    writer.EndObject();
+}
+
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene) {
     // open document for writing
@@ -363,6 +420,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecAudioSourceComponent;
             for (unsigned int j = 0; j < audioSrcComponents.size(); j++) {
                 saveComponent(audioSrcComponents[j], writer);
+            }
+
+            // CameraComponent
+            const std::vector<CameraComponent>& cameraComponents =
+                scene.entities[i].components.vecCameraComponent;
+            for (unsigned int j = 0; j < cameraComponents.size(); j++) {
+                saveComponent(cameraComponents[j], writer);
             }
 
             // BaseComponent
