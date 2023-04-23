@@ -105,15 +105,15 @@ TextureDescriptor::~TextureDescriptor() {
 
     glDeleteTextures(1, &loadedTextures[idx].texId);
 
-    // clear related index
-    uuidToIdx.erase(loadedTextures[idx].uuid);
-
     // update info for back
     uuidToIdx[loadedTextures.back().uuid] = idx;
     if (auto ref = loadedTextures.back().ref.lock()) {
         ref->idx = idx;
         ref->path = &loadedTextures[idx].path;
     }
+
+    // clear related index
+    uuidToIdx.erase(loadedTextures[idx].uuid);
 
     // move deleted clip to back
     std::swap(loadedTextures[idx], loadedTextures.back());

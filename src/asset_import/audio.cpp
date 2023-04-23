@@ -117,15 +117,15 @@ namespace audio {
         // stop clip being deleted
         loadedClips[idx].wav->stop();
 
-        // clear related index
-        uuidToIdx.erase(loadedClips[idx].uuid);
-
         // update info for back
         uuidToIdx[loadedClips.back().uuid] = idx;
         if (auto ref = loadedClips.back().ref.lock()) {
             ref->idx = idx;
             ref->path = &loadedClips[idx].path;
         }
+
+        // clear related index
+        uuidToIdx.erase(loadedClips[idx].uuid);
 
         // move deleted clip to back
         std::swap(loadedClips[idx], loadedClips.back());
@@ -140,8 +140,8 @@ namespace audio {
         // try to add new clip
         if (uuidToIdx.count(uuid) == 0) {
             // construct new info element
-            loadedClips.emplace_back(AudioInfo{uuid, std::string(path),
-                std::make_shared<SoLoud::Wav>(), std::weak_ptr<AudioDescriptor>()});
+            loadedClips.emplace_back(AudioInfo{ uuid, std::string(path),
+                std::make_shared<SoLoud::Wav>(), std::weak_ptr<AudioDescriptor>() });
 
             // try to load clip
             SoLoud::result res = loadedClips.back().wav->load(path);
