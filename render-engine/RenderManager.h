@@ -21,6 +21,7 @@ enum Pipeline {
     WaterPipeline = 4,
     Render2DPipeline = 5,
     GridPipeline = 6,
+    FrustumVisPipeline = 7,
     Pipeline_MAX
 };
 
@@ -60,13 +61,14 @@ class RenderManager {
     void runWaterPipeline();
     void run2DPipeline();
     void runGridPipeline();
+    void runFrustumVisPipeline();
 
   public:
     // members
     // std::vector<RenderPipeline> programs;
     // TODO
-    Camera* camera;
-    Camera* previewCamera;
+    Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
+    Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
     double deltaTime;
 
@@ -78,6 +80,7 @@ class RenderManager {
     // matrices
     glm::mat4 modelMatrix;
     glm::mat4 projectionMatrix;
+    glm::mat4 previewProjectionMatrix;
     glm::mat4 viewMatrix;
 
     // needs to be static to be invoked without object of class

@@ -117,7 +117,10 @@ void Camera::updateInput(
     this->updateKeyboardInput(deltaTime, direction);
     this->updateMouseInput(deltaTime, offsetX, offsetY);
 }
-void Camera::setDirect(const glm::mat4& _view, const float _fov) {
-    viewMatrix = _view;
+void Camera::setDirect(
+    const glm::vec3& _eye, const glm::vec3& _center, const glm::vec3& _up, const float _fov) {
+    position = _eye;
+    front = _center - _eye;
+    up = _up;
     fov = _fov;
 }

@@ -153,7 +153,7 @@ int main() {
 
         // draw scene
         renderManager->renderEntities(
-            scene, renderManager->camera, viewportTexWidth, viewportTexHeight);
+            scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
 
         glFlush();
 

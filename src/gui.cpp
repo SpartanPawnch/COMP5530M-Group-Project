@@ -248,39 +248,39 @@ void buildRunProj(const std::string& activePath, const char* executablePath) {
 static void handleKeyboardInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         // Move the camera forward
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 0);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         // Move the camera backward
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 1);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         // Strafe the camera left
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 2);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         // Strafe the camera right
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 3);
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         // Ascend camera
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 4);
     }
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         // Descend camera
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 5);
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
         // Reset camera position
-        renderManager->camera->resetPosition();
+        renderManager->camera.resetPosition();
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         // increase camera movement speed
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 6);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         // increase camera movement speed
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 7);
     }
 }
 
@@ -289,13 +289,13 @@ static void handleMouseInput(GLFWwindow* window) {
 
     // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-        if (renderManager->camera->focusState == false) {
+        if (renderManager->camera.focusState == false) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            renderManager->camera->focusState = true;
+            renderManager->camera.focusState = true;
         }
         else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            renderManager->camera->focusState = false;
+            renderManager->camera.focusState = false;
         }
 
         // if (renderManager->firstRClick  == true) {
@@ -305,7 +305,7 @@ static void handleMouseInput(GLFWwindow* window) {
         // }
     }
 
-    if (renderManager->camera->focusState == true) {
+    if (renderManager->camera.focusState == true) {
         // now we can change the orientation of the camera
 
         // offset
@@ -313,7 +313,7 @@ static void handleMouseInput(GLFWwindow* window) {
         renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
 
         // send data to camera
-        renderManager->camera->updateInput(
+        renderManager->camera.updateInput(
             renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
 
         renderManager->xPosLast = renderManager->xPos;
@@ -655,7 +655,7 @@ inline void drawViewport() {
     if (ImGui::Begin("Viewport")) {
         // send input to renderer if window is hovered
         if (ImGui::IsWindowHovered() || ImGui::IsWindowFocused() ||
-            renderManager->camera->focusState) {
+            renderManager->camera.focusState) {
             handleKeyboardInput(baseWindow);
             handleMouseInput(baseWindow);
         }

@@ -19,8 +19,8 @@ struct CameraComponent : BaseComponent {
 
     // TODO nicer camera editing mechanism
     //  editable state
-    glm::vec3 eye = glm::vec3(.0f, 1.0f, 5.0f);
-    glm::vec3 center = glm::vec3(.0f);
+    glm::vec3 eye = glm::vec3(.0f);
+    glm::vec3 center = glm::vec3(.0f, .0f, 1.0f);
     glm::vec3 up = glm::vec3(.0f, 1.f, .0f);
     float fov = 90.0f;
 };

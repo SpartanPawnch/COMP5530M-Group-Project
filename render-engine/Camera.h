@@ -73,7 +73,8 @@ class Camera {
     void updateInput(
         const float& deltaTime, const int direction, const double& offsetX, const double& offsetY);
 
-    void setDirect(const glm::mat4& _view, const float _fov);
+    void setDirect(
+        const glm::vec3& _eye, const glm::vec3& _center, const glm::vec3& _up, const float _fov);
 };
 
 #endif // CAMERA_H

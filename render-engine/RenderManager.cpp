@@ -34,7 +34,7 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->yOffset = 0.0f;
 
     // Initialise the camera
-    this->camera = new Camera(glm::vec3(.0f, 2.f, 8.f), glm::vec3(.0f, -2.f, -8.f));
+    this->camera = Camera(glm::vec3(.0f, 2.f, 8.f), glm::vec3(.0f, -2.f, -8.f));
 
     this->modelMatrix = glm::mat4(1.0f);
     this->viewMatrix = glm::lookAt(
@@ -56,9 +56,11 @@ void RenderManager::updateMatrices(int* width, int* height) {
     this->modelMatrix = glm::mat4(1.0f);
     // this->viewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
     // glm::vec3(0.0f, 1.0f, 0.0f));
-    this->viewMatrix = camera->getViewMatrix();
+    this->viewMatrix = camera.getViewMatrix();
     this->projectionMatrix = glm::perspective(
-        glm::radians(camera->fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
+        glm::radians(camera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
+    previewProjectionMatrix = glm::perspective(
+        glm::radians(previewCamera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
 void RenderManager::loadScene() {
@@ -81,12 +83,11 @@ void RenderManager::loadScene() {
     };
 
     ///////////////////////////////////////////////////////
-
-    // TODO: change path
     const char* colorVertexPath = "assets/shaders/colours.vert";
     const char* colorFragPath = "assets/shaders/colours.frag";
     const char* gridVertPath = "assets/shaders/grid.vert";
     const char* gridFragPath = "assets/shaders/grid.frag";
+    const char* frustumVisVertPath = "assets/shaders/frustum.vert";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -101,7 +102,10 @@ void RenderManager::loadScene() {
 
     // TODO: Decide whether we are doing fixed number of pipelines or an
     // arbitrary number. This is incredibly inconvenient and hard to maintain.
+    // skip unimplemented stuff
+    pipelines.resize(GridPipeline);
     addPipeline(gridVertPath, gridFragPath);
+    addPipeline(frustumVisVertPath, gridFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -153,6 +157,17 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         modelMatrix = scene.entities[i].runtimeTransform;
         runPipeline(ColorPipeline);
+    }
+
+    // draw preview camera frustum
+    if (scene.selectedEntity) {
+        modelMatrix = scene.selectedEntity->runtimeTransform;
+        for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
+             i++) {
+            CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
+            previewCamera.setDirect(cam.eye, cam.center, cam.up, cam.fov);
+            runFrustumVisPipeline();
+        }
     }
 }
 void RenderManager::renderGrid(int width, int height) {
@@ -217,7 +232,7 @@ void RenderManager::run2DPipeline() {
 }
 void RenderManager::runGridPipeline() {
     // TODO more maintainable way to get pipeline
-    RenderPipeline pipeline = pipelines[1];
+    RenderPipeline pipeline = pipelines[GridPipeline];
     glUseProgram(pipeline.getProgram());
 
     const int GRIDSIZE = 60;
@@ -229,7 +244,7 @@ void RenderManager::runGridPipeline() {
     GLuint ProjectionID = glGetUniformLocation(pipeline.getProgram(), "projection");
 
     // upload uniforms
-    glm::vec3 camCenter = camera->getCenter();
+    glm::vec3 camCenter = camera.getCenter();
     glm::vec3 offset;
     glm::modf(camCenter, offset);
     glUniform1i(gridSizeID, GRIDSIZE);
@@ -240,4 +255,23 @@ void RenderManager::runGridPipeline() {
     // Render the grid
     glBindVertexArray(pipeline.getVAO());
     glDrawArrays(GL_LINES, 0, 4 * GRIDSIZE + 4);
+}
+void RenderManager::runFrustumVisPipeline() {
+    RenderPipeline pipeline = pipelines[FrustumVisPipeline];
+    glUseProgram(pipeline.getProgram());
+
+    // get uniform ids
+    GLuint mvpID = glGetUniformLocation(pipeline.getProgram(), "MVP");
+    GLuint previewInverseID = glGetUniformLocation(pipeline.getProgram(), "previewInverse");
+
+    // upload uniforms
+    glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+    glm::mat4 previewInverse =
+        glm::inverse(previewProjectionMatrix * previewCamera.getViewMatrix());
+    glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(previewInverseID, 1, GL_FALSE, &previewInverse[0][0]);
+
+    // Render the grid
+    glBindVertexArray(pipeline.getVAO());
+    glDrawArrays(GL_LINES, 0, 24);
 }

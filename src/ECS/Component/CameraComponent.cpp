@@ -39,7 +39,7 @@ glm::mat4 CameraComponent::getMatrix() {
 
 void CameraComponent::update(float dt) {
     if (activeUuid == uuid)
-        renderMgr->camera->setDirect(getMatrix(), fov / 2.0f);
+        renderMgr->camera.setDirect(eye, center, up, fov);
 }
 
 void CameraComponent::stop() {

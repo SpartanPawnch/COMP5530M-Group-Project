@@ -24,6 +24,11 @@ class RenderPipeline {
         const char* computePath, const char* tessControlPath, const char* tessEvalPath);
 
   public:
+    RenderPipeline() {
+        // invalidate everything, shouldn't be used with this constructor
+        VAO = 0;
+        shaderProgram = 0;
+    }
     RenderPipeline(const char* vertexPath, const char* fragmentPath,
         const char* geometryPath = nullptr, const char* computePath = nullptr,
         const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
