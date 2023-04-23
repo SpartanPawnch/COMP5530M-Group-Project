@@ -59,8 +59,6 @@ void RenderManager::updateMatrices(int* width, int* height) {
     this->viewMatrix = camera.getViewMatrix();
     this->projectionMatrix = glm::perspective(
         glm::radians(camera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
-    previewProjectionMatrix = glm::perspective(
-        glm::radians(previewCamera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
 void RenderManager::loadScene() {
@@ -158,22 +156,26 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         modelMatrix = scene.entities[i].runtimeTransform;
         runPipeline(ColorPipeline);
     }
+}
+void RenderManager::renderGrid(int width, int height) {
+    updateMatrices(&width, &height);
 
+    runGridPipeline();
+}
+
+void RenderManager::renderCamPreview(const Scene& scene, int width, int height) {
     // draw preview camera frustum
     if (scene.selectedEntity) {
         modelMatrix = scene.selectedEntity->runtimeTransform;
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
              i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
-            previewCamera.setDirect(cam.eye, cam.center, cam.up, cam.fov);
+            previewMatrix = glm::perspective(glm::radians(cam.fov / 2.0f),
+                                float(width) / float(height), .01f, 100.f) *
+                glm::lookAt(cam.eye, cam.center, cam.up);
             runFrustumVisPipeline();
         }
     }
-}
-void RenderManager::renderGrid(int width, int height) {
-    updateMatrices(&width, &height);
-
-    runGridPipeline();
 }
 
 void RenderManager::runPipeline(Pipeline pipeline) {
@@ -266,8 +268,7 @@ void RenderManager::runFrustumVisPipeline() {
 
     // upload uniforms
     glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-    glm::mat4 previewInverse =
-        glm::inverse(previewProjectionMatrix * previewCamera.getViewMatrix());
+    glm::mat4 previewInverse = glm::inverse(previewMatrix);
     glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
     glUniformMatrix4fv(previewInverseID, 1, GL_FALSE, &previewInverse[0][0]);
 

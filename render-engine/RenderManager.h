@@ -80,8 +80,8 @@ class RenderManager {
     // matrices
     glm::mat4 modelMatrix;
     glm::mat4 projectionMatrix;
-    glm::mat4 previewProjectionMatrix;
     glm::mat4 viewMatrix;
+    glm::mat4 previewMatrix;
 
     // needs to be static to be invoked without object of class
     static RenderManager* getInstance();
@@ -106,6 +106,7 @@ class RenderManager {
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
     void renderGrid(int width, int height);
+    void renderCamPreview(const Scene& scene, int width, int height);
 
     void updateMatrices(int* width, int* height);
 

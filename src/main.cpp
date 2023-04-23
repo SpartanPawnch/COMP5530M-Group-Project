@@ -155,6 +155,9 @@ int main() {
         renderManager->renderEntities(
             scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
 
+        // draw cam preview frustum
+        renderManager->renderCamPreview(scene, width, height);
+
         glFlush();
 
         // draw UI to full window
