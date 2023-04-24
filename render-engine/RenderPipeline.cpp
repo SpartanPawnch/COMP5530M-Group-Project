@@ -164,6 +164,7 @@ GLuint RenderPipeline::getViewID(){ return this->ViewID;}
 GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
 GLuint RenderPipeline::getLightPosID(){ return this->lightPosID;}
 GLuint RenderPipeline::getLightColID(){	return this->lightColID;}
+GLuint RenderPipeline::getViewPosID() { return this->viewPosID;}
 
 void RenderPipeline::setUniformLocations()
 {
@@ -172,6 +173,8 @@ void RenderPipeline::setUniformLocations()
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
 	this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
 	this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
+
 }
 
 

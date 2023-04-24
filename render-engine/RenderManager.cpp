@@ -119,76 +119,10 @@ void RenderManager::loadScene() {
         16, 17, 18, 18, 19, 16, // Top face
         20, 21, 22, 22, 23, 20  // Bottom face
     };
-    //GLfloat cubeVertices1[] = {
-    //    // Front face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 0.0f, 0.0f,
-    //     1.0f, -5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 1.0f, 0.0f,
-    //     1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      0.0f, 0.0f, 1.0f,
-    //    -1.0f,  5.0f,  1.0f,         0.0f, 0.0f, 1.0f,      1.0f, 1.0f, 0.0f,
-    //    // Back face 
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 0.0f, 1.0f,
-    //     1.0f, -5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 1.0f, 1.0f,
-    //     1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     1.0f, 1.0f, 1.0f,
-    //    -1.0f,  5.0f, -1.0f,         0.0f, 0.0f, -1.0f,     0.0f, 0.0f, 0.0f,
-    //    // Left face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f, -5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 1.0f,
-    //    -1.0f, -5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-    //    -1.0f,  5.0f,  1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 0.0f,
-    //    -1.0f,  5.0f, -1.0f,         -1.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
-    //    // Right face
-    //    // Position                 // Normal               // Color  
-    //    1.0f, -5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 1.0f,
-    //    1.0f, -5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
-    //    1.0f,  5.0f,  1.0f,          1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-    //    1.0f,  5.0f, -1.0f,          1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,
-    //    // Top face
-    //    // Position                 // Normal               // Color  
-    //    -1.0f,  5.0f,  1.0f,         0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 0.0f,
-    //    1.0f,  5.0f,  1.0f,          0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
-    //    1.0f,  5.0f, -1.0f,          0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,
-    //    -1.0f,  5.0f, -1.0f,         0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 0.0f,
-    //    // Bottom face
-    //    // Position                 // Normal               // Color         
-    //    -1.0f, -5.0f,  1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,
-    //    1.0f, -5.0f,  1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-    //    1.0f, -5.0f, -1.0f,          0.0f, -1.0f, 0.0f,     0.0f, 1.0f, 1.0f,
-    //    -1.0f, -5.0f, -1.0f,         0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 1.0f,
-    //};
-    //GLuint cubeIndices1[] = {
-    //    0, 1, 2, 2, 3, 0,      // Front face
-    //    4, 5, 6, 6, 7, 4,      // Back face
-    //    8, 9, 10, 10, 11, 8,   // Left face
-    //    12, 13, 14, 14, 15, 12, // Right face
-    //    16, 17, 18, 18, 19, 16, // Top face
-    //    20, 21, 22, 22, 23, 20  // Bottom face
-    //};
-
-    std::vector<float> allVertices;
-    std::vector<unsigned int> allIndices;
-    allVertices.clear();
-    allIndices.clear();
-    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    {
-        allVertices.push_back(model.meshes[0].vertices[i].position.x);
-        allVertices.push_back(model.meshes[0].vertices[i].position.y);
-        allVertices.push_back(model.meshes[0].vertices[i].position.z);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.x);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.y);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.z);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.x);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.y);
-    }
-    for (std::size_t i = 0; i < model.meshes[0].indices.size(); i++)
-    {
-        allIndices.push_back(model.meshes[0].indices[i]);
-    }
 
     //ADD LIGHT SOURCES
 
-    this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
 
@@ -205,14 +139,6 @@ void RenderManager::loadScene() {
     IndexBuffer EBO(sizeof(cubeIndices), cubeIndices);
 
     addPipeline(TexturePipeline,texVertexPath, texFragPath);
-    //std::cout << "we have " << model.meshes.size() << " meshes in model\n";
-    //for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    //{
-    //    std::cout << model.meshes[0].vertices[i].position.x << " "
-    //        << model.meshes[0].vertices[i].position.y << " "
-    //        << model.meshes[0].vertices[i].position.z << std::endl;
-    //}
-    //std::cout << "We have " << model.meshes[0].indices.size() << " indices and " << model.meshes[0].indices.size() / 3 << "triangles";
 
     VertexBuffer vBuffer(model.meshes[0].vertices.size()* sizeof(Vertex), &model.meshes[0].vertices[0], TexturedObjectBuffer);
     IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
@@ -256,10 +182,10 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 
     // RENDERING
     // Go through all the Pipelines
-    //if (this->pipelines[ColourPipeline].initialised == true)
-    //{
-    //    runPipeline(ColourPipeline);
-    //}
+    if (this->pipelines[ColourPipeline].initialised == true)
+    {
+        runPipeline(ColourPipeline);
+    }
     if (this->pipelines[TexturePipeline].initialised == true)
     {
         runPipeline(TexturePipeline);
@@ -327,6 +253,10 @@ void RenderManager::runColourPipeline() {
         lights[0].getColour().x,
         lights[0].getColour().y,
         lights[0].getColour().z);
+    glUniform3f(getPipeline(ColourPipeline)->getViewPosID(),
+        this->camera->getPosition().x,
+        this->camera->getPosition().y,
+        this->camera->getPosition().z);
 
     //// Render the cube
     glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
@@ -354,6 +284,10 @@ void RenderManager::runTexturePipeline() {
         lights[0].getColour().x,
         lights[0].getColour().y,
         lights[0].getColour().z);
+    glUniform3f(getPipeline(TexturePipeline)->getViewPosID(),
+        this->camera->getPosition().x,
+        this->camera->getPosition().y,
+        this->camera->getPosition().z);
 
     //// Render the cube
     glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
