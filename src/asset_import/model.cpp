@@ -1,7 +1,5 @@
 #include "model.h"
-#include "../model_import/model.h"
 #include <string>
-#include <map>
 #include <vector>
 #include <memory>
 
@@ -178,5 +176,21 @@ namespace model {
 
     unsigned int ModelDescriptor::getMeshCount() {
         return loadedModels[idx].model->meshes.size();
+    }
+
+    std::map<std::string, BoneInfo> ModelDescriptor::getBoneInfoMap() {
+        return loadedModels[idx].model->boneInfoMap;
+    }
+
+    void ModelDescriptor::setBoneInfoMap(std::map<std::string, BoneInfo> bimp) {
+        loadedModels[idx].model->boneInfoMap = bimp;
+    }
+
+    unsigned int ModelDescriptor::getBoneCount() {
+        return loadedModels[idx].model->boneCounter;
+    }
+
+    void ModelDescriptor::setBoneCount(unsigned int bc) {
+        loadedModels[idx].model->boneCounter = bc;
     }
 }

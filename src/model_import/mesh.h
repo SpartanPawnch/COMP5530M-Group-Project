@@ -10,6 +10,17 @@ struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
+
+    //vector of bone ids that influence this vertex and their weights 
+    std::vector<unsigned int>boneId;
+    std::vector<float>weight;
+};
+
+struct BoneInfo
+{
+    unsigned int id;
+
+    glm::mat4 offset;
 };
 
 struct Texture {

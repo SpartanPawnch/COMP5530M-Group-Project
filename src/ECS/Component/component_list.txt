@@ -2,3 +2,4 @@ BaseComponent
 TransformComponent
 ScriptComponent
 ModelComponent
+SkeletalModelComponent

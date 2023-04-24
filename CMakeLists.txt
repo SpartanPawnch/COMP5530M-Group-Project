@@ -48,7 +48,7 @@ add_executable(
     render-engine/Buffer.h render-engine/Buffer.cpp
  	"src/asset_import/model.cpp"
 	render-engine/LightSource.h render-engine/LightSource.cpp
-	)
+	src/ECS/Component/SkeletalModelComponent.cpp "src/model_import/animation.cpp" "src/model_import/bone.cpp" "src/asset_import/animation.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

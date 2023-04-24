@@ -6,12 +6,14 @@
 #include "../Component/TransformComponent.h"
 #include "../Component/ScriptComponent.h"
 #include "../Component/ModelComponent.h"
+#include "../Component/SkeletalModelComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
     std::vector<TransformComponent> vecTransformComponent;
     std::vector<ScriptComponent> vecScriptComponent;
     std::vector<ModelComponent> vecModelComponent;
+    std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -48,6 +50,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<SkeletalModelComponent>(const SkeletalModelComponent& component){
+        vecSkeletalModelComponent.emplace_back(component);
+    }
+
+    template<>
     void update<BaseComponent>(float dt){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt);
@@ -72,6 +79,13 @@ struct ComponentStorage{
     void update<ModelComponent>(float dt){
         for(unsigned int i=0;i<vecModelComponent.size();i++){
             vecModelComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<SkeletalModelComponent>(float dt){
+        for(unsigned int i=0;i<vecSkeletalModelComponent.size();i++){
+            vecSkeletalModelComponent[i].update(dt);
         }
     }
 
