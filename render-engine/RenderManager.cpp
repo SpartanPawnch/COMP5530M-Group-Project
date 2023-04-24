@@ -18,6 +18,8 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
     glfwSwapBuffers(aWindow);
     glfwPollEvents();
 
@@ -122,7 +124,10 @@ void RenderManager::loadScene() {
 
     //ADD LIGHT SOURCES
 
-    this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f),
+        glm::vec3(0.2f, 0.2f, 0.2f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
 
@@ -142,7 +147,6 @@ void RenderManager::loadScene() {
 
     VertexBuffer vBuffer(model.meshes[0].vertices.size()* sizeof(Vertex), &model.meshes[0].vertices[0], TexturedObjectBuffer);
     IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
-
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -164,7 +168,7 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     // draw background
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
 
     // RENDERING
     // Go through all the Pipelines
@@ -249,10 +253,18 @@ void RenderManager::runColourPipeline() {
         lights[0].getPosition().x,
         lights[0].getPosition().y,
         lights[0].getPosition().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightColID(),
-        lights[0].getColour().x,
-        lights[0].getColour().y,
-        lights[0].getColour().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(),
+        lights[0].getAmbient().x,
+        lights[0].getAmbient().y,
+        lights[0].getAmbient().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(),
+        lights[0].getDiffuse().x,
+        lights[0].getDiffuse().y,
+        lights[0].getDiffuse().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(),
+        lights[0].getSpecular().x,
+        lights[0].getSpecular().y,
+        lights[0].getSpecular().z);
     glUniform3f(getPipeline(ColourPipeline)->getViewPosID(),
         this->camera->getPosition().x,
         this->camera->getPosition().y,
@@ -280,10 +292,18 @@ void RenderManager::runTexturePipeline() {
         lights[0].getPosition().x,
         lights[0].getPosition().y,
         lights[0].getPosition().z);
-    glUniform3f(getPipeline(TexturePipeline)->getLightColID(),
-        lights[0].getColour().x,
-        lights[0].getColour().y,
-        lights[0].getColour().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(),
+        lights[0].getAmbient().x,
+        lights[0].getAmbient().y,
+        lights[0].getAmbient().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(),
+        lights[0].getDiffuse().x,
+        lights[0].getDiffuse().y,
+        lights[0].getDiffuse().z);
+    glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(),
+        lights[0].getSpecular().x,
+        lights[0].getSpecular().y,
+        lights[0].getSpecular().z);
     glUniform3f(getPipeline(TexturePipeline)->getViewPosID(),
         this->camera->getPosition().x,
         this->camera->getPosition().y,
@@ -295,9 +315,9 @@ void RenderManager::runTexturePipeline() {
     glBindVertexArray(0); 
 }
 
-void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour)
+void RenderManager::addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular)
 {
-    lights.emplace_back(position, colour);
+    lights.emplace_back(position, ambient, diffuse, specular);
 }
 
 RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {

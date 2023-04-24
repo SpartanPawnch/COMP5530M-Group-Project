@@ -92,7 +92,7 @@ class RenderManager {
 
     void addCamera();
 
-    void addLightSource(glm::vec3& position, glm::vec3& colour);
+    void addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular);
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,

@@ -23,16 +23,18 @@ struct Material
     float shininess;
 };
 
-uniform vec3 lightPos;
-uniform vec3 lightCol;
-
-uniform Material material;
 uniform Light light;
 
 uniform vec3 viewPos;
 
 void main()
 {
+   Material material;
+   material.diffuse = vec3(0.2, 0.2, 0.2);
+   material.diffuse = vec3(0.8, 0.8, 0.8);
+   material.specular = vec3(1.0, 1.0, 1.0);
+   material.shininess = 2.0;
+
    vec3 color = vsCol;
    //using normal instead of color
    //ambient
@@ -41,7 +43,7 @@ void main()
    vec3 lightDir = normalize(light.position - vsPos);
    vec3 normal = normalize(vsNormal);
    float diff = max(dot(lightDir, normal), 0.0);
-   vec3 diffuse = light.diffuse * diff *  material.diffuse;
+   vec3 diffuse = light.diffuse * diff *  material.diffuse * color;
 
    //specular
    vec3 viewDir = normalize(viewPos - vsPos);
