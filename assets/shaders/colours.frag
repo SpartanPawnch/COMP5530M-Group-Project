@@ -26,51 +26,30 @@ struct Material
 uniform vec3 lightPos;
 uniform vec3 lightCol;
 
+uniform Material material;
+uniform Light light;
+
 uniform vec3 viewPos;
 
 void main()
 {
-   vec3 normalCol;
-   if(vsNormal.x < 0.0)
-   {
-        normalCol.x = -vsNormal.x; 
-   }
-   else{ normalCol.x = vsNormal.x;
-   }
-
-   if(vsNormal.y < 0.0)
-   {
-        normalCol.y = -vsNormal.y; 
-   }
-   else{ normalCol.y = vsNormal.y;
-   }
-
-   if(vsNormal.z < 0.0)
-   {
-        normalCol.z = -vsNormal.z; 
-   }
-   else{ normalCol.z = vsNormal.z;
-   }
-   vec3 color = normalCol;
-
-
+   vec3 color = vsCol;
    //using normal instead of color
    //ambient
-   vec3 ambient = 0.05 * color;
+   vec3 ambient = light.ambient * material.ambient *  color;
    //diffuse
-   vec3 lightDir = normalize(lightPos - vsPos);
+   vec3 lightDir = normalize(light.position - vsPos);
    vec3 normal = normalize(vsNormal);
    float diff = max(dot(lightDir, normal), 0.0);
-   vec3 diffuse = diff * color;
+   vec3 diffuse = light.diffuse * diff *  material.diffuse;
 
    //specular
    vec3 viewDir = normalize(viewPos - vsPos);
    vec3 reflectDIr = reflect(-lightDir, normal);
    float spec = 0.0;
-   vec3 reflectDir = reflect(-lightDir, normal);
    vec3 halfwayDir = normalize(lightDir + viewDir);
-   spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
-   vec3 specular = vec3(0.7) * spec; // assuming bright white light color
+   spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
+   vec3 specular = light.specular * (spec * material.specular); 
 
 
    fsColour = vec4(ambient + diffuse + specular, 1.0f);

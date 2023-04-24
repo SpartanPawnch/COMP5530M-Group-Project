@@ -18,5 +18,5 @@ void main()
 
     vsPos = vec3(model * vec4(pos, 1.0));
     vsCol = col;
-    vsNormal = mat3(transpose(inverse(model))) * normal;;
+    vsNormal = mat3(transpose(inverse(model))) * normal;
 }
