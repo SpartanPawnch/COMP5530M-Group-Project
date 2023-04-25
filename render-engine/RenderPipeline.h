@@ -65,8 +65,8 @@ public:
 
 	~RenderPipeline();
 
-	void setAttributeLayouts();
+	void setColourUniformLocations();
 
-	void setUniformLocations();
+	void setTextureUniformLocations();
 	
 };

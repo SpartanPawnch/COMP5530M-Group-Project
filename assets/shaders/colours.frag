@@ -30,29 +30,31 @@ uniform vec3 viewPos;
 void main()
 {
    Material material;
-   material.diffuse = vec3(0.2, 0.2, 0.2);
-   material.diffuse = vec3(0.8, 0.8, 0.8);
-   material.specular = vec3(1.0, 1.0, 1.0);
-   material.shininess = 2.0;
+    material.diffuse = vec3(0.2, 0.2, 0.2);
+    material.diffuse = vec3(0.8, 0.8, 0.8);
+    material.specular = vec3(0.2, 0.2, 0.2);
+    material.shininess = 16.0;
 
-   vec3 color = vsCol;
+   vec3 colour = vsCol;
    //using normal instead of color
    //ambient
-   vec3 ambient = light.ambient * material.ambient *  color;
-   //diffuse
-   vec3 lightDir = normalize(light.position - vsPos);
-   vec3 normal = normalize(vsNormal);
-   float diff = max(dot(lightDir, normal), 0.0);
-   vec3 diffuse = light.diffuse * diff *  material.diffuse * color;
+   vec3 ambient = light.ambient * material.ambient;
 
-   //specular
-   vec3 viewDir = normalize(viewPos - vsPos);
-   vec3 reflectDIr = reflect(-lightDir, normal);
-   float spec = 0.0;
-   vec3 halfwayDir = normalize(lightDir + viewDir);
-   spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
-   vec3 specular = light.specular * (spec * material.specular); 
+    //diffuse
+    vec3 lightDir = normalize(light.position - vsPos);
+    vec3 normal = normalize(vsNormal);
+    float diff = clamp(dot(lightDir, vsNormal), 0, 1);
+    vec3 diffuse = light.diffuse * diff *  material.diffuse;
+
+    //specular
+    vec3 viewDir = normalize(viewPos - vsPos);
+    float spec = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
+    vec3 specular = spec * light.specular * material.specular; 
 
 
-   fsColour = vec4(ambient + diffuse + specular, 1.0f);
+    fsColour = vec4(colour,1.f) *
+            (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
+
 }

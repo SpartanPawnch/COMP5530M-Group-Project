@@ -239,7 +239,7 @@ void RenderManager::runPipeline(Pipeline pipeline) {
 
 void RenderManager::setupColourPipelineUniforms()
 {
-    getPipeline(ColourPipeline)->setUniformLocations();
+    getPipeline(ColourPipeline)->setColourUniformLocations();
 }
 
 void RenderManager::runColourPipeline() {
@@ -278,7 +278,7 @@ void RenderManager::runColourPipeline() {
 
 void RenderManager::setupTexturePipelineUniforms()
 {
-    getPipeline(TexturePipeline)->setUniformLocations();
+    getPipeline(TexturePipeline)->setTextureUniformLocations();
 }
 
 void RenderManager::runTexturePipeline() {
