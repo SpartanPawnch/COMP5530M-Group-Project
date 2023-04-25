@@ -29,6 +29,7 @@ class RenderManager {
     // pointer to single instance of RenderEngine
     static RenderManager* instance;
     bool initialized = false;
+    bool antialiasingEnabled = false;
 
     // test output writing for RenderEngine
     // std::ofstream testOutput;
@@ -72,6 +73,8 @@ class RenderManager {
     Camera* previewCamera;
 
     double deltaTime;
+    //Gamma value for gamma correction
+    float gammaValue = 2.2f;
 
     // mouse input variables
     double xPos, yPos, xPosLast, yPosLast;
@@ -118,4 +121,6 @@ class RenderManager {
     void setupColourPipelineUniforms();
     void setupTexturePipelineUniforms();
     void runPipeline(Pipeline pipeline);
+
+    void setGammaCorrection(float value);
 };

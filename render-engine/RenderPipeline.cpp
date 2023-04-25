@@ -167,6 +167,7 @@ GLuint RenderPipeline::getLightAmbientID(){	return this->lightAmbientID;}
 GLuint RenderPipeline::getLightDiffuseID() { return this->lightDiffuseID; }
 GLuint RenderPipeline::getLightSpecularID() { return this->lightSpecularID; }
 GLuint RenderPipeline::getViewPosID() { return this->viewPosID;}
+GLuint RenderPipeline::getGammaID() { return this->gammaID; }
 
 void RenderPipeline::setColourUniformLocations()
 {
@@ -178,6 +179,7 @@ void RenderPipeline::setColourUniformLocations()
 	this->lightDiffuseID = glGetUniformLocation(this->shaderProgram, "light.diffuse");
 	this->lightSpecularID = glGetUniformLocation(this->shaderProgram, "light.specular");
 	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
+	this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
 }
 
 void RenderPipeline::setTextureUniformLocations()
@@ -190,6 +192,7 @@ void RenderPipeline::setTextureUniformLocations()
 	this->lightDiffuseID = glGetUniformLocation(this->shaderProgram, "light.diffuse");
 	this->lightSpecularID = glGetUniformLocation(this->shaderProgram, "light.specular");
 	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
+	this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
 }
 
 

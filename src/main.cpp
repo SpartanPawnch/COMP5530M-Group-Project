@@ -165,7 +165,6 @@ int main() {
     renderManager->loadScene();
     // init shader
 
-
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
 

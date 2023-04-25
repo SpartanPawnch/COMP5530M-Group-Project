@@ -28,6 +28,7 @@ private:
 	GLuint lightDiffuseID;
 	GLuint lightSpecularID;
 	GLuint viewPosID;
+	GLuint gammaID;
 
 	GLuint VAO;
 	
@@ -62,6 +63,7 @@ public:
 	GLuint getLightDiffuseID();
 	GLuint getLightSpecularID();
 	GLuint getViewPosID();
+	GLuint getGammaID();
 
 	~RenderPipeline();
 

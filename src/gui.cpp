@@ -547,6 +547,9 @@ inline void drawViewport() {
         viewportTexWidth = int(windowSize.x);
         viewportTexHeight = int(windowSize.y);
 
+        //samples for antialiasing
+        GLuint samples = 4;
+
         // adjust to window resize
         glBindTexture(GL_TEXTURE_2D, viewportTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,

@@ -35,6 +35,16 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->xOffset = 0.0f;
     this->yOffset = 0.0f;
 
+    //function to set gamma correction - value sent to all pipelines
+    setGammaCorrection(2.2f);
+
+    //Enable antialiasing
+    this->antialiasingEnabled = true;
+    if (this->antialiasingEnabled == true)
+    {
+        glEnable(GL_MULTISAMPLE);
+    }
+
     // Initialise the camera
     this->camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f, 0.f, 0.f));
 
@@ -269,6 +279,7 @@ void RenderManager::runColourPipeline() {
         this->camera->getPosition().x,
         this->camera->getPosition().y,
         this->camera->getPosition().z);
+    glUniform1f(getPipeline(ColourPipeline)->getGammaID(), gammaValue);
 
     //// Render the cube
     glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
@@ -292,15 +303,15 @@ void RenderManager::runTexturePipeline() {
         lights[0].getPosition().x,
         lights[0].getPosition().y,
         lights[0].getPosition().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(),
+    glUniform3f(getPipeline(TexturePipeline)->getLightAmbientID(),
         lights[0].getAmbient().x,
         lights[0].getAmbient().y,
         lights[0].getAmbient().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(),
+    glUniform3f(getPipeline(TexturePipeline)->getLightDiffuseID(),
         lights[0].getDiffuse().x,
         lights[0].getDiffuse().y,
         lights[0].getDiffuse().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(),
+    glUniform3f(getPipeline(TexturePipeline)->getLightSpecularID(),
         lights[0].getSpecular().x,
         lights[0].getSpecular().y,
         lights[0].getSpecular().z);
@@ -308,8 +319,9 @@ void RenderManager::runTexturePipeline() {
         this->camera->getPosition().x,
         this->camera->getPosition().y,
         this->camera->getPosition().z);
+    glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
 
-    //// Render the cube
+    //// Render the model
     glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
     glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); 
@@ -336,4 +348,9 @@ void RenderManager::runBillboardPipeline() {
 void RenderManager::runWaterPipeline() {
 }
 void RenderManager::run2DPipeline() {
+}
+
+void RenderManager::setGammaCorrection(float value)
+{
+    this->gammaValue = value;
 }

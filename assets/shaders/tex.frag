@@ -24,7 +24,7 @@ struct Material
 };
 
 uniform Light light;
-
+uniform float gamma;
 uniform vec3 viewPos;
 
 void main()
@@ -73,9 +73,7 @@ void main()
     spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
     vec3 specular = spec * light.specular * material.specular; 
 
-
     fsColour = vec4(colour,1.f) *
             (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
-
-
+    fsColour.rgb = pow(fsColour.rgb, vec3(1.0/gamma));
 }
