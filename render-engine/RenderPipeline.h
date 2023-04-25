@@ -14,6 +14,9 @@ class RenderPipeline
 private:
 	GLuint shaderProgram;
 
+	// The textures to render to if necessary
+	std::vector<GLuint> renderedTextures;
+
 	GLuint ModelID;
 	GLuint ViewID;
 	GLuint ProjectionID;
@@ -50,6 +53,7 @@ public:
 	GLuint getProjectionID();
 	GLuint getLightPosID();
 	GLuint getLightColID();
+	GLuint getRenderedTexture(unsigned int index);
 
 	~RenderPipeline();
 
@@ -59,5 +63,8 @@ public:
 
 	unsigned int getNoOfMeshes();
 	void addVAO(GLuint VAO);
+
+	//Return index of the TextureRenderTarget in the renderedTextures array of the class
+	unsigned int generateTextureRenderTarget();
 	
 };

@@ -162,6 +162,7 @@ GLuint RenderPipeline::getViewID(){ return this->ViewID;}
 GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
 GLuint RenderPipeline::getLightPosID(){ return this->lightPosID;}
 GLuint RenderPipeline::getLightColID(){	return this->lightColID;}
+GLuint RenderPipeline::getRenderedTexture(unsigned int index) { return this->renderedTextures[index]; }
 
 void RenderPipeline::setUniformLocations()
 {
@@ -173,3 +174,16 @@ void RenderPipeline::setUniformLocations()
 }
 
 void RenderPipeline::addVAO(GLuint VAO) { VAOs.push_back(VAO); }
+
+//Return index of the TextureRenderTarget in the renderedTextures array of the class
+unsigned int RenderPipeline::generateTextureRenderTarget()
+{
+	// The texture we're going to render to
+	GLuint texture;
+	glGenTextures(1, &texture);
+	renderedTextures.push_back(texture);
+
+	return renderedTextures.size() - 1;
+}
+
+
