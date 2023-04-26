@@ -93,23 +93,25 @@ add_custom_target(ComponentStorageGen
 )
 add_dependencies(${PROJECT_NAME} ComponentStorageGen)
 
+message(STATUS ${CMAKE_BINARY_DIR})
+
 #create template
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     #install assimp
-    COMMAND ${CMAKE_COMMAND} --install $<TARGET_FILE_DIR:assimp>/../..
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/assimp-5.2.5
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
     $<$<CONFIG:Release>:Release>
     --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/assimp
 
     #install glfw
-    COMMAND ${CMAKE_COMMAND} --install $<TARGET_FILE_DIR:glfw>/../..
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/glfw-3.3.6
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
     $<$<CONFIG:Release>:Release>
     --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/glfw-3.3.6
 
     #install soloud
-    COMMAND ${CMAKE_COMMAND} --install $<TARGET_FILE_DIR:soloud>/..
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/soloud/contrib
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
     $<$<CONFIG:Release>:Release>
     --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
