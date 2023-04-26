@@ -256,9 +256,19 @@ int main() {
             // setup preview camera object
             renderManager->previewCamera.setDirect(cam.eye, cam.center, cam.up, cam.fov);
 
-            // clear preview section
+            // draw border
+            // TODO nicer way to do this
+            const int PREVIEW_BORDER = 5;
             glEnable(GL_SCISSOR_TEST);
-            glScissor(3 * viewportTexWidth / 4, 0, viewportTexWidth / 4, viewportTexHeight / 4);
+            glScissor((3 * viewportTexWidth / 4) - 2 * PREVIEW_BORDER, 0,
+                (viewportTexWidth / 4) + 2 * PREVIEW_BORDER,
+                (viewportTexHeight / 4) + 2 * PREVIEW_BORDER);
+            glClearColor(.5f, .5f, .5f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // clear preview section
+            glScissor((3 * viewportTexWidth / 4) - PREVIEW_BORDER, PREVIEW_BORDER,
+                viewportTexWidth / 4, viewportTexHeight / 4);
             glClearColor(.2f, .2f, .2f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_SCISSOR_TEST);
