@@ -84,6 +84,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         if (!skip) {
             Texture texture;
             //TODO:generate texture id
+            std::string uuid = assetfolder::getRelativePath(path.C_Str());
+            texture.textureDescriptor = loadTexture(path.C_Str(),uuid);
             texture.id = 1;
             texture.type = typeName;
             texture.path = path.C_Str();

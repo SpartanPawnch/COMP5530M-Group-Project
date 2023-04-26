@@ -9,6 +9,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "../asset_import/images.h"
+#include "../asset_import/folders.h"
 #include "mesh.h"
 
 class Model {
