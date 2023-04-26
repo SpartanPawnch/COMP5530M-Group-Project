@@ -259,22 +259,24 @@ int main() {
             // draw border
             // TODO nicer way to do this
             const int PREVIEW_BORDER = 5;
+            const float PREVIEW_FRACTION = .35f; // part of the screen used for preview window
             glEnable(GL_SCISSOR_TEST);
-            glScissor((3 * viewportTexWidth / 4) - 2 * PREVIEW_BORDER, 0,
-                (viewportTexWidth / 4) + 2 * PREVIEW_BORDER,
-                (viewportTexHeight / 4) + 2 * PREVIEW_BORDER);
+            glScissor((1.f - PREVIEW_FRACTION) * viewportTexWidth - 2 * PREVIEW_BORDER, 0,
+                PREVIEW_FRACTION * viewportTexWidth + 2 * PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexHeight + 2 * PREVIEW_BORDER);
             glClearColor(.5f, .5f, .5f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             // clear preview section
-            glScissor((3 * viewportTexWidth / 4) - PREVIEW_BORDER, PREVIEW_BORDER,
-                viewportTexWidth / 4, viewportTexHeight / 4);
+            glScissor((1.f - PREVIEW_FRACTION) * viewportTexWidth - PREVIEW_BORDER, PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexWidth, PREVIEW_FRACTION * viewportTexHeight);
             glClearColor(.2f, .2f, .2f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_SCISSOR_TEST);
 
             // draw preview
-            glViewport(3 * viewportTexWidth / 4, .0f, viewportTexWidth / 4, viewportTexHeight / 4);
+            glViewport((1.f - PREVIEW_FRACTION) * viewportTexWidth - PREVIEW_BORDER, PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexWidth, PREVIEW_FRACTION * viewportTexHeight);
             renderManager->renderGrid(&renderManager->previewCamera, viewportTexWidth / 4,
                 viewportTexHeight / 4);
             renderManager->renderEntities(scene, &renderManager->previewCamera,
