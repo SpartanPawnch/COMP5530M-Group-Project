@@ -272,7 +272,6 @@ namespace assetfolder {
     }
 
     std::string getRelativePath(const char* path) {
-        printf("%s\n", path);
         assert(strlen(path) >= activeDirectory.length() + 1);
         return std::string(path + activeDirectory.length() + 1);
     }
