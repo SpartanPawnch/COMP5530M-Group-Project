@@ -254,7 +254,8 @@ int main() {
             scene.selectedEntity->components.vecCameraComponent.size() > 0) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[0];
             // setup preview camera object
-            renderManager->previewCamera.setDirect(cam.eye, cam.center, cam.up, cam.fov);
+            cam.copyToCamera(renderManager->previewCamera,
+                scene.selectedEntity->state.runtimeTransform);
 
             // draw border
             // TODO nicer way to do this

@@ -5,6 +5,7 @@
 #include "BaseComponent.h"
 #include "../../asset_import/model.h"
 #include "../../model_import/model.h"
+#include "../EntityState/EntityState.h"
 
 struct ModelComponent : BaseComponent {
     ModelComponent() {
@@ -13,7 +14,7 @@ struct ModelComponent : BaseComponent {
     ~ModelComponent() {
     }
     void start() override;
-    void update(float dt) override;
+    void update(float dt, EntityState& state) override;
     void stop() override;
 
     // model info
@@ -21,5 +22,4 @@ struct ModelComponent : BaseComponent {
     std::shared_ptr<model::ModelDescriptor> modelDescriptor;
 
     // no controls for now
-    
 };

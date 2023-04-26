@@ -1,23 +1,18 @@
 #include "BaseComponent.h"
 
-BaseComponent::BaseComponent()
-{
+BaseComponent::BaseComponent() {
     start();
 }
 
-BaseComponent::~BaseComponent()
-{
+BaseComponent::~BaseComponent() {
     stop();
 }
 
-void BaseComponent::start()
-{
+void BaseComponent::start() {
 }
 
-void BaseComponent::update(float dt)
-{
+void BaseComponent::update(float dt, EntityState& state) {
 }
 
-void BaseComponent::stop()
-{
+void BaseComponent::stop() {
 }

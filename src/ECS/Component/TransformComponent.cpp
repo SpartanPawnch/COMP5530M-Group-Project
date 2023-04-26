@@ -15,7 +15,7 @@ void TransformComponent::start() {
     // scale = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
-void TransformComponent::update(float dt) {
+void TransformComponent::update(float dt, EntityState& state) {
 }
 
 void TransformComponent::stop() {

@@ -1066,9 +1066,9 @@ inline void drawProperties() {
         else {
             ImGui::InputText("Name", &scene.selectedEntity->name);
             // entitity transform
-            ImGui::InputFloat3("Position", &scene.selectedEntity->position[0]);
-            ImGui::InputFloat4("Rotation", &scene.selectedEntity->rotation[0]);
-            ImGui::InputFloat3("Scale", &scene.selectedEntity->scale[0]);
+            ImGui::InputFloat3("Position", &scene.selectedEntity->state.position[0]);
+            ImGui::InputFloat4("Rotation", &scene.selectedEntity->state.rotation[0]);
+            ImGui::InputFloat3("Scale", &scene.selectedEntity->state.scale[0]);
 
             ImGui::Separator();
             // component lists

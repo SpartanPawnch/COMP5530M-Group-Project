@@ -50,6 +50,7 @@ headerFile:write([[
 #pragma once
 
 #include <vector>
+#include "../EntityState/EntityState.h"
 
 ]])
 
@@ -81,13 +82,13 @@ headerFile:write([[
 
     //update all components of specific type
     template<typename T>
-    void update(float dt);
+    void update(float dt,EntityState& state);
 
     //call start for all types
     void startAll();
 
     //call update for all types
-    void updateAll(float dt);
+    void updateAll(float dt,EntityState& state);
     
     //clear all components
     void clearAll();
@@ -123,9 +124,9 @@ end
 for _, type in ipairs(types) do
 	headerFile:write([[
     template<>
-    void update<]] .. type .. [[>(float dt){
+    void update<]] .. type .. [[>(float dt,EntityState& state){
         for(unsigned int i=0;i<vec]] .. type .. [[.size();i++){
-            vec]] .. type .. [[[i].update(dt);
+            vec]] .. type .. [[[i].update(dt,state);
         }
     }
 
@@ -161,12 +162,12 @@ sourceFile:write("}\n")
 
 -- create updateAll method
 sourceFile:write([[
-void ComponentStorage::updateAll(float dt){
+void ComponentStorage::updateAll(float dt, EntityState& state){
 ]])
 
 for _, type in ipairs(types) do
 	sourceFile:write([[
-    update<]] .. type .. [[>(dt);
+    update<]] .. type .. [[>(dt,state);
 ]])
 end
 sourceFile:write("}\n")

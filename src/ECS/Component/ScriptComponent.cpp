@@ -10,7 +10,7 @@ ScriptComponent::~ScriptComponent() {
 void ScriptComponent::start() {
 }
 
-void ScriptComponent::update(float dt) {
+void ScriptComponent::update(float dt, EntityState& state) {
 }
 
 void ScriptComponent::stop() {

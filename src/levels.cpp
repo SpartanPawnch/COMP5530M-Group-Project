@@ -130,12 +130,12 @@ void loadLevel(const char* path, Scene& scene) {
             baseEntity.uuid = entity["uuid"].GetInt();
             baseEntity.name = std::string(entity["name"].GetString());
             baseEntity.parent = entity["parent"].GetInt();
-            baseEntity.position = glm::vec3(entity["position"][0].GetFloat(),
+            baseEntity.state.position = glm::vec3(entity["position"][0].GetFloat(),
                 entity["position"][1].GetFloat(), entity["position"][2].GetFloat());
-            baseEntity.rotation =
+            baseEntity.state.rotation =
                 glm::quat(entity["rotation"][0].GetFloat(), entity["rotation"][1].GetFloat(),
                     entity["rotation"][2].GetFloat(), entity["rotation"][3].GetFloat());
-            baseEntity.scale = glm::vec3(entity["scale"][0].GetFloat(),
+            baseEntity.state.scale = glm::vec3(entity["scale"][0].GetFloat(),
                 entity["scale"][1].GetFloat(), entity["scale"][2].GetFloat());
 
             // add components
@@ -226,8 +226,8 @@ void loadLevel(const char* path, Scene& scene) {
 }
 
 // --- Per-Component-Type serialization functions
-static void saveComponent(
-    const TransformComponent& trComponent, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+static void saveComponent(const TransformComponent& trComponent,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
 
     writer.StartObject();
 
@@ -269,8 +269,8 @@ static void saveComponent(
     writer.EndObject();
 }
 
-static void saveComponent(
-    const BaseComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+static void saveComponent(const BaseComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
     writer.Key("name");
     writer.String(component.name.c_str());
@@ -281,8 +281,8 @@ static void saveComponent(
     writer.EndObject();
 }
 
-static void saveComponent(
-    const AudioSourceComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+static void saveComponent(const AudioSourceComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
 
     writer.Key("name");
@@ -309,8 +309,8 @@ static void saveComponent(
     writer.EndObject();
 }
 
-static void saveComponent(
-    const CameraComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+static void saveComponent(const CameraComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
 
     writer.Key("name");
@@ -349,8 +349,8 @@ static void saveComponent(
     writer.EndObject();
 }
 
-static void saveComponent(
-    const ModelComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+static void saveComponent(const ModelComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
 
     writer.Key("name");
@@ -412,9 +412,9 @@ void saveLevel(const char* path, const Scene& scene) {
             writer.Key("position");
             writer.StartArray();
 
-            writer.Double(double(scene.entities[i].position[0]));
-            writer.Double(double(scene.entities[i].position[1]));
-            writer.Double(double(scene.entities[i].position[2]));
+            writer.Double(double(scene.entities[i].state.position[0]));
+            writer.Double(double(scene.entities[i].state.position[1]));
+            writer.Double(double(scene.entities[i].state.position[2]));
 
             writer.EndArray();
 
@@ -422,10 +422,10 @@ void saveLevel(const char* path, const Scene& scene) {
             writer.Key("rotation");
             writer.StartArray();
 
-            writer.Double(double(scene.entities[i].rotation[0]));
-            writer.Double(double(scene.entities[i].rotation[1]));
-            writer.Double(double(scene.entities[i].rotation[2]));
-            writer.Double(double(scene.entities[i].rotation[3]));
+            writer.Double(double(scene.entities[i].state.rotation[0]));
+            writer.Double(double(scene.entities[i].state.rotation[1]));
+            writer.Double(double(scene.entities[i].state.rotation[2]));
+            writer.Double(double(scene.entities[i].state.rotation[3]));
 
             writer.EndArray();
 
@@ -433,9 +433,9 @@ void saveLevel(const char* path, const Scene& scene) {
             writer.Key("scale");
             writer.StartArray();
 
-            writer.Double(double(scene.entities[i].scale[0]));
-            writer.Double(double(scene.entities[i].scale[1]));
-            writer.Double(double(scene.entities[i].scale[2]));
+            writer.Double(double(scene.entities[i].state.scale[0]));
+            writer.Double(double(scene.entities[i].state.scale[1]));
+            writer.Double(double(scene.entities[i].state.scale[2]));
 
             writer.EndArray();
 

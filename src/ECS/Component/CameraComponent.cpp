@@ -37,7 +37,12 @@ glm::mat4 CameraComponent::getMatrix() {
     return glm::lookAt(eye, center, up);
 }
 
-void CameraComponent::update(float dt) {
+void CameraComponent::copyToCamera(Camera& camera, const glm::mat4& runtimeTransform) {
+    camera.setDirect(runtimeTransform * glm::vec4(eye, 1.0f),
+        runtimeTransform * glm::vec4(center, 1.0f), glm::mat3(runtimeTransform) * up, fov);
+}
+
+void CameraComponent::update(float dt, EntityState& state) {
     if (activeUuid == uuid)
         renderMgr->camera.setDirect(eye, center, up, fov);
 }

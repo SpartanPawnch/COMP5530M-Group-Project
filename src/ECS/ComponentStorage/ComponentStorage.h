@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "../EntityState/EntityState.h"
 
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
@@ -26,13 +27,13 @@ struct ComponentStorage{
 
     //update all components of specific type
     template<typename T>
-    void update(float dt);
+    void update(float dt,EntityState& state);
 
     //call start for all types
     void startAll();
 
     //call update for all types
-    void updateAll(float dt);
+    void updateAll(float dt,EntityState& state);
     
     //clear all components
     void clearAll();
@@ -111,44 +112,44 @@ struct ComponentStorage{
     }
 
     template<>
-    void update<BaseComponent>(float dt){
+    void update<BaseComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
-            vecBaseComponent[i].update(dt);
+            vecBaseComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<TransformComponent>(float dt){
+    void update<TransformComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecTransformComponent.size();i++){
-            vecTransformComponent[i].update(dt);
+            vecTransformComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<ScriptComponent>(float dt){
+    void update<ScriptComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecScriptComponent.size();i++){
-            vecScriptComponent[i].update(dt);
+            vecScriptComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<CameraComponent>(float dt){
+    void update<CameraComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecCameraComponent.size();i++){
-            vecCameraComponent[i].update(dt);
+            vecCameraComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<AudioSourceComponent>(float dt){
+    void update<AudioSourceComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecAudioSourceComponent.size();i++){
-            vecAudioSourceComponent[i].update(dt);
+            vecAudioSourceComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<ModelComponent>(float dt){
+    void update<ModelComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecModelComponent.size();i++){
-            vecModelComponent[i].update(dt);
+            vecModelComponent[i].update(dt,state);
         }
     }
 

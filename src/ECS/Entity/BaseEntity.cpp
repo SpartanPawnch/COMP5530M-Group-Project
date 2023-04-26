@@ -18,15 +18,15 @@ void BaseEntity::start() {
 
 void BaseEntity::update(const glm::mat4& parentMat, float dt) {
     genTransform(parentMat);
-    components.updateAll(dt);
+    components.updateAll(dt, state);
 }
 
 void BaseEntity::stop() {
 }
 
 void BaseEntity::genTransform(const glm::mat4& parentMat) {
-    runtimeTransform =
-        parentMat * glm::translate(position) * glm::mat4_cast(rotation) * glm::scale(scale);
+    state.runtimeTransform = parentMat * glm::translate(state.position) *
+        glm::mat4_cast(state.rotation) * glm::scale(state.scale);
 }
 
 // void BaseEntity::removeComponent(int uuid)

@@ -6,7 +6,7 @@ void AudioSourceComponent::start() {
     if (playOnStart)
         startSound();
 }
-void AudioSourceComponent::update(float dt) {
+void AudioSourceComponent::update(float dt, EntityState& state) {
     // update position
 }
 void AudioSourceComponent::stop() {

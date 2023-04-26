@@ -6,6 +6,7 @@
 
 #include "BaseComponent.h"
 #include "../../asset_import/audio.h"
+#include "../EntityState/EntityState.h"
 
 struct AudioSourceComponent : BaseComponent {
     AudioSourceComponent() {
@@ -14,7 +15,7 @@ struct AudioSourceComponent : BaseComponent {
     ~AudioSourceComponent() {
     }
     void start() override;
-    void update(float dt) override;
+    void update(float dt, EntityState& state) override;
     void stop() override;
     void startSound();
 

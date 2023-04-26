@@ -8,13 +8,13 @@ void ComponentStorage::startAll(){
     start<AudioSourceComponent>();
     start<ModelComponent>();
 }
-void ComponentStorage::updateAll(float dt){
-    update<BaseComponent>(dt);
-    update<TransformComponent>(dt);
-    update<ScriptComponent>(dt);
-    update<CameraComponent>(dt);
-    update<AudioSourceComponent>(dt);
-    update<ModelComponent>(dt);
+void ComponentStorage::updateAll(float dt, EntityState& state){
+    update<BaseComponent>(dt,state);
+    update<TransformComponent>(dt,state);
+    update<ScriptComponent>(dt,state);
+    update<CameraComponent>(dt,state);
+    update<AudioSourceComponent>(dt,state);
+    update<ModelComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();

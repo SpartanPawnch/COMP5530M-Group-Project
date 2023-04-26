@@ -278,8 +278,12 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
-    projectionMatrix =
-        glm::perspective(glm::radians(camera->fov / 2.f), float(width) / height, .01f, 100.0f);
+    float aspect = float(width) / height;
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0))
+        ? aspect
+        : 1.f;
+
+    projectionMatrix = glm::perspective(glm::radians(camera->fov / 2.f), aspect, .01f, 100.0f);
 
     // draw background
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
@@ -291,7 +295,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
-        modelMatrix = scene.entities[i].runtimeTransform;
+        modelMatrix = scene.entities[i].state.runtimeTransform;
 
         // bind model matrix
         glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE,
@@ -326,8 +330,12 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 void RenderManager::renderGrid(Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
-    projectionMatrix =
-        glm::perspective(glm::radians(camera->fov / 2.f), float(width) / height, .01f, 100.0f);
+    float aspect = float(width) / height;
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0))
+        ? aspect
+        : 1.f;
+
+    projectionMatrix = glm::perspective(glm::radians(camera->fov / 2.f), aspect, .01f, 100.0f);
 
     runGridPipeline();
 }
@@ -335,7 +343,7 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
 void RenderManager::renderCamPreview(const Scene& scene, int width, int height) {
     // draw preview camera frustum
     if (scene.selectedEntity) {
-        modelMatrix = scene.selectedEntity->runtimeTransform;
+        modelMatrix = scene.selectedEntity->state.runtimeTransform;
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
              i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];

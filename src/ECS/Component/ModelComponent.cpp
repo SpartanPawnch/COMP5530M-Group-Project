@@ -4,7 +4,7 @@
 
 void ModelComponent::start() {
 }
-void ModelComponent::update(float dt) {
+void ModelComponent::update(float dt, EntityState& state) {
 }
 void ModelComponent::stop() {
 }

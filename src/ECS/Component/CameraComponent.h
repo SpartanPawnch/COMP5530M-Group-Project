@@ -5,15 +5,17 @@
 
 #include "BaseComponent.h"
 #include "../../../render-engine/Camera.h"
+#include "../EntityState/EntityState.h"
 
 struct CameraComponent : BaseComponent {
     CameraComponent();
     CameraComponent(const std::string& name, const int uuid);
     ~CameraComponent();
     void start() override;
-    void update(float dt) override;
+    void update(float dt, EntityState& state) override;
     void stop() override;
     glm::mat4 getMatrix();
+    void copyToCamera(Camera& camera, const glm::mat4& runtimeTransform);
 
     static int activeUuid;
 

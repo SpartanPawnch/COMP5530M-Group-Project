@@ -20,7 +20,7 @@ void Scene::updatePositions() {
     for (unsigned int i = 0; i < entities.size(); i++) {
         entities[i].genTransform(entities[i].parent < 0
                 ? glm::mat4(1.0f)
-                : entities[entities[i].parent].runtimeTransform);
+                : entities[entities[i].parent].state.runtimeTransform);
     }
 }
 
@@ -28,7 +28,7 @@ void Scene::update(float dt) {
     for (unsigned int i = 0; i < entities.size(); i++) {
         glm::mat4 parentTransform = entities[i].parent < 0
             ? glm::mat4(1.0f)
-            : entities[entities[i].parent].runtimeTransform;
+            : entities[entities[i].parent].state.runtimeTransform;
         entities[i].update(parentTransform, dt);
     }
 }
