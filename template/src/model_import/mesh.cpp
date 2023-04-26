@@ -1,9 +1,17 @@
 //adapted from https://learnopengl.com/Model-Loading/Mesh
 #include "mesh.h"
+#include "../../render-engine/RenderManager.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> v, std::vector<unsigned int> i, std::vector<Texture> t)
 {
-    this->vertices = vertices;
-    this->indices = indices;
-    this->textures = textures;
+    vertices = v;
+    indices = i;
+    textures = t;
+    RenderManager::uploadMesh(&vertices, &indices, &VAO, &VBO, &EBO);
+}
+Mesh::~Mesh() {
+
+}
+void Mesh::deleteBuffers() {
+    RenderManager::deleteMesh(&VAO, &VBO, &EBO);
 }

@@ -1,17 +1,22 @@
 #pragma once
 
 #include <vector>
+#include "../EntityState/EntityState.h"
 
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
 #include "../Component/ScriptComponent.h"
+#include "../Component/CameraComponent.h"
 #include "../Component/AudioSourceComponent.h"
+#include "../Component/ModelComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
     std::vector<TransformComponent> vecTransformComponent;
     std::vector<ScriptComponent> vecScriptComponent;
+    std::vector<CameraComponent> vecCameraComponent;
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
+    std::vector<ModelComponent> vecModelComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -22,13 +27,13 @@ struct ComponentStorage{
 
     //update all components of specific type
     template<typename T>
-    void update(float dt);
+    void update(float dt,EntityState& state);
 
     //call start for all types
     void startAll();
 
     //call update for all types
-    void updateAll(float dt);
+    void updateAll(float dt,EntityState& state);
     
     //clear all components
     void clearAll();
@@ -50,8 +55,18 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<CameraComponent>(const CameraComponent& component){
+        vecCameraComponent.emplace_back(component);
+    }
+
+    template<>
     void addComponent<AudioSourceComponent>(const AudioSourceComponent& component){
         vecAudioSourceComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<ModelComponent>(const ModelComponent& component){
+        vecModelComponent.emplace_back(component);
     }
 
     template<>
@@ -76,6 +91,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void start<CameraComponent>(){
+        for(unsigned int i=0;i<vecCameraComponent.size();i++){
+            vecCameraComponent[i].start();
+        }
+    }
+
+    template<>
     void start<AudioSourceComponent>(){
         for(unsigned int i=0;i<vecAudioSourceComponent.size();i++){
             vecAudioSourceComponent[i].start();
@@ -83,30 +105,51 @@ struct ComponentStorage{
     }
 
     template<>
-    void update<BaseComponent>(float dt){
+    void start<ModelComponent>(){
+        for(unsigned int i=0;i<vecModelComponent.size();i++){
+            vecModelComponent[i].start();
+        }
+    }
+
+    template<>
+    void update<BaseComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
-            vecBaseComponent[i].update(dt);
+            vecBaseComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<TransformComponent>(float dt){
+    void update<TransformComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecTransformComponent.size();i++){
-            vecTransformComponent[i].update(dt);
+            vecTransformComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<ScriptComponent>(float dt){
+    void update<ScriptComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecScriptComponent.size();i++){
-            vecScriptComponent[i].update(dt);
+            vecScriptComponent[i].update(dt,state);
         }
     }
 
     template<>
-    void update<AudioSourceComponent>(float dt){
+    void update<CameraComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecCameraComponent.size();i++){
+            vecCameraComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    void update<AudioSourceComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecAudioSourceComponent.size();i++){
-            vecAudioSourceComponent[i].update(dt);
+            vecAudioSourceComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    void update<ModelComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecModelComponent.size();i++){
+            vecModelComponent[i].update(dt,state);
         }
     }
 

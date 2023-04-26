@@ -5,13 +5,14 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "BaseComponent.h"
+#include "../EntityState/EntityState.h"
 
 class TransformComponent : public BaseComponent {
   public:
     TransformComponent();
     ~TransformComponent();
     virtual void start() override;
-    virtual void update(float dt) override;
+    virtual void update(float dt, EntityState& state) override;
     virtual void stop() override;
 
     int uuid;

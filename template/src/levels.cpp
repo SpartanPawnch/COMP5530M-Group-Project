@@ -24,6 +24,7 @@
 #include "ECS/Component/BaseComponent.h"
 #include "ECS/Component/TransformComponent.h"
 #include "ECS/Component/AudioSourceComponent.h"
+#include "ECS/Component/ModelComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -63,6 +64,10 @@ void loadLevel(const char* path, Scene& scene) {
     scene.entities.clear();
     scene.selectedEntity = nullptr;
 
+    std::string projRoot = assetfolder::getProjectRoot();
+    if (!projRoot.empty())
+        projRoot += "/";
+
     // load audio
     // store set of shared pointers temporarily before components are initialized
     std::vector<std::shared_ptr<audio::AudioDescriptor>> audioPtrs;
@@ -70,25 +75,34 @@ void loadLevel(const char* path, Scene& scene) {
         assert(doc.HasMember("audio"));
         auto jsonAudio = doc["audio"].GetArray();
         for (unsigned int i = 0; i < jsonAudio.Size(); i++) {
-            audioPtrs.emplace_back(audio::audioLoad(
-                jsonAudio[i]["path"].GetString(), jsonAudio[i]["uuid"].GetString()));
+            audioPtrs.emplace_back(
+                audio::audioLoad((projRoot + jsonAudio[i]["path"].GetString()).c_str(),
+                    jsonAudio[i]["uuid"].GetString()));
         }
     }
 
     // load textures
+    std::vector<std::shared_ptr<TextureDescriptor>> texturePtrs;
     {
         assert(doc.HasMember("textures"));
         auto jsonTextures = doc["textures"].GetArray();
         for (unsigned int i = 0; i < jsonTextures.Size(); i++) {
-            // TODO init with fixed uuid
-            // loadTexture(jsonTextures[i]["path"].GetString());
+            texturePtrs.emplace_back(
+                loadTexture((projRoot + jsonTextures[i]["path"].GetString()).c_str(),
+                    jsonTextures[i]["uuid"].GetString()));
         }
     }
 
     // TODO - load models
+    std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
         assert(doc.HasMember("models"));
         auto jsonModels = doc["models"].GetArray();
+        for (unsigned int i = 0; i < jsonModels.Size(); i++) {
+            modelPtrs.emplace_back(
+                model::modelLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
+                    jsonModels[i]["uuid"].GetString()));
+        }
     }
 
     // TODO load scripts
@@ -116,12 +130,12 @@ void loadLevel(const char* path, Scene& scene) {
             baseEntity.uuid = entity["uuid"].GetInt();
             baseEntity.name = std::string(entity["name"].GetString());
             baseEntity.parent = entity["parent"].GetInt();
-            baseEntity.position = glm::vec3(entity["position"][0].GetFloat(),
+            baseEntity.state.position = glm::vec3(entity["position"][0].GetFloat(),
                 entity["position"][1].GetFloat(), entity["position"][2].GetFloat());
-            baseEntity.rotation =
+            baseEntity.state.rotation =
                 glm::quat(entity["rotation"][0].GetFloat(), entity["rotation"][1].GetFloat(),
                     entity["rotation"][2].GetFloat(), entity["rotation"][3].GetFloat());
-            baseEntity.scale = glm::vec3(entity["scale"][0].GetFloat(),
+            baseEntity.state.scale = glm::vec3(entity["scale"][0].GetFloat(),
                 entity["scale"][1].GetFloat(), entity["scale"][2].GetFloat());
 
             // add components
@@ -166,6 +180,32 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(audioSrc);
                 }
 
+                // CameraComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "CameraComponent") == 0) {
+                    CameraComponent cam;
+                    cam.uuid = jsonComponent["uuid"].GetInt();
+                    cam.name = std::string(jsonComponent["name"].GetString());
+                    cam.eye = glm::vec3(jsonComponent["eye"][0].GetFloat(),
+                        jsonComponent["eye"][1].GetFloat(), jsonComponent["eye"][2].GetFloat());
+                    cam.center = glm::vec3(jsonComponent["center"][0].GetFloat(),
+                        jsonComponent["center"][1].GetFloat(),
+                        jsonComponent["center"][2].GetFloat());
+                    cam.up = glm::vec3(jsonComponent["up"][0].GetFloat(),
+                        jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
+                    cam.fov = jsonComponent["fov"].GetFloat();
+
+                    baseEntity.components.addComponent(cam);
+                }
+
+                // ModelComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
+                    ModelComponent model;
+                    model.uuid = jsonComponent["uuid"].GetInt();
+                    model.name = std::string(jsonComponent["name"].GetString());
+                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
+                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
+                    baseEntity.components.addComponent(model);
+                }
                 // BaseComponent
                 else {
                     BaseComponent base;

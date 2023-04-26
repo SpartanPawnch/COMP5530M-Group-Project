@@ -111,14 +111,11 @@ namespace audio {
 
     AudioDescriptor::~AudioDescriptor() {
         // skip if bulk clear has been performed
-        if (loadedClips.size() == 0)
+        if (loadedClips.size() <= idx)
             return;
 
         // stop clip being deleted
         loadedClips[idx].wav->stop();
-
-        // clear related index
-        uuidToIdx.erase(loadedClips[idx].uuid);
 
         // update info for back
         uuidToIdx[loadedClips.back().uuid] = idx;
@@ -126,6 +123,9 @@ namespace audio {
             ref->idx = idx;
             ref->path = &loadedClips[idx].path;
         }
+
+        // clear related index
+        uuidToIdx.erase(loadedClips[idx].uuid);
 
         // move deleted clip to back
         std::swap(loadedClips[idx], loadedClips.back());
@@ -140,8 +140,8 @@ namespace audio {
         // try to add new clip
         if (uuidToIdx.count(uuid) == 0) {
             // construct new info element
-            loadedClips.emplace_back(AudioInfo{uuid, std::string(path),
-                std::make_shared<SoLoud::Wav>(), std::weak_ptr<AudioDescriptor>()});
+            loadedClips.emplace_back(AudioInfo{ uuid, std::string(path),
+                std::make_shared<SoLoud::Wav>(), std::weak_ptr<AudioDescriptor>() });
 
             // try to load clip
             SoLoud::result res = loadedClips.back().wav->load(path);

@@ -55,6 +55,9 @@ namespace assetfolder {
     // get name from path
     std::string getName(const char* path);
 
+    // get current active directory
+    std::string getProjectRoot();
+
     // get relative path based on current path
     std::string getRelativePath(const char* path);
 }

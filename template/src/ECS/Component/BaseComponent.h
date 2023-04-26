@@ -3,12 +3,14 @@
 #include <vector>
 #include <string>
 
-class BaseComponent{
-public:
+#include "../EntityState/EntityState.h"
+
+class BaseComponent {
+  public:
     BaseComponent();
     ~BaseComponent();
     virtual void start();
-    virtual void update(float dt);
+    virtual void update(float dt, EntityState& state);
     virtual void stop();
 
     int uuid;
