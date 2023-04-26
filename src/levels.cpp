@@ -23,6 +23,7 @@
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Component/BaseComponent.h"
 #include "ECS/Component/TransformComponent.h"
+#include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/ModelComponent.h"
 
 static std::string currentLevelPath;
@@ -63,23 +64,32 @@ void loadLevel(const char* path, Scene& scene) {
     scene.entities.clear();
     scene.selectedEntity = nullptr;
 
+    std::string projRoot = assetfolder::getProjectRoot();
+    if (!projRoot.empty())
+        projRoot += "/";
+
     // load audio
+    // store set of shared pointers temporarily before components are initialized
+    std::vector<std::shared_ptr<audio::AudioDescriptor>> audioPtrs;
     {
         assert(doc.HasMember("audio"));
         auto jsonAudio = doc["audio"].GetArray();
         for (unsigned int i = 0; i < jsonAudio.Size(); i++) {
-            // TODO init with fixed uuid
-            // audio::audioLoad(jsonAudio[i]["path"].GetString());
+            audioPtrs.emplace_back(
+                audio::audioLoad((projRoot + jsonAudio[i]["path"].GetString()).c_str(),
+                    jsonAudio[i]["uuid"].GetString()));
         }
     }
 
     // load textures
+    std::vector<std::shared_ptr<TextureDescriptor>> texturePtrs;
     {
         assert(doc.HasMember("textures"));
         auto jsonTextures = doc["textures"].GetArray();
         for (unsigned int i = 0; i < jsonTextures.Size(); i++) {
-            // TODO init with fixed uuid
-            // loadTexture(jsonTextures[i]["path"].GetString());
+            texturePtrs.emplace_back(
+                loadTexture((projRoot + jsonTextures[i]["path"].GetString()).c_str(),
+                    jsonTextures[i]["uuid"].GetString()));
         }
     }
 
@@ -89,7 +99,9 @@ void loadLevel(const char* path, Scene& scene) {
         assert(doc.HasMember("models"));
         auto jsonModels = doc["models"].GetArray();
         for (unsigned int i = 0; i < jsonModels.Size(); i++) {
-            modelPtrs.emplace_back(model::modelLoad(jsonModels[i]["path"].GetString(), jsonModels[i]["uuid"].GetString()));
+            modelPtrs.emplace_back(
+                model::modelLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
+                    jsonModels[i]["uuid"].GetString()));
         }
     }
 
@@ -138,7 +150,7 @@ void loadLevel(const char* path, Scene& scene) {
                         jsonComponent["position"][1].GetFloat(),
                         jsonComponent["position"][2].GetFloat());
 
-                    trComponent.rotation = glm::vec4(jsonComponent["rotation"][0].GetFloat(),
+                    trComponent.rotation = glm::quat(jsonComponent["rotation"][0].GetFloat(),
                         jsonComponent["rotation"][1].GetFloat(),
                         jsonComponent["rotation"][2].GetFloat(),
                         jsonComponent["rotation"][3].GetFloat());
@@ -151,6 +163,40 @@ void loadLevel(const char* path, Scene& scene) {
 
                     baseEntity.components.addComponent(trComponent);
                 }
+
+                // AudioSourceComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "AudioSourceComponent") == 0) {
+                    AudioSourceComponent audioSrc;
+                    audioSrc.uuid = jsonComponent["uuid"].GetInt();
+                    audioSrc.name = std::string(jsonComponent["name"].GetString());
+                    audioSrc.clipUuid = std::string(jsonComponent["clipUuid"].GetString());
+                    audioSrc.clipDescriptor = audio::audioGetByUuid(audioSrc.clipUuid);
+                    audioSrc.playOnStart = jsonComponent.HasMember("playOnStart")
+                        ? jsonComponent["playOnStart"].GetBool()
+                        : false;
+                    audioSrc.loop = jsonComponent["loop"].GetBool();
+                    audioSrc.directional = jsonComponent["directional"].GetBool();
+
+                    baseEntity.components.addComponent(audioSrc);
+                }
+
+                // CameraComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "CameraComponent") == 0) {
+                    CameraComponent cam;
+                    cam.uuid = jsonComponent["uuid"].GetInt();
+                    cam.name = std::string(jsonComponent["name"].GetString());
+                    cam.eye = glm::vec3(jsonComponent["eye"][0].GetFloat(),
+                        jsonComponent["eye"][1].GetFloat(), jsonComponent["eye"][2].GetFloat());
+                    cam.center = glm::vec3(jsonComponent["center"][0].GetFloat(),
+                        jsonComponent["center"][1].GetFloat(),
+                        jsonComponent["center"][2].GetFloat());
+                    cam.up = glm::vec3(jsonComponent["up"][0].GetFloat(),
+                        jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
+                    cam.fov = jsonComponent["fov"].GetFloat();
+
+                    baseEntity.components.addComponent(cam);
+                }
+
                 // ModelComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
                     ModelComponent model;
@@ -179,70 +225,147 @@ void loadLevel(const char* path, Scene& scene) {
     logging::logInfo("Opened level {}\n", path);
 }
 
-static rapidjson::Value saveComponent(
-    const TransformComponent& trComponent, rapidjson::Document& d) {
-    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+// --- Per-Component-Type serialization functions
+static void saveComponent(
+    const TransformComponent& trComponent, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
 
-    jsonComponent.AddMember(
-        "name", rapidjson::Value(trComponent.name.c_str(), d.GetAllocator()), d.GetAllocator());
-    jsonComponent.AddMember("uuid", rapidjson::Value(trComponent.uuid), d.GetAllocator());
+    writer.StartObject();
 
-    jsonComponent.AddMember(
-        "type", rapidjson::Value("TransformComponent", d.GetAllocator()), d.GetAllocator());
+    // shared properties
+    writer.Key("name");
+    writer.String(trComponent.name.c_str());
 
+    writer.Key("uuid");
+    writer.Int(trComponent.uuid);
+
+    writer.Key("type");
+    writer.String("TransformComponent");
+
+    writer.Key("position");
     // position
-    rapidjson::Value pos(rapidjson::kArrayType);
-    pos.PushBack(trComponent.position[0], d.GetAllocator());
-    pos.PushBack(trComponent.position[1], d.GetAllocator());
-    pos.PushBack(trComponent.position[2], d.GetAllocator());
-    jsonComponent.AddMember("position", pos, d.GetAllocator());
-
+    writer.StartArray();
+    writer.Double(double(trComponent.position[0]));
+    writer.Double(double(trComponent.position[1]));
+    writer.Double(double(trComponent.position[2]));
+    writer.EndArray();
     // rotation
-    rapidjson::Value rot(rapidjson::kArrayType);
-    rot.PushBack(trComponent.rotation[0], d.GetAllocator());
-    rot.PushBack(trComponent.rotation[1], d.GetAllocator());
-    rot.PushBack(trComponent.rotation[2], d.GetAllocator());
-    rot.PushBack(trComponent.rotation[3], d.GetAllocator());
-    jsonComponent.AddMember("rotation", rot, d.GetAllocator());
+    writer.Key("rotation");
+    writer.StartArray();
+    writer.Double(trComponent.rotation[0]);
+    writer.Double(trComponent.rotation[1]);
+    writer.Double(trComponent.rotation[2]);
+    writer.Double(trComponent.rotation[3]);
+
+    writer.EndArray();
 
     // scale
-    rapidjson::Value scale(rapidjson::kArrayType);
-    scale.PushBack(trComponent.scale[0], d.GetAllocator());
-    scale.PushBack(trComponent.scale[1], d.GetAllocator());
-    scale.PushBack(trComponent.scale[2], d.GetAllocator());
-    jsonComponent.AddMember("scale", scale, d.GetAllocator());
+    writer.Key("scale");
+    writer.StartArray();
+    writer.Double(double(trComponent.scale[0]));
+    writer.Double(double(trComponent.scale[1]));
+    writer.Double(double(trComponent.scale[2]));
+    writer.EndArray();
 
-    return jsonComponent;
+    writer.EndObject();
 }
 
-static rapidjson::Value saveComponent(const BaseComponent& component, rapidjson::Document& d) {
-    rapidjson::Value jsonComponent(rapidjson::kObjectType);
-
-    jsonComponent.AddMember(
-        "name", rapidjson::Value(component.name.c_str(), d.GetAllocator()), d.GetAllocator());
-    jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
-
-    jsonComponent.AddMember(
-        "type", rapidjson::Value("BaseComponent", d.GetAllocator()), d.GetAllocator());
-
-    return jsonComponent;
+static void saveComponent(
+    const BaseComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(component.name.c_str());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+    writer.Key("type");
+    writer.String("BaseComponent");
+    writer.EndObject();
 }
 
-static rapidjson::Value saveComponent(
-    const ModelComponent& component, rapidjson::Document& d) {
-    rapidjson::Value jsonComponent(rapidjson::kObjectType);
+static void saveComponent(
+    const AudioSourceComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
 
-    jsonComponent.AddMember(
-        "name", rapidjson::Value(component.name.c_str(), d.GetAllocator()), d.GetAllocator());
-    jsonComponent.AddMember("uuid", rapidjson::Value(component.uuid), d.GetAllocator());
+    writer.Key("name");
+    writer.String(component.name.c_str());
 
-    jsonComponent.AddMember(
-        "type", rapidjson::Value("ModelComponent", d.GetAllocator()), d.GetAllocator());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
 
-    jsonComponent.AddMember("modelUuid",
-        rapidjson::Value(component.modelUuid.c_str(), d.GetAllocator()), d.GetAllocator());
-    
-    return jsonComponent;
+    writer.Key("type");
+    writer.String("AudioSourceComponent");
+
+    writer.Key("clipUuid");
+    writer.String(component.clipUuid.c_str());
+
+    writer.Key("loop");
+    writer.Bool(component.loop);
+
+    writer.Key("directional");
+    writer.Bool(component.directional);
+
+    writer.Key("playOnStart");
+    writer.Bool(component.playOnStart);
+
+    writer.EndObject();
+}
+
+static void saveComponent(
+    const CameraComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("CameraComponent");
+
+    writer.Key("eye");
+    writer.StartArray();
+    writer.Double(float(component.eye[0]));
+    writer.Double(float(component.eye[1]));
+    writer.Double(float(component.eye[2]));
+    writer.EndArray();
+
+    writer.Key("center");
+    writer.StartArray();
+    writer.Double(float(component.center[0]));
+    writer.Double(float(component.center[1]));
+    writer.Double(float(component.center[2]));
+    writer.EndArray();
+
+    writer.Key("up");
+    writer.StartArray();
+    writer.Double(float(component.up[0]));
+    writer.Double(float(component.up[1]));
+    writer.Double(float(component.up[2]));
+    writer.EndArray();
+
+    writer.Key("fov");
+    writer.Double(double(component.fov));
+
+    writer.EndObject();
+}
+
+static void saveComponent(
+    const ModelComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("ModelComponent");
+
+    writer.Key("modelUuid");
+    writer.String(component.modelUuid.c_str());
+
+    writer.EndObject();
 }
 
 // save level to manifest in path
@@ -255,132 +378,181 @@ void saveLevel(const char* path, const Scene& scene) {
         return;
     }
 
-    rapidjson::Document d;
-    d.SetObject();
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+
+    writer.StartObject();
 
     // save ECS and enumerate dependencies
-    std::vector<int> audioIds;
+    std::vector<int> modelIds;
     std::vector<int> textureIds;
     std::vector<int> scriptIds;
     std::vector<int> miscIds;
 
     // encode entities
     {
-        rapidjson::Value jsonEntities(rapidjson::kArrayType);
+        writer.Key("entities");
+        writer.StartArray();
+        // rapidjson::Value jsonEntities(rapidjson::kArrayType);
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
-            rapidjson::Value jsonEntity(rapidjson::kObjectType);
+            writer.StartObject();
 
             // encode entity properties
-            jsonEntity.AddMember("name",
-                rapidjson::Value(scene.entities[i].name.c_str(), d.GetAllocator()),
-                d.GetAllocator());
-            jsonEntity.AddMember(
-                "uuid", rapidjson::Value(scene.entities[i].uuid), d.GetAllocator());
-            jsonEntity.AddMember(
-                "parent", rapidjson::Value(scene.entities[i].parent), d.GetAllocator());
+            writer.Key("name");
+            writer.String(scene.entities[i].name.c_str());
+
+            writer.Key("uuid");
+            writer.Int(scene.entities[i].uuid);
+
+            writer.Key("parent");
+            writer.Int(scene.entities[i].parent);
 
             // position
-            rapidjson::Value pos(rapidjson::kArrayType);
-            pos.PushBack(scene.entities[i].position[0], d.GetAllocator());
-            pos.PushBack(scene.entities[i].position[1], d.GetAllocator());
-            pos.PushBack(scene.entities[i].position[2], d.GetAllocator());
-            jsonEntity.AddMember("position", pos, d.GetAllocator());
+            writer.Key("position");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].position[0]));
+            writer.Double(double(scene.entities[i].position[1]));
+            writer.Double(double(scene.entities[i].position[2]));
+
+            writer.EndArray();
 
             // rotation
-            rapidjson::Value rot(rapidjson::kArrayType);
-            rot.PushBack(scene.entities[i].rotation[0], d.GetAllocator());
-            rot.PushBack(scene.entities[i].rotation[1], d.GetAllocator());
-            rot.PushBack(scene.entities[i].rotation[2], d.GetAllocator());
-            rot.PushBack(scene.entities[i].rotation[3], d.GetAllocator());
-            jsonEntity.AddMember("rotation", rot, d.GetAllocator());
+            writer.Key("rotation");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].rotation[0]));
+            writer.Double(double(scene.entities[i].rotation[1]));
+            writer.Double(double(scene.entities[i].rotation[2]));
+            writer.Double(double(scene.entities[i].rotation[3]));
+
+            writer.EndArray();
 
             // scale
-            rapidjson::Value scale(rapidjson::kArrayType);
-            scale.PushBack(scene.entities[i].scale[0], d.GetAllocator());
-            scale.PushBack(scene.entities[i].scale[1], d.GetAllocator());
-            scale.PushBack(scene.entities[i].scale[2], d.GetAllocator());
-            jsonEntity.AddMember("scale", scale, d.GetAllocator());
+            writer.Key("scale");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].scale[0]));
+            writer.Double(double(scene.entities[i].scale[1]));
+            writer.Double(double(scene.entities[i].scale[2]));
+
+            writer.EndArray();
 
             // encode components
-            rapidjson::Value jsonComponents(rapidjson::kArrayType);
+            writer.Key("components");
+            writer.StartArray();
 
             // TransformComponent
             const std::vector<TransformComponent>& transformComponents =
                 scene.entities[i].components.vecTransformComponent;
             for (unsigned int j = 0; j < transformComponents.size(); j++) {
-                rapidjson::Value jsonComponent = saveComponent(transformComponents[j], d);
-                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+                saveComponent(transformComponents[j], writer);
+            }
+
+            // AudioSourceComponent
+            const std::vector<AudioSourceComponent>& audioSrcComponents =
+                scene.entities[i].components.vecAudioSourceComponent;
+            for (unsigned int j = 0; j < audioSrcComponents.size(); j++) {
+                saveComponent(audioSrcComponents[j], writer);
+            }
+
+            // CameraComponent
+            const std::vector<CameraComponent>& cameraComponents =
+                scene.entities[i].components.vecCameraComponent;
+            for (unsigned int j = 0; j < cameraComponents.size(); j++) {
+                saveComponent(cameraComponents[j], writer);
             }
 
             // ModelComponent
             const std::vector<ModelComponent>& modelComponents =
                 scene.entities[i].components.vecModelComponent;
             for (unsigned int j = 0; j < modelComponents.size(); j++) {
-                rapidjson::Value jsonComponent = saveComponent(modelComponents[j], d);
-                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+                saveComponent(modelComponents[j], writer);
             }
 
             // BaseComponent
             const std::vector<BaseComponent>& baseComponents =
                 scene.entities[i].components.vecBaseComponent;
             for (unsigned int j = 0; j < baseComponents.size(); j++) {
-                rapidjson::Value jsonComponent = saveComponent(baseComponents[i], d);
-                jsonComponents.PushBack(jsonComponent, d.GetAllocator());
+                saveComponent(baseComponents[j], writer);
             }
 
-            jsonEntity.AddMember("components", jsonComponents, d.GetAllocator());
-
-            jsonEntities.PushBack(jsonEntity, d.GetAllocator());
+            writer.EndArray();
+            writer.EndObject();
         }
-        d.AddMember("entities", jsonEntities, d.GetAllocator());
+        writer.EndArray();
     }
 
-    // TODO - save audio
+    // save audio
     {
-        rapidjson::Value jsonAudio(rapidjson::kArrayType);
-        d.AddMember("audio", jsonAudio, d.GetAllocator());
+        writer.Key("audio");
+        writer.StartArray();
+        std::vector<audio::AudioDiskData> data;
+        audio::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
+        }
+
+        writer.EndArray();
     }
 
     // TODO - save models
     {
-        rapidjson::Value jsonModels(rapidjson::kArrayType);
+        writer.Key("models");
+        writer.StartArray();
         std::vector<model::ModelDiskData> data;
         model::getDiskData(data);
 
         for (unsigned int i = 0; i < data.size(); i++) {
-            rapidjson::Value jsonModel(rapidjson::kObjectType);
-            jsonModel.AddMember(
-                "uuid", rapidjson::Value(data[i].uuid.c_str(), d.GetAllocator()), d.GetAllocator());
-            jsonModel.AddMember(
-                "path", rapidjson::Value(data[i].path.c_str(), d.GetAllocator()), d.GetAllocator());
-            jsonModels.PushBack(jsonModel, d.GetAllocator());
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
         }
-        d.AddMember("models", jsonModels, d.GetAllocator());
+
+        writer.EndArray();
     }
 
     // TODO - save textures
     {
-        rapidjson::Value jsonTextures(rapidjson::kArrayType);
-        d.AddMember("textures", jsonTextures, d.GetAllocator());
+        writer.Key("textures");
+        writer.StartArray();
+        writer.EndArray();
     }
 
     // TODO - save scripts
     {
-        rapidjson::Value jsonScripts(rapidjson::kArrayType);
-        d.AddMember("scripts", jsonScripts, d.GetAllocator());
+        writer.Key("scripts");
+        writer.StartArray();
+        writer.EndArray();
     }
 
     // TODO - save misc
     {
-        rapidjson::Value jsonMisc(rapidjson::kArrayType);
-        d.AddMember("misc", jsonMisc, d.GetAllocator());
+        writer.Key("misc");
+        writer.StartArray();
+        writer.EndArray();
     }
 
     // save and close document
-    char writeBuf[BUFSIZ];
-    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
-    d.Accept(writer);
+    writer.EndObject();
+    writer.Flush();
+    osw.Flush();
     fclose(file);
 
     logging::logInfo("Saved level {}\n", path);

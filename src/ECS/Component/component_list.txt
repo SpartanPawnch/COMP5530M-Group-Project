@@ -1,5 +1,7 @@
 BaseComponent
 TransformComponent
 ScriptComponent
+CameraComponent
+AudioSourceComponent
 ModelComponent
 SkeletalModelComponent

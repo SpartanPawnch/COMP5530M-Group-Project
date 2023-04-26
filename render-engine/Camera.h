@@ -11,13 +11,21 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-enum direction { FORWARD = 0, BACKWARD, LEFT, RIGHT, ASCEND, DESCEND, FAST, SLOW};
+enum direction {
+    FORWARD = 0,
+    BACKWARD,
+    LEFT,
+    RIGHT,
+    ASCEND,
+    DESCEND,
+    FAST,
+    SLOW
+};
 
-class Camera
-{
+class Camera {
 
-private:
-    //Variables
+  private:
+    // Variables
     glm::mat4 viewMatrix;
 
     GLfloat movementSpeed;
@@ -40,27 +48,33 @@ private:
 
     void updateCameraProperties();
 
-public:
-
+  public:
     bool focusState;
+    float fov = 90.0f;
 
     Camera(glm::vec3 position, glm::vec3 direction);
 
-    ~Camera() {}
+    ~Camera() {
+    }
 
-    //Getters
+    // Getters
     const glm::mat4 getViewMatrix();
 
     const glm::vec3 getPosition();
 
+    glm::vec3 getCenter();
+
     void resetPosition();
 
-    //Functions
+    // Functions
     void updateKeyboardInput(const float& deltaTime, const int direction);
     void updateMouseInput(const float& deltaTime, const double& offsetX, const double& offsetY);
 
-    void updateInput(const float& deltaTime, const int direction, const double& offsetX, const double& offsetY);
+    void updateInput(
+        const float& deltaTime, const int direction, const double& offsetX, const double& offsetY);
 
+    void setDirect(
+        const glm::vec3& _eye, const glm::vec3& _center, const glm::vec3& _up, const float _fov);
 };
 
 #endif // CAMERA_H

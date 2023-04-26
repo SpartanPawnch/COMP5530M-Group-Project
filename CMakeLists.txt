@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildSys CXX C)
 
+#common vars
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 #setup SoLoud
@@ -29,15 +30,21 @@ set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
 aux_source_directory("${LUADIR}/" LUASRC)
 
+#setup icon on windows
+if(WIN32)
+    set(ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
+endif(WIN32)
+
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp src/drawing.cpp 
+    ${PROJECT_NAME} src/main.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp src/gui.cpp src/scripting.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
+    src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp src/ECS/Component/ModelComponent.cpp
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
@@ -85,14 +92,34 @@ add_custom_target(ComponentStorageGen
 )
 add_dependencies(${PROJECT_NAME} ComponentStorageGen)
 
-#copy dirs after build
+#create template
 add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    TARGET ${PROJECT_NAME} POST_BUILD
+    #install assimp
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/assimp-5.2.5
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/assimp
+
+    #install glfw
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/glfw-3.3.6
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/glfw-3.3.6
+
+    #install soloud
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/soloud/contrib
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
+
+    #copy template
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_CURRENT_SOURCE_DIR}/template
     $<TARGET_FILE_DIR:${PROJECT_NAME}>/template
 )
 
+#copy dirs after build
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
@@ -105,4 +132,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_CURRENT_SOURCE_DIR}/fonts/
     $<TARGET_FILE_DIR:${PROJECT_NAME}>/fonts
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/logo.ico
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/Launcher/logo.png
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )

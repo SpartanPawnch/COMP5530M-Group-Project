@@ -22,7 +22,10 @@ enum Pipeline {
     ShadowPipeline = 2,
     BillboardPipeline = 3,
     WaterPipeline = 4,
-    Render2DPipeline = 5
+    Render2DPipeline = 5,
+    GridPipeline = 6,
+    FrustumVisPipeline = 7,
+    Pipeline_MAX
 };
 
 struct Buffer
@@ -77,12 +80,14 @@ class RenderManager {
     void runBillboardPipeline();
     void runWaterPipeline();
     void run2DPipeline();
+    void runGridPipeline();
+    void runFrustumVisPipeline();
 
   public:
     // members
     // TODO
-    Camera* camera;
-    Camera* previewCamera;
+    Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
+    Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
     double deltaTime;
 
@@ -95,6 +100,7 @@ class RenderManager {
     glm::mat4 modelMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
+    glm::mat4 previewMatrix;
 
     // needs to be static to be invoked without object of class
     static RenderManager* getInstance();
@@ -122,6 +128,8 @@ class RenderManager {
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
+    void renderGrid(int width, int height);
+    void renderCamPreview(const Scene& scene, int width, int height);
 
     void updateMatrices(int* width, int* height);
 
