@@ -11,6 +11,7 @@ struct GUIManager {
     ~GUIManager();
 };
 
+extern GLuint viewportMultisampleFramebuffer;
 extern GLuint viewportFramebuffer;
 extern int viewportTexWidth;
 extern int viewportTexHeight;

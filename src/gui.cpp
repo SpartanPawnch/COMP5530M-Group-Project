@@ -72,8 +72,8 @@ static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
 
 // asset manager controls
-static assetfolder::AssetDescriptor currAssetFolder = {
-    "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
+static assetfolder::AssetDescriptor currAssetFolder = {"", "",
+    assetfolder::AssetDescriptor::EFileType::INVALID};
 static std::vector<assetfolder::AssetDescriptor> folderItems;
 static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
@@ -92,9 +92,11 @@ static RenderManager* renderManager;
 Scene scene;
 
 // viewport widget vars
+GLuint viewportMultisampleFramebuffer;
 GLuint viewportFramebuffer;
-static GLuint viewportTex;
-static GLuint viewportDepthBuf;
+static GLuint viewportMultisampleTex;
+static GLuint viewportMultisampleDepthBuf;
+static GLuint viewportResolveTex;
 
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
@@ -141,20 +143,40 @@ GUIManager::GUIManager(GLFWwindow* window) {
     // don't unload ui elements
     setTexturesStaticThreshold();
 
-    // create viewport framebuffer
+    // create viewport framebuffers
+
+    // multisample
+    glGenFramebuffers(1, &viewportMultisampleFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
+
+    // glGenTextures(1, &viewportMultisampleTex);
+    // glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, viewportMultisampleTex);
+    // glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, 200, 200, GL_TRUE);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE,
+    //     viewportMultisampleTex, 0);
+    glGenRenderbuffers(1, &viewportMultisampleTex);
+    glBindRenderbuffer(GL_RENDERBUFFER, viewportMultisampleTex);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, 200, 200);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,
+        viewportMultisampleTex);
+
+    glGenRenderbuffers(1, &viewportMultisampleDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, viewportMultisampleDepthBuf);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_STENCIL, 200, 200);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+        viewportMultisampleDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    // resolve
     glGenFramebuffers(1, &viewportFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
-
-    glGenTextures(1, &viewportTex);
-    glBindTexture(GL_TEXTURE_2D, viewportTex);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, viewportTex, 0);
+    glGenTextures(1, &viewportResolveTex);
+    glBindTexture(GL_TEXTURE_2D, viewportResolveTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 200, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, viewportResolveTex,
+        0);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    glGenRenderbuffers(1, &viewportDepthBuf);
-    glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
-    glFramebufferRenderbuffer(
-        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     baseWindow = window;
     renderManager = RenderManager::getInstance();
@@ -163,8 +185,8 @@ GUIManager::~GUIManager() {
     if (projectThread.joinable())
         projectThread.join();
 
-    glDeleteFramebuffers(1, &viewportFramebuffer);
-    glDeleteTextures(1, &viewportTex);
+    glDeleteFramebuffers(1, &viewportMultisampleFramebuffer);
+    glDeleteTextures(1, &viewportMultisampleTex);
 }
 
 // --- Build System Utilities ---
@@ -314,8 +336,8 @@ static void handleMouseInput(GLFWwindow* window) {
         renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
 
         // send data to camera
-        renderManager->camera.updateInput(
-            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+        renderManager->camera.updateInput(renderManager->deltaTime, -1, renderManager->xOffset,
+            renderManager->yOffset);
 
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
@@ -382,8 +404,8 @@ inline float drawMainMenu(const char* executablePath) {
             }
             if (ImGui::MenuItem("Open Project")) {
                 const char* filter = "project.json";
-                std::string path = fdutil::openFile(
-                    "Open Project", nullptr, 1, &filter, "Project File (project.json)");
+                std::string path = fdutil::openFile("Open Project", nullptr, 1, &filter,
+                    "Project File (project.json)");
                 if (!path.empty()) {
                     if (projectThread.joinable())
                         projectThread.join();
@@ -488,8 +510,8 @@ inline void drawTextureDebug() {
         ImGui::PushFont(guicfg::regularFont);
         if (ImGui::Button("Load Texture")) {
             const char* filters[] = {"*.png", "*.jpg", "*.bmp", "*.tga", "*.hdr"};
-            std::string path = fdutil::openFile(
-                "Load Texture", NULL, sizeof(filters) / sizeof(filters[0]), filters, NULL);
+            std::string path = fdutil::openFile("Load Texture", NULL,
+                sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
             if (!path.empty()) {
                 activeTexture = loadTexture(path.c_str(), path.c_str());
@@ -600,8 +622,8 @@ inline void drawAssetBrowser() {
 
                 // selectable
                 ImGui::SetCursorPos(initialPos);
-                if (ImGui::Selectable(
-                        "##fileselector", itemIsSelected[i], 0, guicfg::assetMgrItemSize)) {
+                if (ImGui::Selectable("##fileselector", itemIsSelected[i], 0,
+                        guicfg::assetMgrItemSize)) {
                     if (glfwGetKey(baseWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                         glfwGetKey(baseWindow, GLFW_KEY_RIGHT_CONTROL)) {
                         itemIsSelected[i] = true;
@@ -651,6 +673,8 @@ inline void drawAssetBrowser() {
 int viewportTexWidth = 0;
 int viewportTexHeight = 0;
 
+static int viewportSamples = 4;
+
 inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
@@ -670,18 +694,38 @@ inline void drawViewport() {
         viewportTexHeight = int(windowSize.y);
 
         // adjust to window resize
-        glBindTexture(GL_TEXTURE_2D, viewportTex);
+        glBindRenderbuffer(GL_RENDERBUFFER, viewportMultisampleTex);
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, viewportSamples, GL_RGBA,
+            viewportTexWidth, viewportTexHeight);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, viewportMultisampleDepthBuf);
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, viewportSamples, GL_DEPTH_STENCIL,
+            viewportTexWidth, viewportTexHeight);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        glBindTexture(GL_TEXTURE_2D, viewportResolveTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindRenderbuffer(GL_RENDERBUFFER, viewportDepthBuf);
-        glRenderbufferStorage(
-            GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        ImVec2 initialPos = ImGui::GetCursorPos();
 
         // draw viewport
-        ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)viewportResolveTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+
+        // draw sample selector
+        ImGui::SetCursorPos(initialPos);
+        ImGui::PushFont(guicfg::regularFont);
+        ImGui::SetNextItemWidth(50);
+        if (ImGui::BeginCombo("Samples", std::to_string(viewportSamples).c_str())) {
+            for (int i = 1; i < GL_MAX_SAMPLES && i <= 32; i *= 2) {
+                if (ImGui::Selectable(std::to_string(i).c_str(), i == viewportSamples))
+                    viewportSamples = i;
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopFont();
     }
     ImGui::PopStyleVar(2);
     ImGui::End();
@@ -1073,8 +1117,8 @@ inline void drawProperties() {
 }
 
 inline void drawLevels() {
-    static assetfolder::AssetDescriptor currLevelDir = {
-        "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
+    static assetfolder::AssetDescriptor currLevelDir = {"", "",
+        assetfolder::AssetDescriptor::EFileType::INVALID};
     static std::vector<assetfolder::AssetDescriptor> levelDescriptors;
     static int selectedLevel = -1;
 
@@ -1168,8 +1212,8 @@ inline void drawLevels() {
                     // load level and change window title
                     loadLevel(levelDescriptors[i].path.c_str(), scene);
 
-                    glfwSetWindowTitle(
-                        baseWindow, (levelDescriptors[i].name + " - ONO Engine").c_str());
+                    glfwSetWindowTitle(baseWindow,
+                        (levelDescriptors[i].name + " - ONO Engine").c_str());
                 }
 
                 if (ImGui::MenuItem("Rename")) {

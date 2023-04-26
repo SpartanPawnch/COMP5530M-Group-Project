@@ -16,6 +16,7 @@ RenderManager* RenderManager::getInstance() {
 void RenderManager::startUp(GLFWwindow* aWindow) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_MULTISAMPLE);
     glClearColor(0.2f, 0.2f, .2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT, GL_FILL);

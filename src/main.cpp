@@ -226,7 +226,7 @@ int main() {
 
         //--- Draw Results ---
         // draw scene to texture
-        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
         GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
@@ -282,6 +282,12 @@ int main() {
             renderManager->renderEntities(scene, &renderManager->previewCamera,
                 viewportTexWidth / 4, viewportTexHeight / 4);
         }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, viewportMultisampleFramebuffer);
+        glBlitFramebuffer(0, 0, viewportTexWidth, viewportTexHeight, 0, 0, viewportTexWidth,
+            viewportTexHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
         // wait for results
         glFlush();
 
