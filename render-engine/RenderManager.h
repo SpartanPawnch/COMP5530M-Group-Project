@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include<unordered_map>
+#include <unordered_map>
 
 #include "RenderPipeline.h"
 #include "Camera.h"
@@ -25,16 +25,15 @@ enum Pipeline {
     Render2DPipeline = 5,
     GridPipeline = 6,
     FrustumVisPipeline = 7,
+    EmptyVisPipeline = 8,
     Pipeline_MAX
 };
 
-struct Buffer
-{
+struct Buffer {
     VertexBuffer vBuffer;
     IndexBuffer iBuffer;
 
-    Buffer(VertexBuffer v, IndexBuffer i)
-    {
+    Buffer(VertexBuffer v, IndexBuffer i) {
         vBuffer = v;
         iBuffer = i;
     }
@@ -53,8 +52,8 @@ class RenderManager {
     // The Index of Pipeline Should match the Enum
     std::vector<RenderPipeline> pipelines; // Pipeline refers to a shader program
     std::unordered_map<Pipeline, std::vector<Buffer>> PipelineMeshBufferMap;
-    // 
-    //Light Sources
+    //
+    // Light Sources
     std::vector<LightSource> lights;
 
     // considering windows
@@ -82,6 +81,7 @@ class RenderManager {
     void run2DPipeline();
     void runGridPipeline();
     void runFrustumVisPipeline();
+    void runEmptyVisPipeline();
 
   public:
     // members
@@ -128,7 +128,7 @@ class RenderManager {
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
-    void renderGrid(int width, int height);
+    void renderGrid(Camera* camera, int width, int height);
     void renderCamPreview(const Scene& scene, int width, int height);
 
     void updateMatrices(int* width, int* height);
@@ -141,6 +141,7 @@ class RenderManager {
     void setupTexturePipelineUniforms();
     void runPipeline(Pipeline pipeline);
 
-    static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
+    static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO,
+        unsigned int* VBO, unsigned int* EBO);
     static void deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
 };

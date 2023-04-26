@@ -34,7 +34,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction) {
 }
 
 const glm::mat4 Camera::getViewMatrix() {
-    this->updateCameraProperties();
+    // this->updateCameraProperties();
 
     this->viewMatrix = glm::lookAt(this->position, this->position + this->front, this->up);
 
@@ -94,8 +94,8 @@ void Camera::updateKeyboardInput(const float& deltaTime, const int direction) {
     }
 }
 
-void Camera::updateMouseInput(
-    const float& deltaTime, const double& offsetX, const double& offsetY) {
+void Camera::updateMouseInput(const float& deltaTime, const double& offsetX,
+    const double& offsetY) {
     // Update pitch, yaw and roll
     this->pitch += static_cast<GLfloat>(-offsetY) * this->sensitivity * deltaTime;
     this->yaw += static_cast<GLfloat>(offsetX) * this->sensitivity * deltaTime;
@@ -110,15 +110,16 @@ void Camera::updateMouseInput(
     if (this->yaw > 360.f || this->yaw < -360.f) {
         this->yaw = 0.f;
     }
+    updateCameraProperties();
 }
 
-void Camera::updateInput(
-    const float& deltaTime, const int direction, const double& offsetX, const double& offsetY) {
+void Camera::updateInput(const float& deltaTime, const int direction, const double& offsetX,
+    const double& offsetY) {
     this->updateKeyboardInput(deltaTime, direction);
     this->updateMouseInput(deltaTime, offsetX, offsetY);
 }
-void Camera::setDirect(
-    const glm::vec3& _eye, const glm::vec3& _center, const glm::vec3& _up, const float _fov) {
+void Camera::setDirect(const glm::vec3& _eye, const glm::vec3& _center, const glm::vec3& _up,
+    const float _fov) {
     position = _eye;
     front = _center - _eye;
     up = _up;

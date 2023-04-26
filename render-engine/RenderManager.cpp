@@ -39,8 +39,8 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->camera = Camera(glm::vec3(.0f, 2.f, 8.f), glm::vec3(.0f, -2.f, -8.f));
 
     this->modelMatrix = glm::mat4(1.0f);
-    this->viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 3.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    this->viewMatrix = glm::lookAt(glm::vec3(0.0f, 3.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f));
     this->projectionMatrix = glm::mat4(1.0f);
 }
 
@@ -51,8 +51,8 @@ void RenderManager::shutDown() {
 void RenderManager::addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
     const char* geometryPath, const char* computePath, const char* tessControlPath,
     const char* tessEvalPath) {
-    RenderPipeline newPipeline = RenderPipeline(
-        vertexPath, fragmentPath, geometryPath, computePath, tessControlPath, tessEvalPath);
+    RenderPipeline newPipeline = RenderPipeline(vertexPath, fragmentPath, geometryPath, computePath,
+        tessControlPath, tessEvalPath);
 
     this->pipelines[pipe] = newPipeline;
 }
@@ -63,13 +63,12 @@ void RenderManager::updateMatrices(int* width, int* height) {
     // this->viewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
     // glm::vec3(0.0f, 1.0f, 0.0f));
     this->viewMatrix = camera.getViewMatrix();
-    this->projectionMatrix = glm::perspective(
-        glm::radians(camera.fov / 2.0f), (float)*width / (float)*height, 0.01f, 100.0f);
+    this->projectionMatrix = glm::perspective(glm::radians(camera.fov / 2.0f),
+        (float)*width / (float)*height, 0.01f, 100.0f);
 }
 
-void RenderManager::addMeshToPipeline(
-    std::vector<Pipeline> pipeline, VertexBuffer vBuffer, IndexBuffer iBuffer, GLuint VAO) {
-
+void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuffer vBuffer,
+    IndexBuffer iBuffer, GLuint VAO) {
     for (unsigned int i = 0; i < pipeline.size(); i++) {
         if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end()) {
             PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{Buffer(vBuffer, iBuffer)};
@@ -83,248 +82,63 @@ void RenderManager::addMeshToPipeline(
 }
 
 void RenderManager::loadScene() {
-
     // Load entity models
     Model model;
     model.loadModel("assets/tree.obj");
 
+    // clang-format off
     GLfloat cubeVertices[] = {
         // Front face
         // Position                 // Normal               // Color
-        -1.0f,
-        -1.0f,
-        5.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        5.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        5.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        5.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        0.0f,
+        -1.0f,-1.0f,5.0f,           0.0f,0.0f,1.0f,         1.0f,0.0f,0.0f,
+        1.0f,-1.0f,5.0f,            0.0f,0.0f,1.0f,         0.0f,1.0f,0.0f,
+        1.0f,1.0f,5.0f,             0.0f,0.0f,1.0f,         0.0f,0.0f,1.0f,
+        -1.0f,1.0f,5.0f,            0.0f,0.0f,1.0f,         1.0f,1.0f,0.0f,
         // Back face
         // Position                 // Normal               // Color
-        -1.0f,
-        -1.0f,
-        -5.0f,
-        0.0f,
-        0.0f,
-        -1.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        -5.0f,
-        0.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -5.0f,
-        0.0f,
-        0.0f,
-        -1.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        -5.0f,
-        0.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
+        -1.0f,-1.0f,-5.0f,          0.0f,0.0f,-1.0f,        1.0f,0.0f,1.0f,
+        1.0f,-1.0f,-5.0f,           0.0f,0.0f,-1.0f,        0.0f,1.0f,1.0f,
+        1.0f,1.0f,-5.0f,            0.0f,0.0f,-1.0f,        1.0f,1.0f,1.0f,
+        -1.0f,1.0f,-5.0f,           0.0f,0.0f,-1.0f,        0.0f,0.0f,0.0f,
         // Left face
         // Position                 // Normal               // Color
-        -1.0f,
-        -1.0f,
-        -5.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        -1.0f,
-        5.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        -1.0f,
-        1.0f,
-        5.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.0f,
-        -1.0f,
-        1.0f,
-        -5.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
+        -1.0f,-1.0f,-5.0f,          -1.0f,0.0f,0.0f,        1.0f,0.0f,1.0f,
+        -1.0f,-1.0f,5.0f,           -1.0f,0.0f,0.0f,        1.0f,0.0f,0.0f,
+        -1.0f,1.0f,5.0f,            -1.0f,0.0f,0.0f,        1.0f,1.0f,0.0f,
+        -1.0f,1.0f,-5.0f,           -1.0f,0.0f,0.0f,        1.0f,1.0f,1.0f,
         // Right face
         // Position                 // Normal               // Color
-        1.0f,
-        -1.0f,
-        -5.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        5.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        5.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -5.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
+        1.0f,-1.0f,-5.0f,           1.0f,0.0f,0.0f,         0.0f,1.0f,1.0f,
+        1.0f,-1.0f,5.0f,            1.0f,0.0f,0.0f,         0.0f,1.0f,0.0f,
+        1.0f,1.0f,5.0f,             1.0f,0.0f,0.0f,         0.0f,0.0f,1.0f,
+        1.0f,1.0f,-5.0f,            1.0f,0.0f,0.0f,         1.0f,1.0f,1.0f,
         // Top face
         // Position                 // Normal               // Color
-        -1.0f,
-        1.0f,
-        5.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        5.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -5.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        -5.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
+        -1.0f,1.0f,5.0f,            0.0f,1.0f,0.0f,         1.0f,1.0f,0.0f,
+        1.0f,1.0f,5.0f,             0.0f,1.0f,0.0f,         0.0f,0.0f,1.0f,
+        1.0f,1.0f,-5.0f,            0.0f,1.0f,0.0f,         1.0f,1.0f,1.0f,
+        -1.0f,1.0f,-5.0f,           0.0f,1.0f,0.0f,         0.0f,0.0f,0.0f,
         // Bottom face
         // Position                 // Normal               // Color
-        -1.0f,
-        -1.0f,
-        5.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        5.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        -5.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        -1.0f,
-        -5.0f,
-        0.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
+        -1.0f,-1.0f,5.0f,           0.0f,-1.0f,0.0f,        1.0f,0.0f,0.0f,
+        1.0f,-1.0f,5.0f,            0.0f,-1.0f,0.0f,        0.0f,1.0f,0.0f,
+        1.0f,-1.0f,-5.0f,           0.0f,-1.0f,0.0f,        0.0f,1.0f,1.0f,
+        -1.0f,-1.0f,-5.0f,          0.0f,-1.0f,0.0f,        1.0f,0.0f,1.0f,
     };
+    // clang-format on
     GLuint cubeIndices[] = {
-        0, 1, 2, 2, 3, 0, // Front face
-        4, 5, 6, 6, 7, 4, // Back face
-        8, 9, 10, 10, 11, 8, // Left face
-        12, 13, 14, 14, 15, 12, // Right face
-        16, 17, 18, 18, 19, 16, // Top face
-        20, 21, 22, 22, 23, 20 // Bottom face
+        0, 1, 2, 2, 3,
+        0, // Front face
+        4, 5, 6, 6, 7,
+        4, // Back face
+        8, 9, 10, 10, 11,
+        8, // Left face
+        12, 13, 14, 14, 15,
+        12, // Right face
+        16, 17, 18, 18, 19,
+        16, // Top face
+        20, 21, 22, 22, 23,
+        20 // Bottom face
     };
 
     std::vector<float> allVertices;
@@ -357,6 +171,8 @@ void RenderManager::loadScene() {
     const char* frustumVisVertPath = "assets/shaders/frustum.vert";
     const char* texVertexPath = "assets/shaders/tex.vert";
     const char* texFragPath = "assets/shaders/tex.frag";
+    const char* emptyVertPath = "assets/shaders/empty.vert";
+    const char* emptyFragPath = "assets/shaders/empty.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -386,13 +202,14 @@ void RenderManager::loadScene() {
 
     VertexBuffer vBuffer(model.meshes[0].vertices.size() * sizeof(Vertex),
         &model.meshes[0].vertices[0], TexturedObjectBuffer);
-    IndexBuffer ebo(
-        model.meshes[0].indices.size() * sizeof(unsigned int), &model.meshes[0].indices[0]);
+    IndexBuffer ebo(model.meshes[0].indices.size() * sizeof(unsigned int),
+        &model.meshes[0].indices[0]);
     addMeshToPipeline(std::vector<Pipeline>{TexturePipeline}, vBuffer, ebo, VAO2);
 
     // add vis pipelines
     addPipeline(GridPipeline, gridVertPath, gridFragPath);
     addPipeline(FrustumVisPipeline, frustumVisVertPath, gridFragPath);
+    addPipeline(EmptyVisPipeline, emptyVertPath, emptyFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -458,7 +275,10 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
 }
 
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
-    updateMatrices(&width, &height);
+    // updateMatrices(&width, &height);
+    viewMatrix = camera->getViewMatrix();
+    projectionMatrix =
+        glm::perspective(glm::radians(camera->fov / 2.f), float(width) / height, .01f, 100.0f);
 
     // draw background
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
@@ -473,12 +293,12 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         modelMatrix = scene.entities[i].runtimeTransform;
 
         // bind model matrix
-        glUniformMatrix4fv(
-            getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
-        glUniformMatrix4fv(
-            getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
-        glUniformMatrix4fv(
-            getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE,
+            &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE,
+            &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
+            &projectionMatrix[0][0]);
         glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
             lights[0].getPosition().y, lights[0].getPosition().z);
         glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
@@ -494,11 +314,19 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
         }
+
+        if (scene.entities[i].components.vecModelComponent.empty()) {
+            runEmptyVisPipeline();
+        }
+
         glBindVertexArray(0);
     }
 }
-void RenderManager::renderGrid(int width, int height) {
-    updateMatrices(&width, &height);
+void RenderManager::renderGrid(Camera* camera, int width, int height) {
+    // updateMatrices(&width, &height);
+    viewMatrix = camera->getViewMatrix();
+    projectionMatrix =
+        glm::perspective(glm::radians(camera->fov / 2.f), float(width) / height, .01f, 100.0f);
 
     runGridPipeline();
 }
@@ -552,8 +380,8 @@ void RenderManager::runColourPipeline() {
     // sending uniform data
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(
-        getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE,
+        &projectionMatrix[0][0]);
     glUniform3f(getPipeline(ColourPipeline)->getLightPosID(), lights[0].getPosition().x,
         lights[0].getPosition().y, lights[0].getPosition().z);
     glUniform3f(getPipeline(ColourPipeline)->getLightColID(), lights[0].getColour().x,
@@ -578,8 +406,8 @@ void RenderManager::runTexturePipeline() {
     // sending uniform data
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(
-        getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
+        &projectionMatrix[0][0]);
     glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
         lights[0].getPosition().y, lights[0].getPosition().z);
     glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
@@ -659,6 +487,26 @@ void RenderManager::runFrustumVisPipeline() {
     glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
     glDrawArrays(GL_LINES, 0, 16);
 }
+
+void RenderManager::runEmptyVisPipeline() {
+    RenderPipeline pipeline = pipelines[EmptyVisPipeline];
+    glUseProgram(pipeline.getProgram());
+
+    // get uniform ids
+    GLuint mvID = glGetUniformLocation(pipeline.getProgram(), "modelView");
+    GLuint projID = glGetUniformLocation(pipeline.getProgram(), "proj");
+
+    // upload uniforms
+    glm::mat4 mv = viewMatrix * modelMatrix;
+    glm::mat4 proj = projectionMatrix;
+    glUniformMatrix4fv(mvID, 1, GL_FALSE, &mv[0][0]);
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &proj[0][0]);
+
+    // render empty
+    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
+    glDrawArrays(GL_LINES, 0, 6);
+}
+
 // adapted from https://learnopengl.com/Model-Loading/Mesh
 void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i,
     unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
@@ -672,20 +520,20 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glBufferData(GL_ARRAY_BUFFER, (*v).size() * sizeof(Vertex), &(*v)[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER, (*i).size() * sizeof(unsigned int), &(*i)[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*i).size() * sizeof(unsigned int), &(*i)[0],
+        GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, normal));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, texCoords));
 
     glBindVertexArray(0);
 }

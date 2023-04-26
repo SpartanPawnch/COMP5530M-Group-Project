@@ -99,8 +99,8 @@ void handleMouseInput(GLFWwindow* window) {
         renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
 
         // send data to camera
-        renderManager->camera.updateInput(
-            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+        renderManager->camera.updateInput(renderManager->deltaTime, -1, renderManager->xOffset,
+            renderManager->yOffset);
 
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
@@ -237,11 +237,11 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw grid
-        renderManager->renderGrid(viewportTexWidth, viewportTexHeight);
+        renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
 
         // draw scene
-        renderManager->renderEntities(
-            scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
+        renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
 
         // draw cam preview frustum
         renderManager->renderCamPreview(scene, width, height);
@@ -249,6 +249,28 @@ int main() {
         // renderManager->renderSceneRefactor(
         //     renderManager->camera, viewportTexWidth, viewportTexHeight);
 
+        // draw Camera preview window in corner
+        if (scene.selectedEntity &&
+            scene.selectedEntity->components.vecCameraComponent.size() > 0) {
+            CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[0];
+            // setup preview camera object
+            renderManager->previewCamera.setDirect(cam.eye, cam.center, cam.up, cam.fov);
+
+            // clear preview section
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(3 * viewportTexWidth / 4, 0, viewportTexWidth / 4, viewportTexHeight / 4);
+            glClearColor(.2f, .2f, .2f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_SCISSOR_TEST);
+
+            // draw preview
+            glViewport(3 * viewportTexWidth / 4, .0f, viewportTexWidth / 4, viewportTexHeight / 4);
+            renderManager->renderGrid(&renderManager->previewCamera, viewportTexWidth / 4,
+                viewportTexHeight / 4);
+            renderManager->renderEntities(scene, &renderManager->previewCamera,
+                viewportTexWidth / 4, viewportTexHeight / 4);
+        }
+        // wait for results
         glFlush();
 
         // draw UI to full window
