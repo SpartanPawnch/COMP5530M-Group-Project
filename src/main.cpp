@@ -32,6 +32,7 @@
 
 RenderManager* renderManager;
 
+/*
 void handleKeyboardInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         // Move the camera forward
@@ -107,6 +108,7 @@ void handleMouseInput(GLFWwindow* window) {
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
 }
+*/
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 

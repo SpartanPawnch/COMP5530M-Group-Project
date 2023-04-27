@@ -7,6 +7,7 @@ void ComponentStorage::startAll(){
     start<CameraComponent>();
     start<AudioSourceComponent>();
     start<ModelComponent>();
+    start<SkeletalModelComponent>();
 }
 void ComponentStorage::updateAll(float dt){
     update<BaseComponent>(dt);

@@ -5,6 +5,12 @@
 BaseEntity::BaseEntity() {
     uuid = 10;
     name = "Base Entity";
+
+    // set speeds
+    this->defaultSpeed = 1.0f;
+    this->highSpeed = 10.0f;
+    this->lowSpeed = 0.3f;
+    this->movementSpeed = this->defaultSpeed;
 }
 
 BaseEntity::~BaseEntity() {
@@ -39,3 +45,47 @@ void BaseEntity::genTransform(const glm::mat4& parentMat) {
 //         }
 //     }
 // }
+
+
+void BaseEntity::updateKeyboardInput(const float& deltaTime, const int direction) {
+    // Update position vector
+    switch (direction) {
+    case FORWARD:
+        //this->position += this->front * this->movementSpeed * deltaTime;
+        this->position += glm::vec3(0.f, 0.f, -1.f) * this->movementSpeed * deltaTime;
+        break;
+    case BACKWARD:
+        //this->position -= this->front * this->movementSpeed * deltaTime;
+        this->position += glm::vec3(0.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        break;
+    case LEFT:
+        //this->position -= this->right * this->movementSpeed * deltaTime;
+        this->position += glm::vec3(-1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        break;
+    case RIGHT:
+        //this->position += this->right * this->movementSpeed * deltaTime;
+        this->position += glm::vec3(1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        break;
+    case ASCEND:
+        break;
+    case DESCEND:
+        break;
+    case FAST:
+        if (this->movementSpeed < this->highSpeed) {
+            this->movementSpeed = this->highSpeed;
+        }
+        else {
+            this->movementSpeed = this->defaultSpeed;
+        }
+        break;
+    case SLOW:
+        if (this->movementSpeed > this->lowSpeed) {
+            this->movementSpeed = this->lowSpeed;
+        }
+        else {
+            this->movementSpeed = this->defaultSpeed;
+        }
+    default:
+        break;
+    }
+}

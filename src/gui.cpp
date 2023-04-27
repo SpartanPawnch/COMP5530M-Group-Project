@@ -280,10 +280,31 @@ static void handleKeyboardInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 6);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 6);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 7);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+
+
+    // player controls
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        // Move the camera forward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        // Move the camera backward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        // Strafe the camera left
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        // Strafe the camera right
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 3);
     }
 }
 

@@ -36,4 +36,12 @@ class BaseEntity {
     glm::mat4 runtimeTransform = glm::mat4(1.0f);
 
     ComponentStorage components;
+
+
+    // player controls
+    GLfloat movementSpeed;
+    GLfloat defaultSpeed;
+    GLfloat lowSpeed;
+    GLfloat highSpeed;
+    void updateKeyboardInput(const float& deltaTime, const int direction);
 };
