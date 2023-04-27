@@ -193,7 +193,9 @@ void loadLevel(const char* path, Scene& scene) {
                     cam.up = glm::vec3(jsonComponent["up"][0].GetFloat(),
                         jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
                     cam.fov = jsonComponent["fov"].GetFloat();
-
+                    if (jsonComponent.HasMember("default") && jsonComponent["default"].GetBool()) {
+                        CameraComponent::activeUuid = cam.uuid;
+                    }
                     baseEntity.components.addComponent(cam);
                 }
 
@@ -345,6 +347,11 @@ static void saveComponent(const CameraComponent& component,
 
     writer.Key("fov");
     writer.Double(double(component.fov));
+
+    if (CameraComponent::activeUuid == component.uuid) {
+        writer.Key("default");
+        writer.Bool(true);
+    }
 
     writer.EndObject();
 }

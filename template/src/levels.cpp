@@ -194,6 +194,9 @@ void loadLevel(const char* path, Scene& scene) {
                         jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
                     cam.fov = jsonComponent["fov"].GetFloat();
 
+                    if (jsonComponent.HasMember("default") && jsonComponent["default"].GetBool()) {
+                        CameraComponent::activeUuid = cam.uuid;
+                    }
                     baseEntity.components.addComponent(cam);
                 }
 
