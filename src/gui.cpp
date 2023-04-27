@@ -1013,7 +1013,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::PushID(i);
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
-        if (component.selectedNode && component.selectedNode->animationDescriptor && component.selectedNode->animationDescriptor->path) {
+        if (component.selectedNode && component.selectedNode->animationDescriptor &&
+            component.selectedNode->animationDescriptor->path) {
             previewStr2 = *component.selectedNode->animationDescriptor->path;
             previewStr2 = assetfolder::getRelativePath(previewStr2.c_str());
         }
@@ -1021,7 +1022,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         if (ImGui::BeginCombo("##node_animation", previewStr2.c_str())) {
             // get available audio clips
             static std::vector<assetfolder::AssetDescriptor> animationFiles;
-            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, animationFiles);
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL,
+                animationFiles);
 
             // list available audio clips
             for (unsigned int i = 0; i < animationFiles.size(); i++) {
@@ -1035,11 +1037,15 @@ void drawComponentProps(SkeletalModelComponent& component) {
 
                     if (!desc) {
                         // load file from disk
-                        desc = animation::animationLoad(animationFiles[i].path.c_str(), uuid, component.modelDescriptor);
+                        desc = animation::animationLoad(animationFiles[i].path.c_str(), uuid,
+                            component.modelDescriptor);
                     }
 
                     std::swap(component.selectedNode->animationDescriptor, desc);
-                    component.selectedNode->animationUuid = (component.selectedNode && component.selectedNode->animationDescriptor) ? uuid : "";
+                    component.selectedNode->animationUuid =
+                        (component.selectedNode && component.selectedNode->animationDescriptor)
+                        ? uuid
+                        : "";
                 }
                 ImGui::PopID();
             }
@@ -1083,10 +1089,14 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size(); i++) {
             ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_nocond", component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
+            if (ImGui::BeginCombo("##transition_to_nocond",
+                    component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->noConditionTransitions[i].transitionTo == &component.nodes[j])) {
-                        component.selectedNode->noConditionTransitions[i].transitionTo = &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                            component.selectedNode->noConditionTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
+                        component.selectedNode->noConditionTransitions[i].transitionTo =
+                            &component.nodes[j];
                     }
                 }
                 ImGui::EndCombo();
@@ -1113,20 +1123,27 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
             ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_bool", component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
+            if (ImGui::BeginCombo("##transition_to_bool",
+                    component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->boolTransitions[i].transitionTo == &component.nodes[j])) {
-                        component.selectedNode->boolTransitions[i].transitionTo = &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                            component.selectedNode->boolTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
+                        component.selectedNode->boolTransitions[i].transitionTo =
+                            &component.nodes[j];
                     }
                 }
                 ImGui::EndCombo();
             }
             ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_bool", &component.selectedNode->boolTransitions[i].immediate);
+            ImGui::Checkbox("##immediate_bool",
+                &component.selectedNode->boolTransitions[i].immediate);
             ImGui::NextColumn();
-            ImGui::Checkbox("##condition_bool", &component.selectedNode->boolTransitions[i].condition);
+            ImGui::Checkbox("##condition_bool",
+                &component.selectedNode->boolTransitions[i].condition);
             ImGui::NextColumn();
-            ImGui::Checkbox("##desired_bool", &component.selectedNode->boolTransitions[i].desiredValue);
+            ImGui::Checkbox("##desired_bool",
+                &component.selectedNode->boolTransitions[i].desiredValue);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeBoolACTransition(i);
@@ -1155,26 +1172,35 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
             ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_int", component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
+            if (ImGui::BeginCombo("##transition_to_int",
+                    component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->intTransitions[i].transitionTo == &component.nodes[j])) {
-                        component.selectedNode->intTransitions[i].transitionTo = &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                            component.selectedNode->intTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
+                        component.selectedNode->intTransitions[i].transitionTo =
+                            &component.nodes[j];
                     }
                 }
                 ImGui::EndCombo();
             }
             ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_int", &component.selectedNode->intTransitions[i].immediate);
+            ImGui::Checkbox("##immediate_int",
+                &component.selectedNode->intTransitions[i].immediate);
             ImGui::NextColumn();
             ImGui::Text("%d", component.selectedNode->intTransitions[i].condition);
             ImGui::NextColumn();
-            ImGui::InputInt("##desired_int", &component.selectedNode->intTransitions[i].desiredValue);
+            ImGui::InputInt("##desired_int",
+                &component.selectedNode->intTransitions[i].desiredValue);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_lower_int", &component.selectedNode->intTransitions[i].shouldBeLower);
+            ImGui::Checkbox("##should_lower_int",
+                &component.selectedNode->intTransitions[i].shouldBeLower);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_equal_int", &component.selectedNode->intTransitions[i].shouldBeEqual);
+            ImGui::Checkbox("##should_equal_int",
+                &component.selectedNode->intTransitions[i].shouldBeEqual);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_greater_int", &component.selectedNode->intTransitions[i].shouldBeGreater);
+            ImGui::Checkbox("##should_greater_int",
+                &component.selectedNode->intTransitions[i].shouldBeGreater);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeIntACTransition(i);
@@ -1203,26 +1229,35 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
             ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_float", component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
+            if (ImGui::BeginCombo("##transition_to_float",
+                    component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->floatTransitions[i].transitionTo == &component.nodes[j])) {
-                        component.selectedNode->floatTransitions[i].transitionTo = &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                            component.selectedNode->floatTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
+                        component.selectedNode->floatTransitions[i].transitionTo =
+                            &component.nodes[j];
                     }
                 }
                 ImGui::EndCombo();
             }
             ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_float", &component.selectedNode->floatTransitions[i].immediate);
+            ImGui::Checkbox("##immediate_float",
+                &component.selectedNode->floatTransitions[i].immediate);
             ImGui::NextColumn();
             ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
             ImGui::NextColumn();
-            ImGui::InputFloat("##desired_float", &component.selectedNode->floatTransitions[i].desiredValue);
+            ImGui::InputFloat("##desired_float",
+                &component.selectedNode->floatTransitions[i].desiredValue);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_lower_float", &component.selectedNode->floatTransitions[i].shouldBeLower);
+            ImGui::Checkbox("##should_lower_float",
+                &component.selectedNode->floatTransitions[i].shouldBeLower);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_equal_float", &component.selectedNode->floatTransitions[i].shouldBeEqual);
+            ImGui::Checkbox("##should_equal_float",
+                &component.selectedNode->floatTransitions[i].shouldBeEqual);
             ImGui::NextColumn();
-            ImGui::Checkbox("##should_greater_float", &component.selectedNode->floatTransitions[i].shouldBeGreater);
+            ImGui::Checkbox("##should_greater_float",
+                &component.selectedNode->floatTransitions[i].shouldBeGreater);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeFloatACTransition(i);
@@ -1415,8 +1450,8 @@ inline void drawProperties() {
             for (unsigned int i = 0; i < skeletalModelComponents.size(); i++) {
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(skeletalModelComponents[i].name.c_str(),
-                    ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                    ImGuiTreeNodeFlags_DefaultOpen)) {
+                        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                            ImGuiTreeNodeFlags_DefaultOpen)) {
 
                     drawComponentProps(skeletalModelComponents[i]);
                     ImGui::TreePop();
