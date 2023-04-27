@@ -316,6 +316,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
