@@ -31,17 +31,11 @@ private:
 	GLuint ModelID;
 	GLuint ViewID;
 	GLuint ProjectionID;
-	/*GLuint lightPosID[MAX_LIGHTS];
-	GLuint lightAmbientID;
-	GLuint lightDiffuseID;
-	GLuint lightSpecularID;*/
 	LightUniform lightUniforms[MAX_LIGHTS];
 	GLuint viewPosID;
 	GLuint gammaID;
 	GLuint numLightsID;
 	
-
-
 	GLuint VAO;
 	
 	bool readAndCompileShader(const char* shaderPath, const GLuint& id);

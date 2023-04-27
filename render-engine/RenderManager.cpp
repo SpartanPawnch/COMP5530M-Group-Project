@@ -308,7 +308,8 @@ void RenderManager::runTexturePipeline() {
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
     glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
-    glUniform1ui(getPipeline(TexturePipeline)->getNumLightsID(), this->lights.size());
+    glUniform1i(getPipeline(TexturePipeline)->getNumLightsID(), static_cast<int>(this->lights.size()));
+    std::cout << this->lights.size() << std::endl;
 
     for (std::size_t i = 0; i < lights.size(); i++)
     {

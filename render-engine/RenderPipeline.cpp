@@ -177,6 +177,7 @@ void RenderPipeline::setColourUniformLocations()
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
 	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
 	this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
+	this->numLightsID = glGetUniformLocation(this->shaderProgram, "numLights");
 
 	//light vector	
 	for (int i = 0; i < MAX_LIGHTS; i++)
@@ -200,7 +201,7 @@ void RenderPipeline::setTextureUniformLocations()
 	this->numLightsID = glGetUniformLocation(this->shaderProgram, "numLights");
 
 	//light vector	
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
 		std::string base = "lights[" + std::to_string(i) + "].";
 		this->lightUniforms[i].lightPosID = glGetUniformLocation(this->shaderProgram, (base + "position").c_str());
