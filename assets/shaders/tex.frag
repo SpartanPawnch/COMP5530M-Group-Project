@@ -52,14 +52,8 @@ vec4 computeBlinnPhongLighting(int lightIndex)
     return (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
 }
 
-void main()
+vec3 computeNormalColor()
 {
-    
-    material.ambient = vec3(0.2, 0.2, 0.2);
-    material.diffuse = vec3(0.8, 0.8, 0.8);
-    material.specular = vec3(0.2, 0.2, 0.2);
-    material.shininess = 16.0;
-
     vec3 normal;
     if(vsNormal.x < 0.0)
     {
@@ -81,8 +75,19 @@ void main()
     }
     else{ normal.z = vsNormal.z;
     }
-    fsColour = vec4(normal, 1.0f);
-    vec3 colour = normal;
+    return normal;
+}
+
+
+void main()
+{
+    
+    material.ambient = vec3(0.2, 0.2, 0.2);
+    material.diffuse = vec3(0.8, 0.8, 0.8);
+    material.specular = vec3(0.2, 0.2, 0.2);
+    material.shininess = 16.0;
+   
+    vec3 colour = computeNormalColor();
     
     vec4 lighting = vec4(0.0);
     for(int i = 0; i < numLights; i++)

@@ -268,6 +268,8 @@ void RenderManager::runColourPipeline() {
         this->camera->getPosition().y,
         this->camera->getPosition().z);
     glUniform1f(getPipeline(ColourPipeline)->getGammaID(), gammaValue);
+    glUniform1i(getPipeline(ColourPipeline)->getNumLightsID(),
+        static_cast<int>(this->lights.size()));
 
     for (std::size_t i = 0; i < lights.size(); i++)
     {
