@@ -38,7 +38,7 @@ void main()
     material.specular = vec3(0.2, 0.2, 0.2);
     material.shininess = 16.0;
 
-   vec3 colour = vsCol;
+   vec3 colour = vec3(.4f);//vsCol;
    //using normal instead of color
    //ambient
    vec3 ambient = lights[0].ambient * material.ambient;

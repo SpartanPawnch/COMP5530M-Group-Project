@@ -9,69 +9,70 @@
 
 const int MAX_LIGHTS = 20;
 
-class RenderPipeline
-{
-	struct LightUniform {
-		GLuint lightPosID;
+class RenderPipeline {
+    struct LightUniform {
+        GLuint lightPosID;
 
-		GLuint lightAmbientID;
-		GLuint lightDiffuseID;
-		GLuint lightSpecularID;
-	};
-private:
+        GLuint lightAmbientID;
+        GLuint lightDiffuseID;
+        GLuint lightSpecularID;
+    };
 
-	GLuint shaderProgram;
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint computeShader;
-	GLuint tescShader;
-	GLuint teseShader;
-	GLuint geometryShader;
+  private:
+    GLuint shaderProgram;
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    GLuint computeShader;
+    GLuint tescShader;
+    GLuint teseShader;
+    GLuint geometryShader;
 
-	GLuint ModelID;
-	GLuint ViewID;
-	GLuint ProjectionID;
-	LightUniform lightUniforms[MAX_LIGHTS];
-	GLuint viewPosID;
-	GLuint gammaID;
-	GLuint numLightsID;
+  public:
+    GLuint ModelID;
+    GLuint ViewID;
+    GLuint ProjectionID;
+    LightUniform lightUniforms[MAX_LIGHTS];
+    GLuint viewPosID;
+    GLuint gammaID;
+    GLuint numLightsID;
 
-	GLuint VAO;
+    std::vector<GLuint> VAOs;
 
-	bool readAndCompileShader(const char* shaderPath, const GLuint& id);
-	void createProgram(const char* vertexPath,
-		const char* fragmentPath,
-		const char* geometryPath,
-		const char* computePath,
-		const char* tessControlPath,
-		const char* tessEvalPath);
+    GLuint VAO;
 
-	bool initialised = false;
+    bool readAndCompileShader(const char* shaderPath, const GLuint& id);
+    void createProgram(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
+        const char* computePath, const char* tessControlPath, const char* tessEvalPath);
 
-	bool initialised = false;
+    bool initialised = false;
 
+    RenderPipeline();
 
-	RenderPipeline(const char* vertexPath, const char* fragmentPath,
-		const char* geometryPath = nullptr, const char* computePath = nullptr,
-		const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
+    RenderPipeline(const char* vertexPath, const char* fragmentPath,
+        const char* geometryPath = nullptr, const char* computePath = nullptr,
+        const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
-	GLuint getProgram();
-	GLuint getVAO(unsigned int index);
-	GLuint getModelID();
-	GLuint getViewID();
-	GLuint getProjectionID();
-	GLuint getLightPosID(int index);
-	GLuint getLightAmbientID(int index);
-	GLuint getLightDiffuseID(int index);
-	GLuint getLightSpecularID(int index);
-	GLuint getViewPosID();
-	GLuint getGammaID();
-	GLuint getNumLightsID();
+    ~RenderPipeline();
 
-	void setAttributeLayouts();
+    GLuint getProgram();
+    GLuint getVAO(unsigned int index);
+    GLuint getModelID();
+    GLuint getViewID();
+    GLuint getProjectionID();
+    GLuint getLightPosID(int index);
+    GLuint getLightAmbientID(int index);
+    GLuint getLightDiffuseID(int index);
+    GLuint getLightSpecularID(int index);
+    GLuint getViewPosID();
+    GLuint getGammaID();
+    GLuint getNumLightsID();
 
-	void setUniformLocations();
+    void setAttributeLayouts();
 
-	unsigned int getNoOfMeshes();
-	void addVAO(GLuint VAO);
+    void setUniformLocations();
+    void setColourUniformLocations();
+    void setTextureUniformLocations();
+
+    unsigned int getNoOfMeshes();
+    void addVAO(GLuint VAO);
 };
