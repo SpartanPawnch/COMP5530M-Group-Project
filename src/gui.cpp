@@ -647,11 +647,19 @@ inline void drawProperties() {
 
 inline void drawAddUI()
 {
-    static float value = 0.5f;
+    static float transparency = 0.5f;
+    static float width = 0.5f;
+    static float height = 0.5f;
     if (ImGui::Begin("Set Properties"))
     {
         ImGuiStyle& style = ImGui::GetStyle();
-        ImGui::SliderFloat("Value", &value, 0.0f, 1.0f);
+
+        ImGui::SliderFloat("transparency", &transparency, 0.0f, 1.0f);
+
+        ImGui::SliderFloat("width", &width, 0.0f, 1.0f);
+
+        ImGui::SliderFloat("height", &height, 0.0f, 1.0f);
+
 
         // if(ImGui::Begin())
         // {
