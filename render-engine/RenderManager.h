@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -15,6 +14,8 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
+
+
 
 enum Pipeline {
     ColourPipeline = 0,
@@ -40,10 +41,11 @@ struct Buffer {
 };
 
 class RenderManager {
-  private:
+private:
     // pointer to single instance of RenderEngine
     static RenderManager* instance;
     bool initialized = false;
+    bool antialiasingEnabled = false;
 
     // test output writing for RenderEngine
     // std::ofstream testOutput;
@@ -83,13 +85,16 @@ class RenderManager {
     void runFrustumVisPipeline();
     void runEmptyVisPipeline();
 
-  public:
+public:
     // members
     // TODO
     Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
     Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
     double deltaTime;
+    //Gamma value for gamma correction
+    float gammaValue = 2.2f;
+
 
     // mouse input variables
     double xPos, yPos, xPosLast, yPosLast;
@@ -111,7 +116,7 @@ class RenderManager {
 
     void addCamera();
 
-    void addLightSource(glm::vec3& position, glm::vec3& colour);
+    void addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular);
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
@@ -144,4 +149,5 @@ class RenderManager {
     static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO,
         unsigned int* VBO, unsigned int* EBO);
     static void deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);
+    void setGammaCorrection(float value);
 };

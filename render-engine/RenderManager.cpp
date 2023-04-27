@@ -8,7 +8,7 @@ RenderManager* RenderManager::getInstance() {
     }
     else {
         std::cout << "Render instance has been created previously. Returning previous instance."
-                  << std::endl;
+            << std::endl;
     }
     return instance;
 }
@@ -35,6 +35,16 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->firstRClick = true;
     this->xOffset = 0.0f;
     this->yOffset = 0.0f;
+
+    //function to set gamma correction - value sent to all pipelines
+    setGammaCorrection(2.2f);
+
+    //Enable antialiasing
+    this->antialiasingEnabled = true;
+    if (this->antialiasingEnabled == true)
+    {
+        glEnable(GL_MULTISAMPLE);
+    }
 
     // Initialise the camera
     this->camera = Camera(glm::vec3(.0f, 2.f, 8.f), glm::vec3(.0f, -2.f, -8.f));
@@ -72,7 +82,7 @@ void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuff
     IndexBuffer iBuffer, GLuint VAO) {
     for (unsigned int i = 0; i < pipeline.size(); i++) {
         if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end()) {
-            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{Buffer(vBuffer, iBuffer)};
+            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{ Buffer(vBuffer, iBuffer) };
         }
         else {
             PipelineMeshBufferMap[pipeline[i]].push_back(Buffer(vBuffer, iBuffer));
@@ -142,27 +152,16 @@ void RenderManager::loadScene() {
         20 // Bottom face
     };
 
-    std::vector<float> allVertices;
-    std::vector<unsigned int> allIndices;
-    allVertices.clear();
-    allIndices.clear();
-    for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++) {
-        allVertices.push_back(model.meshes[0].vertices[i].position.x);
-        allVertices.push_back(model.meshes[0].vertices[i].position.y);
-        allVertices.push_back(model.meshes[0].vertices[i].position.z);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.x);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.y);
-        allVertices.push_back(model.meshes[0].vertices[i].normal.z);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.x);
-        allVertices.push_back(model.meshes[0].vertices[i].texCoords.y);
-    }
-    for (std::size_t i = 0; i < model.meshes[0].indices.size(); i++) {
-        allIndices.push_back(model.meshes[0].indices[i]);
-    }
-
     // ADD LIGHT SOURCES
 
-    this->addLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f),
+        glm::vec3(0.2f, 0.2f, 0.2f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(1.0f, 1.0f, 1.0f));
+    this->addLightSource(glm::vec3(-10.0f, -10.0f, 1.0f),
+        glm::vec3(0.2f, 0.2f, 0.2f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
     const char* colorVertexPath = "assets/shaders/colours.vert";
@@ -232,7 +231,7 @@ void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
     // draw background
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
 
     // RENDERING
     // Go through all the Pipelines
@@ -280,7 +279,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -358,7 +357,7 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -372,7 +371,7 @@ void RenderManager::renderCamPreview(const Scene& scene, int width, int height) 
     if (scene.selectedEntity) {
         modelMatrix = scene.selectedEntity->state.runtimeTransform;
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
-             i++) {
+            i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
             float aspect = float(width) / height;
             aspect =
@@ -411,8 +410,10 @@ void RenderManager::runPipeline(Pipeline pipeline) {
     }
 }
 
-void RenderManager::setupColourPipelineUniforms() {
+void RenderManager::setupColourPipelineUniforms()
+{
     getPipeline(ColourPipeline)->setUniformLocations();
+    getPipeline(ColourPipeline)->setColourUniformLocations();
 }
 
 void RenderManager::runColourPipeline() {
@@ -421,12 +422,34 @@ void RenderManager::runColourPipeline() {
     // sending uniform data
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE,
-        &projectionMatrix[0][0]);
-    glUniform3f(getPipeline(ColourPipeline)->getLightPosID(), lights[0].getPosition().x,
-        lights[0].getPosition().y, lights[0].getPosition().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightColID(), lights[0].getColour().x,
-        lights[0].getColour().y, lights[0].getColour().z);
+    glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniform3f(getPipeline(ColourPipeline)->getViewPosID(),
+        this->camera->getPosition().x,
+        this->camera->getPosition().y,
+        this->camera->getPosition().z);
+    glUniform1f(getPipeline(ColourPipeline)->getGammaID(), gammaValue);
+    glUniform1i(getPipeline(ColourPipeline)->getNumLightsID(),
+        static_cast<int>(this->lights.size()));
+
+    for (std::size_t i = 0; i < lights.size(); i++)
+    {
+        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i),
+            lights[i].getPosition().x,
+            lights[i].getPosition().y,
+            lights[i].getPosition().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i),
+            lights[i].getAmbient().x,
+            lights[i].getAmbient().y,
+            lights[i].getAmbient().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i),
+            lights[i].getDiffuse().x,
+            lights[i].getDiffuse().y,
+            lights[i].getDiffuse().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
+            lights[i].getSpecular().x,
+            lights[i].getSpecular().y,
+            lights[i].getSpecular().z);
+    }
 
     //// Render the cube
     for (unsigned int i = 0; i < getPipeline(ColourPipeline)->getNoOfMeshes(); i++) {
@@ -437,8 +460,10 @@ void RenderManager::runColourPipeline() {
     glBindVertexArray(0);
 }
 
-void RenderManager::setupTexturePipelineUniforms() {
+void RenderManager::setupTexturePipelineUniforms()
+{
     getPipeline(TexturePipeline)->setUniformLocations();
+    getPipeline(TexturePipeline)->setTextureUniformLocations();
 }
 
 void RenderManager::runTexturePipeline() {
@@ -447,24 +472,41 @@ void RenderManager::runTexturePipeline() {
     // sending uniform data
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
-        &projectionMatrix[0][0]);
-    glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
-        lights[0].getPosition().y, lights[0].getPosition().z);
-    glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
-        lights[0].getColour().y, lights[0].getColour().z);
+    glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
+    glUniform1i(getPipeline(TexturePipeline)->getNumLightsID(), static_cast<int>(this->lights.size()));
+    std::cout << this->lights.size() << std::endl;
 
-    //// Render the cube
-    for (unsigned int i = 0; i < getPipeline(TexturePipeline)->getNoOfMeshes(); i++) {
-        glBindVertexArray(getPipeline(TexturePipeline)->getVAO(i));
-        glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0); // TODO:: Change 36 to dynamic
+    for (std::size_t i = 0; i < lights.size(); i++)
+    {
+        glUniform3f(getPipeline(TexturePipeline)->getLightPosID(i),
+            lights[i].getPosition().x,
+            lights[i].getPosition().y,
+            lights[i].getPosition().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightAmbientID(i),
+            lights[i].getAmbient().x,
+            lights[i].getAmbient().y,
+            lights[i].getAmbient().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightDiffuseID(i),
+            lights[i].getDiffuse().x,
+            lights[i].getDiffuse().y,
+            lights[i].getDiffuse().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightSpecularID(i),
+            lights[i].getSpecular().x,
+            lights[i].getSpecular().y,
+            lights[i].getSpecular().z);
     }
 
+
+    //// Render the model
+    glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
+    glDrawElements(GL_TRIANGLES, 2136, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-void RenderManager::addLightSource(glm::vec3& position, glm::vec3& colour) {
-    lights.emplace_back(position, colour);
+void RenderManager::addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular)
+{
+    lights.emplace_back(position, ambient, diffuse, specular);
 }
 
 RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {
@@ -583,4 +625,9 @@ void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned in
     glDeleteVertexArrays(1, VAO);
     glDeleteBuffers(1, VBO);
     glDeleteBuffers(1, EBO);
+}
+
+void RenderManager::setGammaCorrection(float value)
+{
+    this->gammaValue = value;
 }
