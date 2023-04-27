@@ -7,6 +7,7 @@ void ComponentStorage::startAll(){
     start<CameraComponent>();
     start<AudioSourceComponent>();
     start<ModelComponent>();
+    start<SkeletalModelComponent>();
 }
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
@@ -15,6 +16,7 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<CameraComponent>(dt,state);
     update<AudioSourceComponent>(dt,state);
     update<ModelComponent>(dt,state);
+    update<SkeletalModelComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
@@ -23,4 +25,5 @@ void ComponentStorage::clearAll(){
     vecCameraComponent.clear();
     vecAudioSourceComponent.clear();
     vecModelComponent.clear();
+    vecSkeletalModelComponent.clear();
 }

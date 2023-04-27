@@ -9,6 +9,7 @@
 #include "../Component/CameraComponent.h"
 #include "../Component/AudioSourceComponent.h"
 #include "../Component/ModelComponent.h"
+#include "../Component/SkeletalModelComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -17,6 +18,7 @@ struct ComponentStorage{
     std::vector<CameraComponent> vecCameraComponent;
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
     std::vector<ModelComponent> vecModelComponent;
+    std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -70,6 +72,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<SkeletalModelComponent>(const SkeletalModelComponent& component){
+        vecSkeletalModelComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -112,6 +119,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void start<SkeletalModelComponent>(){
+        for(unsigned int i=0;i<vecSkeletalModelComponent.size();i++){
+            vecSkeletalModelComponent[i].start();
+        }
+    }
+
+    template<>
     void update<BaseComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt,state);
@@ -150,6 +164,13 @@ struct ComponentStorage{
     void update<ModelComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecModelComponent.size();i++){
             vecModelComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    void update<SkeletalModelComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecSkeletalModelComponent.size();i++){
+            vecSkeletalModelComponent[i].update(dt,state);
         }
     }
 

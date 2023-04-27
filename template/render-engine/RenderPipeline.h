@@ -7,7 +7,16 @@
 
 #include <GL/glew.h>
 
+const int MAX_LIGHTS = 20;
+
 class RenderPipeline {
+    struct LightUniform {
+        GLuint lightPosID;
+
+        GLuint lightAmbientID;
+        GLuint lightDiffuseID;
+        GLuint lightSpecularID;
+    };
 
   private:
     GLuint shaderProgram;
@@ -19,18 +28,21 @@ class RenderPipeline {
     GLuint geometryShader;
 
   public:
-    GLuint VAO;
-    bool readAndCompileShader(const char* shaderPath, const GLuint& id);
-    void createProgram(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
-        const char* computePath, const char* tessControlPath, const char* tessEvalPath);
-
     GLuint ModelID;
     GLuint ViewID;
     GLuint ProjectionID;
-    GLuint lightPosID;
-    GLuint lightColID;
+    LightUniform lightUniforms[MAX_LIGHTS];
+    GLuint viewPosID;
+    GLuint gammaID;
+    GLuint numLightsID;
 
     std::vector<GLuint> VAOs;
+
+    GLuint VAO;
+
+    bool readAndCompileShader(const char* shaderPath, const GLuint& id);
+    void createProgram(const char* vertexPath, const char* fragmentPath, const char* geometryPath,
+        const char* computePath, const char* tessControlPath, const char* tessEvalPath);
 
     bool initialised = false;
 
@@ -40,19 +52,26 @@ class RenderPipeline {
         const char* geometryPath = nullptr, const char* computePath = nullptr,
         const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
 
+    ~RenderPipeline();
+
     GLuint getProgram();
     GLuint getVAO(unsigned int index);
     GLuint getModelID();
     GLuint getViewID();
     GLuint getProjectionID();
-    GLuint getLightPosID();
-    GLuint getLightColID();
-
-    ~RenderPipeline();
+    GLuint getLightPosID(int index);
+    GLuint getLightAmbientID(int index);
+    GLuint getLightDiffuseID(int index);
+    GLuint getLightSpecularID(int index);
+    GLuint getViewPosID();
+    GLuint getGammaID();
+    GLuint getNumLightsID();
 
     void setAttributeLayouts();
 
     void setUniformLocations();
+    void setColourUniformLocations();
+    void setTextureUniformLocations();
 
     unsigned int getNoOfMeshes();
     void addVAO(GLuint VAO);

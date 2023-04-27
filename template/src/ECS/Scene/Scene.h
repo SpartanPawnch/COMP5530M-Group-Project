@@ -20,5 +20,6 @@ class Scene {
     void setParent(int childIdx, int parentIdx);
 
     BaseEntity* selectedEntity;
+    int selectedCameraIdx = 0;
     std::vector<BaseEntity> entities;
 };

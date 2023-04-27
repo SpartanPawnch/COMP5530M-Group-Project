@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include "../model_import/model.h"
+#include <map>
 #include <string>
 #include <vector>
 
@@ -13,8 +15,13 @@ namespace model {
         unsigned int getVAO(int meshIndex);
         unsigned int getVBO(int meshIndex);
         unsigned int getEBO(int meshIndex);
+        unsigned int getTexture(int meshIndex);
         unsigned int getIndexCount(int meshIndex);
         unsigned int getMeshCount();
+        std::map<std::string, BoneInfo> getBoneInfoMap();
+        unsigned int getBoneCount();
+        void setBoneCount(unsigned int bc);
+        void setBoneInfoMap(std::map<std::string, BoneInfo> bimp);
     };
 
     // load file with selected path. Returns non-negative index on success

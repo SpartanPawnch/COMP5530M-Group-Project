@@ -4,3 +4,4 @@ ScriptComponent
 CameraComponent
 AudioSourceComponent
 ModelComponent
+SkeletalModelComponent
