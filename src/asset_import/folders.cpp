@@ -44,7 +44,7 @@ namespace assetfolder {
         std::string ext = getExtension(path);
 
         // models
-        if (ext == ".obj" || ext == ".fbx" || ext == ".dae" || ext == ".gltf")
+        if (ext == ".obj" || ext == ".fbx" || ext == ".dae" || ext == ".gltf" || ext == ".iqm")
             return AssetDescriptor::EFileType::MODEL;
 
         // textures
@@ -82,8 +82,8 @@ namespace assetfolder {
 
     AssetDescriptor getAssetsRootDir() {
         if (activeDirectory.empty())
-            return AssetDescriptor{
-                std::string(""), std::string(""), AssetDescriptor::EFileType::INVALID};
+            return AssetDescriptor{std::string(""), std::string(""),
+                AssetDescriptor::EFileType::INVALID};
 
         return AssetDescriptor{std::string(activeDirectory) + "/assets", std::string("assets"),
             AssetDescriptor::EFileType::FOLDER};
@@ -91,8 +91,8 @@ namespace assetfolder {
 
     AssetDescriptor getLevelsRootDir() {
         if (activeDirectory.empty())
-            return AssetDescriptor{
-                std::string(""), std::string(""), AssetDescriptor::EFileType::INVALID};
+            return AssetDescriptor{std::string(""), std::string(""),
+                AssetDescriptor::EFileType::INVALID};
 
         return AssetDescriptor{std::string(activeDirectory) + "/levels", std::string("levels"),
             AssetDescriptor::EFileType::FOLDER};
@@ -174,12 +174,12 @@ namespace assetfolder {
             return dir;
 
         std::string newPath = dir.path.substr(0, i);
-        return AssetDescriptor{
-            newPath, getName(newPath.c_str()), AssetDescriptor::EFileType::FOLDER};
+        return AssetDescriptor{newPath, getName(newPath.c_str()),
+            AssetDescriptor::EFileType::FOLDER};
     }
 
-    static void addAssets_internal(
-        const std::vector<AssetDescriptor>& assets, const AssetDescriptor& dir) {
+    static void addAssets_internal(const std::vector<AssetDescriptor>& assets,
+        const AssetDescriptor& dir) {
         for (unsigned int i = 0; i < assets.size(); i++) {
             addAsset(assets[i].path, dir);
         }
@@ -272,7 +272,10 @@ namespace assetfolder {
     }
 
     std::string getRelativePath(const char* path) {
-        assert(strlen(path) >= activeDirectory.length() + 1);
+        if (strlen(path) < activeDirectory.length() + 1) {
+            logging::logWarn("Path {} is outside project\n", path);
+            return std::string(path);
+        }
         return std::string(path + activeDirectory.length() + 1);
     }
 }

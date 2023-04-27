@@ -290,25 +290,11 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(getPipeline(TexturePipeline)->getProgram());
-
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         modelMatrix = scene.entities[i].state.runtimeTransform;
-
-        // bind model matrix
-        glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE,
-            &modelMatrix[0][0]);
-        glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE,
-            &viewMatrix[0][0]);
-        glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
-            &projectionMatrix[0][0]);
-        glUniform3f(getPipeline(TexturePipeline)->getLightPosID(), lights[0].getPosition().x,
-            lights[0].getPosition().y, lights[0].getPosition().z);
-        glUniform3f(getPipeline(TexturePipeline)->getLightColID(), lights[0].getColour().x,
-            lights[0].getColour().y, lights[0].getColour().z);
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
             auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
@@ -316,8 +302,45 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
-                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
 
+                GLuint tex = desc->getTexture(k);
+                if (tex) {
+                    // draw textured
+                    // bind model matrix
+                    glUseProgram(getPipeline(TexturePipeline)->getProgram());
+
+                    glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE,
+                        &modelMatrix[0][0]);
+                    glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE,
+                        &viewMatrix[0][0]);
+                    glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
+                        &projectionMatrix[0][0]);
+                    glUniform3f(getPipeline(TexturePipeline)->getLightPosID(),
+                        lights[0].getPosition().x, lights[0].getPosition().y,
+                        lights[0].getPosition().z);
+                    glUniform3f(getPipeline(TexturePipeline)->getLightColID(),
+                        lights[0].getColour().x, lights[0].getColour().y, lights[0].getColour().z);
+
+                    glBindTexture(GL_TEXTURE_2D, tex);
+                }
+                else {
+                    // TODO use vertex colours
+                    // draw untextured
+                    // bind model matrix
+                    glUseProgram(getPipeline(ColourPipeline)->getProgram());
+
+                    glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE,
+                        &modelMatrix[0][0]);
+                    glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE,
+                        &viewMatrix[0][0]);
+                    glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE,
+                        &projectionMatrix[0][0]);
+                    glUniform3f(getPipeline(ColourPipeline)->getLightPosID(),
+                        lights[0].getPosition().x, lights[0].getPosition().y,
+                        lights[0].getPosition().z);
+                    glUniform3f(getPipeline(ColourPipeline)->getLightColID(),
+                        lights[0].getColour().x, lights[0].getColour().y, lights[0].getColour().z);
+                }
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
