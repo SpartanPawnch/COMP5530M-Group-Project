@@ -314,11 +314,11 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glUniform3f(getPipeline(TexturePipeline)->getLightPosID(0),
                         lights[0].getPosition().x, lights[0].getPosition().y,
                         lights[0].getPosition().z);
-                    glUniform3f(getPipeline(ColourPipeline)->getViewPosID(),
+                    glUniform3f(getPipeline(TexturePipeline)->getViewPosID(),
                         this->camera.getPosition().x, this->camera.getPosition().y,
                         this->camera.getPosition().z);
-                    glUniform1f(getPipeline(ColourPipeline)->getGammaID(), gammaValue);
-                    glUniform1i(getPipeline(ColourPipeline)->getNumLightsID(),
+                    glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
+                    glUniform1i(getPipeline(TexturePipeline)->getNumLightsID(),
                         static_cast<int>(this->lights.size()));
 
                     // set per-light uniforms

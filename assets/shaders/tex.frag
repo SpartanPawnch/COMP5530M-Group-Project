@@ -32,6 +32,8 @@ uniform Light lights[MAX_LIGHTS];
 uniform float gamma;
 uniform vec3 viewPos;
 
+uniform sampler2D texSampler;
+
 vec4 computeBlinnPhongLighting(int lightIndex)
 {
     vec3 ambient = lights[lightIndex].ambient * material.ambient;
@@ -87,7 +89,7 @@ void main()
     material.specular = vec3(0.2, 0.2, 0.2);
     material.shininess = 16.0;
    
-    vec3 colour = computeNormalColor();
+    vec3 colour = texture(texSampler,vsTex).rgb;
     
     vec4 lighting = vec4(0.0);
     for(int i = 0; i < numLights; i++)
