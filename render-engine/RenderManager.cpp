@@ -279,7 +279,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
-    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0))
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -331,7 +332,8 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
-    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0))
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -347,8 +349,13 @@ void RenderManager::renderCamPreview(const Scene& scene, int width, int height) 
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
              i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
-            previewMatrix = glm::perspective(glm::radians(cam.fov / 2.0f),
-                                float(width) / float(height), .01f, 100.f) *
+            float aspect = float(width) / height;
+            aspect =
+                (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+                    !(aspect != aspect))
+                ? aspect
+                : 1.f;
+            previewMatrix = glm::perspective(glm::radians(cam.fov / 2.0f), aspect, .01f, 100.f) *
                 glm::lookAt(cam.eye, cam.center, cam.up);
             runFrustumVisPipeline();
         }
