@@ -2,6 +2,7 @@
 
 RenderPipeline::RenderPipeline()
 {
+	//lightUniforms.resize(MAX_LIGHTS);
 }
 
 RenderPipeline::RenderPipeline(const char* vertexPath,
@@ -15,12 +16,12 @@ RenderPipeline::RenderPipeline(const char* vertexPath,
 		computePath, tessControlPath, tessEvalPath);
 
 	this->initialised = true;
+	//lightUniforms.clear();
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
-
-		
 }
+
 //adapted from COMP5812M Foundations of Modelling and Rendering Coursework 3
 bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& id)
 {
@@ -69,7 +70,6 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
 	return res == 1;
 	
 }
-
 
 void RenderPipeline::createProgram(const char* vertexPath,
 	const char* fragmentPath,
@@ -162,24 +162,32 @@ GLuint RenderPipeline::getVAO(){ return this->VAO;}
 GLuint RenderPipeline::getModelID(){ return this->ModelID;}
 GLuint RenderPipeline::getViewID(){ return this->ViewID;}
 GLuint RenderPipeline::getProjectionID(){ return this->ProjectionID;}
-GLuint RenderPipeline::getLightPosID(){ return this->lightPosID;}
-GLuint RenderPipeline::getLightAmbientID(){	return this->lightAmbientID;}
-GLuint RenderPipeline::getLightDiffuseID() { return this->lightDiffuseID; }
-GLuint RenderPipeline::getLightSpecularID() { return this->lightSpecularID; }
-GLuint RenderPipeline::getViewPosID() { return this->viewPosID;}
+GLuint RenderPipeline::getLightPosID(int index) { return this->lightUniforms[index].lightPosID; }
+GLuint RenderPipeline::getLightAmbientID(int index){ return this->lightUniforms[index].lightAmbientID;}
+GLuint RenderPipeline::getLightDiffuseID( int index) { return this->lightUniforms[index].lightDiffuseID; }
+GLuint RenderPipeline::getLightSpecularID(int index) { return this->lightUniforms[index].lightSpecularID; }
+GLuint RenderPipeline::getViewPosID() { return this->viewPosID; }
 GLuint RenderPipeline::getGammaID() { return this->gammaID; }
+GLuint RenderPipeline::getNumLightsID() { return this->numLightsID; }
 
 void RenderPipeline::setColourUniformLocations()
 {
 	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
 	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
-	this->lightPosID = glGetUniformLocation(this->shaderProgram, "light.position");
-	this->lightAmbientID = glGetUniformLocation(this->shaderProgram, "light.ambient");
-	this->lightDiffuseID = glGetUniformLocation(this->shaderProgram, "light.diffuse");
-	this->lightSpecularID = glGetUniformLocation(this->shaderProgram, "light.specular");
 	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
 	this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
+
+	//light vector	
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		std::string base = "lights[" + std::to_string(i) + "].";
+		this->lightUniforms[i].lightPosID = glGetUniformLocation(this->shaderProgram, (base + "position").c_str());
+		this->lightUniforms[i].lightAmbientID = glGetUniformLocation(this->shaderProgram, (base + "ambient").c_str());
+		this->lightUniforms[i].lightDiffuseID = glGetUniformLocation(this->shaderProgram, (base + "diffuse").c_str());
+		this->lightUniforms[i].lightSpecularID = glGetUniformLocation(this->shaderProgram, (base + "specular").c_str());
+	}
+
 }
 
 void RenderPipeline::setTextureUniformLocations()
@@ -187,12 +195,20 @@ void RenderPipeline::setTextureUniformLocations()
 	this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
 	this->ViewID = glGetUniformLocation(this->shaderProgram, "view");
 	this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
-	this->lightPosID = glGetUniformLocation(this->shaderProgram, "light.position");
-	this->lightAmbientID = glGetUniformLocation(this->shaderProgram, "light.ambient");
-	this->lightDiffuseID = glGetUniformLocation(this->shaderProgram, "light.diffuse");
-	this->lightSpecularID = glGetUniformLocation(this->shaderProgram, "light.specular");
 	this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
 	this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
+	this->numLightsID = glGetUniformLocation(this->shaderProgram, "numLights");
+
+	//light vector	
+	for (int i = 0; i < 1; i++)
+	{
+		std::string base = "lights[" + std::to_string(i) + "].";
+		this->lightUniforms[i].lightPosID = glGetUniformLocation(this->shaderProgram, (base + "position").c_str());
+		this->lightUniforms[i].lightAmbientID = glGetUniformLocation(this->shaderProgram, (base + "ambient").c_str());
+		this->lightUniforms[i].lightDiffuseID = glGetUniformLocation(this->shaderProgram, (base + "diffuse").c_str());
+		this->lightUniforms[i].lightSpecularID = glGetUniformLocation(this->shaderProgram, (base + "specular").c_str());
+	}
+
 }
 
 

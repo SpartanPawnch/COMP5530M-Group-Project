@@ -138,6 +138,10 @@ void RenderManager::loadScene() {
         glm::vec3(0.2f, 0.2f, 0.2f),
         glm::vec3(0.8f, 0.8f, 0.8f),
         glm::vec3(1.0f, 1.0f, 1.0f));
+    this->addLightSource(glm::vec3(-10.0f, -10.0f, 1.0f),
+        glm::vec3(0.2f, 0.2f, 0.2f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(1.0f, 1.0f, 1.0f));
 
     ///////////////////////////////////////////////////////
 
@@ -259,27 +263,31 @@ void RenderManager::runColourPipeline() {
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(ColourPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
-    glUniform3f(getPipeline(ColourPipeline)->getLightPosID(),
-        lights[0].getPosition().x,
-        lights[0].getPosition().y,
-        lights[0].getPosition().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(),
-        lights[0].getAmbient().x,
-        lights[0].getAmbient().y,
-        lights[0].getAmbient().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(),
-        lights[0].getDiffuse().x,
-        lights[0].getDiffuse().y,
-        lights[0].getDiffuse().z);
-    glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(),
-        lights[0].getSpecular().x,
-        lights[0].getSpecular().y,
-        lights[0].getSpecular().z);
     glUniform3f(getPipeline(ColourPipeline)->getViewPosID(),
         this->camera->getPosition().x,
         this->camera->getPosition().y,
         this->camera->getPosition().z);
     glUniform1f(getPipeline(ColourPipeline)->getGammaID(), gammaValue);
+
+    for (std::size_t i = 0; i < lights.size(); i++)
+    {
+        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i),
+            lights[i].getPosition().x,
+            lights[i].getPosition().y,
+            lights[i].getPosition().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i),
+            lights[i].getAmbient().x,
+            lights[i].getAmbient().y,
+            lights[i].getAmbient().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i),
+            lights[i].getDiffuse().x,
+            lights[i].getDiffuse().y,
+            lights[i].getDiffuse().z);
+        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
+            lights[i].getSpecular().x,
+            lights[i].getSpecular().y,
+            lights[i].getSpecular().z);
+    }
 
     //// Render the cube
     glBindVertexArray(getPipeline(ColourPipeline)->getVAO());
@@ -299,27 +307,29 @@ void RenderManager::runTexturePipeline() {
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
-    glUniform3f(getPipeline(TexturePipeline)->getLightPosID(),
-        lights[0].getPosition().x,
-        lights[0].getPosition().y,
-        lights[0].getPosition().z);
-    glUniform3f(getPipeline(TexturePipeline)->getLightAmbientID(),
-        lights[0].getAmbient().x,
-        lights[0].getAmbient().y,
-        lights[0].getAmbient().z);
-    glUniform3f(getPipeline(TexturePipeline)->getLightDiffuseID(),
-        lights[0].getDiffuse().x,
-        lights[0].getDiffuse().y,
-        lights[0].getDiffuse().z);
-    glUniform3f(getPipeline(TexturePipeline)->getLightSpecularID(),
-        lights[0].getSpecular().x,
-        lights[0].getSpecular().y,
-        lights[0].getSpecular().z);
-    glUniform3f(getPipeline(TexturePipeline)->getViewPosID(),
-        this->camera->getPosition().x,
-        this->camera->getPosition().y,
-        this->camera->getPosition().z);
     glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
+    glUniform1ui(getPipeline(TexturePipeline)->getNumLightsID(), this->lights.size());
+
+    for (std::size_t i = 0; i < lights.size(); i++)
+    {
+        glUniform3f(getPipeline(TexturePipeline)->getLightPosID(i),
+            lights[i].getPosition().x,
+            lights[i].getPosition().y,
+            lights[i].getPosition().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightAmbientID(i),
+            lights[i].getAmbient().x,
+            lights[i].getAmbient().y,
+            lights[i].getAmbient().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightDiffuseID(i),
+            lights[i].getDiffuse().x,
+            lights[i].getDiffuse().y,
+            lights[i].getDiffuse().z);
+        glUniform3f(getPipeline(TexturePipeline)->getLightSpecularID(i),
+            lights[i].getSpecular().x,
+            lights[i].getSpecular().y,
+            lights[i].getSpecular().z);
+    }
+
 
     //// Render the model
     glBindVertexArray(getPipeline(TexturePipeline)->getVAO());
@@ -353,4 +363,5 @@ void RenderManager::run2DPipeline() {
 void RenderManager::setGammaCorrection(float value)
 {
     this->gammaValue = value;
+    
 }

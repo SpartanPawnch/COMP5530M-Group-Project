@@ -7,11 +7,19 @@
 
 #include <GL/glew.h>
 
+const int MAX_LIGHTS = 20;
 
 class RenderPipeline
 {
+struct LightUniform {
+	GLuint lightPosID;
 
+	GLuint lightAmbientID;
+	GLuint lightDiffuseID;
+	GLuint lightSpecularID;
+};
 private:
+
 	GLuint shaderProgram;
 	GLuint vertexShader;
 	GLuint fragmentShader;
@@ -23,12 +31,16 @@ private:
 	GLuint ModelID;
 	GLuint ViewID;
 	GLuint ProjectionID;
-	GLuint lightPosID;
+	/*GLuint lightPosID[MAX_LIGHTS];
 	GLuint lightAmbientID;
 	GLuint lightDiffuseID;
-	GLuint lightSpecularID;
+	GLuint lightSpecularID;*/
+	LightUniform lightUniforms[MAX_LIGHTS];
 	GLuint viewPosID;
 	GLuint gammaID;
+	GLuint numLightsID;
+	
+
 
 	GLuint VAO;
 	
@@ -43,6 +55,7 @@ private:
 public:
 
 	bool initialised = false;
+	
 
 	RenderPipeline();
 
@@ -58,12 +71,13 @@ public:
 	GLuint getModelID();
 	GLuint getViewID();
 	GLuint getProjectionID();
-	GLuint getLightPosID();
-	GLuint getLightAmbientID();
-	GLuint getLightDiffuseID();
-	GLuint getLightSpecularID();
+	GLuint getLightPosID(int index);
+	GLuint getLightAmbientID(int index);
+	GLuint getLightDiffuseID(int index);
+	GLuint getLightSpecularID(int index);
 	GLuint getViewPosID();
 	GLuint getGammaID();
+	GLuint getNumLightsID();
 
 	~RenderPipeline();
 

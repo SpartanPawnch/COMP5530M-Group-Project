@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -14,6 +13,8 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
+
+
 
 enum Pipeline {
     ColourPipeline = 0,
@@ -75,6 +76,7 @@ class RenderManager {
     double deltaTime;
     //Gamma value for gamma correction
     float gammaValue = 2.2f;
+
 
     // mouse input variables
     double xPos, yPos, xPosLast, yPosLast;

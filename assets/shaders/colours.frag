@@ -23,14 +23,17 @@ struct Material
     float shininess;
 };
 
-uniform Light light;
+const int MAX_LIGHTS = 20;
+uniform int numLights;
+uniform Light lights[MAX_LIGHTS];
+
 uniform float gamma;
 uniform vec3 viewPos;
 
 void main()
 {
    Material material;
-    material.diffuse = vec3(0.2, 0.2, 0.2);
+    material.ambient = vec3(0.2, 0.2, 0.2);
     material.diffuse = vec3(0.8, 0.8, 0.8);
     material.specular = vec3(0.2, 0.2, 0.2);
     material.shininess = 16.0;
@@ -38,20 +41,20 @@ void main()
    vec3 colour = vsCol;
    //using normal instead of color
    //ambient
-   vec3 ambient = light.ambient * material.ambient;
+   vec3 ambient = lights[0].ambient * material.ambient;
 
     //diffuse
-    vec3 lightDir = normalize(light.position - vsPos);
+    vec3 lightDir = normalize(lights[0].position - vsPos);
     vec3 normal = normalize(vsNormal);
     float diff = clamp(dot(lightDir, vsNormal), 0, 1);
-    vec3 diffuse = light.diffuse * diff *  material.diffuse;
+    vec3 diffuse = lights[0].diffuse * diff *  material.diffuse;
 
     //specular
     vec3 viewDir = normalize(viewPos - vsPos);
     float spec = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
     spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
-    vec3 specular = spec * light.specular * material.specular; 
+    vec3 specular = spec * lights[0].specular * material.specular; 
 
 
     fsColour = vec4(colour,1.f) *
