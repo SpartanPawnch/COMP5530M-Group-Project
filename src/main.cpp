@@ -252,7 +252,8 @@ int main() {
         // draw Camera preview window in corner
         if (scene.selectedEntity &&
             scene.selectedEntity->components.vecCameraComponent.size() > 0) {
-            CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[0];
+            CameraComponent& cam =
+                scene.selectedEntity->components.vecCameraComponent[scene.selectedCameraIdx];
             // setup preview camera object
             cam.copyToCamera(renderManager->previewCamera,
                 scene.selectedEntity->state.runtimeTransform);

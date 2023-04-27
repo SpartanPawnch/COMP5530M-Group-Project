@@ -793,6 +793,7 @@ inline void drawEntities() {
                 // handle select
                 if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                     scene.selectedEntity = &scene.entities[i];
+                    scene.selectedCameraIdx = 0;
                 }
 
                 // handle drag and drop
@@ -845,6 +846,7 @@ inline void drawEntities() {
         // add new child if requested
         if (targetParent >= 0) {
             scene.selectedEntity = nullptr;
+            scene.selectedCameraIdx = 0;
             scene.addChild(targetChild, targetParent);
         }
 
@@ -852,6 +854,7 @@ inline void drawEntities() {
         if (targetToDelete >= 0) {
             scene.removeEntityByIdx(targetToDelete);
             scene.selectedEntity = nullptr;
+            scene.selectedCameraIdx = 0;
         }
 
         // draw invisible button to allow context menu for full window
@@ -875,18 +878,22 @@ inline void drawEntities() {
             if (ImGui::MenuItem("Add Entity")) {
                 scene.addEntity(BaseEntity());
                 scene.selectedEntity = nullptr;
+                scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Camera Entity")) {
                 scene.addEntity(CameraEntity());
                 scene.selectedEntity = nullptr;
+                scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Model Entity")) {
                 scene.addEntity(ModelEntity());
                 scene.selectedEntity = nullptr;
+                scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
                 scene.addEntity(SkeletalMeshEntity());
                 scene.selectedEntity = nullptr;
+                scene.selectedCameraIdx = 0;
             }
             ImGui::EndPopup();
         }
@@ -1052,6 +1059,36 @@ void drawComponentList(std::vector<T>& components) {
     // handle deletion requests
     if (componentToDelete >= 0) {
         components.erase(components.begin() + componentToDelete);
+    }
+}
+
+template <>
+
+void drawComponentList(std::vector<CameraComponent>& components) {
+    int componentToDelete = -1;
+
+    // draw list
+    for (int i = 0; i < components.size(); i++) {
+        ImGui::PushID(i);
+        if (ImGui::TreeNodeEx(components[i].name.c_str(),
+                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
+            // update selected camera
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+                scene.selectedCameraIdx = i;
+
+            drawComponentContextMenu(i, componentToDelete);
+
+            drawComponentProps(components[i]);
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+
+    // handle deletion requests
+    if (componentToDelete >= 0) {
+        components.erase(components.begin() + componentToDelete);
+        scene.selectedCameraIdx = 0;
     }
 }
 
