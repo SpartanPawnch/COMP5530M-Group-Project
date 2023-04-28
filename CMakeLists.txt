@@ -42,7 +42,7 @@ add_executable(
     ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
-    src/logging.cpp src/gui.cpp src/scripting.cpp
+    src/logging.cpp src/gui.cpp src/scripting.cpp src/metrics.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp src/ECS/Component/ModelComponent.cpp
@@ -55,7 +55,9 @@ add_executable(
     render-engine/Buffer.h render-engine/Buffer.cpp
  	"src/asset_import/model.cpp"
 	render-engine/LightSource.h render-engine/LightSource.cpp
-	src/ECS/Component/SkeletalModelComponent.cpp "src/model_import/animation.cpp" "src/model_import/bone.cpp" "src/asset_import/animation.cpp")
+	src/ECS/Component/SkeletalModelComponent.cpp "src/model_import/animation.cpp" "src/model_import/bone.cpp" "src/asset_import/animation.cpp"
+    ${ICON_RESOURCE}
+)
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

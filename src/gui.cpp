@@ -26,6 +26,7 @@
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
+#include "metrics.h"
 #include "util.h"
 #include "scripting.h"
 #include "asset_import/audio.h"
@@ -74,8 +75,8 @@ static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
 
 // asset manager controls
-static assetfolder::AssetDescriptor currAssetFolder = { "", "",
-    assetfolder::AssetDescriptor::EFileType::INVALID };
+static assetfolder::AssetDescriptor currAssetFolder = {"", "",
+    assetfolder::AssetDescriptor::EFileType::INVALID};
 static std::vector<assetfolder::AssetDescriptor> folderItems;
 static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
@@ -511,7 +512,7 @@ inline void drawTextureDebug() {
     if (ImGui::Begin("Texture Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::PushFont(guicfg::regularFont);
         if (ImGui::Button("Load Texture")) {
-            const char* filters[] = { "*.png", "*.jpg", "*.bmp", "*.tga", "*.hdr" };
+            const char* filters[] = {"*.png", "*.jpg", "*.bmp", "*.tga", "*.hdr"};
             std::string path = fdutil::openFile("Load Texture", NULL,
                 sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
@@ -625,7 +626,7 @@ inline void drawAssetBrowser() {
                 // selectable
                 ImGui::SetCursorPos(initialPos);
                 if (ImGui::Selectable("##fileselector", itemIsSelected[i], 0,
-                    guicfg::assetMgrItemSize)) {
+                        guicfg::assetMgrItemSize)) {
                     if (glfwGetKey(baseWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                         glfwGetKey(baseWindow, GLFW_KEY_RIGHT_CONTROL)) {
                         itemIsSelected[i] = true;
@@ -655,10 +656,10 @@ inline void drawAssetBrowser() {
                     // wrap to next line if needed
                     bool wrap = i % itemsPerLine == itemsPerLine - 1;
                     ImVec2 nextPos = ImVec2(wrap ? initialItemPad
-                        : (initialPos.x + guicfg::assetMgrItemSize.x +
-                            guicfg::assetMgrPadding.x),
+                                                 : (initialPos.x + guicfg::assetMgrItemSize.x +
+                                                       guicfg::assetMgrPadding.x),
                         initialPos.y +
-                        (guicfg::assetMgrIconSize.y + guicfg::assetMgrPadding.y) * wrap);
+                            (guicfg::assetMgrIconSize.y + guicfg::assetMgrPadding.y) * wrap);
                     ImGui::SetCursorPos(nextPos);
                 }
 
@@ -695,7 +696,7 @@ inline void drawViewport() {
         viewportTexWidth = int(windowSize.x);
         viewportTexHeight = int(windowSize.y);
 
-        //samples for antialiasing
+        // samples for antialiasing
         GLuint samples = 4;
 
         // adjust to window resize
@@ -785,10 +786,10 @@ inline void drawEntities() {
                 // start new tree node if visible
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
-                    ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
-                    ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                    (ImGuiTreeNodeFlags_Leaf * isLeaf),
-                    "%s", scene.entities[i].name.c_str())) {
+                        ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
+                            ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                            (ImGuiTreeNodeFlags_Leaf * isLeaf),
+                        "%s", scene.entities[i].name.c_str())) {
                     openDepth = currDepth + 1;
                 }
                 else {
@@ -1093,11 +1094,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
         for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_nocond",
-                component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                        component.selectedNode->noConditionTransitions[i].transitionTo ==
-                        &component.nodes[j])) {
+                            component.selectedNode->noConditionTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
                         component.selectedNode->noConditionTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1127,11 +1128,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
         for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_bool",
-                component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                        component.selectedNode->boolTransitions[i].transitionTo ==
-                        &component.nodes[j])) {
+                            component.selectedNode->boolTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
                         component.selectedNode->boolTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1176,11 +1177,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
         for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_int",
-                component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                        component.selectedNode->intTransitions[i].transitionTo ==
-                        &component.nodes[j])) {
+                            component.selectedNode->intTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
                         component.selectedNode->intTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1233,11 +1234,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
         for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_float",
-                component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                        component.selectedNode->floatTransitions[i].transitionTo ==
-                        &component.nodes[j])) {
+                            component.selectedNode->floatTransitions[i].transitionTo ==
+                                &component.nodes[j])) {
                         component.selectedNode->floatTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1375,8 +1376,8 @@ void drawComponentList(std::vector<T>& components) {
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
         if (ImGui::TreeNodeEx(components[i].name.c_str(),
-            ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-            ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
             drawComponentContextMenu(i, componentToDelete);
 
             drawComponentProps(components[i]);
@@ -1400,8 +1401,8 @@ void drawComponentList(std::vector<CameraComponent>& components) {
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
         if (ImGui::TreeNodeEx(components[i].name.c_str(),
-            ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-            ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
             // update selected camera
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
                 scene.selectedCameraIdx = i;
@@ -1453,8 +1454,8 @@ inline void drawProperties() {
             for (unsigned int i = 0; i < skeletalModelComponents.size(); i++) {
                 ImGui::PushID(i);
                 if (ImGui::TreeNodeEx(skeletalModelComponents[i].name.c_str(),
-                    ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                    ImGuiTreeNodeFlags_DefaultOpen)) {
+                        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                            ImGuiTreeNodeFlags_DefaultOpen)) {
 
                     drawComponentProps(skeletalModelComponents[i]);
                     ImGui::TreePop();
@@ -1501,8 +1502,8 @@ inline void drawProperties() {
 }
 
 inline void drawLevels() {
-    static assetfolder::AssetDescriptor currLevelDir = { "", "",
-        assetfolder::AssetDescriptor::EFileType::INVALID };
+    static assetfolder::AssetDescriptor currLevelDir = {"", "",
+        assetfolder::AssetDescriptor::EFileType::INVALID};
     static std::vector<assetfolder::AssetDescriptor> levelDescriptors;
     static int selectedLevel = -1;
 
@@ -1535,7 +1536,7 @@ inline void drawLevels() {
         // rename popup
         if (ImGui::BeginPopup("##mvlvlpopup")) {
             if (ImGui::InputText("Name", &mvNameBuf,
-                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
                 std::string newPath = currLevelDir.path + "/" + mvNameBuf;
                 std::rename(levelDescriptors[mvIdx].path.c_str(), newPath.c_str());
 
@@ -1586,7 +1587,7 @@ inline void drawLevels() {
             // selectable over text
             bool selected = (i == selectedLevel);
             if (ImGui::Selectable("##levelselectable", &selected, 0,
-                ImVec2(buttonSize.x, ImGui::GetItemRectSize().y))) {
+                    ImVec2(buttonSize.x, ImGui::GetItemRectSize().y))) {
                 selectedLevel = i;
             }
 
@@ -1649,7 +1650,7 @@ inline void drawLevels() {
         if (ImGui::BeginPopup("##newlvlpopup")) {
             std::string buf;
             if (ImGui::InputText("Name ##newlvl", &buf,
-                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll)) {
                 // save new empty level
                 std::string lvlName = currLevelDir.path + "/" + buf + ".json";
                 saveLevel(lvlName.c_str(), Scene());
@@ -1697,8 +1698,24 @@ inline void drawScriptDemo() {
 void drawStats() {
     if (ImGui::Begin("Statistics")) {
         ImGui::PushFont(guicfg::regularFont);
+
+        // CPU
+        ImGui::Text("CPU: %f%%", metrics::getCurrentCPUUsage());
+
+        // Physical Mem
+        float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Physical Memory Used: %.3f MB", physMemMB);
+
+        // Virtual Mem
+        float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Virtual Memory Used: %.3f MB", virtMemMB);
+
+        // Audio stuff
         ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+
+        // Texture stuff
         ImGui::Text("TEXTURES %i loaded", getTextureCount());
+
         ImGui::PopFont();
     }
     ImGui::End();
@@ -1728,8 +1745,8 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
     ImGui::SetNextWindowSize(windowSize);
     if (ImGui::Begin("##FullscreenWindow", nullptr,
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoDocking)) {
+            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoDocking)) {
 
         ImGuiID dockId = ImGui::GetID("DockspaceDefault");
         ImGui::DockSpace(dockId);

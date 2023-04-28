@@ -23,6 +23,7 @@
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
+#include "metrics.h"
 #include "scripting.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
@@ -89,6 +90,8 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
+    // init metrics
+    metrics::MetricsTracker metricsTracker;
     // init scripting
     scripting::ScriptManager scriptMgr;
 
@@ -98,8 +101,8 @@ int main() {
     // Probably the job of Asset Manager
     ///////////////////////////////////
     // Load entity models
-    Model model;
-    model.loadModel("assets/tree.obj");
+    // Model model;
+    // model.loadModel("assets/tree.obj");
 
     //////////////////////////////////
 
