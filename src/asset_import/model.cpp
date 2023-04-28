@@ -169,6 +169,13 @@ namespace model {
         return loadedModels[idx].model->meshes[meshIndex].EBO;
     }
 
+    unsigned int ModelDescriptor::getTexture(int meshIndex) {
+        if (loadedModels[idx].model->textures_loaded.size()<= meshIndex || loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor==nullptr) {
+            return 0;
+        }
+        return loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor->texId;
+    }
+
     unsigned int ModelDescriptor::getIndexCount(int meshIndex) {
         return loadedModels[idx].model->meshes[meshIndex].vertices.size();
     }

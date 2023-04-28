@@ -43,6 +43,10 @@
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
 
+#include "../external/ImGuizmo/ImGuizmo.h"
+#include <glm/gtx/matrix_decompose.hpp>
+
+
 using namespace ImGui;
 
 // --- GUI constants, possibly replace with settings file ---
@@ -705,6 +709,26 @@ inline void drawViewport() {
 
         // draw viewport
         ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+
+        if (scene.selectedEntity) {
+            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowSize.x, windowSize.y);
+            
+            //glm::mat4 cameraView = glm::inverse(renderManager->viewMatrix);
+            glm::mat4 cameraView = renderManager->viewMatrix;
+            glm::mat4 cameraProjection = renderManager->projectionMatrix;
+            glm::mat4 transform = scene.selectedEntity->runtimeTransform;
+
+            ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),ImGuizmo::OPERATION::UNIVERSAL,ImGuizmo::LOCAL,glm::value_ptr(transform));
+
+            if (ImGuizmo::IsUsing()) {
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::decompose(transform, scene.selectedEntity->scale, scene.selectedEntity->rotation, scene.selectedEntity->position,skew, perspective);
+            }
+            
+        }
     }
     ImGui::PopStyleVar(2);
     ImGui::End();
@@ -1612,6 +1636,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
     // ImVec2 mousePos = ImGui::GetMousePos();
 

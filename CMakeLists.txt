@@ -37,7 +37,7 @@ endif(WIN32)
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp 
+    ${PROJECT_NAME} src/main.cpp external/ImGuizmo/ImGuizmo.cpp
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
@@ -74,8 +74,6 @@ add_subdirectory("external/glm")
 #add spdlog
 add_subdirectory("external/spdlog")
 
-
-
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
     ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
@@ -91,6 +89,33 @@ add_custom_target(ComponentStorageGen
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/ECS/Component/component_list.txt
 )
 add_dependencies(${PROJECT_NAME} ComponentStorageGen)
+
+#create template
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    #install assimp
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/assimp-5.2.5
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/assimp
+
+    #install glfw
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/glfw-3.3.6
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/glfw-3.3.6
+
+    #install soloud
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/soloud/contrib
+    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
+    $<$<CONFIG:Release>:Release>
+    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
+
+    #copy template
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    ${CMAKE_CURRENT_SOURCE_DIR}/template
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/template
+)
 
 #copy dirs after build
 add_custom_command(

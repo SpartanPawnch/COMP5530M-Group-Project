@@ -15,6 +15,7 @@ namespace model {
         unsigned int getVAO(int meshIndex);
         unsigned int getVBO(int meshIndex);
         unsigned int getEBO(int meshIndex);
+        unsigned int getTexture(int meshIndex);
         unsigned int getIndexCount(int meshIndex);
         unsigned int getMeshCount();
         std::map<std::string, BoneInfo> getBoneInfoMap();

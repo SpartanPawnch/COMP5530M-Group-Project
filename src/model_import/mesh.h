@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <assimp/scene.h>
+#include "../asset_import/images.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -27,6 +28,7 @@ struct Texture {
     unsigned int id;
     std::string type;
     std::string path;
+    std::shared_ptr<TextureDescriptor> textureDescriptor;
 };
 
 class Mesh {
