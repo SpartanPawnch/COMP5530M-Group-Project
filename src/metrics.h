@@ -1,4 +1,5 @@
 #pragma once
+#include <implot.h>
 namespace metrics {
     struct MetricsTracker {
         MetricsTracker();
@@ -7,5 +8,9 @@ namespace metrics {
     float getCurrentCPUUsage();
     int getCurrentVirtualMemoryUsage();
     int getCurrentPhysicalMemoryUsage();
-    // TODO graph data
+
+    int getMaxSampleCount();
+    ImPlotPoint getCPUSample(int idx, void* data);
+    ImPlotPoint getPhysMemSample(int idx, void* data);
+    ImPlotPoint getVirtMemSample(int idx, void* data);
 };

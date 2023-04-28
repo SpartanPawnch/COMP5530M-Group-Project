@@ -3,19 +3,56 @@
 #include <psapi.h>
 #include <stdint.h>
 #include <thread>
+#include <algorithm>
+
+#include <implot.h>
+
 namespace metrics {
+    // previous sample state
     static FILETIME lastCPU, lastSysCPU, lastUserCPU;
+
+    // process info
     static int numProcessors;
     static HANDLE currProc;
+
+    // ring buffer data
+    const int MAX_SAMPLE_COUNT = 100;
+    static int samplesTaken = 0;
+    static int currOffset = 0;
+    static float cpuSamples[MAX_SAMPLE_COUNT] = {.0f};
+    static float physMemSamples[MAX_SAMPLE_COUNT] = {.0f};
+    static float virtMemSamples[MAX_SAMPLE_COUNT] = {.0f};
+
+    // CPU stats
     static float currCPUUsage = .0f;
+
+    // Memory stats
     static int currPhysMemUsage = 0;
     static int currVirtMemUsage = 0;
 
     std::thread trackerThread;
     static bool stopTracker = false;
 
+    static int64_t filetimeToInt(const FILETIME& ft) {
+        return (int64_t(ft.dwHighDateTime) * (1ll << 32) + ft.dwLowDateTime);
+    }
+
+    ImPlotPoint getCPUSample(int idx, void* data) {
+        return ImPlotPoint(float(idx), cpuSamples[(currOffset + idx) % MAX_SAMPLE_COUNT]);
+    }
+
+    ImPlotPoint getPhysMemSample(int idx, void* data) {
+        return (ImPlotPoint(float(idx),
+            float(physMemSamples[(currOffset + idx) % MAX_SAMPLE_COUNT] / (1024.f * 1024.f))));
+    }
+
+    ImPlotPoint getVirtMemSample(int idx, void* data) {
+        return (ImPlotPoint(float(idx),
+            float(virtMemSamples[(currOffset + idx) % MAX_SAMPLE_COUNT]) / (1024.f * 1024.f)));
+    }
+
     static void trackMetrics() {
-        static const int POLL_INTERVAL_MS = 1000;
+        static const int POLL_INTERVAL_MS = 50;
         while (!stopTracker) {
             // get raw cpu metrics
             FILETIME currTime, currSys, currUser;
@@ -24,10 +61,10 @@ namespace metrics {
             GetProcessTimes(currProc, &ignore, &ignore, &currSys, &currUser);
 
             // calculate usage %
-            currCPUUsage = currUser.dwLowDateTime - lastUserCPU.dwLowDateTime +
-                currSys.dwLowDateTime - lastSysCPU.dwLowDateTime;
+            currCPUUsage = filetimeToInt(currUser) - filetimeToInt(lastUserCPU) +
+                filetimeToInt(currSys) - filetimeToInt(lastSysCPU);
 
-            currCPUUsage /= (currTime.dwLowDateTime - lastCPU.dwLowDateTime) * numProcessors;
+            currCPUUsage /= (filetimeToInt(currTime) - filetimeToInt(lastCPU)) * numProcessors;
             currCPUUsage *= 100.f;
 
             // update previous metrics
@@ -38,7 +75,14 @@ namespace metrics {
             PROCESS_MEMORY_COUNTERS_EX memInfo;
             GetProcessMemoryInfo(currProc, (PROCESS_MEMORY_COUNTERS*)&memInfo, sizeof(memInfo));
             currVirtMemUsage = int(memInfo.PrivateUsage);
-            currPhysMemUsage = int(memInfo.PagefileUsage);
+            currPhysMemUsage = int(memInfo.WorkingSetSize);
+
+            // update sampled data
+            cpuSamples[samplesTaken % MAX_SAMPLE_COUNT] = currCPUUsage;
+            physMemSamples[samplesTaken % MAX_SAMPLE_COUNT] = currPhysMemUsage;
+            virtMemSamples[samplesTaken % MAX_SAMPLE_COUNT] = currVirtMemUsage;
+            samplesTaken++;
+            currOffset = (currOffset + int(samplesTaken >= MAX_SAMPLE_COUNT)) % MAX_SAMPLE_COUNT;
 
             Sleep(POLL_INTERVAL_MS);
         }
@@ -77,5 +121,8 @@ namespace metrics {
 
     int getCurrentPhysicalMemoryUsage() {
         return currPhysMemUsage;
+    }
+    int getMaxSampleCount() {
+        return std::min<int>(MAX_SAMPLE_COUNT, samplesTaken);
     }
 };

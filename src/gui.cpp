@@ -15,6 +15,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_internal.h>
+#include <implot.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -109,6 +110,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     // Init ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 
@@ -190,6 +192,8 @@ GUIManager::~GUIManager() {
 
     glDeleteFramebuffers(1, &viewportMultisampleFramebuffer);
     glDeleteTextures(1, &viewportMultisampleTex);
+    ImPlot::DestroyContext();
+    ImGui::DestroyContext();
 }
 
 // --- Build System Utilities ---
@@ -1700,15 +1704,59 @@ void drawStats() {
         ImGui::PushFont(guicfg::regularFont);
 
         // CPU
-        ImGui::Text("CPU: %f%%", metrics::getCurrentCPUUsage());
+        ImGui::Text("CPU: %.3f%%", metrics::getCurrentCPUUsage());
+
+        // draw plot
+        if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+        }
+        ImPlot::EndPlot();
 
         // Physical Mem
         float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
         ImGui::Text("Physical Memory Used: %.3f MB", physMemMB);
 
+        // draw plot
+        if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+        }
+        ImPlot::EndPlot();
+
         // Virtual Mem
         float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
         ImGui::Text("Virtual Memory Used: %.3f MB", virtMemMB);
+
+        // draw plot
+        if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+        }
+        ImPlot::EndPlot();
 
         // Audio stuff
         ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
@@ -1805,6 +1853,8 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
+
+    // ImGui::ShowDemoWindow();
 
     // prepare gui for rendering
     ImGui::Render();

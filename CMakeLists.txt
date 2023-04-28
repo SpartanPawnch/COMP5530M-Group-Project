@@ -25,6 +25,11 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp"
   "${IMGUIDIR}/misc/cpp/imgui_stdlib.cpp"
 )
 
+#setup ImPlot
+include_directories(${PROJECT_NAME} "external/implot")
+set(IMPLOTSRC "external/implot/implot.cpp" 
+    "external/implot/implot_items.cpp" "external/implot/implot_demo.cpp")
+
 #setup lua interpreter
 set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
@@ -39,7 +44,7 @@ endif(WIN32)
 add_executable(
     ${PROJECT_NAME} src/main.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-    ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
+    ${IMPLOTSRC} ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
     src/logging.cpp src/gui.cpp src/scripting.cpp src/metrics.cpp
@@ -53,9 +58,10 @@ add_executable(
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
     render-engine/Buffer.h render-engine/Buffer.cpp
- 	"src/asset_import/model.cpp"
+ 	src/asset_import/model.cpp
 	render-engine/LightSource.h render-engine/LightSource.cpp
-	src/ECS/Component/SkeletalModelComponent.cpp "src/model_import/animation.cpp" "src/model_import/bone.cpp" "src/asset_import/animation.cpp"
+	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp
+    src/model_import/bone.cpp src/asset_import/animation.cpp
     ${ICON_RESOURCE}
 )
 
