@@ -90,33 +90,6 @@ add_custom_target(ComponentStorageGen
 )
 add_dependencies(${PROJECT_NAME} ComponentStorageGen)
 
-#create template
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    #install assimp
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/assimp-5.2.5
-    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
-    $<$<CONFIG:Release>:Release>
-    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/assimp
-
-    #install glfw
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/glfw-3.3.6
-    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
-    $<$<CONFIG:Release>:Release>
-    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/glfw-3.3.6
-
-    #install soloud
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/build/external/soloud/contrib
-    --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
-    $<$<CONFIG:Release>:Release>
-    --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
-
-    #copy template
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
-    ${CMAKE_CURRENT_SOURCE_DIR}/template
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>/template
-)
-
 #copy dirs after build
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
