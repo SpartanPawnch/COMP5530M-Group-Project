@@ -351,34 +351,23 @@ static void handleMouseInput(GLFWwindow* window) {
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         if (ImGuizmo::IsUsing()) return;
-        glBindFramebuffer(GL_FRAMEBUFFER, viewportTex);
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
 
         int height = ImGui::GetWindowSize().y;
 
-        std::cout << "clicked on x:" << renderManager->xPos - ImGui::GetWindowPos().x << " y:" << height - (renderManager->yPos - ImGui::GetWindowPos().y) << std::endl;
-
         unsigned char pixel[4];
-        glReadPixels(renderManager->xPos - ImGui::GetWindowPos().x, height -(renderManager->yPos - ImGui::GetWindowPos().y), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        glReadPixels(renderManager->xPos - ImGui::GetWindowPos().x, height - (renderManager->yPos - ImGui::GetWindowPos().y), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 
         glm::vec4 color = glm::vec4(pixel[0], pixel[1], pixel[2], pixel[3]);
-        std::cout << "clicked on color:" << color.r << " " << color.g << " " << color.b << " " << color.a << std::endl;
 
         uint32_t entityIndex = std::floor(color.x) * 1000000 + std::floor(color.y) * 1000 + std::floor(color.z);
         if (entityIndex == 0) {
-            std::cout << "selected background, unselecting entity" << std::endl;
             scene.selectedEntity = nullptr;
         }
         else {
-            std::cout << "selected entity " << entityIndex-1 << std::endl;
             if (entityIndex - 1 >= scene.entities.size()) return;
             scene.selectedEntity = &scene.entities[entityIndex - 1];
         }
-        int colorX = std::floor(entityIndex / 1000000);
-        int colorY = std::floor((entityIndex - colorX* 1000000) / 1000);
-        int colorZ = entityIndex - (colorX* 1000000 + colorY*1000);
-
-        glm::vec4 reconstructed_color = glm::vec4(colorX,colorY,colorZ,255);
-        std::cout << "reconstructed color:" << reconstructed_color.r << " " << reconstructed_color.g << " " << reconstructed_color.b << " " << reconstructed_color.a << std::endl;
     }
 }
 
