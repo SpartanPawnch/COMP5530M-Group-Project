@@ -29,6 +29,7 @@ class RenderPipeline {
     GLuint ProjectionID;
     GLuint lightPosID;
     GLuint lightColID;
+    GLuint entID;
 
     std::vector<GLuint> VAOs;
 
@@ -47,12 +48,14 @@ class RenderPipeline {
     GLuint getProjectionID();
     GLuint getLightPosID();
     GLuint getLightColID();
+    GLuint getEntID();
 
     ~RenderPipeline();
 
     void setAttributeLayouts();
 
     void setUniformLocations();
+    void setIDUniformLocations();
 
     unsigned int getNoOfMeshes();
     void addVAO(GLuint VAO);

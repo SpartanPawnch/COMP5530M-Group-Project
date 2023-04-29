@@ -357,6 +357,8 @@ void RenderManager::loadScene() {
     const char* frustumVisVertPath = "assets/shaders/frustum.vert";
     const char* texVertexPath = "assets/shaders/tex.vert";
     const char* texFragPath = "assets/shaders/tex.frag";
+    const char* entIDVertexPath = "assets/shaders/entID.vert";
+    const char* entIDFragPath = "assets/shaders/entID.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -393,6 +395,7 @@ void RenderManager::loadScene() {
     // add vis pipelines
     addPipeline(GridPipeline, gridVertPath, gridFragPath);
     addPipeline(FrustumVisPipeline, frustumVisVertPath, gridFragPath);
+    addPipeline(EntIDPipeline, entIDVertexPath, entIDFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -499,6 +502,54 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         glBindVertexArray(0);
     }
 }
+
+void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int width, int height) {
+    updateMatrices(&width, &height);
+
+    // draw background
+    // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+    // RENDERING
+    // Go through all the Pipelines
+    // TODO: Check if it is necessary to use the given pipeline and the call the following fn
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        modelMatrix = scene.entities[i].runtimeTransform;
+
+        int entityIndex = i + 1;
+
+        int colorX = std::floor(entityIndex / 1000000);
+        int colorY = std::floor((entityIndex - colorX * 1000000) / 1000);
+        int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
+
+        glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
+
+        // bind model matrix
+        glUniformMatrix4fv(
+            getPipeline(EntIDPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(EntIDPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(EntIDPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+        glUniform3f(
+            getPipeline(EntIDPipeline)->getEntID(), reconstructed_color.x, reconstructed_color.y, reconstructed_color.z);
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
+            auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
+        glBindVertexArray(0);
+    }
+}
 void RenderManager::renderGrid(int width, int height) {
     updateMatrices(&width, &height);
 
@@ -572,6 +623,9 @@ void RenderManager::runColourPipeline() {
 
 void RenderManager::setupTexturePipelineUniforms() {
     getPipeline(TexturePipeline)->setUniformLocations();
+}
+void RenderManager::setupEntIDPipelineUniforms() {
+    getPipeline(EntIDPipeline)->setIDUniformLocations();
 }
 
 void RenderManager::runTexturePipeline() {

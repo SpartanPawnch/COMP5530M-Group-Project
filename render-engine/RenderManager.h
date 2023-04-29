@@ -25,6 +25,7 @@ enum Pipeline {
     Render2DPipeline = 5,
     GridPipeline = 6,
     FrustumVisPipeline = 7,
+    EntIDPipeline = 8,
     Pipeline_MAX
 };
 
@@ -128,6 +129,7 @@ class RenderManager {
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
+    void renderEntitiesID(const Scene& scene, Camera* camera, int width, int height);
     void renderGrid(int width, int height);
     void renderCamPreview(const Scene& scene, int width, int height);
 
@@ -139,6 +141,7 @@ class RenderManager {
 
     void setupColourPipelineUniforms();
     void setupTexturePipelineUniforms();
+    void setupEntIDPipelineUniforms();
     void runPipeline(Pipeline pipeline);
 
     static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO, unsigned int* VBO, unsigned int* EBO);

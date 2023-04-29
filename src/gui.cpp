@@ -102,6 +102,11 @@ GLuint viewportFramebuffer;
 static GLuint viewportTex;
 static GLuint viewportDepthBuf;
 
+//entity ids rendering
+GLuint entIDFramebuffer;
+static GLuint entIDTex;
+static GLuint entIDDepthBuf;
+
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
 
@@ -162,6 +167,17 @@ GUIManager::GUIManager(GLFWwindow* window) {
         GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, viewportDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+
+    glGenFramebuffers(1, &entIDFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+    glGenTextures(1, &entIDTex);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, entIDTex, 0);
+    glGenRenderbuffers(1, &entIDDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, entIDDepthBuf);
+    glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, entIDDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
     baseWindow = window;
     renderManager = RenderManager::getInstance();
 }
@@ -171,6 +187,8 @@ GUIManager::~GUIManager() {
 
     glDeleteFramebuffers(1, &viewportFramebuffer);
     glDeleteTextures(1, &viewportTex);
+    glDeleteFramebuffers(1, &entIDFramebuffer);
+    glDeleteTextures(1, &entIDTex);
 }
 
 // --- Build System Utilities ---
@@ -326,6 +344,35 @@ static void handleMouseInput(GLFWwindow* window) {
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        std::cout << "clicked on x:" << renderManager->xPos- ImGui::GetWindowPos().x << " y:" << renderManager->yPos- ImGui::GetWindowPos().y << std::endl;
+
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        unsigned char pixel[4];
+        glReadPixels(renderManager->xPos, height - renderManager->yPos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+
+        glm::vec4 color = glm::vec4(pixel[0], pixel[1], pixel[2], pixel[3]);
+        std::cout << "clicked on color:" << color.r << " " << color.g << " " << color.b << " " << color.a << std::endl;
+
+        uint32_t entityIndex = std::floor(color.x) * 1000000 + std::floor(color.y) * 1000 + std::floor(color.z);
+        if (entityIndex == 0) {
+            std::cout << "selected background, unselecting entity" << std::endl;
+            scene.selectedEntity = nullptr;
+        }
+        else {
+            std::cout << "selected entity " << entityIndex-1 << std::endl;
+            scene.selectedEntity = &scene.entities[entityIndex - 1];
+        }
+        int colorX = std::floor(entityIndex / 1000000);
+        int colorY = std::floor((entityIndex - colorX* 1000000) / 1000);
+        int colorZ = entityIndex - (colorX* 1000000 + colorY*1000);
+
+        glm::vec4 reconstructed_color = glm::vec4(colorX,colorY,colorZ,255);
+        std::cout << "reconstructed color:" << reconstructed_color.r << " " << reconstructed_color.g << " " << reconstructed_color.b << " " << reconstructed_color.a << std::endl;
     }
 }
 
@@ -689,12 +736,22 @@ inline void drawViewport() {
         // draw viewport
         ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
+        //adjust entity id too
+        glBindTexture(GL_TEXTURE_2D, entIDTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindRenderbuffer(GL_RENDERBUFFER, entIDDepthBuf);
+        glRenderbufferStorage(
+            GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
         if (scene.selectedEntity) {
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist();
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowSize.x, windowSize.y);
             
-            //glm::mat4 cameraView = glm::inverse(renderManager->viewMatrix);
             glm::mat4 cameraView = renderManager->viewMatrix;
             glm::mat4 cameraProjection = renderManager->projectionMatrix;
             glm::mat4 transform = scene.selectedEntity->runtimeTransform;

@@ -12,6 +12,7 @@ struct GUIManager {
 };
 
 extern GLuint viewportFramebuffer;
+extern GLuint entIDFramebuffer;
 extern int viewportTexWidth;
 extern int viewportTexHeight;
 extern Scene scene;

@@ -142,6 +142,9 @@ GLuint RenderPipeline::getLightPosID() {
 GLuint RenderPipeline::getLightColID() {
     return this->lightColID;
 }
+GLuint RenderPipeline::getEntID() {
+    return this->entID;
+}
 
 void RenderPipeline::setUniformLocations() {
     this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
@@ -149,6 +152,10 @@ void RenderPipeline::setUniformLocations() {
     this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
     this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
     this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+}
+void RenderPipeline::setIDUniformLocations() {
+    setUniformLocations();
+    this->entID = glGetUniformLocation(this->shaderProgram, "entID");
 }
 
 void RenderPipeline::addVAO(GLuint VAO) {
