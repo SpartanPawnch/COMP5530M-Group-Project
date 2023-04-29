@@ -170,8 +170,11 @@ GUIManager::GUIManager(GLFWwindow* window) {
 
     glGenFramebuffers(1, &entIDFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+
     glGenTextures(1, &entIDTex);
+    glBindTexture(GL_TEXTURE_2D, entIDTex);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, entIDTex, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glGenRenderbuffers(1, &entIDDepthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, entIDDepthBuf);
     glFramebufferRenderbuffer(
@@ -346,14 +349,16 @@ static void handleMouseInput(GLFWwindow* window) {
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
 
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        std::cout << "clicked on x:" << renderManager->xPos- ImGui::GetWindowPos().x << " y:" << renderManager->yPos- ImGui::GetWindowPos().y << std::endl;
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (ImGuizmo::IsUsing()) return;
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportTex);
 
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
+        int height = ImGui::GetWindowSize().y;
+
+        std::cout << "clicked on x:" << renderManager->xPos - ImGui::GetWindowPos().x << " y:" << height - (renderManager->yPos - ImGui::GetWindowPos().y) << std::endl;
 
         unsigned char pixel[4];
-        glReadPixels(renderManager->xPos, height - renderManager->yPos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        glReadPixels(renderManager->xPos - ImGui::GetWindowPos().x, height -(renderManager->yPos - ImGui::GetWindowPos().y), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 
         glm::vec4 color = glm::vec4(pixel[0], pixel[1], pixel[2], pixel[3]);
         std::cout << "clicked on color:" << color.r << " " << color.g << " " << color.b << " " << color.a << std::endl;
@@ -710,7 +715,7 @@ inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
         // send input to renderer if window is hovered
-        if (ImGui::IsWindowHovered() || ImGui::IsWindowFocused() ||
+        if (ImGui::IsWindowHovered() ||
             renderManager->camera.focusState) {
             handleKeyboardInput(baseWindow);
             handleMouseInput(baseWindow);
@@ -749,8 +754,7 @@ inline void drawViewport() {
         glRenderbufferStorage(
             GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-        ImGui::Image((void*)entIDTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+        //ImGui::Image((void*)entIDTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
         if (scene.selectedEntity) {
             ImGuizmo::SetOrthographic(false);
