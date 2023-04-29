@@ -228,30 +228,30 @@ int main() {
 
         //--- Draw Results ---
         // draw scene to texture
-        //glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
-        //glViewport(0, 0, viewportTexWidth, viewportTexHeight);
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        //GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
-        //glDrawBuffers(2, attachments);
+        GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        glDrawBuffers(2, attachments);
 
-        //// clear screen
-        //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // clear screen
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //// draw grid
-        //renderManager->renderGrid(viewportTexWidth, viewportTexHeight);
+        // draw grid
+        renderManager->renderGrid(viewportTexWidth, viewportTexHeight);
 
-        //// draw scene
-        //renderManager->renderEntities(
-        //    scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
+        // draw scene
+        renderManager->renderEntities(
+            scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
 
-        //// draw cam preview frustum
-        //renderManager->renderCamPreview(scene, width, height);
+        // draw cam preview frustum
+        renderManager->renderCamPreview(scene, width, height);
 
         // renderManager->renderSceneRefactor(
         //     renderManager->camera, viewportTexWidth, viewportTexHeight);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
         GLuint entIDattachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };

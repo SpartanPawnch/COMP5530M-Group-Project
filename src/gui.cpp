@@ -365,6 +365,7 @@ static void handleMouseInput(GLFWwindow* window) {
         }
         else {
             std::cout << "selected entity " << entityIndex-1 << std::endl;
+            if (entityIndex - 1 >= scene.entities.size()) return;
             scene.selectedEntity = &scene.entities[entityIndex - 1];
         }
         int colorX = std::floor(entityIndex / 1000000);
@@ -723,6 +724,7 @@ inline void drawViewport() {
         viewportTexHeight = int(windowSize.y);
 
         // adjust to window resize
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
         glBindTexture(GL_TEXTURE_2D, viewportTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, nullptr);
@@ -736,6 +738,7 @@ inline void drawViewport() {
         // draw viewport
         ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
         //adjust entity id too
         glBindTexture(GL_TEXTURE_2D, entIDTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
@@ -746,6 +749,8 @@ inline void drawViewport() {
         glRenderbufferStorage(
             GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth, viewportTexHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        ImGui::Image((void*)entIDTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
         if (scene.selectedEntity) {
             ImGuizmo::SetOrthographic(false);
