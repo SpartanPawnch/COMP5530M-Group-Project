@@ -177,7 +177,7 @@ namespace model {
     }
 
     unsigned int ModelDescriptor::getIndexCount(int meshIndex) {
-        return loadedModels[idx].model->meshes[meshIndex].vertices.size();
+        return loadedModels[idx].model->meshes[meshIndex].indices.size();
     }
 
     unsigned int ModelDescriptor::getMeshCount() {
