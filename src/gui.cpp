@@ -37,11 +37,13 @@
 #include "ECS/Component/CameraComponent.h"
 #include "ECS/Component/ModelComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
+#include "ECS/Component/PlayerControllerComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
 
 #include "../external/ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
@@ -94,8 +96,14 @@ static std::shared_ptr<TextureDescriptor> folderTexture;
 // renderer vars
 static RenderManager* renderManager;
 
+
+
+
 // editor vars
 Scene scene;
+
+// input system
+static InputSystem inputSystem(&scene);
 
 // viewport widget vars
 GLuint viewportFramebuffer;
@@ -164,6 +172,8 @@ GUIManager::GUIManager(GLFWwindow* window) {
 
     baseWindow = window;
     renderManager = RenderManager::getInstance();
+
+    inputSystem.attachScene(&scene);
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -1315,6 +1325,9 @@ void drawComponentContextMenu(int i, int& componentToDelete) {
         if (ImGui::MenuItem("Add Transform Component")) {
             scene.selectedEntity->components.addComponent(TransformComponent());
         }
+        if (ImGui::MenuItem("Add Player Controller Component")) {
+            scene.selectedEntity->components.addComponent(PlayerControllerComponent());
+        }
         if (ImGui::MenuItem("Delete Component")) {
             componentToDelete = i;
         }
@@ -1417,6 +1430,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Transform Component")) {
                     scene.selectedEntity->components.addComponent(TransformComponent());
+                }
+                if (ImGui::MenuItem("Add Player Controller Component")) {
+                    scene.selectedEntity->components.addComponent(PlayerControllerComponent());
                 }
                 ImGui::EndPopup();
             }
@@ -1717,6 +1733,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawProperties();
 
     // prepare gui for rendering
+    inputSystem.update();
     ImGui::Render();
 }
 

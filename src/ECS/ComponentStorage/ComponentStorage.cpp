@@ -8,6 +8,9 @@ void ComponentStorage::startAll(){
     start<AudioSourceComponent>();
     start<ModelComponent>();
     start<SkeletalModelComponent>();
+    start<ControllerComponent>();
+    start<PlayerControllerComponent>();
+
 }
 void ComponentStorage::updateAll(float dt){
     update<BaseComponent>(dt);
@@ -17,6 +20,9 @@ void ComponentStorage::updateAll(float dt){
     update<AudioSourceComponent>(dt);
     update<ModelComponent>(dt);
     update<SkeletalModelComponent>(dt);
+    update<ControllerComponent>(dt);
+    update<PlayerControllerComponent>(dt);
+
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
@@ -26,4 +32,6 @@ void ComponentStorage::clearAll(){
     vecAudioSourceComponent.clear();
     vecModelComponent.clear();
     vecSkeletalModelComponent.clear();
+    vecControllerComponent.clear();
+    vecPlayerControllerComponent.clear();
 }

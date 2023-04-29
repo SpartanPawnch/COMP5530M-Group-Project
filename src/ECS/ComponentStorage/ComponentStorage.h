@@ -9,6 +9,9 @@
 #include "../Component/AudioSourceComponent.h"
 #include "../Component/ModelComponent.h"
 #include "../Component/SkeletalModelComponent.h"
+#include "../Component/ControllerComponent.h"
+#include "../Component/PlayerControllerComponent.h"
+
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -18,6 +21,8 @@ struct ComponentStorage{
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
     std::vector<ModelComponent> vecModelComponent;
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
+    std::vector<ControllerComponent> vecControllerComponent;
+    std::vector<PlayerControllerComponent> vecPlayerControllerComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -76,6 +81,16 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<ControllerComponent>(const ControllerComponent& component) {
+        vecControllerComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<PlayerControllerComponent>(const PlayerControllerComponent& component) {
+        vecPlayerControllerComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -125,6 +140,20 @@ struct ComponentStorage{
     }
 
     template<>
+    void start<ControllerComponent>() {
+        for (unsigned int i = 0; i < vecControllerComponent.size(); i++) {
+            vecControllerComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<PlayerControllerComponent>() {
+        for (unsigned int i = 0; i < vecPlayerControllerComponent.size(); i++) {
+            vecPlayerControllerComponent[i].start();
+        }
+    }
+
+    template<>
     void update<BaseComponent>(float dt){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt);
@@ -170,6 +199,20 @@ struct ComponentStorage{
     void update<SkeletalModelComponent>(float dt){
         for(unsigned int i=0;i<vecSkeletalModelComponent.size();i++){
             vecSkeletalModelComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<ControllerComponent>(float dt) {
+        for (unsigned int i = 0; i < vecControllerComponent.size(); i++) {
+            vecControllerComponent[i].update(dt);
+        }
+    }
+
+    template<>
+    void update<PlayerControllerComponent>(float dt) {
+        for (unsigned int i = 0; i < vecPlayerControllerComponent.size(); i++) {
+            vecPlayerControllerComponent[i].update(dt);
         }
     }
 

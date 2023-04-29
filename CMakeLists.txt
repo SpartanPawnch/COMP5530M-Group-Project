@@ -46,16 +46,18 @@ add_executable(
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp src/ECS/Component/ModelComponent.cpp
+    src/ECS/Component/ControllerComponent.cpp src/ECS/Component/PlayerControllerComponent.cpp 
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
-    src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp 
+    src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp
+    src/ECS/System/InputSystem.cpp
     src/ECS/System/InterfaceSystem.cpp src/ECS/ComponentStorage/ComponentStorage.cpp
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
     render-engine/Buffer.h render-engine/Buffer.cpp
- 	"src/asset_import/model.cpp"
+ 	src/asset_import/model.cpp
 	render-engine/LightSource.h render-engine/LightSource.cpp
-	src/ECS/Component/SkeletalModelComponent.cpp "src/model_import/animation.cpp" "src/model_import/bone.cpp" "src/asset_import/animation.cpp")
+	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp src/model_import/bone.cpp src/asset_import/animation.cpp)
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
