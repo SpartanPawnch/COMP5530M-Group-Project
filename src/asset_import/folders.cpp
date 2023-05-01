@@ -55,6 +55,10 @@ namespace assetfolder {
         if (ext == ".mp3" || ext == ".ogg" || ext == ".flac" || ext == ".wav")
             return AssetDescriptor::EFileType::AUDIO;
 
+        // script
+        if (ext == ".lua")
+            return AssetDescriptor::EFileType::SCRIPT;
+
         return AssetDescriptor::EFileType::MISC;
     }
 

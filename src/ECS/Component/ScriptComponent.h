@@ -7,11 +7,12 @@
 
 struct ScriptComponent : BaseComponent {
     ScriptComponent();
+    ScriptComponent(const std::string& _name, const int _uuid);
     ~ScriptComponent();
     virtual void start() override;
     virtual void update(float dt, EntityState& state) override;
     virtual void stop() override;
 
-    int scriptIdx = -1;
-    std::string scriptUuid;
+    std::string scriptPath;
+    bool valid = false;
 };

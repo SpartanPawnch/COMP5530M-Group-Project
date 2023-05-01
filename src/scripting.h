@@ -34,10 +34,12 @@ namespace scripting {
     // --- Application Side (Running Lua scripts from CPP) ---
 
     // run lua file in path
-    void runScript(const char* path);
+    bool runScript(const char* path);
 
     // load lua file to internal buffer
     int loadScript(const char* path, const std::string& uuid);
+
+    lua_State* getState();
 
     // get internal index corresponding to uuid
     inline int getScriptIdx(const std::string& uuid);

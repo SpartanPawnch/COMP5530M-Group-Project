@@ -1338,6 +1338,37 @@ void drawComponentProps(AudioSourceComponent& component) {
     ImGui::Checkbox("Directional", &component.directional);
 }
 
+void drawComponentProps(ScriptComponent& component) {
+    std::string previewStr = component.scriptPath.empty()
+        ? "None"
+        : assetfolder::getRelativePath(component.scriptPath.c_str());
+
+    // script selector
+    if (ImGui::BeginCombo("Script File", previewStr.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> scriptFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::SCRIPT, scriptFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < scriptFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (component.scriptPath == scriptFiles[i].path);
+            if (ImGui::Selectable(scriptFiles[i].name.c_str(), &isSelected)) {
+                component.scriptPath = scriptFiles[i].path;
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+    if (ImGui::Button("Test")) {
+        component.start();
+        component.update(.016f, scene.selectedEntity->state);
+        component.stop();
+    }
+}
+
 void drawComponentProps(CameraComponent& component) {
     // cam properties
     ImGui::InputFloat3("Eye", &component.eye[0]);
@@ -1360,6 +1391,7 @@ void drawComponentContextMenu(int i, int& componentToDelete) {
             scene.selectedEntity->components.addComponent(CameraComponent());
         }
         if (ImGui::MenuItem("Add Script Component")) {
+            scene.selectedEntity->components.addComponent(ScriptComponent());
         }
         if (ImGui::MenuItem("Add Transform Component")) {
             scene.selectedEntity->components.addComponent(TransformComponent());
@@ -1452,6 +1484,9 @@ inline void drawProperties() {
             // ModelComponent
             drawComponentList(scene.selectedEntity->components.vecModelComponent);
 
+            // ScriptComponent
+            drawComponentList(scene.selectedEntity->components.vecScriptComponent);
+
             // SkeletalModelComponent
             std::vector<SkeletalModelComponent>& skeletalModelComponents =
                 scene.selectedEntity->components.vecSkeletalModelComponent;
@@ -1493,6 +1528,7 @@ inline void drawProperties() {
                     scene.selectedEntity->components.addComponent(SkeletalModelComponent());
                 }
                 if (ImGui::MenuItem("Add Script Component")) {
+                    scene.selectedEntity->components.addComponent(ScriptComponent());
                 }
                 if (ImGui::MenuItem("Add Transform Component")) {
                     scene.selectedEntity->components.addComponent(TransformComponent());
@@ -1852,8 +1888,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawViewport();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    // drawScriptDemo();
-    drawTextureDebug();
+    drawScriptDemo();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawStyleEditor();

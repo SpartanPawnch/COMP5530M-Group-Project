@@ -3,6 +3,8 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <lua.hpp>
+
 struct EntityState {
     // local transform
     glm::vec3 position = glm::vec3(.0f);
@@ -11,4 +13,6 @@ struct EntityState {
 
     // world-space transform
     glm::mat4 runtimeTransform = glm::mat4(1.0f);
+
+    void pushLuaTable(lua_State* luaState);
 };

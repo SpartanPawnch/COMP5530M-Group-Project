@@ -43,6 +43,10 @@ namespace scripting {
 
         // setup warning handler
         lua_setwarnf(luaState, &l_warn, nullptr);
+
+        // setup script components global
+        lua_createtable(luaState, 0, 0);
+        lua_setglobal(luaState, "ScriptComponents");
     }
 
     ScriptManager::~ScriptManager() {
@@ -74,7 +78,8 @@ namespace scripting {
         lua_setglobal(luaState, name);
     }
 
-    void runScript(const char* path) {
+    bool runScript(const char* path) {
+        int stackcount = lua_gettop(luaState);
         // run using dofile
         int res = luaL_dofile(luaState, path);
 
@@ -82,7 +87,10 @@ namespace scripting {
         if (res != LUA_OK) {
             const char* err = luaL_tolstring(luaState, -1, nullptr);
             logging::logErr("LUA RUNTIME ERROR: {}", err);
+            lua_settop(luaState, stackcount);
+            return false;
         }
+        return true;
     }
 
     int loadScript(const char* path, const std::string& uuid) {
@@ -116,6 +124,10 @@ namespace scripting {
         scripts[idx].buf = std::string(buf.data());
 
         return idx;
+    }
+
+    lua_State* getState() {
+        return luaState;
     }
 
     inline int getScriptIdx(const std::string& uuid) {

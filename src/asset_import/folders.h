@@ -11,6 +11,7 @@ namespace assetfolder {
             MODEL,
             TEXTURE,
             AUDIO,
+            SCRIPT,
             MISC,
             INVALID
         };
