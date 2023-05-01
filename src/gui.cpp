@@ -1041,8 +1041,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::PushID(i);
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
-        if (component.selectedNode && component.selectedNode->animationDescriptor && component.selectedNode->animationDescriptor->path) {
-            previewStr2 = *component.selectedNode->animationDescriptor->path;
+        if (component.nodes[i].animationDescriptor && component.nodes[i].animationDescriptor->path) {
+            previewStr2 = *component.nodes[i].animationDescriptor->path;
             previewStr2 = assetfolder::getRelativePath(previewStr2.c_str());
         }
 
@@ -1052,24 +1052,23 @@ void drawComponentProps(SkeletalModelComponent& component) {
             assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, animationFiles);
 
             // list available audio clips
-            for (unsigned int i = 0; i < animationFiles.size(); i++) {
-                ImGui::PushID(i);
-                bool isSelected = (previewStr2 == animationFiles[i].path);
-                if (ImGui::Selectable(animationFiles[i].name.c_str(), &isSelected)) {
+            for (unsigned int j = 0; j < animationFiles.size();j++) {
+                bool isSelected = (previewStr2 == animationFiles[j].path);
+                if (ImGui::Selectable(animationFiles[j].name.c_str(), &isSelected)) {
                     // check if we need to load file
                     // TODO better unique id scheme
-                    std::string uuid = assetfolder::getRelativePath(animationFiles[i].path.c_str());
+                    std::string uuid = assetfolder::getRelativePath(animationFiles[j].path.c_str());
                     auto desc = animation::animationGetByUuid(uuid);
 
                     if (!desc) {
                         // load file from disk
-                        desc = animation::animationLoad(animationFiles[i].path.c_str(), uuid, component.modelDescriptor);
+                        desc = animation::animationLoad(animationFiles[j].path.c_str(), uuid, component.modelDescriptor);
                     }
 
-                    std::swap(component.selectedNode->animationDescriptor, desc);
-                    component.selectedNode->animationUuid = (component.selectedNode && component.selectedNode->animationDescriptor) ? uuid : "";
+                    std::swap(component.nodes[i].animationDescriptor, desc);
+                    component.nodes[i].animationUuid = (component.nodes[i].animationDescriptor) ? uuid : "";
+
                 }
-                ImGui::PopID();
             }
 
             ImGui::EndCombo();
