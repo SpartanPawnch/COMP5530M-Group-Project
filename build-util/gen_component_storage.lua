@@ -186,6 +186,28 @@ sourceFile:write("}\n")
 
 sourceFile:close()
 
+local compLocationFile = io.open("src/ECS/ComponentLocation/ComponentLocation.h", "w")
+assert(compLocationFile, "Failed to open ComponentLocation.h for writing")
+
+compLocationFile:write([[
+#pragma once
+struct ComponentLocation{
+    int entityIdx;
+    int componentIdx;
+    enum CompType{
+]])
+for _, type in ipairs(types) do
+	compLocationFile:write([[
+        ]] .. string.upper(type) .. ",\n")
+end
+compLocationFile:write([[
+        COMPTYPE_MAX
+    };
+    CompType type;
+};
+]])
+compLocationFile:close()
+
 cacheFile = io.open("src/ECS/ComponentStorage/codegen.cache", "w")
 if cacheFile then
 	cacheFile:write(datemodified)

@@ -50,7 +50,8 @@ add_executable(
     src/logging.cpp src/gui.cpp src/scripting.cpp src/metrics.cpp
     src/ECS/engine.cpp src/ECS/Component/BaseComponent.cpp
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
-    src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp src/ECS/Component/ModelComponent.cpp
+    src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp
+    src/ECS/Component/ModelComponent.cpp src/ECS/Component/LightComponent.cpp
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
     src/ECS/Scene/Scene.cpp  src/ECS/System/BaseSystem.cpp 

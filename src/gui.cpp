@@ -1704,7 +1704,8 @@ void drawStats() {
         ImGui::PushFont(guicfg::regularFont);
 
         // CPU
-        ImGui::Text("CPU: %.3f%%", metrics::getCurrentCPUUsage());
+        ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
+            metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
 
         // draw plot
         if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
@@ -1722,7 +1723,10 @@ void drawStats() {
 
         // Physical Mem
         float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Physical Memory Used: %.3f MB", physMemMB);
+        float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
+            minPhysMemMB, maxPhysMemMB);
 
         // draw plot
         if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
@@ -1742,7 +1746,10 @@ void drawStats() {
 
         // Virtual Mem
         float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Virtual Memory Used: %.3f MB", virtMemMB);
+        float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
+        float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
+            minVirtMemMB, maxVirtMemMB);
 
         // draw plot
         if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),

@@ -25,10 +25,17 @@ namespace metrics {
 
     // CPU stats
     static float currCPUUsage = .0f;
+    static float minCPUUsage = 2.0f;
+    static float maxCPUUsage = -1.0f;
 
     // Memory stats
     static int currPhysMemUsage = 0;
+    static int minPhysMemUsage = 0;
+    static int maxPhysMemUsage = 0;
+
     static int currVirtMemUsage = 0;
+    static int minVirtMemUsage = 0;
+    static int maxVirtMemUsage = 0;
 
     std::thread trackerThread;
     static bool stopTracker = false;
@@ -66,6 +73,8 @@ namespace metrics {
 
             currCPUUsage /= (filetimeToInt(currTime) - filetimeToInt(lastCPU)) * numProcessors;
             currCPUUsage *= 100.f;
+            minCPUUsage = (currCPUUsage < minCPUUsage) ? currCPUUsage : minCPUUsage;
+            maxCPUUsage = (currCPUUsage > maxCPUUsage) ? currCPUUsage : maxCPUUsage;
 
             // update previous metrics
             lastCPU = currTime;
@@ -75,7 +84,20 @@ namespace metrics {
             PROCESS_MEMORY_COUNTERS_EX memInfo;
             GetProcessMemoryInfo(currProc, (PROCESS_MEMORY_COUNTERS*)&memInfo, sizeof(memInfo));
             currVirtMemUsage = int(memInfo.PrivateUsage);
+            minVirtMemUsage = (samplesTaken == 0 || currVirtMemUsage < minVirtMemUsage)
+                ? currVirtMemUsage
+                : minVirtMemUsage;
+            maxVirtMemUsage = (samplesTaken == 0 || currVirtMemUsage > maxVirtMemUsage)
+                ? currVirtMemUsage
+                : maxVirtMemUsage;
+
             currPhysMemUsage = int(memInfo.WorkingSetSize);
+            minPhysMemUsage = (samplesTaken == 0 || currPhysMemUsage < minPhysMemUsage)
+                ? currPhysMemUsage
+                : minPhysMemUsage;
+            maxPhysMemUsage = (samplesTaken == 0 || currPhysMemUsage > maxPhysMemUsage)
+                ? currPhysMemUsage
+                : maxPhysMemUsage;
 
             // update sampled data
             cpuSamples[samplesTaken % MAX_SAMPLE_COUNT] = currCPUUsage;
@@ -110,18 +132,39 @@ namespace metrics {
             trackerThread.join();
     }
 
+    // CPU getters
     float getCurrentCPUUsage() {
-
         return currCPUUsage;
     }
+    float getMinCPUUsage() {
+        return minCPUUsage;
+    }
+    float getMaxCPUUsage() {
+        return maxCPUUsage;
+    }
 
+    // Virt Mem getters
     int getCurrentVirtualMemoryUsage() {
         return currVirtMemUsage;
     }
+    int getMinVirtualMemoryUsage() {
+        return minVirtMemUsage;
+    }
+    int getMaxVirtualMemoryUsage() {
+        return maxVirtMemUsage;
+    }
 
+    // Phys Mem getters
     int getCurrentPhysicalMemoryUsage() {
         return currPhysMemUsage;
     }
+    int getMinPhysicalMemoryUsage() {
+        return minPhysMemUsage;
+    }
+    int getMaxPhysicalMemoryUsage() {
+        return maxPhysMemUsage;
+    }
+
     int getMaxSampleCount() {
         return std::min<int>(MAX_SAMPLE_COUNT, samplesTaken);
     }
