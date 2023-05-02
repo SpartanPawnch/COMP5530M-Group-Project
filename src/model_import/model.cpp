@@ -7,7 +7,7 @@ Model::Model() {
 
 bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
-    uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs;
+    uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_LimitBoneWeights;
     const aiScene* scene = importer.ReadFile(filename, flags);
     //this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {

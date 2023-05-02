@@ -12,7 +12,7 @@ Animation::~Animation() {
 
 bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<model::ModelDescriptor> model) {
     Assimp::Importer importer;
-	uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs;
+	uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_LimitBoneWeights;
     const aiScene* scene = importer.ReadFile(animationPath, flags);
     if (!scene->HasAnimations()) {
         return false;
@@ -21,7 +21,15 @@ bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<
     name = animation->mName.data;
     duration = animation->mDuration;
     ticksPerSecond = animation->mTicksPerSecond;
-	std::map<std::string, Bone>& boneInfoMap = model->getBoneInfoMap();
+
+	std::map<std::string, Bone>& modelBoneInfoMap = model->getBoneInfoMap();
+
+	for (unsigned int i = 0; i < animation->mNumChannels; i++) {
+        aiNodeAnim* channel = animation->mChannels[i];
+        std::string bone_name(channel->mNodeName.C_Str());
+		Bone bone = modelBoneInfoMap[bone_name];
+        boneInfoMap[bone_name] = bone;
+    }
 
 	for (unsigned int i = 0; i < animation->mNumChannels; i++) {
 		aiNodeAnim* channel = animation->mChannels[i];
@@ -63,26 +71,27 @@ bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<
 		}
 	}
 
-	setBoneData(scene->mRootNode, rootBone, boneInfoMap);
+	setBoneData(scene->mRootNode, rootBone);
 
     return true;
 }
 
-void Animation::setBoneData(aiNode* node, Bone& bone, std::map<std::string, Bone>& boneInfoMap) {
+void Animation::setBoneData(aiNode* node, Bone& bone) {
 	std::string bone_name(node->mName.C_Str());
 
 	if (boneInfoMap.count(bone_name)) {
+		std::cout << "found" << std::endl;
 		bone = boneInfoMap.at(bone_name);
 
 		for (uint32_t i = 0; i < node->mNumChildren; i++) {
 			Bone child;
-			setBoneData(node->mChildren[i], child, boneInfoMap);
+			setBoneData(node->mChildren[i], child);
 			bone.children.push_back(child);
 		}
 	}
 	else {
 		for (uint32_t i = 0; i < node->mNumChildren; i++) {
-			setBoneData(node->mChildren[i], bone, boneInfoMap);
+			setBoneData(node->mChildren[i], bone);
 		}
 	}
 }

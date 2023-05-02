@@ -26,10 +26,11 @@ public:
     float duration;
     int ticksPerSecond;
     Bone rootBone;
+    std::map<std::string, Bone> boneInfoMap;
 
     Animation();
     ~Animation();
 
     bool loadAnimation(const std::string& animationPath, std::shared_ptr<model::ModelDescriptor> model);
-    void setBoneData(aiNode* ai_node, Bone& bone, std::map<std::string, Bone>& bone_infos);
+    void setBoneData(aiNode* ai_node, Bone& bone);
 };

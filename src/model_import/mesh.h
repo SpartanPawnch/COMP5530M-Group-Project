@@ -33,7 +33,7 @@ struct Vertex {
         }
         //std::cout << "Not set" << std::endl;
         //std::cout << "---------------------" << std::endl;
-        //assert(0);
+        assert(0);
     }
 };
 
