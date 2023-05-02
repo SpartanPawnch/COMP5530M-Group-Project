@@ -7,10 +7,10 @@ Animation::Animation() {
 }
 
 Animation::~Animation() {
-
 }
 
-bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<model::ModelDescriptor> model) {
+bool Animation::loadAnimation(const std::string& animationPath,
+    std::shared_ptr<model::ModelDescriptor> model) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
     assert(scene && scene->mRootNode);
@@ -25,16 +25,15 @@ bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<
 
 Bone* Animation::findBoneByName(const std::string& name) {
     auto iter = std::find_if(bones.begin(), bones.end(),
-        [&](const Bone& Bone)
-        {
-            return Bone.name == name;
-        }
-    );
-    if (iter == bones.end()) return nullptr;
-    else return &(*iter);
+        [&](const Bone& Bone) { return Bone.name == name; });
+    if (iter == bones.end())
+        return nullptr;
+    else
+        return &(*iter);
 }
 
-void Animation::readMissingBones(const aiAnimation* animation, std::shared_ptr<model::ModelDescriptor>& model) {
+void Animation::readMissingBones(const aiAnimation* animation,
+    std::shared_ptr<model::ModelDescriptor>& model) {
     int channelCount = animation->mNumChannels;
 
     std::map<std::string, BoneInfo> bInfoMap = model->getBoneInfoMap();
@@ -48,7 +47,8 @@ void Animation::readMissingBones(const aiAnimation* animation, std::shared_ptr<m
             boneCount++;
             model->setBoneCount(boneCount);
         }
-        bones.push_back(Bone(channel->mNodeName.data, bInfoMap[channel->mNodeName.data].id, channel));
+        bones.push_back(
+            Bone(channel->mNodeName.data, bInfoMap[channel->mNodeName.data].id, channel));
     }
     boneInfoMap = bInfoMap;
     model->setBoneInfoMap(bInfoMap);

@@ -1566,19 +1566,7 @@ inline void drawProperties() {
             drawComponentList(scene.selectedEntity->components.vecScriptComponent);
 
             // SkeletalModelComponent
-            std::vector<SkeletalModelComponent>& skeletalModelComponents =
-                scene.selectedEntity->components.vecSkeletalModelComponent;
-            for (unsigned int i = 0; i < skeletalModelComponents.size(); i++) {
-                ImGui::PushID(i);
-                if (ImGui::TreeNodeEx(skeletalModelComponents[i].name.c_str(),
-                        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                            ImGuiTreeNodeFlags_DefaultOpen)) {
-
-                    drawComponentProps(skeletalModelComponents[i]);
-                    ImGui::TreePop();
-                }
-                ImGui::PopID();
-            }
+            drawComponentList(scene.selectedEntity->components.vecSkeletalModelComponent);
 
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
