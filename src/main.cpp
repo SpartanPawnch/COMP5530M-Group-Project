@@ -202,6 +202,7 @@ int main() {
     // ------------- UNIFORMS --------------------------
     renderManager->setupColourPipelineUniforms();
     renderManager->setupTexturePipelineUniforms();
+    renderManager->setupAnimatedPipelineUniforms();
     renderManager->setupEntIDPipelineUniforms();
 
 

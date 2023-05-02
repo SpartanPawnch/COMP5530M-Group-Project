@@ -26,6 +26,7 @@ enum Pipeline {
     GridPipeline = 6,
     FrustumVisPipeline = 7,
     EntIDPipeline = 8,
+    AnimatedPipeline = 9,
     Pipeline_MAX
 };
 
@@ -141,6 +142,7 @@ class RenderManager {
 
     void setupColourPipelineUniforms();
     void setupTexturePipelineUniforms();
+    void setupAnimatedPipelineUniforms();
     void setupEntIDPipelineUniforms();
     void runPipeline(Pipeline pipeline);
 

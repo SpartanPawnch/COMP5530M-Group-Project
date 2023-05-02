@@ -42,6 +42,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         Vertex vertex;
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+        for (int j = 0; j < MAX_BONE_INFLUENCE; j++)
+        {
+            vertex.boneId[j] = -1;
+            vertex.weight[j] = 0.0f;
+        }
         if (mesh->mTextureCoords[0]) {
             vertex.texCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
         }
@@ -117,7 +122,7 @@ void Model::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const a
             newBoneInfo.offset[0][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c1;
             newBoneInfo.offset[1][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c2;
             newBoneInfo.offset[2][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c3;
-            newBoneInfo.offset[2][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c4;
+            newBoneInfo.offset[3][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c4;
             newBoneInfo.offset[0][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d1;
             newBoneInfo.offset[1][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d2;
             newBoneInfo.offset[2][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d3;
@@ -133,7 +138,7 @@ void Model::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const a
         }
         assert(boneID != -1);
         auto weights = mesh->mBones[boneIndex]->mWeights;
-        int numWeights = mesh->mBones[boneIndex]->mNumWeights;
+        int numWeights = std::min(mesh->mBones[boneIndex]->mNumWeights,4u);
 
         for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
         {
@@ -141,8 +146,8 @@ void Model::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const a
             float weight = weights[weightIndex].mWeight;
             assert(vertexId <= vertices.size());
             //add bone to list of bones that influence the vertex and weight
-            vertices[vertexId].boneId.push_back(boneID);
-            vertices[vertexId].weight.push_back(weight);
+            vertices[vertexId].boneId[weightIndex] = boneID;
+            vertices[vertexId].weight[weightIndex] = weight;
         }
     }
 }

@@ -142,6 +142,9 @@ GLuint RenderPipeline::getLightPosID() {
 GLuint RenderPipeline::getLightColID() {
     return this->lightColID;
 }
+GLuint RenderPipeline::getBonesMatrix() {
+    return this->bonesMatrix;
+}
 GLuint RenderPipeline::getEntID() {
     return this->entID;
 }
@@ -152,6 +155,7 @@ void RenderPipeline::setUniformLocations() {
     this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
     this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
     this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+    this->bonesMatrix = glGetUniformLocation(this->shaderProgram, "bonesMatrix");
 }
 void RenderPipeline::setIDUniformLocations() {
     setUniformLocations();

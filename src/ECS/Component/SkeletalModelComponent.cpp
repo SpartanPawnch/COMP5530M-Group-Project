@@ -69,10 +69,9 @@ void SkeletalModelComponent::stop() {
 }
 
 void SkeletalModelComponent::updateAnimation(float dt) {
-	deltaTime = dt;
 	std::shared_ptr<animation::AnimationDescriptor> currentAnimation = currentNode->animationDescriptor;
 	if (currentAnimation) {
-		currentTime += currentAnimation->getFPS() * dt;
+		currentTime += dt;
 		if (currentTime > currentAnimation->getDuration()) {
 			currentLoopCount++;
 			if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
@@ -91,12 +90,12 @@ void SkeletalModelComponent::calculateBoneTransform(const AssimpNodeData* node, 
 	std::string nodeName = node->name;
 	glm::mat4 nodeTransform = node->transformation;
 
-	Bone* Bone = currentAnimation->findBoneByName(nodeName);
+	Bone* bone = currentAnimation->findBoneByName(nodeName);
 
-	if (Bone)
+	if (bone)
 	{
-		Bone->update(currentTime);
-		nodeTransform = Bone->transform;
+		bone->update(currentTime);
+		nodeTransform = bone->transform;
 	}
 
 	glm::mat4 globalTransformation = parentTransform * nodeTransform;

@@ -29,6 +29,7 @@ class RenderPipeline {
     GLuint ProjectionID;
     GLuint lightPosID;
     GLuint lightColID;
+    GLuint bonesMatrix;
     GLuint entID;
 
     std::vector<GLuint> VAOs;
@@ -48,6 +49,7 @@ class RenderPipeline {
     GLuint getProjectionID();
     GLuint getLightPosID();
     GLuint getLightColID();
+    GLuint getBonesMatrix();
     GLuint getEntID();
 
     ~RenderPipeline();

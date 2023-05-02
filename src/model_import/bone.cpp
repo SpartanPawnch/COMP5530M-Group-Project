@@ -60,7 +60,8 @@ int Bone::getPositionIndex(float animationTime) {
 			return i;
 		}
 	}
-	assert(0);
+	return 0;
+	//assert(0);
 }
 
 int Bone::getRotationIndex(float animationTime) {
@@ -69,7 +70,8 @@ int Bone::getRotationIndex(float animationTime) {
 			return i;
 		}
 	}
-	assert(0);
+	return 0;
+	//assert(0);
 }
 
 int Bone::getScaleIndex(float animationTime) {
@@ -78,7 +80,8 @@ int Bone::getScaleIndex(float animationTime) {
 			return i;
 		}
 	}
-	assert(0);
+	return 0;
+	//assert(0);
 }
 
 float Bone::getInterpolationFactor(float lastTimeStamp, float nextTimeStamp, float animationTime) {

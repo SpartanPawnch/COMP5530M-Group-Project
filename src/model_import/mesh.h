@@ -7,14 +7,16 @@
 #include <assimp/scene.h>
 #include "../asset_import/images.h"
 
+#define MAX_BONE_INFLUENCE 4
+
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
 
     //vector of bone ids that influence this vertex and their weights 
-    std::vector<unsigned int>boneId;
-    std::vector<float>weight;
+    int boneId[MAX_BONE_INFLUENCE];
+    float weight[MAX_BONE_INFLUENCE];
 };
 
 struct BoneInfo

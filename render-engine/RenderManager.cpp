@@ -357,6 +357,7 @@ void RenderManager::loadScene() {
     const char* frustumVisVertPath = "assets/shaders/frustum.vert";
     const char* texVertexPath = "assets/shaders/tex.vert";
     const char* texFragPath = "assets/shaders/tex.frag";
+    const char* AnimatedVertexPath = "assets/shaders/animated.vert";
     const char* entIDVertexPath = "assets/shaders/entID.vert";
     const char* entIDFragPath = "assets/shaders/entID.frag";
 
@@ -396,6 +397,7 @@ void RenderManager::loadScene() {
     addPipeline(GridPipeline, gridVertPath, gridFragPath);
     addPipeline(FrustumVisPipeline, frustumVisVertPath, gridFragPath);
     addPipeline(EntIDPipeline, entIDVertexPath, entIDFragPath);
+    addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -467,13 +469,14 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(getPipeline(TexturePipeline)->getProgram());
-
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
+
         modelMatrix = scene.entities[i].runtimeTransform;
+
+        glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
         // bind model matrix
         glUniformMatrix4fv(
@@ -499,6 +502,39 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
         }
+
+        glUseProgram(getPipeline(AnimatedPipeline)->getProgram());
+
+        // bind model matrix
+        glUniformMatrix4fv(
+            getPipeline(AnimatedPipeline)->getModelID(), 1, GL_FALSE, &modelMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(AnimatedPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(
+            getPipeline(AnimatedPipeline)->getProjectionID(), 1, GL_FALSE, &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(), lights[0].getPosition().x,
+            lights[0].getPosition().y, lights[0].getPosition().z);
+        glUniform3f(getPipeline(AnimatedPipeline)->getLightColID(), lights[0].getColour().x,
+            lights[0].getColour().y, lights[0].getColour().z);
+        
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size(); j++) {
+            auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glUniformMatrix4fv(
+                    getPipeline(AnimatedPipeline)->getBonesMatrix(), 1, GL_FALSE, &scene.entities[i].components.vecSkeletalModelComponent[j].transformMatrices[0][0][0]
+                );
+
+                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
+
         glBindVertexArray(0);
     }
 }
@@ -624,6 +660,10 @@ void RenderManager::runColourPipeline() {
 void RenderManager::setupTexturePipelineUniforms() {
     getPipeline(TexturePipeline)->setUniformLocations();
 }
+
+void RenderManager::setupAnimatedPipelineUniforms() {
+    getPipeline(AnimatedPipeline)->setUniformLocations();
+}
 void RenderManager::setupEntIDPipelineUniforms() {
     getPipeline(EntIDPipeline)->setIDUniformLocations();
 }
@@ -742,6 +782,15 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(
         2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+
+    // vertex texture coords
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, boneId));
+
+    // vertex texture coords
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, weight));
 
     glBindVertexArray(0);
 }

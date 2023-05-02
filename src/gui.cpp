@@ -977,6 +977,14 @@ void drawComponentProps(ModelComponent& component) {
 }
 
 void drawComponentProps(SkeletalModelComponent& component) {
+    if (ImGui::Button(component.isPlaying ? "Pause" : "Play")) {
+        component.isPlaying = !component.isPlaying;
+    }
+
+    if (ImGui::Button("Update 0.01")) {
+        component.update(0.01);
+    }
+
     bool hasModel = false;
     std::string previewStr = "Select a Model";
     if (component.modelDescriptor && component.modelDescriptor->path) {
