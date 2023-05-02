@@ -1362,11 +1362,89 @@ void drawComponentProps(ScriptComponent& component) {
 
         ImGui::EndCombo();
     }
+
+    // argument list
+    if (!component.scriptPath.empty()) {
+        int idxToDelete = -1;
+        ImGui::Text("Arguments:");
+        // add button
+        ImGui::SameLine();
+        if (ImGui::Button("+")) {
+            component.args.emplace_back(ScriptArgument{});
+        }
+
+        for (unsigned int i = 0; i < component.args.size(); i++) {
+            ImGui::PushID(i);
+            ImGui::BeginGroup();
+            ImGui::Separator();
+            // delete button
+            if (ImGui::Button("-")) {
+                idxToDelete = i;
+            }
+
+            // key selector
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(140.0f);
+            ImGui::InputText("##key", &component.args[i].key);
+
+            // only show rest if key is valid
+            if (!component.args[i].key.empty()) {
+                // argument type selector
+                static const char* argTypes[] = {"bool", "int", "float", "string", "entity",
+                    "component", "none"};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100.0f);
+                if (ImGui::BeginCombo("##type", argTypes[component.args[i].type])) {
+                    for (unsigned int j = 0; j < ScriptArgument::ARGTYPE_MAX; j++) {
+                        bool isSelected = component.args[i].type == j;
+                        if (ImGui::Selectable(argTypes[j], &isSelected)) {
+                            component.args[i].type = (ScriptArgument::ArgType)j;
+                        }
+                    }
+
+                    ImGui::EndCombo();
+                }
+
+                // argument value input
+                bool b;
+                switch (component.args[i].type) {
+                case ScriptArgument::BOOL:
+                    b = bool(component.args[i].arg._int);
+                    if (ImGui::Checkbox("##boolselector", &b)) {
+                        component.args[i].arg._int = int(b);
+                    }
+                    break;
+                case ScriptArgument::INT:
+                    ImGui::InputInt("##intselector", &component.args[i].arg._int);
+                    break;
+                case ScriptArgument::FLOAT:
+                    ImGui::InputFloat("##floatselector", &component.args[i].arg._float);
+                    break;
+                case ScriptArgument::STRING:
+                    ImGui::InputText("##stringselector", &component.args[i].stringBuf);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            if (i == component.args.size() - 1)
+                ImGui::Separator();
+
+            ImGui::EndGroup();
+            ImGui::PopID();
+        }
+        if (idxToDelete >= 0) {
+            component.args.erase(component.args.begin() + idxToDelete);
+        }
+    }
+    ImGui::BeginDisabled(component.scriptPath.empty());
     if (ImGui::Button("Test")) {
         component.start();
         component.update(.016f, scene.selectedEntity->state);
         component.stop();
     }
+    ImGui::EndDisabled();
 }
 
 void drawComponentProps(CameraComponent& component) {

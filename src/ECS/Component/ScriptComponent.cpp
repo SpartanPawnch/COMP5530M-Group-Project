@@ -41,6 +41,30 @@ void ScriptComponent::start() {
     lua_setglobal(state, "ScriptComponents");
 }
 
+static void pushArgs(lua_State* state, std::vector<ScriptArgument>& args) {
+    // create initial table
+    lua_createtable(state, 0, args.size());
+
+    for (unsigned int i = 0; i < args.size(); i++) {
+        // fill based on arg type
+        switch (args[i].type) {
+        case ScriptArgument::BOOL:
+        case ScriptArgument::INT:
+            lua_pushinteger(state, args[i].arg._int);
+            break;
+        case ScriptArgument::FLOAT:
+            lua_pushnumber(state, args[i].arg._float);
+            break;
+        case ScriptArgument::STRING:
+            lua_pushstring(state, args[i].stringBuf.c_str());
+            break;
+        default:
+            continue;
+        }
+        lua_setfield(state, -2, args[i].key.c_str());
+    }
+}
+
 void ScriptComponent::update(float dt, EntityState& state) {
     if (!valid)
         return;
@@ -56,9 +80,9 @@ void ScriptComponent::update(float dt, EntityState& state) {
     // push arguments
     lua_pushnumber(luaState, dt);
     state.pushLuaTable(luaState);
-
+    pushArgs(luaState, args);
     // call
-    int err = lua_pcall(luaState, 2, 0, 0);
+    int err = lua_pcall(luaState, 3, 0, 0);
     if (err != LUA_OK) {
         const char* err = luaL_tolstring(luaState, -1, nullptr);
         logging::logErr("LUA RUNTIME ERROR: {}\n", err);
