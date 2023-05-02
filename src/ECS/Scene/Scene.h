@@ -11,6 +11,7 @@ class Scene {
     ~Scene();
     void start();
     void updatePositions();
+    void updateReferences();
     void update(float dt);
     void stop();
     void addEntity(const BaseEntity& entity);

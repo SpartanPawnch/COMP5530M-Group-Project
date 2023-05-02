@@ -24,6 +24,22 @@ void Scene::updatePositions() {
     }
 }
 
+void Scene::updateReferences() {
+    for (unsigned int i = 0; i < entities.size(); i++) {
+        std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
+        for (unsigned int j = 0; j < scripts.size(); j++) {
+            for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
+                // update entity
+                if (scripts[j].args[k].type == ScriptArgument::ENTITY) {
+                    int idx = scripts[j].args[k].arg._int;
+                    scripts[j].args[k].ref =
+                        (idx < entities.size()) ? &entities[idx].state : nullptr;
+                }
+            }
+        }
+    }
+}
+
 void Scene::update(float dt) {
     for (unsigned int i = 0; i < entities.size(); i++) {
         glm::mat4 parentTransform = entities[i].parent < 0

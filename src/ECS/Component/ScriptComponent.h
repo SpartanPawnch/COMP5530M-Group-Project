@@ -8,6 +8,7 @@
 #include "../ComponentLocation/ComponentLocation.h"
 
 struct ScriptArgument {
+    // union of vals
     union {
         int _int;
         float _float;
@@ -23,7 +24,9 @@ struct ScriptArgument {
         NONE,
         ARGTYPE_MAX
     };
-    std::string stringBuf;
+    std::string stringBuf; // added separately to avoid compile issues
+    void* ref; // runtime ref to entity or component
+
     ArgType type = NONE;
     std::string key;
 };

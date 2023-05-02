@@ -8,7 +8,7 @@
 static int baseUuid = 0;
 
 ScriptComponent::ScriptComponent() {
-    name = "Camera Component";
+    name = "Script Component";
     uuid = baseUuid++;
 }
 
@@ -46,6 +46,9 @@ static void pushArgs(lua_State* state, std::vector<ScriptArgument>& args) {
     lua_createtable(state, 0, args.size());
 
     for (unsigned int i = 0; i < args.size(); i++) {
+        if (args[i].key.empty())
+            continue;
+
         // fill based on arg type
         switch (args[i].type) {
         case ScriptArgument::BOOL:
@@ -57,6 +60,14 @@ static void pushArgs(lua_State* state, std::vector<ScriptArgument>& args) {
             break;
         case ScriptArgument::STRING:
             lua_pushstring(state, args[i].stringBuf.c_str());
+            break;
+        case ScriptArgument::ENTITY:
+            if (args[i].ref == nullptr) {
+                lua_pushnil(state);
+            }
+            else {
+                ((EntityState*)args[i].ref)->pushLuaTable(state);
+            }
             break;
         default:
             continue;

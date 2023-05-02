@@ -1338,6 +1338,23 @@ void drawComponentProps(AudioSourceComponent& component) {
     ImGui::Checkbox("Directional", &component.directional);
 }
 
+static void drawEntitySelector(ScriptComponent& component, int i) {
+    int idx = component.args[i].arg._int;
+    std::string previewStr =
+        (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
+    if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
+        for (unsigned int j = 0; j < scene.entities.size(); j++) {
+            ImGui::PushID(j);
+            bool isSelected = idx == j;
+            if (ImGui::Selectable(scene.entities[j].name.c_str())) {
+                component.args[i].arg._int = j;
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndCombo();
+    }
+}
+
 void drawComponentProps(ScriptComponent& component) {
     std::string previewStr = component.scriptPath.empty()
         ? "None"
@@ -1423,6 +1440,9 @@ void drawComponentProps(ScriptComponent& component) {
                 case ScriptArgument::STRING:
                     ImGui::InputText("##stringselector", &component.args[i].stringBuf);
                     break;
+                case ScriptArgument::ENTITY:
+                    drawEntitySelector(component, i);
+                    break;
                 default:
                     break;
                 }
@@ -1440,6 +1460,7 @@ void drawComponentProps(ScriptComponent& component) {
     }
     ImGui::BeginDisabled(component.scriptPath.empty());
     if (ImGui::Button("Test")) {
+        scene.updateReferences();
         component.start();
         component.update(.016f, scene.selectedEntity->state);
         component.stop();
