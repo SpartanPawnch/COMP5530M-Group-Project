@@ -7,7 +7,8 @@ Model::Model() {
 
 bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+    uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs;
+    const aiScene* scene = importer.ReadFile(filename, flags);
     //this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         return false;
@@ -69,7 +70,38 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
-    getSkeletonInfo(vertices, mesh, scene);
+    for (uint32_t i = 0; i < mesh->mNumBones; i++) {
+        aiBone* bone = mesh->mBones[i];
+        std::string bone_name(bone->mName.C_Str());
+
+        if (boneInfoMap.count(bone_name) == 0) {
+            boneInfoMap[bone_name].name = bone_name;
+            boneInfoMap[bone_name].id = boneCounter++;
+            boneInfoMap[bone_name].transform[0][0] = bone->mOffsetMatrix.a1;
+            boneInfoMap[bone_name].transform[1][0] = bone->mOffsetMatrix.a2;
+            boneInfoMap[bone_name].transform[2][0] = bone->mOffsetMatrix.a3;
+            boneInfoMap[bone_name].transform[3][0] = bone->mOffsetMatrix.a4;
+            boneInfoMap[bone_name].transform[0][1] = bone->mOffsetMatrix.b1;
+            boneInfoMap[bone_name].transform[1][1] = bone->mOffsetMatrix.b2;
+            boneInfoMap[bone_name].transform[2][1] = bone->mOffsetMatrix.b3;
+            boneInfoMap[bone_name].transform[3][1] = bone->mOffsetMatrix.b4;
+            boneInfoMap[bone_name].transform[0][2] = bone->mOffsetMatrix.c1;
+            boneInfoMap[bone_name].transform[1][2] = bone->mOffsetMatrix.c2;
+            boneInfoMap[bone_name].transform[2][2] = bone->mOffsetMatrix.c3;
+            boneInfoMap[bone_name].transform[3][2] = bone->mOffsetMatrix.c4;
+            boneInfoMap[bone_name].transform[0][3] = bone->mOffsetMatrix.d1;
+            boneInfoMap[bone_name].transform[1][3] = bone->mOffsetMatrix.d2;
+            boneInfoMap[bone_name].transform[2][3] = bone->mOffsetMatrix.d3;
+            boneInfoMap[bone_name].transform[3][3] = bone->mOffsetMatrix.d4;
+        }
+
+        for (unsigned int j = 0; j < bone->mNumWeights; j++) {
+            unsigned int vtx_id = bone->mWeights[j].mVertexId;
+            assert(vtx_id <= vertices.size());
+            vertices[vtx_id].setBoneData(boneInfoMap[bone_name].id, bone->mWeights[j].mWeight);
+        }
+    }
+
     return Mesh(vertices, indices, textures);
 }
 
@@ -99,55 +131,4 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         }
     }
     return textures;
-}
-
-void Model::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
-    for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
-    {
-        unsigned int boneID = 0;
-        std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
-        if (boneInfoMap.find(boneName) == boneInfoMap.end())
-        {
-            BoneInfo newBoneInfo;
-            newBoneInfo.id = boneCounter;
-            //convert assimp matrix to glm::mat4
-            newBoneInfo.offset[0][0] = mesh->mBones[boneIndex]->mOffsetMatrix.a1;
-            newBoneInfo.offset[1][0] = mesh->mBones[boneIndex]->mOffsetMatrix.a2;
-            newBoneInfo.offset[2][0] = mesh->mBones[boneIndex]->mOffsetMatrix.a3;
-            newBoneInfo.offset[3][0] = mesh->mBones[boneIndex]->mOffsetMatrix.a4;
-            newBoneInfo.offset[0][1] = mesh->mBones[boneIndex]->mOffsetMatrix.b1;
-            newBoneInfo.offset[1][1] = mesh->mBones[boneIndex]->mOffsetMatrix.b2;
-            newBoneInfo.offset[2][1] = mesh->mBones[boneIndex]->mOffsetMatrix.b3;
-            newBoneInfo.offset[3][1] = mesh->mBones[boneIndex]->mOffsetMatrix.b4;
-            newBoneInfo.offset[0][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c1;
-            newBoneInfo.offset[1][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c2;
-            newBoneInfo.offset[2][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c3;
-            newBoneInfo.offset[3][2] = mesh->mBones[boneIndex]->mOffsetMatrix.c4;
-            newBoneInfo.offset[0][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d1;
-            newBoneInfo.offset[1][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d2;
-            newBoneInfo.offset[2][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d3;
-            newBoneInfo.offset[3][3] = mesh->mBones[boneIndex]->mOffsetMatrix.d4;
-
-            boneInfoMap[boneName] = newBoneInfo;
-            boneID = boneCounter;
-            boneCounter++;
-        }
-        else
-        {
-            boneID = boneInfoMap[boneName].id;
-        }
-        assert(boneID != -1);
-        auto weights = mesh->mBones[boneIndex]->mWeights;
-        int numWeights = std::min(mesh->mBones[boneIndex]->mNumWeights,4u);
-
-        for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
-        {
-            int vertexId = weights[weightIndex].mVertexId;
-            float weight = weights[weightIndex].mWeight;
-            assert(vertexId <= vertices.size());
-            //add bone to list of bones that influence the vertex and weight
-            vertices[vertexId].boneId[weightIndex] = boneID;
-            vertices[vertexId].weight[weightIndex] = weight;
-        }
-    }
 }

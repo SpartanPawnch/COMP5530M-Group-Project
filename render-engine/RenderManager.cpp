@@ -525,7 +525,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
                 glUniformMatrix4fv(
-                    getPipeline(AnimatedPipeline)->getBonesMatrix(), 1, GL_FALSE, &scene.entities[i].components.vecSkeletalModelComponent[j].transformMatrices[0][0][0]
+                    getPipeline(AnimatedPipeline)->getBonesMatrix(), 100, GL_FALSE, &scene.entities[i].components.vecSkeletalModelComponent[j].transformMatrices[0][0][0]
                 );
 
                 glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
@@ -785,15 +785,15 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
 
     // vertex texture coords
     glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, boneId));
+    glVertexAttribIPointer(3, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, boneId));
 
     // vertex texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        (void*)offsetof(Vertex, weight));
+    glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weight));
 
     glBindVertexArray(0);
 }
+
 
 void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO) {
     glDeleteVertexArrays(1, VAO);

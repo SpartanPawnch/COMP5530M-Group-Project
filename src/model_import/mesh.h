@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include <glm/glm.hpp>
 #include <assimp/scene.h>
 #include "../asset_import/images.h"
@@ -15,15 +16,25 @@ struct Vertex {
     glm::vec2 texCoords;
 
     //vector of bone ids that influence this vertex and their weights 
-    int boneId[MAX_BONE_INFLUENCE];
-    float weight[MAX_BONE_INFLUENCE];
-};
+    glm::ivec4 boneId = glm::ivec4(-1);
+    glm::vec4 weight = glm::ivec4(0.0);
 
-struct BoneInfo
-{
-    unsigned int id;
-
-    glm::mat4 offset;
+    void setBoneData(unsigned int id, float w) {
+        //std::cout << "---------------------" << std::endl;
+        //std::cout << "Setting id:weight " << id << ":" << w << std::endl;
+        for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
+            if (boneId[i] < 0 || boneId[i] == id) {
+                boneId[i] = id;
+                weight[i] = w;
+                //std::cout << "Set to index " << i << std::endl;
+                //std::cout << "---------------------" << std::endl;
+                return;
+            }
+        }
+        //std::cout << "Not set" << std::endl;
+        //std::cout << "---------------------" << std::endl;
+        //assert(0);
+    }
 };
 
 struct Texture {
