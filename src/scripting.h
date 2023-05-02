@@ -2,17 +2,13 @@
 #include <string>
 
 #include <lua.hpp>
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace scripting {
     struct ScriptManager {
         ScriptManager();
         ~ScriptManager();
-    };
-
-    struct ScriptDescriptor {
-        std::string uuid;
-        std::string buf;
-        std::string path;
     };
 
     // --- Library Side (CPP functions in Lua) ---
@@ -31,22 +27,18 @@ namespace scripting {
     // register global function outside of any module
     void registerGlobalFunction(const char* name, lua_CFunction fun);
 
+    // --- Library Side (CPP references in Lua) ---
+    void pushFloatRef(lua_State* state, float* f);
+
+    void pushVec3Ref(lua_State* state, glm::vec3* vec);
+
+    void pushQuatRef(lua_State* state, glm::quat* quat);
+
     // --- Application Side (Running Lua scripts from CPP) ---
 
     // run lua file in path
     bool runScript(const char* path);
 
-    // load lua file to internal buffer
-    int loadScript(const char* path, const std::string& uuid);
-
+    // get pointer to main lua stack
     lua_State* getState();
-
-    // get internal index corresponding to uuid
-    inline int getScriptIdx(const std::string& uuid);
-
-    // get script ref corresponding to internal index
-    inline const ScriptDescriptor& getScript(int idx);
-
-    // clear all currently loaded scripts
-    void clearScripts();
 }

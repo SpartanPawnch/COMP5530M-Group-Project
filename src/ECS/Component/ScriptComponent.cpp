@@ -55,14 +55,13 @@ void ScriptComponent::update(float dt, EntityState& state) {
 
     // push arguments
     lua_pushnumber(luaState, dt);
-
-    // TODO EntityState
+    state.pushLuaTable(luaState);
 
     // call
-    int err = lua_pcall(luaState, 1, 0, 0);
+    int err = lua_pcall(luaState, 2, 0, 0);
     if (err != LUA_OK) {
         const char* err = luaL_tolstring(luaState, -1, nullptr);
-        logging::logErr("LUA RUNTIME ERROR: {}", err);
+        logging::logErr("LUA RUNTIME ERROR: {}\n", err);
     }
 
     // restore stack state
@@ -76,6 +75,8 @@ void ScriptComponent::stop() {
 
     // set table entry to nil
     lua_State* state = scripting::getState();
+    if (state == nullptr)
+        return;
     lua_getglobal(state, "ScriptComponents");
     lua_pushnil(state);
     lua_setfield(state, -2, std::to_string(uuid).c_str());

@@ -60,7 +60,6 @@ void loadLevel(const char* path, Scene& scene) {
     // clear all assets
     audio::clearAudio();
     clearDynamicTextures();
-    scripting::clearScripts();
     scene.entities.clear();
     scene.selectedEntity = nullptr;
 
