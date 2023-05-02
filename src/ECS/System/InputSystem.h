@@ -10,15 +10,32 @@
 class InputSystem : public BaseSystem {
 public:
     InputSystem();
-    InputSystem(Scene* sc);
+    InputSystem(GLFWwindow* window, Scene* sc);
     ~InputSystem();
-    void start() override;
+
+    void start(GLFWwindow* window);
     void update();
     void stop() override;
+
+    // pointer to single instance of RenderEngine
+    static InputSystem* getInstance();
+    static InputSystem* instance;
+    bool initialized = false;
+   
 
     void attachScene(Scene* sc);
     void detachScene();
 
-    GLFWwindow* window;
+    static void glfw_callback_wrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+    void glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aScanCode, int aAction, int /*aModifierFlags*/);
+    //GLFWwindow* window;
     Scene* scene;
+
+    void AssignAction(BaseEntity& entity, float scale, unsigned int action);
+
+    static void MoveLeftRight(BaseEntity& entity, float scale);
+    static void MoveForwardBackward(BaseEntity& entity, float scale);
+    static void MoveAscendDescend(BaseEntity& entity, float scale);
+
 };

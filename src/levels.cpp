@@ -25,6 +25,7 @@
 #include "ECS/Component/TransformComponent.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/PlayerControllerComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -206,6 +207,21 @@ void loadLevel(const char* path, Scene& scene) {
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
                     baseEntity.components.addComponent(model);
                 }
+                // PlayerControllerComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "PlayerControllerComponent") == 0) {
+                    PlayerControllerComponent controls;
+                    controls.uuid = jsonComponent["uuid"].GetInt();
+                    controls.name = jsonComponent["name"].GetString();
+                    auto const virtualKeys = jsonComponent["virtualKeys"].GetArray();
+                    for (int j = 0; j < virtualKeys.Size(); j++) {
+                        controls.addKey();
+                        controls.virtualKeys[j].name = virtualKeys[j]["name"].GetString();
+                        controls.virtualKeys[j].key = virtualKeys[j]["Key"].GetInt();
+                        controls.virtualKeys[j].scale = virtualKeys[j]["scale"].GetFloat();
+                        controls.virtualKeys[j].action = virtualKeys[j]["action"].GetInt();
+                    }
+                    baseEntity.components.addComponent(controls);
+                }
                 // BaseComponent
                 else {
                     BaseComponent base;
@@ -214,6 +230,8 @@ void loadLevel(const char* path, Scene& scene) {
 
                     baseEntity.components.addComponent(base);
                 }
+                
+
             }
             scene.entities.emplace_back(baseEntity);
         }
@@ -368,6 +386,40 @@ static void saveComponent(
     writer.EndObject();
 }
 
+static void saveComponent(
+    const PlayerControllerComponent& component, rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("PlayerControllerComponent");
+
+    writer.Key("virtualKeys");
+    writer.StartArray();
+    for (auto const& vk : component.virtualKeys) {
+        writer.StartObject();
+        writer.Key("name");
+        writer.String(vk.name.c_str());
+
+        writer.Key("Key");
+        writer.Int(vk.key);
+
+        writer.Key("scale");
+        writer.Double(double(vk.scale));
+
+        writer.Key("action");
+        writer.Int(vk.action);
+        writer.EndObject();
+    }
+    writer.EndArray();
+    writer.EndObject();
+}
+
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene) {
     // open document for writing
@@ -476,6 +528,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecBaseComponent;
             for (unsigned int j = 0; j < baseComponents.size(); j++) {
                 saveComponent(baseComponents[j], writer);
+            }
+
+            // PlayerControllerComponent
+            const std::vector<PlayerControllerComponent>& playerControllerComponents =
+                scene.entities[i].components.vecPlayerControllerComponent;
+            for (unsigned int j = 0; j < playerControllerComponents.size(); j++) {
+                saveComponent(playerControllerComponents[j], writer);
             }
 
             writer.EndArray();

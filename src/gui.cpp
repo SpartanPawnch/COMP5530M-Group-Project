@@ -103,7 +103,7 @@ static RenderManager* renderManager;
 Scene scene;
 
 // input system
-static InputSystem inputSystem(&scene);
+static InputSystem* inputSystem;
 
 // viewport widget vars
 GLuint viewportFramebuffer;
@@ -173,7 +173,8 @@ GUIManager::GUIManager(GLFWwindow* window) {
     baseWindow = window;
     renderManager = RenderManager::getInstance();
 
-    inputSystem.attachScene(&scene);
+    inputSystem = InputSystem::getInstance();
+    inputSystem->attachScene(&scene);
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -1312,6 +1313,67 @@ void drawComponentProps(CameraComponent& component) {
         CameraComponent::activeUuid = component.uuid;
 }
 
+void drawComponentProps(PlayerControllerComponent& component)
+{
+    if (ImGui::Button("Add Key")) {
+        component.addKey();
+    }
+    for (unsigned int i = 0; i < component.virtualKeys.size(); i++) {
+        ImGui::PushID(i);
+        /*
+        ImGui::Columns(5);
+        ImGui::InputText("##name", &component.virtualKeys[i].name[0], component.virtualKeys[0].name.capacity());
+        component.virtualKeys[i].name.resize(std::strlen(&component.virtualKeys[i].name[0]));
+        ImGui::NextColumn();
+        if (component.virtualKeys.at(i).key == -1) {
+            ImGui::Text("Key Not Set");
+        }
+        else {
+            const char* keyName = glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+            ImGui::Text("%s", keyName);
+        }
+        ImGui::NextColumn();
+        ImGui::InputFloat("##direction", &component.virtualKeys.at(i).scale);
+        ImGui::NextColumn();
+        if (ImGui::Button("Set Key")) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            //logString += "Starting scan for key ";
+            //logString += keyindex;
+            //logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::NextColumn();
+        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move Up", "Move Down", "N/A"};
+        ImGui::Combo("function", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        //ImGui::NextColumn();
+        if (ImGui::Button("Remove Key")) {
+            component.removeKey(i);
+        }
+        ImGui::NextColumn();
+        */
+        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move Up", "Move Down", "N/A" };
+
+        ImGui::Combo("", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        ImGui::SameLine();
+        const char* keyName = component.virtualKeys.at(i).key == -1 ? "Unassigned" : glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+        if (ImGui::Button(keyName)) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            //logString += "Starting scan for key ";
+            //logString += keyindex;
+            //logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::SameLine();
+        ImGui::InputFloat("##scale", &component.virtualKeys.at(i).scale);
+        ImGui::PopID();
+    }
+  
+}
+
 void drawComponentContextMenu(int i, int& componentToDelete) {
     if (ImGui::BeginPopupContextItem()) {
         if (ImGui::MenuItem("Add Audio Source Component")) {
@@ -1343,6 +1405,7 @@ void drawComponentList(std::vector<T>& components) {
     // draw list
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
+        /*
         if (ImGui::TreeNodeEx(components[i].name.c_str(),
                 ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
                     ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1350,6 +1413,10 @@ void drawComponentList(std::vector<T>& components) {
 
             drawComponentProps(components[i]);
             ImGui::TreePop();
+        }
+        */
+        if (ImGui::CollapsingHeader(components[i].name.c_str())) {
+            drawComponentProps(components[i]);
         }
         ImGui::PopID();
     }
@@ -1403,6 +1470,9 @@ inline void drawProperties() {
 
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
+
+            // PlayerControllerComponent
+            drawComponentList(scene.selectedEntity->components.vecPlayerControllerComponent);
 
             // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();
@@ -1733,7 +1803,6 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawProperties();
 
     // prepare gui for rendering
-    inputSystem.update();
     ImGui::Render();
 }
 

@@ -5,3 +5,5 @@ CameraComponent
 AudioSourceComponent
 ModelComponent
 SkeletalModelComponent
+ControllerComponent
+PlayerControllerComponent

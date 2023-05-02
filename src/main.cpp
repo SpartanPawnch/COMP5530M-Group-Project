@@ -29,8 +29,10 @@
 #include "asset_import/folders.h"
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
 
 RenderManager* renderManager;
+InputSystem* inputSystem;
 
 /*
 void handleKeyboardInput(GLFWwindow* window) {
@@ -112,6 +114,9 @@ void handleMouseInput(GLFWwindow* window) {
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 
+// set InputSystem to nullptr intially
+InputSystem* InputSystem::instance = nullptr;
+
 int main() {
     // switch to correct working directory - platform specific
 #ifdef _WIN32
@@ -186,6 +191,11 @@ int main() {
     renderManager->startUp(window);
 
     renderManager->loadScene();
+
+    // Input System
+    inputSystem = InputSystem::getInstance();
+    inputSystem->start(window);
+
     // init shader
 
     // float lastQueryTime = float(glfwGetTime());

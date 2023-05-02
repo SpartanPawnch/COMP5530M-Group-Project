@@ -7,7 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/mat4x4.hpp>
 
-#include "../Component/BaseComponent.h"
+//#include "../Component/BaseComponent.h"
 #include "../ComponentStorage/ComponentStorage.h"
 
 // Requires Change!!
