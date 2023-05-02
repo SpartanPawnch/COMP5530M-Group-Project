@@ -50,7 +50,11 @@ headerFile:write([[
 #pragma once
 
 #include <vector>
+
+#include <lua.hpp>
+
 #include "../EntityState/EntityState.h"
+#include "../ComponentLocation/ComponentLocation.h"
 
 ]])
 
@@ -92,6 +96,12 @@ headerFile:write([[
     
     //clear all components
     void clearAll();
+
+    //get raw pointer using component loc
+    void* getProtectedPtr(const ComponentLocation& loc);
+
+    //push lua table
+    static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
     // --- Template Specializations ---
 ]])
@@ -182,7 +192,54 @@ for _, type in ipairs(types) do
     vec]] .. type .. [[.clear();
 ]])
 end
+
 sourceFile:write("}\n")
+
+-- create getProtectedPtr method
+sourceFile:write([[
+void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
+    switch(loc.type){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    case ComponentLocation::]] .. string.upper(type) .. [[:
+        if(loc.componentIdx>=vec]] .. type .. [[.size())
+            return nullptr;
+        return &vec]] .. type .. "[loc.componentIdx]" .. [[;
+]])
+end
+
+sourceFile:write([[
+    default:;
+    }
+    return nullptr;
+}
+]])
+
+-- create pushLuaTable method
+sourceFile:write([[
+void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_State* state){
+    switch(loc.type){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    case ComponentLocation::]] .. string.upper(type) .. [[:
+        if(ptr==nullptr)
+            break;
+        ((]] .. type .. "*)ptr)->" .. [[pushLuaTable(state);
+        return;
+]])
+end
+
+sourceFile:write([[
+    default:;
+    }
+    lua_pushnil(state);
+    return;
+}
+]])
 
 sourceFile:close()
 

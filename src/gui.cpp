@@ -1346,12 +1346,96 @@ static void drawEntitySelector(ScriptComponent& component, int i) {
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
             bool isSelected = idx == j;
-            if (ImGui::Selectable(scene.entities[j].name.c_str())) {
+            if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
                 component.args[i].arg._int = j;
             }
             ImGui::PopID();
         }
         ImGui::EndCombo();
+    }
+}
+
+template <typename T> void drawComponentSelector(int& idx, const std::vector<T>& components) {
+    std::string previewStr = (idx >= 0 && idx < components.size()) ? components[idx].name : "None";
+    if (ImGui::BeginCombo("##compselector", previewStr.c_str())) {
+        for (unsigned int i = 0; i < components.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = idx == i;
+            if (ImGui::Selectable(components[i].name.c_str(), &isSelected)) {
+                idx = i;
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndCombo();
+    }
+}
+
+static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
+    ComponentLocation& loc = component.args[i].arg._loc;
+    // entity selector
+    std::string previewStr = (loc.entityIdx >= 0 && loc.entityIdx < scene.entities.size())
+        ? scene.entities[loc.entityIdx].name
+        : "None";
+    if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
+        for (unsigned int j = 0; j < scene.entities.size(); j++) {
+            ImGui::PushID(j);
+            bool isSelected = loc.entityIdx == j;
+            if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
+                loc.entityIdx = j;
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndCombo();
+    }
+    if (loc.entityIdx < 0 || loc.entityIdx >= scene.entities.size())
+        return;
+
+    // TODO rest of function is hard to maintain - try to generate this in the future
+    // type selector
+    const char* types[] = {"BaseComponent", "TransformComponent", "ScriptComponent",
+        "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent",
+        "LightComponent"};
+    previewStr =
+        (loc.type >= 0 && loc.type < ComponentLocation::COMPTYPE_MAX) ? types[loc.type] : "None";
+    if (ImGui::BeginCombo("##typeselector", previewStr.c_str())) {
+        for (int j = 0; j < ComponentLocation::COMPTYPE_MAX; j++) {
+            ImGui::PushID(j);
+            bool isSelected = loc.type == j;
+            if (ImGui::Selectable(types[j], &isSelected))
+                loc.type = (ComponentLocation::CompType)j;
+            ImGui::PopID();
+        }
+        ImGui::EndCombo();
+    }
+
+    // component selector
+    const ComponentStorage& storage = scene.entities[loc.entityIdx].components;
+    switch (loc.type) {
+    case ComponentLocation::BASECOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecBaseComponent);
+        break;
+    case ComponentLocation::TRANSFORMCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecTransformComponent);
+        break;
+    case ComponentLocation::SCRIPTCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecScriptComponent);
+        break;
+    case ComponentLocation::CAMERACOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecCameraComponent);
+        break;
+    case ComponentLocation::AUDIOSOURCECOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecAudioSourceComponent);
+        break;
+    case ComponentLocation::MODELCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecModelComponent);
+        break;
+    case ComponentLocation::SKELETALMODELCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecSkeletalModelComponent);
+        break;
+    case ComponentLocation::LIGHTCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecLightComponent);
+        break;
+    default:;
     }
 }
 
@@ -1442,6 +1526,9 @@ void drawComponentProps(ScriptComponent& component) {
                     break;
                 case ScriptArgument::ENTITY:
                     drawEntitySelector(component, i);
+                    break;
+                case ScriptArgument::COMPONENT:
+                    drawComponentSelectorOuter(component, i);
                     break;
                 default:
                     break;

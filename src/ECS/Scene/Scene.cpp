@@ -29,11 +29,24 @@ void Scene::updateReferences() {
         std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
         for (unsigned int j = 0; j < scripts.size(); j++) {
             for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
-                // update entity
+                // TODO match uuids
+
+                // update entity pointer
                 if (scripts[j].args[k].type == ScriptArgument::ENTITY) {
                     int idx = scripts[j].args[k].arg._int;
                     scripts[j].args[k].ref =
                         (idx < entities.size()) ? &entities[idx].state : nullptr;
+                }
+                // update component pointer
+                else if (scripts[j].args[k].type == ScriptArgument::COMPONENT) {
+                    ComponentLocation& loc = scripts[j].args[k].arg._loc;
+                    // handle invalid entity
+                    if (loc.entityIdx >= entities.size()) {
+                        scripts[j].args[k].ref = nullptr;
+                        continue;
+                    }
+                    scripts[j].args[k].ref =
+                        entities[loc.entityIdx].components.getProtectedPtr(loc);
                 }
             }
         }

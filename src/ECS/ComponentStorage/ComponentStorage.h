@@ -1,7 +1,11 @@
 #pragma once
 
 #include <vector>
+
+#include <lua.hpp>
+
 #include "../EntityState/EntityState.h"
+#include "../ComponentLocation/ComponentLocation.h"
 
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
@@ -41,6 +45,12 @@ struct ComponentStorage{
     
     //clear all components
     void clearAll();
+
+    //get raw pointer using component loc
+    void* getProtectedPtr(const ComponentLocation& loc);
+
+    //push lua table
+    static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
     // --- Template Specializations ---
     template<>

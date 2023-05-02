@@ -4,6 +4,7 @@
 
 #include "../../logging.h"
 #include "../../scripting.h"
+#include "../ComponentStorage/ComponentStorage.h"
 
 static int baseUuid = 0;
 
@@ -68,6 +69,9 @@ static void pushArgs(lua_State* state, std::vector<ScriptArgument>& args) {
             else {
                 ((EntityState*)args[i].ref)->pushLuaTable(state);
             }
+            break;
+        case ScriptArgument::COMPONENT:
+            ComponentStorage::pushLuaTable(args[i].ref, args[i].arg._loc, state);
             break;
         default:
             continue;
