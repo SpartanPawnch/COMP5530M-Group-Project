@@ -36,7 +36,6 @@ void Bone::getScalePrevAndNext(float animationTime, KeyScale& prev, KeyScale& ne
 
 
 float Bone::getInterpolationFactor(float lastTimeStamp, float nextTimeStamp, float animationTime) {
-	float interpolationFactor = 0.0f;
 	float timeBetweenFrames = nextTimeStamp - lastTimeStamp;
 	float timeMissingForNext = animationTime - lastTimeStamp;
 	return timeMissingForNext / timeBetweenFrames;
@@ -53,12 +52,12 @@ glm::mat4 Bone::interpolatePosition(float animationTime) {
 	getPositionPrevAndNext(animationTime,prev,next);
 	float interpolationFactor = getInterpolationFactor(prev.time, next.time, animationTime);
 	glm::vec3 keyPosition = glm::mix(prev.position, next.position, interpolationFactor);
-	std::cout << "PositionPrev: " << std::endl;
+	/*std::cout << "PositionPrev: " << std::endl;
 	std::cout << glm::to_string(prev.position) << std::endl;
 	std::cout << "PositionPref------------" << std::endl;
 	std::cout << "PositionAft: " << std::endl;
 	std::cout << glm::to_string(next.position) << std::endl;
-	std::cout << "PositionAft------------" << std::endl;
+	std::cout << "PositionAft------------" << std::endl;*/
 	return glm::translate(glm::mat4(1.0f), keyPosition);
 }
 

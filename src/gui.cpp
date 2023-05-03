@@ -985,6 +985,10 @@ void drawComponentProps(SkeletalModelComponent& component) {
         component.update(0.01);
     }
 
+    if (ImGui::Button("Reset")) {
+        component.resetMarices();
+    }
+
     bool hasModel = false;
     std::string previewStr = "Select a Model";
     if (component.modelDescriptor && component.modelDescriptor->path) {

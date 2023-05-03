@@ -109,7 +109,7 @@ void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parent
 	std::cout << glm::to_string(scale) << std::endl;
 	std::cout << "Scale------------------" << std::endl;*/
 
-	std::cout << "Bone ID: " << bone->id << std::endl;
+	//std::cout << "Bone ID: " << bone->id << std::endl;
 
 	if(bone->id < MAX_BONES && bone->id >=0)
 		transformMatrices[bone->id] = globalTransformation * bone->transform;
@@ -250,4 +250,10 @@ void SkeletalModelComponent::removeIntACTransition(int id) {
 void SkeletalModelComponent::removeFloatACTransition(int id) {
 	assert(selectedNode->floatTransitions.size() > id);
 	selectedNode->floatTransitions.erase(selectedNode->floatTransitions.begin() + id);
+}
+
+void SkeletalModelComponent::resetMarices() {
+	for (unsigned int i = 0; i < MAX_BONES; i++) {
+		transformMatrices[i] = glm::mat4(1.0);
+	}
 }

@@ -63,8 +63,10 @@ struct SkeletalModelComponent : BaseComponent {
 		currentNode = nullptr;
 		selectedNode = nullptr;
 
+		transformMatrices.reserve(MAX_BONES);
+
 		for (unsigned int i = 0; i < MAX_BONES; i++) {
-			transformMatrices[i] = glm::mat4(1.0f);
+			transformMatrices.push_back(glm::mat4(1.0f));
 		}
     }
     ~SkeletalModelComponent() {
@@ -89,6 +91,7 @@ struct SkeletalModelComponent : BaseComponent {
 
 	void updateAnimation(float dt);
 	void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
+	void resetMarices();
 
     // model info
     std::string modelUuid = std::string("");
@@ -104,5 +107,5 @@ struct SkeletalModelComponent : BaseComponent {
     int currentLoopCount;
     float deltaTime;
 	bool isPlaying;
-    glm::mat4 transformMatrices[MAX_BONES];
+    std::vector<glm::mat4> transformMatrices;
 };

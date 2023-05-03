@@ -44,7 +44,7 @@ bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<
 
 				KeyPosition currentKey;
 				currentKey.position = glm::vec3(aiPosition.x, aiPosition.y, aiPosition.z);
-				std::cout << glm::to_string(currentKey.position) << std::endl;
+				//std::cout << "Position: " << glm::to_string(currentKey.position) << std::endl;
 				currentKey.time = time;
 				bone_data.positionKeys.push_back(currentKey);
 			}
@@ -55,16 +55,18 @@ bool Animation::loadAnimation(const std::string& animationPath, std::shared_ptr<
 
 				KeyRotation currentKey;
 				currentKey.rotation = glm::quat(aiRotation.w, aiRotation.x, aiRotation.y, aiRotation.z);
+				//std::cout << "Rotation: " << glm::to_string(currentKey.rotation) << std::endl;
 				currentKey.time = time;
 				bone_data.rotationKeys.push_back(currentKey);
 			}
 
 			for (uint32_t j = 0; j < channel->mNumScalingKeys; j++) {
-				aiVector3D aiScale = channel->mPositionKeys[j].mValue;
-				float time = channel->mPositionKeys[j].mTime;
+				aiVector3D aiScale = channel->mScalingKeys[j].mValue;
+				float time = channel->mScalingKeys[j].mTime;
 
 				KeyScale currentKey;
 				currentKey.scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+				//std::cout << "Scale: " << glm::to_string(currentKey.scale) << std::endl;
 				currentKey.time = time;
 				bone_data.scaleKeys.push_back(currentKey);
 			}
@@ -80,7 +82,7 @@ void Animation::setBoneData(aiNode* node, Bone& bone) {
 	std::string bone_name(node->mName.C_Str());
 
 	if (boneInfoMap.count(bone_name)) {
-		std::cout << "found" << std::endl;
+		//std::cout << "found" << std::endl;
 		bone = boneInfoMap.at(bone_name);
 
 		for (uint32_t i = 0; i < node->mNumChildren; i++) {

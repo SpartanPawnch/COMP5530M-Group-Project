@@ -15,6 +15,7 @@
 #include "mesh.h"
 #include "bone.h"
 
+
 class Model {
 public:
 	Model();
