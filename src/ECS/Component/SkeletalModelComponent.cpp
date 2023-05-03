@@ -111,8 +111,9 @@ void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parent
 
 	//std::cout << "Bone ID: " << bone->id << std::endl;
 
-	if(bone->id < MAX_BONES && bone->id >=0)
+	if(bone->id < MAX_BONES && bone->id >= 0)
 		transformMatrices[bone->id] = globalTransformation * bone->transform;
+
 
 	for (Bone& child : bone->children) {
 		calculateBoneTransform(&child, globalTransformation);

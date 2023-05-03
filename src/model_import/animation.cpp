@@ -82,8 +82,8 @@ void Animation::setBoneData(aiNode* node, Bone& bone) {
 	std::string bone_name(node->mName.C_Str());
 
 	if (boneInfoMap.count(bone_name)) {
-		//std::cout << "found" << std::endl;
 		bone = boneInfoMap.at(bone_name);
+		//std::cout << bone.id << std::endl;
 
 		for (uint32_t i = 0; i < node->mNumChildren; i++) {
 			Bone child;

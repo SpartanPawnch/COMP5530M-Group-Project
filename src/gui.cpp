@@ -977,6 +977,9 @@ void drawComponentProps(ModelComponent& component) {
 }
 
 void drawComponentProps(SkeletalModelComponent& component) {
+    if(component.isPlaying){
+        component.update(renderManager->deltaTime);
+    }
     if (ImGui::Button(component.isPlaying ? "Pause" : "Play")) {
         component.isPlaying = !component.isPlaying;
     }
@@ -1124,7 +1127,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_nocond", component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->noConditionTransitions[i].transitionTo == &component.nodes[j])) {
+                    bool isSelected = component.selectedNode->noConditionTransitions[i].transitionTo == &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->noConditionTransitions[i].transitionTo = &component.nodes[j];
                     }
                 }
@@ -1154,7 +1158,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_bool", component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->boolTransitions[i].transitionTo == &component.nodes[j])) {
+                    bool isSelected = component.selectedNode->boolTransitions[i].transitionTo == &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->boolTransitions[i].transitionTo = &component.nodes[j];
                     }
                 }

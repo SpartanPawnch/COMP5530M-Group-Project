@@ -105,7 +105,7 @@ struct SkeletalModelComponent : BaseComponent {
 
     float currentTime;
     int currentLoopCount;
-    float deltaTime;
+    float prevTime;
 	bool isPlaying;
     std::vector<glm::mat4> transformMatrices;
 };
