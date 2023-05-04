@@ -302,7 +302,7 @@ inline float drawMainMenu(const char* executablePath) {
         }
 
         if (ImGui::Begin("##FullscreenWindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus)) {
             if (ImGui::Button("Game Editor"))
             {GameEditor=true,UIEditor=false,CharacterEditor=false,WorldEditor=false;}
             ImGui::SameLine();
@@ -644,30 +644,123 @@ inline void drawProperties() {
     ImGui::End();
 }
 
-
-inline void drawAddUI()
+float newUIWidth = 300.f;
+float newUIHeight = 180.f;
+inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize)
 {
     static float transparency = 0.5f;
-    static float width = 0.5f;
-    static float height = 0.5f;
-    if (ImGui::Begin("Set Properties"))
+    
+
+    if (ImGui::Begin("Set Properties" ,nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus))
     {
-        ImGuiStyle& style = ImGui::GetStyle();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
 
         ImGui::SliderFloat("transparency", &transparency, 0.0f, 1.0f);
 
-        ImGui::SliderFloat("width", &width, 0.0f, 1.0f);
+        ImGui::SliderFloat("width", &newUIWidth, 0.0f, 1800.0f);
 
-        ImGui::SliderFloat("height", &height, 0.0f, 1.0f);
+        ImGui::SliderFloat("height", &newUIHeight, 0.0f, 1000.0f);
 
+        if (ImGui::Button("Add Image"))
+        {
+            // const char* file_path = OpenFileDialog();
+            // ImTextureID image_id = LoadImage(file_path);
+            // ImGui::Image(image_id, ImVec2(100, 100));
+            
+        }
+        
+        ImVec2 lastPos = ImGui::GetItemRectMax();
 
-        // if(ImGui::Begin())
-        // {
+        static ImGuiID normal = 0;
+        static ImGuiID rounded;
+        static ImGuiID translucent;
+        static ImGuiID Image;
+        static ImVec2 padding = ImVec2(15.f,15.f);
 
-        // }
-        // ImGui::End();
+        //TODO save and load dock state
+        //create layout if not present already
 
-        ImGui::SetNextWindowSizeConstraints(ImVec2(300, 180), ImVec2(FLT_MAX, FLT_MAX));
+        window_pos = ImVec2(window_pos.x+(padding.x/2),
+                            lastPos.y+(padding.x/2));
+
+        window_size = ImVec2(window_size.x-padding.x,
+                            window_size.x-padding.x);
+
+        ImGui::SetNextWindowPos(window_pos);
+        ImGui::SetNextWindowSize(window_size);
+        if (ImGui::Begin("##TemplateGrid", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking)) {
+
+            ImGuiID dockId = ImGui::GetID("DockspaceDefault");
+            ImGui::DockSpace(dockId);
+            static bool dockSpaceInit = false;
+            if (!dockSpaceInit) {
+                //create initial empty node
+                ImGui::DockBuilderRemoveNode(dockId);
+                normal = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+                ImGui::DockBuilderSetNodeSize(normal, windowSize);
+                ImGui::DockBuilderSetNodePos(normal, ImGui::GetMainViewport()->Pos);
+
+                //split horizontally
+                rounded = ImGui::DockBuilderSplitNode(normal, ImGuiDir_Right, .5f, NULL, &normal);
+
+                translucent = ImGui::DockBuilderSplitNode(normal, ImGuiDir_Down, .5f, NULL, &normal);
+
+                Image = ImGui::DockBuilderSplitNode(rounded, ImGuiDir_Down, .5f, NULL, &rounded);
+
+                ImGui::DockBuilderFinish(dockId);
+                dockSpaceInit = true;
+            }
+        }
+
+        ImGui::End();
+
+        ImGui::SetNextWindowDockID(normal, ImGuiCond_Once);
+        if (ImGui::Begin("normal"))
+        {
+
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowDockID(rounded, ImGuiCond_Once);
+        if (ImGui::Begin("rounded"))
+        {
+
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowDockID(translucent, ImGuiCond_Once);
+        if (ImGui::Begin("translucent"))
+        {
+
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowDockID(Image, ImGuiCond_Once);
+        if (ImGui::Begin("Image"))
+        {
+
+        }
+        ImGui::End();
+
+    }
+    ImGui::End();
+}
+
+inline void drawUIPreview()
+{
+    if (ImGui::Begin("UI Preview" ,nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus))
+    {
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 newPos = ImVec2((window_size.x/2.f)+window_pos.x-(newUIWidth/2),
+                                (window_size.y/2.f)+window_pos.y-(newUIHeight/2));
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        ImGui::SetNextWindowSize(ImVec2(newUIWidth, newUIHeight));
+        ImGui::SetNextWindowPos(newPos);
+
         if(ImGui::Begin("normal",nullptr, ImGuiWindowFlags_NoTitleBar))
         {
             // Get the width of the text
@@ -686,9 +779,14 @@ inline void drawAddUI()
             ImGui::Text("normal");
         }
         ImGui::End();
+        if (ImGui::IsItemClicked())
+        {
+            std::cout<<'test';
+            // Handle button click
+        }
 
         style.WindowRounding = 10.0f;
-        ImGui::SetNextWindowSizeConstraints(ImVec2(300, 180), ImVec2(FLT_MAX, FLT_MAX));
+        ImGui::SetNextWindowSize(ImVec2(300, 180));
         if(ImGui::Begin("rounded",nullptr, ImGuiWindowFlags_NoTitleBar))
         {
             // Get the width of the text
@@ -710,7 +808,7 @@ inline void drawAddUI()
         style.WindowRounding = 0.0f;
         
         style.Colors[ImGuiCol_WindowBg].w = 0.5f;
-        ImGui::SetNextWindowSizeConstraints(ImVec2(300, 180), ImVec2(FLT_MAX, FLT_MAX));
+        ImGui::SetNextWindowSize(ImVec2(300, 180));
         if(ImGui::Begin("translucent",nullptr, ImGuiWindowFlags_NoTitleBar))
         {
             // Get the width of the text
@@ -730,8 +828,6 @@ inline void drawAddUI()
         }
         ImGui::End();
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-
-            
     }
     ImGui::End();
 }
@@ -830,10 +926,10 @@ void uiEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
     ImGui::End();
 
     ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
-    // drawViewport();
+    drawUIPreview();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawAddUI();
+    drawAddUI(mainMenuHeight, windowSize);
 }
 
 void characterEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window)
