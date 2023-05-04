@@ -1895,6 +1895,13 @@ inline void drawLevels() {
     ImGui::End();
 }
 
+inline void drawMaterials() {
+    if (ImGui::Begin("Materials")) {
+        
+    }
+    ImGui::End();
+}
+
 inline void drawScriptDemo() {
     if (ImGui::Begin("Scripting")) {
         ImGui::PushFont(guicfg::regularFont);
@@ -2048,6 +2055,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
 
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawMaterials();
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser();

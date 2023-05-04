@@ -29,6 +29,7 @@ struct Texture {
     std::string type;
     std::string path;
     std::shared_ptr<TextureDescriptor> textureDescriptor;
+    std::string textureUuid = std::string("");
 };
 
 class Mesh {
