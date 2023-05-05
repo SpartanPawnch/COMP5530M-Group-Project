@@ -52,6 +52,10 @@ struct ComponentStorage{
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
+    //get CompType enum based on type
+    template<typename T>
+    static ComponentLocation::CompType typeToCompTypeEnum();
+
     // --- Template Specializations ---
     template<>
     void addComponent<BaseComponent>(const BaseComponent& component){
@@ -205,4 +209,36 @@ struct ComponentStorage{
         }
     }
 
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
+        return ComponentLocation::BASECOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<TransformComponent>(){
+        return ComponentLocation::TRANSFORMCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ScriptComponent>(){
+        return ComponentLocation::SCRIPTCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<CameraComponent>(){
+        return ComponentLocation::CAMERACOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<AudioSourceComponent>(){
+        return ComponentLocation::AUDIOSOURCECOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ModelComponent>(){
+        return ComponentLocation::MODELCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<SkeletalModelComponent>(){
+        return ComponentLocation::SKELETALMODELCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<LightComponent>(){
+        return ComponentLocation::LIGHTCOMPONENT;
+    }
 };

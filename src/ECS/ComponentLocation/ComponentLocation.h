@@ -1,6 +1,6 @@
 #pragma once
 struct ComponentLocation{
-    int entityIdx;
+    int entityUuid;
     int componentIdx;
     enum CompType{
         BASECOMPONENT,

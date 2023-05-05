@@ -1374,17 +1374,17 @@ template <typename T> void drawComponentSelector(int& idx, const std::vector<T>&
 
 static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     ComponentLocation& loc = component.args[i].arg._loc;
-    int idx = scene.uuidToIdx.count(loc.entityIdx) > 0 ? scene.uuidToIdx[loc.entityIdx] : -1;
+    int idx = scene.uuidToIdx.count(loc.entityUuid) > 0 ? scene.uuidToIdx[loc.entityUuid] : -1;
     // entity selector
     std::string previewStr =
         (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
-            bool isSelected = loc.entityIdx == scene.entities[j].uuid;
+            bool isSelected = loc.entityUuid == scene.entities[j].uuid;
             if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
-                loc.entityIdx = scene.entities[j].uuid;
-                idx = scene.uuidToIdx[loc.entityIdx];
+                loc.entityUuid = scene.entities[j].uuid;
+                idx = scene.uuidToIdx[loc.entityUuid];
             }
             ImGui::PopID();
         }
@@ -1412,7 +1412,7 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     }
 
     // component selector
-    const ComponentStorage& storage = scene.entities[loc.entityIdx].components;
+    const ComponentStorage& storage = scene.entities[loc.entityUuid].components;
     switch (loc.type) {
     case ComponentLocation::BASECOMPONENT:
         drawComponentSelector(loc.componentIdx, storage.vecBaseComponent);
@@ -1614,6 +1614,8 @@ void drawComponentList(std::vector<T>& components) {
     // handle deletion requests
     if (componentToDelete >= 0) {
         components.erase(components.begin() + componentToDelete);
+        scene.fixDescriptors(scene.selectedEntity->uuid, ComponentStorage::typeToCompTypeEnum<T>(),
+            componentToDelete);
     }
 }
 
@@ -1643,6 +1645,8 @@ void drawComponentList(std::vector<CameraComponent>& components) {
     // handle deletion requests
     if (componentToDelete >= 0) {
         components.erase(components.begin() + componentToDelete);
+        scene.fixDescriptors(scene.selectedEntity->uuid, ComponentLocation::CAMERACOMPONENT,
+            componentToDelete);
         scene.selectedCameraIdx = 0;
     }
 }

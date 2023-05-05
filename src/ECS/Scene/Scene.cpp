@@ -41,12 +41,33 @@ void Scene::updateReferences() {
                 else if (scripts[j].args[k].type == ScriptArgument::COMPONENT) {
                     ComponentLocation& loc = scripts[j].args[k].arg._loc;
                     // handle invalid entity
-                    if (uuidToIdx.count(loc.entityIdx) == 0) {
+                    if (uuidToIdx.count(loc.entityUuid) == 0) {
                         scripts[j].args[k].ref = nullptr;
                         continue;
                     }
                     scripts[j].args[k].ref =
-                        entities[uuidToIdx[loc.entityIdx]].components.getProtectedPtr(loc);
+                        entities[uuidToIdx[loc.entityUuid]].components.getProtectedPtr(loc);
+                }
+            }
+        }
+    }
+}
+
+void Scene::fixDescriptors(int entityUuid, ComponentLocation::CompType deletedType,
+    int deletedIdx) {
+    for (size_t i = 0; i < entities.size(); i++) {
+        std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
+        for (size_t j = 0; j < scripts.size(); j++) {
+            for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
+                if (scripts[j].args[k].type == ScriptArgument::COMPONENT &&
+                    scripts[j].args[k].arg._loc.type == deletedType &&
+                    scripts[j].args[k].arg._loc.entityUuid == entityUuid) {
+                    if (scripts[j].args[k].arg._loc.componentIdx > deletedIdx) {
+                        scripts[j].args[k].arg._loc.componentIdx--;
+                    }
+                    else if (scripts[j].args[k].arg._loc.componentIdx == deletedIdx) {
+                        scripts[j].args[k].arg._loc.componentIdx = -1;
+                    }
                 }
             }
         }

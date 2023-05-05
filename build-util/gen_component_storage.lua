@@ -103,6 +103,10 @@ headerFile:write([[
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
+    //get CompType enum based on type
+    template<typename T>
+    static ComponentLocation::CompType typeToCompTypeEnum();
+
     // --- Template Specializations ---
 ]])
 
@@ -140,6 +144,16 @@ for _, type in ipairs(types) do
         }
     }
 
+]])
+end
+
+-- specialize typeToEnum methods
+for _, type in ipairs(types) do
+	headerFile:write([[
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<]] .. type .. [[>(){
+        return ComponentLocation::]] .. string.upper(type) .. [[;
+    }
 ]])
 end
 
@@ -249,7 +263,7 @@ assert(compLocationFile, "Failed to open ComponentLocation.h for writing")
 compLocationFile:write([[
 #pragma once
 struct ComponentLocation{
-    int entityIdx;
+    int entityUuid;
     int componentIdx;
     enum CompType{
 ]])
