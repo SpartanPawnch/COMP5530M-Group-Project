@@ -166,8 +166,8 @@ std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::
     if (texID != 0) {
         // try to add new texture
         if (uuidToIdx.count(uuid) == 0) {
-            loadedTextures.emplace_back(TextureInfo{
-                uuid, std::string(filename), texID, std::weak_ptr<TextureDescriptor>()});
+            loadedTextures.emplace_back(TextureInfo{uuid, std::string(filename), texID,
+                std::weak_ptr<TextureDescriptor>()});
             std::shared_ptr<TextureDescriptor> desc = std::make_shared<TextureDescriptor>(
                 int(loadedTextures.size() - 1), &loadedTextures.back().path);
             loadedTextures.back().ref = std::weak_ptr<TextureDescriptor>(desc);

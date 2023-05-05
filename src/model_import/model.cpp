@@ -11,7 +11,9 @@ bool Model::loadModel(const std::string& filename) {
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         return false;
     }
-    directory = filename.substr(0, filename.find_last_of('\\'));
+    std::string backslashSubStr = filename.substr(0, filename.find_last_of('\\'));
+    std::string slashSubStr = filename.substr(0, filename.find_last_of('/'));
+    directory = (slashSubStr.size() > backslashSubStr.size()) ? slashSubStr : backslashSubStr;
     processNode(scene->mRootNode, scene);
     return true;
 }
@@ -87,12 +89,15 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         }
         if (!skip) {
             Texture texture;
+            std::string resolvedPath =
+                assetfolder::resolveExternalDependency(path.C_Str(), directory.c_str());
+
             // TODO:generate texture id
-            std::string uuid = assetfolder::getRelativePath(path.C_Str());
-            texture.textureDescriptor = loadTexture(path.C_Str(), uuid);
+            std::string uuid = assetfolder::getRelativePath(resolvedPath.c_str());
+            texture.textureDescriptor = loadTexture(resolvedPath.c_str(), uuid);
             texture.id = 1;
             texture.type = typeName;
-            texture.path = path.C_Str();
+            texture.path = resolvedPath.c_str();
             textures.push_back(texture);
             textures_loaded.push_back(texture);
         }

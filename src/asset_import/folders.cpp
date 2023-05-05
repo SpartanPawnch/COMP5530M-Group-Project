@@ -282,4 +282,39 @@ namespace assetfolder {
         }
         return std::string(path + activeDirectory.length() + 1);
     }
+
+    std::string resolveExternalDependency(const char* path, const char* baseAssetDir) {
+        // check if path is relative
+        if (strlen(path) <= 1 || path[1] != ':')
+            return std::string(path);
+
+        // check if path is local to folder
+        std::string assetpath(baseAssetDir);
+        if (assetpath.length() < strlen(path)) {
+            bool local = true;
+            for (size_t i = 0; i < assetpath.length() && local; i++) {
+                if (assetpath[i] != path[i])
+                    local = false;
+            }
+            if (local)
+                return std::string(path);
+        }
+
+        // try to resolve folder structure
+        for (int offset = strlen(path) - 1; offset >= 0; offset--) {
+            if (path[offset] == '/' || path[offset] == '\\') {
+                std::string subpath = std::string(path + offset);
+                if (GetFileAttributesA((assetpath + subpath).c_str()) != INVALID_FILE_ATTRIBUTES) {
+                    logging::logInfo("Path {} is not local to project, resolved to {}\n", path,
+                        assetpath + subpath);
+                    return (assetpath + subpath);
+                }
+            }
+        }
+
+        logging::logWarn("ASSET WARNING: Path {} is not found in base asset folder {} and"
+                         " will not load on other machines. Consider importing\n",
+            path, baseAssetDir);
+        return std::string(path);
+    }
 }
