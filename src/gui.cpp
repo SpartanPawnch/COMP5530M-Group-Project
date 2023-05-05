@@ -1339,7 +1339,9 @@ void drawComponentProps(AudioSourceComponent& component) {
 }
 
 static void drawEntitySelector(ScriptComponent& component, int i) {
-    int idx = component.args[i].arg._int;
+    int idx = scene.uuidToIdx.count(component.args[i].arg._int) > 0
+        ? scene.uuidToIdx[component.args[i].arg._int]
+        : -1;
     std::string previewStr =
         (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
@@ -1347,7 +1349,7 @@ static void drawEntitySelector(ScriptComponent& component, int i) {
             ImGui::PushID(j);
             bool isSelected = idx == j;
             if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
-                component.args[i].arg._int = j;
+                component.args[i].arg._int = scene.entities[j].uuid;
             }
             ImGui::PopID();
         }
@@ -1372,22 +1374,23 @@ template <typename T> void drawComponentSelector(int& idx, const std::vector<T>&
 
 static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     ComponentLocation& loc = component.args[i].arg._loc;
+    int idx = scene.uuidToIdx.count(loc.entityIdx) > 0 ? scene.uuidToIdx[loc.entityIdx] : -1;
     // entity selector
-    std::string previewStr = (loc.entityIdx >= 0 && loc.entityIdx < scene.entities.size())
-        ? scene.entities[loc.entityIdx].name
-        : "None";
+    std::string previewStr =
+        (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
-            bool isSelected = loc.entityIdx == j;
+            bool isSelected = loc.entityIdx == scene.entities[j].uuid;
             if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
-                loc.entityIdx = j;
+                loc.entityIdx = scene.entities[j].uuid;
+                idx = scene.uuidToIdx[loc.entityIdx];
             }
             ImGui::PopID();
         }
         ImGui::EndCombo();
     }
-    if (loc.entityIdx < 0 || loc.entityIdx >= scene.entities.size())
+    if (idx < 0 || idx >= scene.entities.size())
         return;
 
     // TODO rest of function is hard to maintain - try to generate this in the future

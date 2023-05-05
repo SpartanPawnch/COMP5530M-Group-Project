@@ -61,6 +61,7 @@ void loadLevel(const char* path, Scene& scene) {
     audio::clearAudio();
     clearDynamicTextures();
     scene.entities.clear();
+    scene.uuidToIdx.clear();
     scene.selectedEntity = nullptr;
 
     std::string projRoot = assetfolder::getProjectRoot();
@@ -216,7 +217,7 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(base);
                 }
             }
-            scene.entities.emplace_back(baseEntity);
+            scene.addEntity(baseEntity);
         }
     }
 

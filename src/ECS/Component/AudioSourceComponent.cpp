@@ -2,6 +2,12 @@
 
 #include "../../asset_import/audio.h"
 
+static int baseUuid = 0;
+
+AudioSourceComponent::AudioSourceComponent() {
+    name = "Audio Source Component";
+    uuid = baseUuid++;
+}
 void AudioSourceComponent::start() {
     if (playOnStart)
         startSound();

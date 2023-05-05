@@ -13,7 +13,10 @@ bool Model::loadModel(const std::string& filename) {
     }
     std::string backslashSubStr = filename.substr(0, filename.find_last_of('\\'));
     std::string slashSubStr = filename.substr(0, filename.find_last_of('/'));
-    directory = (slashSubStr.size() > backslashSubStr.size()) ? slashSubStr : backslashSubStr;
+    directory =
+        (slashSubStr.size() > backslashSubStr.size() || backslashSubStr.size() == filename.size())
+        ? slashSubStr
+        : backslashSubStr;
     processNode(scene->mRootNode, scene);
     return true;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #include "../Entity/BaseEntity.h"
 #include "../Component/BaseComponent.h"
@@ -22,5 +23,7 @@ class Scene {
 
     BaseEntity* selectedEntity;
     int selectedCameraIdx = 0;
+
+    std::unordered_map<int, int> uuidToIdx;
     std::vector<BaseEntity> entities;
 };

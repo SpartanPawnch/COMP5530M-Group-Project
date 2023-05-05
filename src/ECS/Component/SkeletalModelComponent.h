@@ -56,19 +56,7 @@ struct FloatACTransition {
 };
 
 struct SkeletalModelComponent : BaseComponent {
-    SkeletalModelComponent() {
-        name = "Skeletal Model Component";
-        currentTime = 0.0;
-        currentLoopCount = 0;
-        currentNode = nullptr;
-        selectedNode = nullptr;
-
-        transformMatrices.reserve(MAX_BONES);
-
-        for (unsigned int i = 0; i < MAX_BONES; i++) {
-            transformMatrices.push_back(glm::mat4(1.0f));
-        }
-    }
+    SkeletalModelComponent();
     ~SkeletalModelComponent() {
     }
     void start() override;

@@ -2,8 +2,10 @@
 
 #include <glm/gtx/transform.hpp>
 
+static int baseUuid = 0;
+
 BaseEntity::BaseEntity() {
-    uuid = 10;
+    uuid = baseUuid++;
     name = "Base Entity";
 }
 

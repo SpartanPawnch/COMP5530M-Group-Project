@@ -1,7 +1,9 @@
 #include "BaseComponent.h"
 
+static int baseUuid = 0;
+
 BaseComponent::BaseComponent() {
-    start();
+    uuid = baseUuid++;
 }
 
 BaseComponent::~BaseComponent() {

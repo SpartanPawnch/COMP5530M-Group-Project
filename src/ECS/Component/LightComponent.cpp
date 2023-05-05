@@ -1,5 +1,7 @@
 #include "LightComponent.h"
+static int baseUuid = 0;
 LightComponent::LightComponent() {
+    uuid = baseUuid++;
 }
 LightComponent::~LightComponent() {
 }

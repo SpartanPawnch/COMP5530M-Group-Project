@@ -8,9 +8,7 @@
 #include "../EntityState/EntityState.h"
 
 struct ModelComponent : BaseComponent {
-    ModelComponent() {
-        name = "Model Component";
-    }
+    ModelComponent();
     ~ModelComponent() {
     }
     void start() override;
