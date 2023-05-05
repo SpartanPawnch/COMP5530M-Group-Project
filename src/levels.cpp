@@ -93,7 +93,7 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
 
-    // TODO - load models
+    // load models
     std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
         assert(doc.HasMember("models"));
@@ -105,11 +105,6 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
 
-    // TODO load scripts
-    {
-        assert(doc.HasMember("scripts"));
-        auto jsonScripts = doc["scripts"].GetArray();
-    }
     // TODO load misc
     {
         assert(doc.HasMember("misc"));
@@ -124,7 +119,6 @@ void loadLevel(const char* path, Scene& scene) {
             auto entity = jsonEntities[i].GetObject();
 
             // add entity
-            // TODO - currently ignoring type, need to think about component only vs entity params
             BaseEntity baseEntity;
 
             baseEntity.uuid = entity["uuid"].GetInt();
@@ -207,6 +201,48 @@ void loadLevel(const char* path, Scene& scene) {
                     model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
                     baseEntity.components.addComponent(model);
+                }
+                // ScriptComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ScriptComponent") == 0) {
+                    int uuid = jsonComponent["uuid"].GetInt();
+                    std::string name = std::string(jsonComponent["name"].GetString());
+                    ScriptComponent script(name, uuid);
+                    script.scriptPath = jsonComponent["scriptPath"].GetString();
+
+                    // handle args
+                    auto scriptArgs = jsonComponent["args"].GetArray();
+                    for (size_t arg = 0; arg < scriptArgs.Size(); arg++) {
+                        auto jsonArg = scriptArgs[arg].GetObject();
+
+                        ScriptArgument scriptArg;
+                        scriptArg.type = (ScriptArgument::ArgType)jsonArg["type"].GetInt();
+                        scriptArg.key = jsonArg["key"].GetString();
+                        rapidjson::Value loc;
+                        switch (scriptArg.type) {
+                        case ScriptArgument::BOOL:
+                        case ScriptArgument::INT:
+                        case ScriptArgument::ENTITY:
+                            scriptArg.arg._int = jsonArg["val"].GetInt();
+                            break;
+                        case ScriptArgument::FLOAT:
+                            scriptArg.arg._float = jsonArg["val"].GetFloat();
+                            break;
+                        case ScriptArgument::STRING:
+                            scriptArg.stringBuf = jsonArg["val"].GetString();
+                            break;
+                        case ScriptArgument::COMPONENT:
+                            loc = jsonArg["val"].GetObject();
+                            scriptArg.arg._loc.componentIdx = loc["componentIdx"].GetInt();
+                            scriptArg.arg._loc.entityUuid = loc["entityUuid"].GetInt();
+                            scriptArg.arg._loc.type =
+                                (ComponentLocation::CompType)loc["type"].GetInt();
+                            break;
+                        default:;
+                        }
+                        script.args.emplace_back(scriptArg);
+                    }
+
+                    baseEntity.components.addComponent(script);
                 }
                 // BaseComponent
                 else {
@@ -375,6 +411,60 @@ static void saveComponent(const ModelComponent& component,
     writer.EndObject();
 }
 
+static void saveComponent(const ScriptComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(component.name.c_str());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+    writer.Key("type");
+    writer.String("ScriptComponent");
+    writer.Key("scriptPath");
+    writer.String(component.scriptPath.c_str());
+    writer.Key("args");
+    writer.StartArray();
+    for (size_t i = 0; i < component.args.size(); i++) {
+        writer.StartObject();
+        writer.Key("key");
+        writer.String(component.args[i].key.c_str());
+        writer.Key("type");
+        writer.Int(component.args[i].type);
+        switch (component.args[i].type) {
+        case ScriptArgument::BOOL:
+        case ScriptArgument::INT:
+        case ScriptArgument::ENTITY:
+            writer.Key("val");
+            writer.Int(component.args[i].arg._int);
+            break;
+        case ScriptArgument::FLOAT:
+            writer.Key("val");
+            writer.Double(component.args[i].arg._float);
+            break;
+        case ScriptArgument::STRING:
+            writer.Key("val");
+            writer.String(component.args[i].stringBuf.c_str());
+            break;
+        case ScriptArgument::COMPONENT:
+            writer.Key("val");
+            writer.StartObject();
+            writer.Key("type");
+            writer.Int(component.args[i].arg._loc.type);
+            writer.Key("entityUuid");
+            writer.Int(component.args[i].arg._loc.entityUuid);
+            writer.Key("componentIdx");
+            writer.Int(component.args[i].arg._loc.componentIdx);
+            writer.EndObject();
+            break;
+        default:;
+        }
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+    writer.EndObject();
+}
+
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene) {
     // open document for writing
@@ -476,6 +566,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecModelComponent;
             for (unsigned int j = 0; j < modelComponents.size(); j++) {
                 saveComponent(modelComponents[j], writer);
+            }
+
+            // ScriptComponent
+            const std::vector<ScriptComponent>& scriptComponents =
+                scene.entities[i].components.vecScriptComponent;
+            for (size_t j = 0; j < scriptComponents.size(); j++) {
+                saveComponent(scriptComponents[j], writer);
             }
 
             // BaseComponent
