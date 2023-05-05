@@ -59,7 +59,7 @@ add_executable(
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
     render-engine/Buffer.h render-engine/Buffer.cpp
- 	src/asset_import/model.cpp
+ 	src/asset_import/model.cpp src/asset_import/materials.cpp
 	render-engine/LightSource.h render-engine/LightSource.cpp
 	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp
     src/model_import/bone.cpp src/asset_import/animation.cpp
