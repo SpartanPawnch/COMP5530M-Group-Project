@@ -4,8 +4,10 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <utility>
 #include <glm/glm.hpp>
 #include "images.h"
+#include "folders.h"
 
 struct Material {
     std::string name="";

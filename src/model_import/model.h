@@ -11,6 +11,7 @@
 #include <assimp/postprocess.h>
 #include "../asset_import/images.h"
 #include "../asset_import/folders.h"
+#include "../asset_import/materials.h"
 #include "mesh.h"
 
 class Model {
@@ -18,7 +19,6 @@ public:
 	Model();
 
     std::vector<Mesh> meshes;
-    std::vector<Texture> textures_loaded;
     std::string directory;
 
     //skeleton information
@@ -29,7 +29,6 @@ public:
     void deleteBuffers();
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
     //skeleton methods
     void getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);

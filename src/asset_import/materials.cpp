@@ -37,7 +37,16 @@ void MaterialSystem::selectMaterial(std::string name) {
 }
 
 void MaterialSystem::setTextureFromPath(std::string path, std::shared_ptr<TextureDescriptor>& baseColorMap, std::string& uuid) {
+    std::string localUuid = assetfolder::getRelativePath(path.c_str());
+    auto desc = getTexture(localUuid);
 
+    if (!desc) {
+        // load file from disk
+        desc = loadTexture(path.c_str(), localUuid);
+    }
+
+    std::swap(baseColorMap, desc);
+    uuid = baseColorMap ? localUuid : "";
 }
 
 void MaterialSystem::createActiveMaterial(const std::string& name) {

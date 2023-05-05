@@ -958,6 +958,27 @@ void drawComponentProps(ModelComponent& component) {
 
         ImGui::EndCombo();
     }
+    if (component.modelDescriptor) {
+        for (uint32_t i = 0; i < component.modelDescriptor->getMeshCount(); i++) {
+            ImGui::PushID(i);
+            ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
+            std::string meshPreviewStr = "Select a Material";
+            if (component.modelDescriptor->meshHasMaterial(i)) {
+                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            }
+            //materials select options by name
+            if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
+                for (auto const& mat : materialSystem->materials) {
+                    bool selected = (meshPreviewStr == mat.first);
+                    if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                        component.modelDescriptor->setMeshMaterial(i, materialSystem->loadActiveMaterial(mat.second));
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+    }
 }
 
 void drawComponentProps(SkeletalModelComponent& component) {

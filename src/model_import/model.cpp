@@ -6,7 +6,7 @@ Model::Model() {
 
 bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FixInfacingNormals  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     // this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         return false;
@@ -35,7 +35,8 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+
+    std::string meshName = mesh->mName.C_Str();
 
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex;
@@ -50,6 +51,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             // no texture coordinates
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
         }
+        vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+        vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         vertices.push_back(vertex);
     }
     for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -58,59 +61,51 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             indices.push_back(face.mIndices[j]);
         }
     }
+    std::shared_ptr<ActiveMaterial> activeMat;
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps =
-            loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps =
-            loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        Material mat;
+        mat.name = material->GetName().C_Str();
+
+        aiColor3D color;
+        material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+        mat.baseColor = glm::vec3(color.r, color.g, color.b);
+
+        material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+        mat.emissiveColor = glm::vec3(color.r, color.g, color.b);
+
+        material->Get(AI_MATKEY_SHININESS, mat.roughness);
+        material->Get(AI_MATKEY_REFLECTIVITY, mat.metalness);
+        material->Get(AI_MATKEY_OPACITY, mat.occlusion);
+
+        aiString texturePath;
+        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
+            mat.baseColorMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_SHININESS, 0, &texturePath) == AI_SUCCESS) {
+            mat.roughnessMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_REFLECTION, 0, &texturePath) == AI_SUCCESS) {
+            mat.metalnessMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_NORMALS, 0, &texturePath) == AI_SUCCESS) {
+            mat.normalMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_OPACITY, 0, &texturePath) == AI_SUCCESS) {
+            mat.alphaMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath) == AI_SUCCESS) {
+            mat.emissiveMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &texturePath) == AI_SUCCESS) {
+            mat.occlusionMap = std::string(texturePath.C_Str());
+        }
+
+        MaterialSystem* materialSystem = MaterialSystem::getInstance();
+        activeMat = materialSystem->loadActiveMaterial(mat);
     }
     getSkeletonInfo(vertices, mesh, scene);
-    return Mesh(vertices, indices, textures);
-}
-
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
-    const std::string& typeName) {
-    std::vector<Texture> textures;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
-        aiString path;
-        mat->GetTexture(type, i, &path);
-        bool skip = false;
-        for (unsigned int j = 0; j < textures_loaded.size(); ++j) {
-            if (std::strcmp(textures_loaded[j].path.data(), path.C_Str()) == 0) {
-                textures.push_back(textures_loaded[j]);
-                skip = true;
-                break;
-            }
-        }
-        if (!skip) {
-            Texture texture;
-            // TODO:generate texture id
-            std::string uuid = assetfolder::getRelativePath(path.C_Str());
-            auto desc = getTexture(uuid);
-
-            if (!desc) {
-                // load file from disk
-                desc = loadTexture(path.C_Str(), uuid);
-            }
-
-            std::swap(texture.textureDescriptor, desc);
-            texture.textureUuid = texture.textureDescriptor ? uuid : "";
-            texture.id = 1;
-            texture.type = typeName;
-            texture.path = path.C_Str();
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-        }
-        else {
-            Texture texture;
-            texture.id = 0;
-            textures_loaded.push_back(texture);
-        }
-    }
-    return textures;
+    return Mesh(meshName,vertices, indices, activeMat);
 }
 
 void Model::getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {

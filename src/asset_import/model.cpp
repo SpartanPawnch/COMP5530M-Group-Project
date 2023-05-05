@@ -169,13 +169,13 @@ namespace model {
         return loadedModels[idx].model->meshes[meshIndex].EBO;
     }
 
-    unsigned int ModelDescriptor::getTexture(int meshIndex) {
-        if (loadedModels[idx].model->textures_loaded.size() <= meshIndex ||
-            loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor == nullptr) {
-            return 0;
-        }
-        return loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor->texId;
-    }
+    //unsigned int ModelDescriptor::getTexture(int meshIndex) {
+    //    if (loadedModels[idx].model->textures_loaded.size() <= meshIndex ||
+    //        loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor == nullptr) {
+    //        return 0;
+    //    }
+    //    return loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor->texId;
+    //}
 
     unsigned int ModelDescriptor::getIndexCount(int meshIndex) {
         return loadedModels[idx].model->meshes[meshIndex].indices.size();
@@ -184,6 +184,23 @@ namespace model {
     unsigned int ModelDescriptor::getMeshCount() {
         return loadedModels[idx].model->meshes.size();
     }
+
+    std::string ModelDescriptor::getMeshName(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].name;
+    }
+
+    std::string ModelDescriptor::getMeshMaterialName(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].material->name;
+    }
+
+    bool ModelDescriptor::meshHasMaterial(int meshIndex) {
+        return !(loadedModels[idx].model->meshes[meshIndex].material == nullptr);
+    }
+
+    void ModelDescriptor::setMeshMaterial(int meshIndex, std::shared_ptr<ActiveMaterial> mat) {
+        loadedModels[idx].model->meshes[meshIndex].material = mat;
+    }
+
 
     std::map<std::string, BoneInfo> ModelDescriptor::getBoneInfoMap() {
         return loadedModels[idx].model->boneInfoMap;

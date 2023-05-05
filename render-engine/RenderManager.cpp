@@ -297,7 +297,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
 
-                GLuint tex = desc->getTexture(k);
+                //GLuint tex = desc->getTexture(k);
+                GLuint tex = 0;
                 if (tex) {
                     // draw textured
                     glUseProgram(getPipeline(TexturePipeline)->getProgram());
@@ -637,6 +638,14 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
+    // vertex tangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, tangent));
+    // vertex bitangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, bitangent));
 
     glBindVertexArray(0);
 }
