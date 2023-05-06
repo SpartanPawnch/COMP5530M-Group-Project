@@ -102,7 +102,6 @@ TextureDescriptor::~TextureDescriptor() {
         return;
 
     // clear texture
-
     glDeleteTextures(1, &loadedTextures[idx].texId);
 
     // update info for back
@@ -201,8 +200,10 @@ void setTexturesStaticThreshold() {
 }
 
 void clearDynamicTextures() {
-    for (unsigned int i = staticThreshold; i < loadedTextures.size(); i++)
+    for (unsigned int i = staticThreshold; i < loadedTextures.size(); i++) {
         glDeleteTextures(1, &loadedTextures[i].texId);
+        uuidToIdx.erase(loadedTextures[i].uuid);
+    }
     loadedTextures.resize(staticThreshold);
     // TODO clear map appropriately
 }
