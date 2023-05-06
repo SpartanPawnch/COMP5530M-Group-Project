@@ -2,8 +2,10 @@
 
 #include <glm/gtx/transform.hpp>
 
+static int baseUuid = 0;
+
 BaseEntity::BaseEntity() {
-    uuid = 10;
+    uuid = baseUuid++;
     name = "Base Entity";
 }
 
@@ -28,7 +30,6 @@ void BaseEntity::genTransform(const glm::mat4& parentMat) {
     state.runtimeTransform = parentMat * glm::translate(state.position) *
         glm::mat4_cast(state.rotation) * glm::scale(state.scale);
 }
-
 // void BaseEntity::removeComponent(int uuid)
 // {
 //     for (unsigned int i = 0; i < components.size(); i++)

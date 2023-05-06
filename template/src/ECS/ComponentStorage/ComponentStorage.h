@@ -1,7 +1,11 @@
 #pragma once
 
 #include <vector>
+
+#include <lua.hpp>
+
 #include "../EntityState/EntityState.h"
+#include "../ComponentLocation/ComponentLocation.h"
 
 #include "../Component/BaseComponent.h"
 #include "../Component/TransformComponent.h"
@@ -10,6 +14,7 @@
 #include "../Component/AudioSourceComponent.h"
 #include "../Component/ModelComponent.h"
 #include "../Component/SkeletalModelComponent.h"
+#include "../Component/LightComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -19,6 +24,7 @@ struct ComponentStorage{
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
     std::vector<ModelComponent> vecModelComponent;
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
+    std::vector<LightComponent> vecLightComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -39,6 +45,16 @@ struct ComponentStorage{
     
     //clear all components
     void clearAll();
+
+    //get raw pointer using component loc
+    void* getProtectedPtr(const ComponentLocation& loc);
+
+    //push lua table
+    static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
+
+    //get CompType enum based on type
+    template<typename T>
+    static ComponentLocation::CompType typeToCompTypeEnum();
 
     // --- Template Specializations ---
     template<>
@@ -74,6 +90,11 @@ struct ComponentStorage{
     template<>
     void addComponent<SkeletalModelComponent>(const SkeletalModelComponent& component){
         vecSkeletalModelComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<LightComponent>(const LightComponent& component){
+        vecLightComponent.emplace_back(component);
     }
 
     template<>
@@ -126,6 +147,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void start<LightComponent>(){
+        for(unsigned int i=0;i<vecLightComponent.size();i++){
+            vecLightComponent[i].start();
+        }
+    }
+
+    template<>
     void update<BaseComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt,state);
@@ -174,4 +202,43 @@ struct ComponentStorage{
         }
     }
 
+    template<>
+    void update<LightComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecLightComponent.size();i++){
+            vecLightComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
+        return ComponentLocation::BASECOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<TransformComponent>(){
+        return ComponentLocation::TRANSFORMCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ScriptComponent>(){
+        return ComponentLocation::SCRIPTCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<CameraComponent>(){
+        return ComponentLocation::CAMERACOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<AudioSourceComponent>(){
+        return ComponentLocation::AUDIOSOURCECOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ModelComponent>(){
+        return ComponentLocation::MODELCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<SkeletalModelComponent>(){
+        return ComponentLocation::SKELETALMODELCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<LightComponent>(){
+        return ComponentLocation::LIGHTCOMPONENT;
+    }
 };

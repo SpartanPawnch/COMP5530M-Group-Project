@@ -9,9 +9,7 @@
 #include "../EntityState/EntityState.h"
 
 struct AudioSourceComponent : BaseComponent {
-    AudioSourceComponent() {
-        name = "Audio Source Component";
-    }
+    AudioSourceComponent();
     ~AudioSourceComponent() {
     }
     void start() override;

@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildSys CXX C)
 
+#define as engine
+add_compile_definitions(ONO_ENGINE_ONLY)
+
 #common vars
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
@@ -101,11 +104,35 @@ add_custom_target(ComponentStorageGen
 )
 add_dependencies(${PROJECT_NAME} ComponentStorageGen)
 
-message(STATUS ${CMAKE_BINARY_DIR})
-
 #create template
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/template
+    #copy over most engine source files
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/asset_import
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/src/asset_import
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/ECS
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/src/ECS
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/model_import
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/src/model_import
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/render-engine
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/render-engine
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/fdutil.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/fdutil.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/levels.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/levels.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/logging.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/logging.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/src
+
     #install assimp
     COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/assimp-5.2.5
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 

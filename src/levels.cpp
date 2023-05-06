@@ -207,7 +207,7 @@ void loadLevel(const char* path, Scene& scene) {
                     int uuid = jsonComponent["uuid"].GetInt();
                     std::string name = std::string(jsonComponent["name"].GetString());
                     ScriptComponent script(name, uuid);
-                    script.scriptPath = jsonComponent["scriptPath"].GetString();
+                    script.scriptPath = projRoot + jsonComponent["scriptPath"].GetString();
 
                     // handle args
                     auto scriptArgs = jsonComponent["args"].GetArray();
@@ -263,6 +263,7 @@ void loadLevel(const char* path, Scene& scene) {
     logging::logInfo("Opened level {}\n", path);
 }
 
+#ifdef ONO_ENGINE_ONLY
 // --- Per-Component-Type serialization functions
 static void saveComponent(const TransformComponent& trComponent,
     rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
@@ -421,7 +422,7 @@ static void saveComponent(const ScriptComponent& component,
     writer.Key("type");
     writer.String("ScriptComponent");
     writer.Key("scriptPath");
-    writer.String(component.scriptPath.c_str());
+    writer.String(assetfolder::getRelativePath(component.scriptPath.c_str()).c_str());
     writer.Key("args");
     writer.StartArray();
     for (size_t i = 0; i < component.args.size(); i++) {
@@ -667,6 +668,7 @@ void saveCurrentLevel() {
     if (!currentLevelPath.empty())
         saveLevel(currentLevelPath.c_str(), *currentScene);
 }
+#endif
 
 // load default project from project file
 std::string loadProjectFile(const char* path) {
@@ -701,6 +703,7 @@ std::string loadProjectFile(const char* path) {
     return defaultLevelPath;
 }
 
+#ifdef ONO_ENGINE_ONLY
 // save project file to manifest
 void saveProjectFile(const char* path) {
     if (defaultLevelPath.empty())
@@ -737,3 +740,4 @@ void setDefaultLevel(const std::string& path) {
 bool isCurrentLevel(const std::string& name) {
     return (name == assetfolder::getName(currentLevelPath.c_str()));
 }
+#endif

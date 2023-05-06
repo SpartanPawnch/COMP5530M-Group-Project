@@ -384,10 +384,11 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
         }
-
+#ifdef ONO_ENGINE_ONLY
         if (scene.entities[i].components.vecModelComponent.empty()) {
             runEmptyVisPipeline();
         }
+#endif
 
         glBindVertexArray(0);
     }

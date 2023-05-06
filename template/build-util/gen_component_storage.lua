@@ -50,7 +50,11 @@ headerFile:write([[
 #pragma once
 
 #include <vector>
+
+#include <lua.hpp>
+
 #include "../EntityState/EntityState.h"
+#include "../ComponentLocation/ComponentLocation.h"
 
 ]])
 
@@ -93,6 +97,16 @@ headerFile:write([[
     //clear all components
     void clearAll();
 
+    //get raw pointer using component loc
+    void* getProtectedPtr(const ComponentLocation& loc);
+
+    //push lua table
+    static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
+
+    //get CompType enum based on type
+    template<typename T>
+    static ComponentLocation::CompType typeToCompTypeEnum();
+
     // --- Template Specializations ---
 ]])
 
@@ -130,6 +144,16 @@ for _, type in ipairs(types) do
         }
     }
 
+]])
+end
+
+-- specialize typeToEnum methods
+for _, type in ipairs(types) do
+	headerFile:write([[
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<]] .. type .. [[>(){
+        return ComponentLocation::]] .. string.upper(type) .. [[;
+    }
 ]])
 end
 
@@ -182,9 +206,78 @@ for _, type in ipairs(types) do
     vec]] .. type .. [[.clear();
 ]])
 end
+
 sourceFile:write("}\n")
 
+-- create getProtectedPtr method
+sourceFile:write([[
+void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
+    switch(loc.type){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    case ComponentLocation::]] .. string.upper(type) .. [[:
+        if(loc.componentIdx>=vec]] .. type .. [[.size())
+            return nullptr;
+        return &vec]] .. type .. "[loc.componentIdx]" .. [[;
+]])
+end
+
+sourceFile:write([[
+    default:;
+    }
+    return nullptr;
+}
+]])
+
+-- create pushLuaTable method
+sourceFile:write([[
+void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_State* state){
+    switch(loc.type){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    case ComponentLocation::]] .. string.upper(type) .. [[:
+        if(ptr==nullptr)
+            break;
+        ((]] .. type .. "*)ptr)->" .. [[pushLuaTable(state);
+        return;
+]])
+end
+
+sourceFile:write([[
+    default:;
+    }
+    lua_pushnil(state);
+    return;
+}
+]])
+
 sourceFile:close()
+
+local compLocationFile = io.open("src/ECS/ComponentLocation/ComponentLocation.h", "w")
+assert(compLocationFile, "Failed to open ComponentLocation.h for writing")
+
+compLocationFile:write([[
+#pragma once
+struct ComponentLocation{
+    int entityUuid;
+    int componentIdx;
+    enum CompType{
+]])
+for _, type in ipairs(types) do
+	compLocationFile:write([[
+        ]] .. string.upper(type) .. ",\n")
+end
+compLocationFile:write([[
+        COMPTYPE_MAX
+    };
+    CompType type;
+};
+]])
+compLocationFile:close()
 
 cacheFile = io.open("src/ECS/ComponentStorage/codegen.cache", "w")
 if cacheFile then

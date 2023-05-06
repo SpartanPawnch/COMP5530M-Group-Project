@@ -11,6 +11,7 @@ namespace assetfolder {
             MODEL,
             TEXTURE,
             AUDIO,
+            SCRIPT,
             MISC,
             INVALID
         };
@@ -60,4 +61,6 @@ namespace assetfolder {
 
     // get relative path based on current path
     std::string getRelativePath(const char* path);
+
+    std::string resolveExternalDependency(const char* path, const char* baseAssetDir);
 }

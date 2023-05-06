@@ -5,3 +5,4 @@ CameraComponent
 AudioSourceComponent
 ModelComponent
 SkeletalModelComponent
+LightComponent

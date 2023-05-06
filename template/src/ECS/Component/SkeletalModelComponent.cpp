@@ -2,6 +2,22 @@
 
 #include "../../model_import/model.h"
 
+static int baseUuid = 0;
+
+SkeletalModelComponent::SkeletalModelComponent() {
+    name = "Skeletal Model Component";
+    uuid = baseUuid++;
+    currentTime = 0.0;
+    currentLoopCount = 0;
+    currentNode = nullptr;
+    selectedNode = nullptr;
+
+    transformMatrices.reserve(MAX_BONES);
+
+    for (unsigned int i = 0; i < MAX_BONES; i++) {
+        transformMatrices.push_back(glm::mat4(1.0f));
+    }
+}
 void SkeletalModelComponent::start() {
 }
 void SkeletalModelComponent::update(float dt, EntityState& state) {

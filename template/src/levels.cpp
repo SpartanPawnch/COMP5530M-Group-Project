@@ -60,8 +60,8 @@ void loadLevel(const char* path, Scene& scene) {
     // clear all assets
     audio::clearAudio();
     clearDynamicTextures();
-    scripting::clearScripts();
     scene.entities.clear();
+    scene.uuidToIdx.clear();
     scene.selectedEntity = nullptr;
 
     std::string projRoot = assetfolder::getProjectRoot();
@@ -93,7 +93,7 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
 
-    // TODO - load models
+    // load models
     std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
         assert(doc.HasMember("models"));
@@ -105,11 +105,6 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
 
-    // TODO load scripts
-    {
-        assert(doc.HasMember("scripts"));
-        auto jsonScripts = doc["scripts"].GetArray();
-    }
     // TODO load misc
     {
         assert(doc.HasMember("misc"));
@@ -124,7 +119,6 @@ void loadLevel(const char* path, Scene& scene) {
             auto entity = jsonEntities[i].GetObject();
 
             // add entity
-            // TODO - currently ignoring type, need to think about component only vs entity params
             BaseEntity baseEntity;
 
             baseEntity.uuid = entity["uuid"].GetInt();
@@ -193,7 +187,6 @@ void loadLevel(const char* path, Scene& scene) {
                     cam.up = glm::vec3(jsonComponent["up"][0].GetFloat(),
                         jsonComponent["up"][1].GetFloat(), jsonComponent["up"][2].GetFloat());
                     cam.fov = jsonComponent["fov"].GetFloat();
-
                     if (jsonComponent.HasMember("default") && jsonComponent["default"].GetBool()) {
                         CameraComponent::activeUuid = cam.uuid;
                     }
@@ -209,6 +202,48 @@ void loadLevel(const char* path, Scene& scene) {
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
                     baseEntity.components.addComponent(model);
                 }
+                // ScriptComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ScriptComponent") == 0) {
+                    int uuid = jsonComponent["uuid"].GetInt();
+                    std::string name = std::string(jsonComponent["name"].GetString());
+                    ScriptComponent script(name, uuid);
+                    script.scriptPath = projRoot + jsonComponent["scriptPath"].GetString();
+
+                    // handle args
+                    auto scriptArgs = jsonComponent["args"].GetArray();
+                    for (size_t arg = 0; arg < scriptArgs.Size(); arg++) {
+                        auto jsonArg = scriptArgs[arg].GetObject();
+
+                        ScriptArgument scriptArg;
+                        scriptArg.type = (ScriptArgument::ArgType)jsonArg["type"].GetInt();
+                        scriptArg.key = jsonArg["key"].GetString();
+                        rapidjson::Value loc;
+                        switch (scriptArg.type) {
+                        case ScriptArgument::BOOL:
+                        case ScriptArgument::INT:
+                        case ScriptArgument::ENTITY:
+                            scriptArg.arg._int = jsonArg["val"].GetInt();
+                            break;
+                        case ScriptArgument::FLOAT:
+                            scriptArg.arg._float = jsonArg["val"].GetFloat();
+                            break;
+                        case ScriptArgument::STRING:
+                            scriptArg.stringBuf = jsonArg["val"].GetString();
+                            break;
+                        case ScriptArgument::COMPONENT:
+                            loc = jsonArg["val"].GetObject();
+                            scriptArg.arg._loc.componentIdx = loc["componentIdx"].GetInt();
+                            scriptArg.arg._loc.entityUuid = loc["entityUuid"].GetInt();
+                            scriptArg.arg._loc.type =
+                                (ComponentLocation::CompType)loc["type"].GetInt();
+                            break;
+                        default:;
+                        }
+                        script.args.emplace_back(scriptArg);
+                    }
+
+                    baseEntity.components.addComponent(script);
+                }
                 // BaseComponent
                 else {
                     BaseComponent base;
@@ -218,7 +253,7 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(base);
                 }
             }
-            scene.entities.emplace_back(baseEntity);
+            scene.addEntity(baseEntity);
         }
     }
 
@@ -227,6 +262,413 @@ void loadLevel(const char* path, Scene& scene) {
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
 }
+
+#ifdef ONO_ENGINE_ONLY
+// --- Per-Component-Type serialization functions
+static void saveComponent(const TransformComponent& trComponent,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+
+    writer.StartObject();
+
+    // shared properties
+    writer.Key("name");
+    writer.String(trComponent.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(trComponent.uuid);
+
+    writer.Key("type");
+    writer.String("TransformComponent");
+
+    writer.Key("position");
+    // position
+    writer.StartArray();
+    writer.Double(double(trComponent.position[0]));
+    writer.Double(double(trComponent.position[1]));
+    writer.Double(double(trComponent.position[2]));
+    writer.EndArray();
+    // rotation
+    writer.Key("rotation");
+    writer.StartArray();
+    writer.Double(trComponent.rotation[0]);
+    writer.Double(trComponent.rotation[1]);
+    writer.Double(trComponent.rotation[2]);
+    writer.Double(trComponent.rotation[3]);
+
+    writer.EndArray();
+
+    // scale
+    writer.Key("scale");
+    writer.StartArray();
+    writer.Double(double(trComponent.scale[0]));
+    writer.Double(double(trComponent.scale[1]));
+    writer.Double(double(trComponent.scale[2]));
+    writer.EndArray();
+
+    writer.EndObject();
+}
+
+static void saveComponent(const BaseComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(component.name.c_str());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+    writer.Key("type");
+    writer.String("BaseComponent");
+    writer.EndObject();
+}
+
+static void saveComponent(const AudioSourceComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("AudioSourceComponent");
+
+    writer.Key("clipUuid");
+    writer.String(component.clipUuid.c_str());
+
+    writer.Key("loop");
+    writer.Bool(component.loop);
+
+    writer.Key("directional");
+    writer.Bool(component.directional);
+
+    writer.Key("playOnStart");
+    writer.Bool(component.playOnStart);
+
+    writer.EndObject();
+}
+
+static void saveComponent(const CameraComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("CameraComponent");
+
+    writer.Key("eye");
+    writer.StartArray();
+    writer.Double(float(component.eye[0]));
+    writer.Double(float(component.eye[1]));
+    writer.Double(float(component.eye[2]));
+    writer.EndArray();
+
+    writer.Key("center");
+    writer.StartArray();
+    writer.Double(float(component.center[0]));
+    writer.Double(float(component.center[1]));
+    writer.Double(float(component.center[2]));
+    writer.EndArray();
+
+    writer.Key("up");
+    writer.StartArray();
+    writer.Double(float(component.up[0]));
+    writer.Double(float(component.up[1]));
+    writer.Double(float(component.up[2]));
+    writer.EndArray();
+
+    writer.Key("fov");
+    writer.Double(double(component.fov));
+
+    if (CameraComponent::activeUuid == component.uuid) {
+        writer.Key("default");
+        writer.Bool(true);
+    }
+
+    writer.EndObject();
+}
+
+static void saveComponent(const ModelComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("ModelComponent");
+
+    writer.Key("modelUuid");
+    writer.String(component.modelUuid.c_str());
+
+    writer.EndObject();
+}
+
+static void saveComponent(const ScriptComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(component.name.c_str());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+    writer.Key("type");
+    writer.String("ScriptComponent");
+    writer.Key("scriptPath");
+    writer.String(assetfolder::getRelativePath(component.scriptPath.c_str()).c_str());
+    writer.Key("args");
+    writer.StartArray();
+    for (size_t i = 0; i < component.args.size(); i++) {
+        writer.StartObject();
+        writer.Key("key");
+        writer.String(component.args[i].key.c_str());
+        writer.Key("type");
+        writer.Int(component.args[i].type);
+        switch (component.args[i].type) {
+        case ScriptArgument::BOOL:
+        case ScriptArgument::INT:
+        case ScriptArgument::ENTITY:
+            writer.Key("val");
+            writer.Int(component.args[i].arg._int);
+            break;
+        case ScriptArgument::FLOAT:
+            writer.Key("val");
+            writer.Double(component.args[i].arg._float);
+            break;
+        case ScriptArgument::STRING:
+            writer.Key("val");
+            writer.String(component.args[i].stringBuf.c_str());
+            break;
+        case ScriptArgument::COMPONENT:
+            writer.Key("val");
+            writer.StartObject();
+            writer.Key("type");
+            writer.Int(component.args[i].arg._loc.type);
+            writer.Key("entityUuid");
+            writer.Int(component.args[i].arg._loc.entityUuid);
+            writer.Key("componentIdx");
+            writer.Int(component.args[i].arg._loc.componentIdx);
+            writer.EndObject();
+            break;
+        default:;
+        }
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+    writer.EndObject();
+}
+
+// save level to manifest in path
+void saveLevel(const char* path, const Scene& scene) {
+    // open document for writing
+#pragma warning(disable : 4996)
+    FILE* file = fopen(path, "wb");
+    if (file == NULL) {
+        logging::logErr("Failed to open file {} for writing\n", path);
+        return;
+    }
+
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+
+    writer.StartObject();
+
+    // save ECS and enumerate dependencies
+    std::vector<int> modelIds;
+    std::vector<int> textureIds;
+    std::vector<int> scriptIds;
+    std::vector<int> miscIds;
+
+    // encode entities
+    {
+        writer.Key("entities");
+        writer.StartArray();
+        // rapidjson::Value jsonEntities(rapidjson::kArrayType);
+        for (unsigned int i = 0; i < scene.entities.size(); i++) {
+            writer.StartObject();
+
+            // encode entity properties
+            writer.Key("name");
+            writer.String(scene.entities[i].name.c_str());
+
+            writer.Key("uuid");
+            writer.Int(scene.entities[i].uuid);
+
+            writer.Key("parent");
+            writer.Int(scene.entities[i].parent);
+
+            // position
+            writer.Key("position");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].state.position[0]));
+            writer.Double(double(scene.entities[i].state.position[1]));
+            writer.Double(double(scene.entities[i].state.position[2]));
+
+            writer.EndArray();
+
+            // rotation
+            writer.Key("rotation");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].state.rotation[0]));
+            writer.Double(double(scene.entities[i].state.rotation[1]));
+            writer.Double(double(scene.entities[i].state.rotation[2]));
+            writer.Double(double(scene.entities[i].state.rotation[3]));
+
+            writer.EndArray();
+
+            // scale
+            writer.Key("scale");
+            writer.StartArray();
+
+            writer.Double(double(scene.entities[i].state.scale[0]));
+            writer.Double(double(scene.entities[i].state.scale[1]));
+            writer.Double(double(scene.entities[i].state.scale[2]));
+
+            writer.EndArray();
+
+            // encode components
+            writer.Key("components");
+            writer.StartArray();
+
+            // TransformComponent
+            const std::vector<TransformComponent>& transformComponents =
+                scene.entities[i].components.vecTransformComponent;
+            for (unsigned int j = 0; j < transformComponents.size(); j++) {
+                saveComponent(transformComponents[j], writer);
+            }
+
+            // AudioSourceComponent
+            const std::vector<AudioSourceComponent>& audioSrcComponents =
+                scene.entities[i].components.vecAudioSourceComponent;
+            for (unsigned int j = 0; j < audioSrcComponents.size(); j++) {
+                saveComponent(audioSrcComponents[j], writer);
+            }
+
+            // CameraComponent
+            const std::vector<CameraComponent>& cameraComponents =
+                scene.entities[i].components.vecCameraComponent;
+            for (unsigned int j = 0; j < cameraComponents.size(); j++) {
+                saveComponent(cameraComponents[j], writer);
+            }
+
+            // ModelComponent
+            const std::vector<ModelComponent>& modelComponents =
+                scene.entities[i].components.vecModelComponent;
+            for (unsigned int j = 0; j < modelComponents.size(); j++) {
+                saveComponent(modelComponents[j], writer);
+            }
+
+            // ScriptComponent
+            const std::vector<ScriptComponent>& scriptComponents =
+                scene.entities[i].components.vecScriptComponent;
+            for (size_t j = 0; j < scriptComponents.size(); j++) {
+                saveComponent(scriptComponents[j], writer);
+            }
+
+            // BaseComponent
+            const std::vector<BaseComponent>& baseComponents =
+                scene.entities[i].components.vecBaseComponent;
+            for (unsigned int j = 0; j < baseComponents.size(); j++) {
+                saveComponent(baseComponents[j], writer);
+            }
+
+            writer.EndArray();
+            writer.EndObject();
+        }
+        writer.EndArray();
+    }
+
+    // save audio
+    {
+        writer.Key("audio");
+        writer.StartArray();
+        std::vector<audio::AudioDiskData> data;
+        audio::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
+        }
+
+        writer.EndArray();
+    }
+
+    // TODO - save models
+    {
+        writer.Key("models");
+        writer.StartArray();
+        std::vector<model::ModelDiskData> data;
+        model::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
+        }
+
+        writer.EndArray();
+    }
+
+    // TODO - save textures
+    {
+        writer.Key("textures");
+        writer.StartArray();
+        writer.EndArray();
+    }
+
+    // TODO - save scripts
+    {
+        writer.Key("scripts");
+        writer.StartArray();
+        writer.EndArray();
+    }
+
+    // TODO - save misc
+    {
+        writer.Key("misc");
+        writer.StartArray();
+        writer.EndArray();
+    }
+
+    // save and close document
+    writer.EndObject();
+    writer.Flush();
+    osw.Flush();
+    fclose(file);
+
+    logging::logInfo("Saved level {}\n", path);
+}
+
+// save last loaded level
+void saveCurrentLevel() {
+    if (!currentLevelPath.empty())
+        saveLevel(currentLevelPath.c_str(), *currentScene);
+}
+#endif
 
 // load default project from project file
 std::string loadProjectFile(const char* path) {
@@ -260,3 +702,42 @@ std::string loadProjectFile(const char* path) {
     defaultLevelPath = std::string(doc["base_level"].GetString());
     return defaultLevelPath;
 }
+
+#ifdef ONO_ENGINE_ONLY
+// save project file to manifest
+void saveProjectFile(const char* path) {
+    if (defaultLevelPath.empty())
+        return;
+
+    FILE* file = fopen(path, "wb");
+    if (file == NULL) {
+        logging::logErr("Failed to open file {} for writing\n", path);
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("base_level", rapidjson::Value(defaultLevelPath.c_str(), doc.GetAllocator()),
+        doc.GetAllocator());
+
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+    doc.Accept(writer);
+    fclose(file);
+
+    logging::logInfo("Saved project file at {}\n", path);
+}
+
+bool isDefaultLevel(const std::string& name) {
+    return (name == assetfolder::getName(defaultLevelPath.c_str()));
+}
+
+void setDefaultLevel(const std::string& path) {
+    defaultLevelPath = assetfolder::getRelativePath(path.c_str());
+}
+
+bool isCurrentLevel(const std::string& name) {
+    return (name == assetfolder::getName(currentLevelPath.c_str()));
+}
+#endif

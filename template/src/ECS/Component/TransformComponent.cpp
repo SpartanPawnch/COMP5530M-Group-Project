@@ -1,7 +1,9 @@
 #include "TransformComponent.h"
 
+static int baseUuid = 0;
+
 TransformComponent::TransformComponent() {
-    uuid = 999;
+    uuid = baseUuid++;
     name = "Transform Component";
 }
 
