@@ -30,7 +30,7 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
     }
     catch (std::ifstream::failure e) {
         std::cout << " ERROR::SHADER:: " << shaderPath << " ::FILE_NOT_SUCCESSFULLY_READ"
-                  << std::endl;
+            << std::endl;
     }
 
     char const* sCode = shaderCode.c_str();
@@ -50,7 +50,7 @@ bool RenderPipeline::readAndCompileShader(const char* shaderPath, const GLuint& 
     }
 
     std::cout << "Compilation of Shader: " << shaderPath << " "
-              << (res == GL_TRUE ? "Success" : "Failed!") << std::endl;
+        << (res == GL_TRUE ? "Success" : "Failed!") << std::endl;
 
     return res == 1;
 }
@@ -158,6 +158,12 @@ GLuint RenderPipeline::getGammaID() {
 GLuint RenderPipeline::getNumLightsID() {
     return this->numLightsID;
 }
+GLuint RenderPipeline::getBonesMatrix() {
+    return this->bonesMatrix;
+}
+GLuint RenderPipeline::getEntID() {
+    return this->entID;
+}
 
 void RenderPipeline::setUniformLocations() {
     this->ModelID = glGetUniformLocation(this->shaderProgram, "model");
@@ -165,6 +171,13 @@ void RenderPipeline::setUniformLocations() {
     this->ProjectionID = glGetUniformLocation(this->shaderProgram, "projection");
     // this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
     // this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+    this->lightPosID = glGetUniformLocation(this->shaderProgram, "lightPos");
+    this->lightColID = glGetUniformLocation(this->shaderProgram, "lightCol");
+    this->bonesMatrix = glGetUniformLocation(this->shaderProgram, "bonesMatrix");
+}
+void RenderPipeline::setIDUniformLocations() {
+    setUniformLocations();
+    this->entID = glGetUniformLocation(this->shaderProgram, "entID");
 }
 
 void RenderPipeline::addVAO(GLuint VAO) {

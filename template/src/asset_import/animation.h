@@ -15,11 +15,9 @@ namespace animation {
         std::string* path;
         AnimationDescriptor(int _idx, std::string* _path);
         ~AnimationDescriptor();
-        AssimpNodeData* getRootNode();
-        Bone* findBoneByName(const std::string& name);
-        float getFPS();
+        Bone* getRootBone();
+        float getTicksPerSecond();
         float getDuration();
-        std::map<std::string, BoneInfo> getBoneInfoMap();
     };
 
     // load file with selected path. Returns non-negative index on success

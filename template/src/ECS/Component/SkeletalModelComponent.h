@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-
+#include <glm/gtx/string_cast.hpp>
 #include "BaseComponent.h"
 #include "../../asset_import/model.h"
 #include "../../asset_import/animation.h"
@@ -30,6 +30,7 @@ struct AnimationControllerNode {
 struct NoConditionACTransition {
     AnimationControllerNode* transitionTo;
 };
+
 struct BoolACTransition {
     AnimationControllerNode* transitionTo;
     bool immediate; // should translate instantly or only when animation is done
@@ -78,7 +79,8 @@ struct SkeletalModelComponent : BaseComponent {
     void removeFloatACTransition(int id);
 
     void updateAnimation(float dt);
-    void calculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform);
+    void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
+    void resetMarices();
 
     // model info
     std::string modelUuid = std::string("");
@@ -92,7 +94,7 @@ struct SkeletalModelComponent : BaseComponent {
 
     float currentTime;
     int currentLoopCount;
-    float deltaTime;
+    float prevTime;
     bool isPlaying;
     std::vector<glm::mat4> transformMatrices;
 };

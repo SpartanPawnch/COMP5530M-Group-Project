@@ -767,10 +767,43 @@ inline void drawViewport() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+        // adjust entity id too
+        glBindTexture(GL_TEXTURE_2D, entIDTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexWidth, viewportTexHeight, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindRenderbuffer(GL_RENDERBUFFER, entIDDepthBuf);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, viewportTexWidth,
+            viewportTexHeight);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
         ImVec2 initialPos = ImGui::GetCursorPos();
 
         // draw viewport
         ImGui::Image((void*)viewportResolveTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+
+        if (scene.selectedEntity) {
+            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowSize.x,
+                windowSize.y);
+
+            glm::mat4 cameraView = renderManager->viewMatrix;
+            glm::mat4 cameraProjection = renderManager->projectionMatrix;
+            glm::mat4 transform = scene.selectedEntity->state.runtimeTransform;
+
+            ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+                ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::LOCAL, glm::value_ptr(transform));
+
+            if (ImGuizmo::IsUsing()) {
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::decompose(transform, scene.selectedEntity->state.scale,
+                    scene.selectedEntity->state.rotation, scene.selectedEntity->state.position,
+                    skew, perspective);
+            }
+        }
 
         // draw sample selector
         ImGui::SetCursorPos(initialPos);
@@ -1013,7 +1046,9 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
 
     if (ImGui::Button("Update 0.01")) {
+        component.isPlaying = true;
         component.update(0.01, scene.selectedEntity->state);
+        component.isPlaying = false;
     }
 
     if (ImGui::Button("Reset")) {

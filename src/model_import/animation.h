@@ -1,5 +1,5 @@
-//adapted from https://learnopengl.com/Model-Loading/Mesh
-//and https://learnopengl.com/Guest-Articles/2020/Skeletal-Animation
+// adapted from https://learnopengl.com/Model-Loading/Mesh
+// and https://learnopengl.com/Guest-Articles/2020/Skeletal-Animation
 #pragma once
 
 #include <string>
@@ -11,17 +11,15 @@
 #include "model.h"
 #include "bone.h"
 
-struct AssimpNodeData
-{
+struct AssimpNodeData {
     glm::mat4 transformation;
     std::string name;
     int childrenCount;
     std::vector<AssimpNodeData> children;
 };
 
-class Animation
-{
-public:
+class Animation {
+  public:
     std::string name;
     float duration;
     int ticksPerSecond;
@@ -31,6 +29,7 @@ public:
     Animation();
     ~Animation();
 
-    bool loadAnimation(const std::string& animationPath, std::shared_ptr<model::ModelDescriptor> model);
+    bool loadAnimation(const std::string& animationPath,
+        std::shared_ptr<model::ModelDescriptor> model);
     void setBoneData(aiNode* ai_node, Bone& bone);
 };

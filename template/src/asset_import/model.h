@@ -18,10 +18,10 @@ namespace model {
         unsigned int getTexture(int meshIndex);
         unsigned int getIndexCount(int meshIndex);
         unsigned int getMeshCount();
-        std::map<std::string, BoneInfo> getBoneInfoMap();
+        std::map<std::string, Bone> getBoneInfoMap();
         unsigned int getBoneCount();
         void setBoneCount(unsigned int bc);
-        void setBoneInfoMap(std::map<std::string, BoneInfo> bimp);
+        void setBoneInfoMap(std::map<std::string, Bone> bimp);
     };
 
     // load file with selected path. Returns non-negative index on success

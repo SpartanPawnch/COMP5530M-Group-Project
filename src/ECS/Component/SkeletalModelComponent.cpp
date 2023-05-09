@@ -86,7 +86,8 @@ void SkeletalModelComponent::stop() {
 }
 
 void SkeletalModelComponent::updateAnimation(float dt) {
-    std::shared_ptr<animation::AnimationDescriptor> currentAnimation = currentNode->animationDescriptor;
+    std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
+        currentNode->animationDescriptor;
     if (currentAnimation) {
         currentTime += currentAnimation->getTicksPerSecond() * dt;
         if (currentTime / currentAnimation->getDuration() >= 1.0) {
@@ -102,7 +103,8 @@ void SkeletalModelComponent::updateAnimation(float dt) {
 }
 
 void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parentTransform) {
-    std::shared_ptr<animation::AnimationDescriptor> currentAnimation = currentNode->animationDescriptor;
+    std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
+        currentNode->animationDescriptor;
 
     glm::mat4 position = bone->interpolatePosition(currentTime);
     glm::mat4 rotation = bone->interpolateRotation(currentTime);
@@ -126,11 +128,10 @@ void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parent
     std::cout << glm::to_string(scale) << std::endl;
     std::cout << "Scale------------------" << std::endl;*/
 
-    //std::cout << "Bone ID: " << bone->id << std::endl;
+    // std::cout << "Bone ID: " << bone->id << std::endl;
 
     if (bone->id < MAX_BONES && bone->id >= 0)
         transformMatrices[bone->id] = globalTransformation * bone->transform;
-
 
     for (Bone& child : bone->children) {
         calculateBoneTransform(&child, globalTransformation);

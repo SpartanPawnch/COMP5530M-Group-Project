@@ -295,6 +295,14 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     for (unsigned int i = 0; i < scene.entities.size(); i++) {
         modelMatrix = scene.entities[i].state.runtimeTransform;
 
+#ifdef ONO_ENGINE_ONLY
+        if (scene.entities[i].components.vecModelComponent.empty() &&
+            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
+            runEmptyVisPipeline();
+            continue;
+        }
+#endif
+
         for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
             auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
             if (!desc) {
@@ -316,9 +324,6 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                         &projectionMatrix[0][0]);
 
                     // set universal lighting uniforms
-                    glUniform3f(getPipeline(TexturePipeline)->getLightPosID(0),
-                        lights[0].getPosition().x, lights[0].getPosition().y,
-                        lights[0].getPosition().z);
                     glUniform3f(getPipeline(TexturePipeline)->getViewPosID(),
                         this->camera.getPosition().x, this->camera.getPosition().y,
                         this->camera.getPosition().z);
@@ -381,20 +386,11 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                             lights[i].getSpecular().x, lights[i].getSpecular().y,
                             lights[i].getSpecular().z);
                     }
-
-                    // glUniform3f(getPipeline(ColourPipeline)->getLightColID(),
-                    // lights[0].getColour().x, lights[0].getColour().y, lights[0].getColour().z);
                 }
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
         }
-#ifdef ONO_ENGINE_ONLY
-        if (scene.entities[i].components.vecModelComponent.empty() &&
-            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
-            runEmptyVisPipeline();
-        }
-#endif
 
         glUseProgram(getPipeline(AnimatedPipeline)->getProgram());
 
@@ -406,15 +402,22 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getProjectionID(), 1, GL_FALSE,
             &projectionMatrix[0][0]);
 
+        // set universal light uniforms
+        glUniform3f(getPipeline(AnimatedPipeline)->getViewPosID(), this->camera.getPosition().x,
+            this->camera.getPosition().y, this->camera.getPosition().z);
+        glUniform1f(getPipeline(AnimatedPipeline)->getGammaID(), gammaValue);
+        glUniform1i(getPipeline(AnimatedPipeline)->getNumLightsID(),
+            static_cast<int>(this->lights.size()));
+
         // set per-light uniforms
         for (std::size_t i = 0; i < lights.size(); i++) {
-            glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i), lights[i].getPosition().x,
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(i), lights[i].getPosition().x,
                 lights[i].getPosition().y, lights[i].getPosition().z);
-            glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i), lights[i].getAmbient().x,
-                lights[i].getAmbient().y, lights[i].getAmbient().z);
-            glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i), lights[i].getDiffuse().x,
-                lights[i].getDiffuse().y, lights[i].getDiffuse().z);
-            glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightAmbientID(i),
+                lights[i].getAmbient().x, lights[i].getAmbient().y, lights[i].getAmbient().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightDiffuseID(i),
+                lights[i].getDiffuse().x, lights[i].getDiffuse().y, lights[i].getDiffuse().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightSpecularID(i),
                 lights[i].getSpecular().x, lights[i].getSpecular().y, lights[i].getSpecular().z);
         }
 
@@ -590,6 +593,7 @@ void RenderManager::setupTexturePipelineUniforms() {
 }
 
 void RenderManager::setupAnimatedPipelineUniforms() {
+    getPipeline(AnimatedPipeline)->setTextureUniformLocations();
     getPipeline(AnimatedPipeline)->setUniformLocations();
 }
 void RenderManager::setupEntIDPipelineUniforms() {

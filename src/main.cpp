@@ -133,7 +133,6 @@ int main() {
     renderManager->setupAnimatedPipelineUniforms();
     renderManager->setupEntIDPipelineUniforms();
 
-
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         // get window dimensions
@@ -160,12 +159,16 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
+        GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
         glDrawBuffers(2, attachments);
 
         // clear screen
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+            const float clearVals[] = {.2f, .2f, .2f, 1.f};
+            const float clearDepth = 1.f;
+            glClearBufferfv(GL_COLOR, 0, clearVals);
+            glClearBufferfv(GL_DEPTH, 0, &clearDepth);
+        }
 
         // draw grid
         renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
@@ -225,15 +228,19 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint entIDattachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
+        GLuint entIDattachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
         glDrawBuffers(2, entIDattachments);
 
         // clear screen
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+            const float clearVals[] = {.0f, .0f, .0f, 1.f};
+            const float clearDepth = 1.f;
+            glClearBufferfv(GL_COLOR, 0, clearVals);
+            glClearBufferfv(GL_DEPTH, 0, &clearDepth);
+        }
 
-        renderManager->renderEntitiesID(
-            scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
+        renderManager->renderEntitiesID(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
 
         glFlush();
 

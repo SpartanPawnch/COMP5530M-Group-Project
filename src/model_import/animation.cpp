@@ -44,7 +44,7 @@ bool Animation::loadAnimation(const std::string& animationPath,
 
                 KeyPosition currentKey;
                 currentKey.position = glm::vec3(aiPosition.x, aiPosition.y, aiPosition.z);
-                //std::cout << "Position: " << glm::to_string(currentKey.position) << std::endl;
+                // std::cout << "Position: " << glm::to_string(currentKey.position) << std::endl;
                 currentKey.time = time;
                 bone_data.positionKeys.push_back(currentKey);
             }
@@ -54,8 +54,9 @@ bool Animation::loadAnimation(const std::string& animationPath,
                 float time = channel->mRotationKeys[j].mTime;
 
                 KeyRotation currentKey;
-                currentKey.rotation = glm::quat(aiRotation.w, aiRotation.x, aiRotation.y, aiRotation.z);
-                //std::cout << "Rotation: " << glm::to_string(currentKey.rotation) << std::endl;
+                currentKey.rotation =
+                    glm::quat(aiRotation.w, glm::vec3(aiRotation.x, aiRotation.y, aiRotation.z));
+                // std::cout << "Rotation: " << glm::to_string(currentKey.rotation) << std::endl;
                 currentKey.time = time;
                 bone_data.rotationKeys.push_back(currentKey);
             }
@@ -66,7 +67,7 @@ bool Animation::loadAnimation(const std::string& animationPath,
 
                 KeyScale currentKey;
                 currentKey.scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
-                //std::cout << "Scale: " << glm::to_string(currentKey.scale) << std::endl;
+                // std::cout << "Scale: " << glm::to_string(currentKey.scale) << std::endl;
                 currentKey.time = time;
                 bone_data.scaleKeys.push_back(currentKey);
             }
@@ -74,6 +75,8 @@ bool Animation::loadAnimation(const std::string& animationPath,
     }
 
     setBoneData(scene->mRootNode, rootBone);
+
+    // calculate parent inverses
 
     return true;
 }
@@ -83,7 +86,7 @@ void Animation::setBoneData(aiNode* node, Bone& bone) {
 
     if (boneInfoMap.count(bone_name)) {
         bone = boneInfoMap.at(bone_name);
-        //std::cout << bone.id << std::endl;
+        // std::cout << bone.id << std::endl;
 
         for (uint32_t i = 0; i < node->mNumChildren; i++) {
             Bone child;

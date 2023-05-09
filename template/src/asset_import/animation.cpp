@@ -157,23 +157,15 @@ namespace animation {
         }
     }
 
-    AssimpNodeData* AnimationDescriptor::getRootNode() {
-        return &loadedAnimations[idx].animation->rootNode;
+    Bone* AnimationDescriptor::getRootBone() {
+        return &loadedAnimations[idx].animation->rootBone;
     }
 
-    Bone* AnimationDescriptor::findBoneByName(const std::string& name) {
-        return loadedAnimations[idx].animation->findBoneByName(name);
-    }
-
-    float AnimationDescriptor::getFPS() {
-        return loadedAnimations[idx].animation->framesPerSecond;
+    float AnimationDescriptor::getTicksPerSecond() {
+        return loadedAnimations[idx].animation->ticksPerSecond;
     }
 
     float AnimationDescriptor::getDuration() {
         return loadedAnimations[idx].animation->duration;
-    }
-
-    std::map<std::string, BoneInfo> AnimationDescriptor::getBoneInfoMap() {
-        return loadedAnimations[idx].animation->boneInfoMap;
     }
 }

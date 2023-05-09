@@ -185,11 +185,11 @@ namespace model {
         return loadedModels[idx].model->meshes.size();
     }
 
-    std::map<std::string, BoneInfo> ModelDescriptor::getBoneInfoMap() {
+    std::map<std::string, Bone> ModelDescriptor::getBoneInfoMap() {
         return loadedModels[idx].model->boneInfoMap;
     }
 
-    void ModelDescriptor::setBoneInfoMap(std::map<std::string, BoneInfo> bimp) {
+    void ModelDescriptor::setBoneInfoMap(std::map<std::string, Bone> bimp) {
         loadedModels[idx].model->boneInfoMap = bimp;
     }
 

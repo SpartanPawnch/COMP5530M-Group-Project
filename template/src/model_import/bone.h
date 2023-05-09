@@ -1,39 +1,38 @@
-//adapted from https://learnopengl.com/Model-Loading/Mesh
-//and https://learnopengl.com/Guest-Articles/2020/Skeletal-Animation
+// adapted from https://learnopengl.com/Model-Loading/Mesh
+// and https://learnopengl.com/Guest-Articles/2020/Skeletal-Animation
 #pragma once
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <assimp/scene.h>
 
-struct KeyPosition
-{
-    glm::vec3 position;
-    float time;
+struct KeyPosition {
+    glm::vec3 position = glm::vec3(0.0f);
+    float time = 0;
 };
 
-struct KeyRotation
-{
-    glm::quat rotation;
-    float time;
+struct KeyRotation {
+    glm::quat rotation = glm::quat(1.f, .0f, .0f, .0f);
+    float time = 0;
 };
 
-struct KeyScale
-{
-    glm::vec3 scale;
-    float time;
+struct KeyScale {
+    glm::vec3 scale = glm::vec3(1.0f);
+    float time = 0;
 };
 
-class Bone
-{
-public:
-    unsigned int id;
+class Bone {
+  public:
+    int id = -1;
     std::string name;
-    glm::mat4 transform;
+    glm::mat4 transform = glm::mat4(1.f);
+    std::vector<Bone> children;
 
-    //keyframes
+    // keyframes
     std::vector<KeyPosition> positionKeys;
     std::vector<KeyRotation> rotationKeys;
     std::vector<KeyScale> scaleKeys;
@@ -41,11 +40,9 @@ public:
     int rotationKeysCount;
     int scaleKeysCount;
 
-    Bone(const std::string& name, int id, const aiNodeAnim* channel);
-    void update(float animationTime);
-    int getPositionIndex(float animationTime);
-    int getRotationIndex(float animationTime);
-    int getScaleIndex(float animationTime);
+    void getPositionPrevAndNext(float animationTime, KeyPosition& prev, KeyPosition& next);
+    void getRotationPrevAndNext(float animationTime, KeyRotation& prev, KeyRotation& next);
+    void getScalePrevAndNext(float animationTime, KeyScale& prev, KeyScale& next);
     float getInterpolationFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
     glm::mat4 interpolatePosition(float animationTime);
     glm::mat4 interpolateRotation(float animationTime);

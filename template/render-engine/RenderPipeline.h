@@ -18,7 +18,7 @@ class RenderPipeline {
         GLuint lightSpecularID;
     };
 
-  private:
+private:
     GLuint shaderProgram;
     GLuint vertexShader;
     GLuint fragmentShader;
@@ -27,7 +27,7 @@ class RenderPipeline {
     GLuint teseShader;
     GLuint geometryShader;
 
-  public:
+public:
     GLuint ModelID;
     GLuint ViewID;
     GLuint ProjectionID;
@@ -35,6 +35,10 @@ class RenderPipeline {
     GLuint viewPosID;
     GLuint gammaID;
     GLuint numLightsID;
+    GLuint lightPosID;
+    GLuint lightColID;
+    GLuint bonesMatrix;
+    GLuint entID;
 
     std::vector<GLuint> VAOs;
 
@@ -66,12 +70,15 @@ class RenderPipeline {
     GLuint getViewPosID();
     GLuint getGammaID();
     GLuint getNumLightsID();
+    GLuint getBonesMatrix();
+    GLuint getEntID();
 
     void setAttributeLayouts();
 
     void setUniformLocations();
     void setColourUniformLocations();
     void setTextureUniformLocations();
+    void setIDUniformLocations();
 
     unsigned int getNoOfMeshes();
     void addVAO(GLuint VAO);

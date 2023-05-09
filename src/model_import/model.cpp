@@ -8,7 +8,7 @@ bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
     uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_LimitBoneWeights;
     const aiScene* scene = importer.ReadFile(filename, flags);
-    //this should be handled in a better way later
+    // this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         return false;
     }
@@ -48,8 +48,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         vertex.position =
             glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        for (int j = 0; j < MAX_BONE_INFLUENCE; j++)
-        {
+        for (int j = 0; j < MAX_BONE_INFLUENCE; j++) {
             vertex.boneId[j] = -1;
             vertex.weight[j] = 0.0f;
         }
