@@ -28,13 +28,16 @@
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "asset_import/materials.h"
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 
 RenderManager* renderManager;
+MaterialSystem* materialSystem;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
+MaterialSystem* MaterialSystem::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -105,6 +108,9 @@ int main() {
     // model.loadModel("assets/tree.obj");
 
     //////////////////////////////////
+
+    materialSystem = MaterialSystem::getInstance();
+    materialSystem->createMaterial("test");
 
     // Render Engine
     renderManager = RenderManager::getInstance();

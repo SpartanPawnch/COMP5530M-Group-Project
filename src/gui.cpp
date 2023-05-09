@@ -34,6 +34,7 @@
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
 #include "asset_import/animation.h"
+#include "asset_import/materials.h"
 #include "model_import/model.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/CameraComponent.h"
@@ -91,6 +92,8 @@ static std::shared_ptr<TextureDescriptor> folderTexture;
 
 // model demo vars
 // static Model model;
+
+static MaterialSystem* materialSystem;
 
 // renderer vars
 static RenderManager* renderManager;
@@ -204,6 +207,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
+    materialSystem = MaterialSystem::getInstance();
     renderManager = RenderManager::getInstance();
 }
 GUIManager::~GUIManager() {
@@ -1034,6 +1038,27 @@ void drawComponentProps(ModelComponent& component) {
         }
 
         ImGui::EndCombo();
+    }
+    if (component.modelDescriptor) {
+        for (uint32_t i = 0; i < component.modelDescriptor->getMeshCount(); i++) {
+            ImGui::PushID(i);
+            ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
+            std::string meshPreviewStr = "Select a Material";
+            if (component.modelDescriptor->meshHasMaterial(i)) {
+                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            }
+            //materials select options by name
+            if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
+                for (auto const& mat : materialSystem->materials) {
+                    bool selected = (meshPreviewStr == mat.first);
+                    if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                        component.modelDescriptor->setMeshMaterial(i, materialSystem->loadActiveMaterial(mat.second));
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
     }
 }
 
@@ -1997,6 +2022,123 @@ inline void drawLevels() {
     ImGui::End();
 }
 
+inline void drawMaterials() {
+    if (ImGui::Begin("Materials")) {
+        std::string newMaterialName="";
+        ImGui::InputText("##name", &newMaterialName[0], newMaterialName.capacity());
+        newMaterialName.resize(std::strlen(&newMaterialName[0]));
+        if (ImGui::Button("Create Material")) {
+            if (newMaterialName.size() > 0) {
+                if (materialSystem->createMaterial(newMaterialName)) {
+                    newMaterialName = "";
+                }
+                else {
+                    newMaterialName = "Invalid Name, choose new one";
+                }
+            }
+        }
+
+        std::string previewStr = "Select a Material";
+
+        if (materialSystem->selectedMaterial.size() > 0) {
+            previewStr = materialSystem->selectedMaterial;
+        }
+
+        //materials select options by name
+        if (ImGui::BeginCombo("##materialscombo", previewStr.c_str())) {
+            for (auto const& mat : materialSystem->materials) {
+                bool selected = (materialSystem->selectedMaterial == mat.first);
+                if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                    materialSystem->selectMaterial(mat.first);
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        //selected material properties
+        if (materialSystem->selectedMaterial.size() > 0) {
+            Material* mat = materialSystem->getMaterial(materialSystem->selectedMaterial);
+
+            static std::vector<assetfolder::AssetDescriptor> textureFiles;
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE, textureFiles);
+
+            ImGui::Text("Name", &mat->name);
+            ImGui::ColorEdit3("Base Color", &mat->baseColor[0]);
+            //texture for base color combo box from textures
+            std::string previewStrBaseColor = "Select a texture";
+            if (mat->baseColorMap.size()>0) {
+                previewStrBaseColor = mat->baseColorMap;
+            }
+            if (ImGui::BeginCombo("Base Color Map", previewStrBaseColor.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrBaseColor == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->baseColorMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::ColorEdit3("Emissive Color", &mat->emissiveColor[0]);
+            std::string previewStrEmissive = "Select a texture";
+            if (mat->emissiveMap.size() > 0) {
+                previewStrEmissive = mat->emissiveMap;
+            }
+            if (ImGui::BeginCombo("Emissive Map", previewStrEmissive.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrEmissive == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->emissiveMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
+            std::string previewStrRoughness = "Select a texture";
+            if (mat->roughnessMap.size() > 0) {
+                previewStrRoughness = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Roughness Map", previewStrRoughness.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrRoughness == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->roughnessMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
+            std::string previewStrMetalness = "Select a texture";
+            if (mat->metalnessMap.size() > 0) {
+                previewStrMetalness = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Metalness Map", previewStrMetalness.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrMetalness == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->metalnessMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
+            std::string previewStrOcclusion = "Select a texture";
+            if (mat->occlusionMap.size() > 0) {
+                previewStrOcclusion = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Occlusion Map", previewStrOcclusion.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrOcclusion == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->occlusionMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+        }
+    }
+    ImGui::End();
+}
+
 inline void drawScriptDemo() {
     if (ImGui::Begin("Scripting")) {
         ImGui::PushFont(guicfg::regularFont);
@@ -2151,6 +2293,9 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
 
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawMaterials();
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser();

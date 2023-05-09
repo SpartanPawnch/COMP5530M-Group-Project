@@ -6,7 +6,7 @@ Model::Model() {
 
 bool Model::loadModel(const std::string& filename) {
     Assimp::Importer importer;
-    uint32_t flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_LimitBoneWeights;
+    uint32_t flags = aiProcess_Triangulate | aiProcess_FixInfacingNormals  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights;
     const aiScene* scene = importer.ReadFile(filename, flags);
     // this should be handled in a better way later
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -41,17 +41,14 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+
+    std::string meshName = mesh->mName.C_Str();
 
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex;
         vertex.position =
             glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        for (int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-            vertex.boneId[j] = -1;
-            vertex.weight[j] = 0.0f;
-        }
         if (mesh->mTextureCoords[0]) {
             vertex.texCoords =
                 glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
@@ -59,6 +56,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         else {
             // no texture coordinates
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
+        }
+        vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+        vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        for (int j = 0; j < MAX_BONE_INFLUENCE; j++) {
+            vertex.boneId[j] = -1;
+            vertex.weight[j] = 0.0f;
         }
         vertices.push_back(vertex);
     }
@@ -68,15 +71,49 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             indices.push_back(face.mIndices[j]);
         }
     }
+    std::shared_ptr<ActiveMaterial> activeMat;
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps =
-            loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps =
-            loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        Material mat;
+        mat.name = material->GetName().C_Str();
+
+        aiColor3D color;
+        material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+        mat.baseColor = glm::vec3(color.r, color.g, color.b);
+
+        material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+        mat.emissiveColor = glm::vec3(color.r, color.g, color.b);
+
+        material->Get(AI_MATKEY_SHININESS, mat.roughness);
+        material->Get(AI_MATKEY_REFLECTIVITY, mat.metalness);
+        material->Get(AI_MATKEY_OPACITY, mat.occlusion);
+        aiString texturePath;
+        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
+            mat.baseColorMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_SHININESS, 0, &texturePath) == AI_SUCCESS) {
+            mat.roughnessMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_REFLECTION, 0, &texturePath) == AI_SUCCESS) {
+            mat.metalnessMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_NORMALS, 0, &texturePath) == AI_SUCCESS) {
+            mat.normalMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_OPACITY, 0, &texturePath) == AI_SUCCESS) {
+            mat.alphaMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath) == AI_SUCCESS) {
+            mat.emissiveMap = std::string(texturePath.C_Str());
+        }
+        if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &texturePath) == AI_SUCCESS) {
+            mat.occlusionMap = std::string(texturePath.C_Str());
+        }
+
+        MaterialSystem* materialSystem = MaterialSystem::getInstance();
+        activeMat = materialSystem->loadActiveMaterial(mat);
     }
+
     for (uint32_t i = 0; i < mesh->mNumBones; i++) {
         aiBone* bone = mesh->mBones[i];
         std::string bone_name(bone->mName.C_Str());
@@ -108,43 +145,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             vertices[vtx_id].setBoneData(boneInfoMap[bone_name].id, bone->mWeights[j].mWeight);
         }
     }
-
-    return Mesh(vertices, indices, textures);
-}
-
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
-    const std::string& typeName) {
-    std::vector<Texture> textures;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
-        aiString path;
-        mat->GetTexture(type, i, &path);
-        bool skip = false;
-        for (unsigned int j = 0; j < textures_loaded.size(); ++j) {
-            if (std::strcmp(textures_loaded[j].path.data(), path.C_Str()) == 0) {
-                textures.push_back(textures_loaded[j]);
-                skip = true;
-                break;
-            }
-        }
-        if (!skip) {
-            Texture texture;
-            std::string resolvedPath =
-                assetfolder::resolveExternalDependency(path.C_Str(), directory.c_str());
-
-            // TODO:generate texture id
-            std::string uuid = assetfolder::getRelativePath(resolvedPath.c_str());
-            texture.textureDescriptor = loadTexture(resolvedPath.c_str(), uuid);
-            texture.id = 1;
-            texture.type = typeName;
-            texture.path = resolvedPath.c_str();
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-        }
-        else {
-            Texture texture;
-            texture.id = 0;
-            textures_loaded.push_back(texture);
-        }
-    }
-    return textures;
+     
+    return Mesh(meshName,vertices, indices, activeMat);
 }

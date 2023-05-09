@@ -310,7 +310,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
 
-                GLuint tex = desc->getTexture(k);
+                //GLuint tex = desc->getTexture(k);
+                GLuint tex = 0;
                 if (tex) {
                     // draw textured
                     glUseProgram(getPipeline(TexturePipeline)->getProgram());
@@ -433,7 +434,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                          .components.vecSkeletalModelComponent[j]
                          .transformMatrices[0][0][0]);
 
-                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+                //glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -743,6 +744,14 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
+    // vertex tangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, tangent));
+    // vertex bitangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, bitangent));
 
     // vertex texture coords
     glEnableVertexAttribArray(3);
