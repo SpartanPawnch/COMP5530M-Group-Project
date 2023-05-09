@@ -21,6 +21,7 @@ out vec3 vsNormal;
 void main()
 {
     vec4 totalPosition = vec4(0.0f);
+    vec3 totalNormal=vec3(.0f);
     for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++)
     {
         if(boneIds[i] == -1) 
@@ -33,12 +34,12 @@ void main()
         vec4 localPosition = bonesMatrix[boneIds[i]] * vec4(pos,1.0f);
         totalPosition += localPosition * weights[i];
         vec3 localNormal = mat3(bonesMatrix[boneIds[i]]) * normal;
-        vsNormal += localNormal * weights[i];
+        totalNormal += localNormal * weights[i];
     }
     
     
 
     gl_Position =  projection * view * model * totalPosition;
     vsTex = tex;
-    vsNormal = normalize(vsNormal);
+    vsNormal = normalize(transpose(inverse(mat3(model)))*totalNormal);
 }
