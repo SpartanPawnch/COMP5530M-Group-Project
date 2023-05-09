@@ -168,6 +168,9 @@ void RenderManager::loadScene() {
     const char* texFragPath = "assets/shaders/tex.frag";
     const char* emptyVertPath = "assets/shaders/empty.vert";
     const char* emptyFragPath = "assets/shaders/empty.frag";
+    const char* AnimatedVertexPath = "assets/shaders/animated.vert";
+    const char* entIDVertexPath = "assets/shaders/entID.vert";
+    const char* entIDFragPath = "assets/shaders/entID.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -205,6 +208,8 @@ void RenderManager::loadScene() {
     addPipeline(GridPipeline, gridVertPath, gridFragPath);
     addPipeline(FrustumVisPipeline, frustumVisVertPath, gridFragPath);
     addPipeline(EmptyVisPipeline, emptyVertPath, emptyFragPath);
+    addPipeline(EntIDPipeline, entIDVertexPath, entIDFragPath);
+    addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -385,11 +390,100 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             }
         }
 #ifdef ONO_ENGINE_ONLY
-        if (scene.entities[i].components.vecModelComponent.empty()) {
+        if (scene.entities[i].components.vecModelComponent.empty() &&
+            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
             runEmptyVisPipeline();
         }
 #endif
 
+        glUseProgram(getPipeline(AnimatedPipeline)->getProgram());
+
+        // bind model matrix
+        glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getModelID(), 1, GL_FALSE,
+            &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getViewID(), 1, GL_FALSE,
+            &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getProjectionID(), 1, GL_FALSE,
+            &projectionMatrix[0][0]);
+
+        // set per-light uniforms
+        for (std::size_t i = 0; i < lights.size(); i++) {
+            glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i), lights[i].getPosition().x,
+                lights[i].getPosition().y, lights[i].getPosition().z);
+            glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i), lights[i].getAmbient().x,
+                lights[i].getAmbient().y, lights[i].getAmbient().z);
+            glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i), lights[i].getDiffuse().x,
+                lights[i].getDiffuse().y, lights[i].getDiffuse().z);
+            glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
+                lights[i].getSpecular().x, lights[i].getSpecular().y, lights[i].getSpecular().z);
+        }
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
+             j++) {
+            auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getBonesMatrix(), 100, GL_FALSE,
+                    &scene.entities[i]
+                         .components.vecSkeletalModelComponent[j]
+                         .transformMatrices[0][0][0]);
+
+                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
+
+        glBindVertexArray(0);
+    }
+}
+
+void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int width, int height) {
+    updateMatrices(&width, &height);
+
+    // draw background
+    // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+    // RENDERING
+    // Go through all the Pipelines
+    // TODO: Check if it is necessary to use the given pipeline and the call the following fn
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        modelMatrix = scene.entities[i].state.runtimeTransform;
+
+        int entityIndex = i + 1;
+
+        int colorX = std::floor(entityIndex / 1000000);
+        int colorY = std::floor((entityIndex - colorX * 1000000) / 1000);
+        int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
+
+        glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
+
+        // bind model matrix
+        glUniformMatrix4fv(getPipeline(EntIDPipeline)->getModelID(), 1, GL_FALSE,
+            &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(EntIDPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(EntIDPipeline)->getProjectionID(), 1, GL_FALSE,
+            &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(EntIDPipeline)->getEntID(), reconstructed_color.x,
+            reconstructed_color.y, reconstructed_color.z);
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
+            auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
         glBindVertexArray(0);
     }
 }
@@ -493,6 +587,13 @@ void RenderManager::runColourPipeline() {
 void RenderManager::setupTexturePipelineUniforms() {
     getPipeline(TexturePipeline)->setUniformLocations();
     getPipeline(TexturePipeline)->setTextureUniformLocations();
+}
+
+void RenderManager::setupAnimatedPipelineUniforms() {
+    getPipeline(AnimatedPipeline)->setUniformLocations();
+}
+void RenderManager::setupEntIDPipelineUniforms() {
+    getPipeline(EntIDPipeline)->setIDUniformLocations();
 }
 
 void RenderManager::runTexturePipeline() {
@@ -638,6 +739,16 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
+
+    // vertex texture coords
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex),
+        (void*)offsetof(Vertex, boneId));
+
+    // vertex texture coords
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, weight));
 
     glBindVertexArray(0);
 }

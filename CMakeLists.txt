@@ -45,7 +45,7 @@ endif(WIN32)
 
 #setup executables
 add_executable(
-    ${PROJECT_NAME} src/main.cpp 
+    ${PROJECT_NAME} src/main.cpp external/ImGuizmo/ImGuizmo.cpp
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
     ${IMPLOTSRC} ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
@@ -85,8 +85,6 @@ add_subdirectory("external/glm")
 
 #add spdlog
 add_subdirectory("external/spdlog")
-
-
 
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include

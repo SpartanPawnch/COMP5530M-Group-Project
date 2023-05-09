@@ -45,6 +45,9 @@
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
 
+#include "../external/ImGuizmo/ImGuizmo.h"
+#include <glm/gtx/matrix_decompose.hpp>
+
 using namespace ImGui;
 
 // --- GUI constants, possibly replace with settings file ---
@@ -101,6 +104,11 @@ GLuint viewportFramebuffer;
 static GLuint viewportMultisampleTex;
 static GLuint viewportMultisampleDepthBuf;
 static GLuint viewportResolveTex;
+
+// entity ids rendering
+GLuint entIDFramebuffer;
+static GLuint entIDTex;
+static GLuint entIDDepthBuf;
 
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
@@ -183,6 +191,18 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glGenFramebuffers(1, &entIDFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+
+    glGenTextures(1, &entIDTex);
+    glBindTexture(GL_TEXTURE_2D, entIDTex);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, entIDTex, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glGenRenderbuffers(1, &entIDDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, entIDDepthBuf);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, entIDDepthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
     baseWindow = window;
     renderManager = RenderManager::getInstance();
 }
@@ -194,6 +214,9 @@ GUIManager::~GUIManager() {
     glDeleteTextures(1, &viewportMultisampleTex);
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
+    glDeleteFramebuffers(1, &viewportFramebuffer);
+    glDeleteFramebuffers(1, &entIDFramebuffer);
+    glDeleteTextures(1, &entIDTex);
 }
 
 // --- Build System Utilities ---
@@ -349,6 +372,32 @@ static void handleMouseInput(GLFWwindow* window) {
         renderManager->xPosLast = renderManager->xPos;
         renderManager->yPosLast = renderManager->yPos;
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (ImGuizmo::IsUsing())
+            return;
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+
+        int height = ImGui::GetWindowSize().y;
+
+        unsigned char pixel[4];
+        glReadPixels(renderManager->xPos - ImGui::GetWindowPos().x,
+            height - (renderManager->yPos - ImGui::GetWindowPos().y), 1, 1, GL_RGBA,
+            GL_UNSIGNED_BYTE, pixel);
+
+        glm::vec4 color = glm::vec4(pixel[0], pixel[1], pixel[2], pixel[3]);
+
+        uint32_t entityIndex =
+            std::floor(color.x) * 1000000 + std::floor(color.y) * 1000 + std::floor(color.z);
+        if (entityIndex == 0) {
+            scene.selectedEntity = nullptr;
+        }
+        else {
+            if (entityIndex - 1 >= scene.entities.size())
+                return;
+            scene.selectedEntity = &scene.entities[entityIndex - 1];
+        }
     }
 }
 
@@ -687,8 +736,7 @@ inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
         // send input to renderer if window is hovered
-        if (ImGui::IsWindowHovered() || ImGui::IsWindowFocused() ||
-            renderManager->camera.focusState) {
+        if (ImGui::IsWindowHovered() || renderManager->camera.focusState) {
             handleKeyboardInput(baseWindow);
             handleMouseInput(baseWindow);
         }
@@ -957,6 +1005,21 @@ void drawComponentProps(ModelComponent& component) {
 }
 
 void drawComponentProps(SkeletalModelComponent& component) {
+    if (component.isPlaying) {
+        component.update(renderManager->deltaTime, scene.selectedEntity->state);
+    }
+    if (ImGui::Button(component.isPlaying ? "Pause" : "Play")) {
+        component.isPlaying = !component.isPlaying;
+    }
+
+    if (ImGui::Button("Update 0.01")) {
+        component.update(0.01, scene.selectedEntity->state);
+    }
+
+    if (ImGui::Button("Reset")) {
+        component.resetMarices();
+    }
+
     bool hasModel = false;
     std::string previewStr = "Select a Model";
     if (component.modelDescriptor && component.modelDescriptor->path) {
@@ -1021,9 +1084,9 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::PushID(i);
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
-        if (component.selectedNode && component.selectedNode->animationDescriptor &&
-            component.selectedNode->animationDescriptor->path) {
-            previewStr2 = *component.selectedNode->animationDescriptor->path;
+        if (component.nodes[i].animationDescriptor &&
+            component.nodes[i].animationDescriptor->path) {
+            previewStr2 = *component.nodes[i].animationDescriptor->path;
             previewStr2 = assetfolder::getRelativePath(previewStr2.c_str());
         }
 
@@ -1034,28 +1097,24 @@ void drawComponentProps(SkeletalModelComponent& component) {
                 animationFiles);
 
             // list available audio clips
-            for (unsigned int i = 0; i < animationFiles.size(); i++) {
-                ImGui::PushID(i);
-                bool isSelected = (previewStr2 == animationFiles[i].path);
-                if (ImGui::Selectable(animationFiles[i].name.c_str(), &isSelected)) {
+            for (unsigned int j = 0; j < animationFiles.size(); j++) {
+                bool isSelected = (previewStr2 == animationFiles[j].path);
+                if (ImGui::Selectable(animationFiles[j].name.c_str(), &isSelected)) {
                     // check if we need to load file
                     // TODO better unique id scheme
-                    std::string uuid = assetfolder::getRelativePath(animationFiles[i].path.c_str());
+                    std::string uuid = assetfolder::getRelativePath(animationFiles[j].path.c_str());
                     auto desc = animation::animationGetByUuid(uuid);
 
                     if (!desc) {
                         // load file from disk
-                        desc = animation::animationLoad(animationFiles[i].path.c_str(), uuid,
+                        desc = animation::animationLoad(animationFiles[j].path.c_str(), uuid,
                             component.modelDescriptor);
                     }
 
-                    std::swap(component.selectedNode->animationDescriptor, desc);
-                    component.selectedNode->animationUuid =
-                        (component.selectedNode && component.selectedNode->animationDescriptor)
-                        ? uuid
-                        : "";
+                    std::swap(component.nodes[i].animationDescriptor, desc);
+                    component.nodes[i].animationUuid =
+                        (component.nodes[i].animationDescriptor) ? uuid : "";
                 }
-                ImGui::PopID();
             }
 
             ImGui::EndCombo();
@@ -1100,9 +1159,10 @@ void drawComponentProps(SkeletalModelComponent& component) {
             if (ImGui::BeginCombo("##transition_to_nocond",
                     component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                            component.selectedNode->noConditionTransitions[i].transitionTo ==
-                                &component.nodes[j])) {
+                    bool isSelected =
+                        component.selectedNode->noConditionTransitions[i].transitionTo ==
+                        &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->noConditionTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1134,9 +1194,9 @@ void drawComponentProps(SkeletalModelComponent& component) {
             if (ImGui::BeginCombo("##transition_to_bool",
                     component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                            component.selectedNode->boolTransitions[i].transitionTo ==
-                                &component.nodes[j])) {
+                    bool isSelected = component.selectedNode->boolTransitions[i].transitionTo ==
+                        &component.nodes[j];
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->boolTransitions[i].transitionTo =
                             &component.nodes[j];
                     }
@@ -1999,6 +2059,7 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
     // ImVec2 mousePos = ImGui::GetMousePos();
 

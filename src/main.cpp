@@ -130,6 +130,9 @@ int main() {
     // ------------- UNIFORMS --------------------------
     renderManager->setupColourPipelineUniforms();
     renderManager->setupTexturePipelineUniforms();
+    renderManager->setupAnimatedPipelineUniforms();
+    renderManager->setupEntIDPipelineUniforms();
+
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -157,7 +160,7 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
         glDrawBuffers(2, attachments);
 
         // clear screen
@@ -219,6 +222,19 @@ int main() {
             viewportTexHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         // wait for results
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+        glViewport(0, 0, viewportTexWidth, viewportTexHeight);
+
+        GLuint entIDattachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
+        glDrawBuffers(2, entIDattachments);
+
+        // clear screen
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderManager->renderEntitiesID(
+            scene, &renderManager->camera, viewportTexWidth, viewportTexHeight);
+
         glFlush();
 
         // draw UI to full window

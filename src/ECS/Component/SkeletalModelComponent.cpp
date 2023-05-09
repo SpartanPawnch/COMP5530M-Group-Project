@@ -86,12 +86,10 @@ void SkeletalModelComponent::stop() {
 }
 
 void SkeletalModelComponent::updateAnimation(float dt) {
-    deltaTime = dt;
-    std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
-        currentNode->animationDescriptor;
+    std::shared_ptr<animation::AnimationDescriptor> currentAnimation = currentNode->animationDescriptor;
     if (currentAnimation) {
-        currentTime += currentAnimation->getFPS() * dt;
-        if (currentTime > currentAnimation->getDuration()) {
+        currentTime += currentAnimation->getTicksPerSecond() * dt;
+        if (currentTime / currentAnimation->getDuration() >= 1.0) {
             currentLoopCount++;
             if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
                 finalLoop();
@@ -99,36 +97,44 @@ void SkeletalModelComponent::updateAnimation(float dt) {
             }
         }
         currentTime = fmod(currentTime, currentAnimation->getDuration());
-        calculateBoneTransform(currentAnimation->getRootNode(), glm::mat4(1.0f));
+        calculateBoneTransform(currentAnimation->getRootBone(), glm::mat4(1.0f));
     }
 }
 
-void SkeletalModelComponent::calculateBoneTransform(const AssimpNodeData* node,
-    glm::mat4 parentTransform) {
-    std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
-        currentNode->animationDescriptor;
+void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parentTransform) {
+    std::shared_ptr<animation::AnimationDescriptor> currentAnimation = currentNode->animationDescriptor;
 
-    std::string nodeName = node->name;
-    glm::mat4 nodeTransform = node->transformation;
+    glm::mat4 position = bone->interpolatePosition(currentTime);
+    glm::mat4 rotation = bone->interpolateRotation(currentTime);
+    glm::mat4 scale = bone->interpolateScale(currentTime);
 
-    Bone* Bone = currentAnimation->findBoneByName(nodeName);
+    glm::mat4 globalTransformation = parentTransform * position * rotation * scale;
 
-    if (Bone) {
-        Bone->update(currentTime);
-        nodeTransform = Bone->transform;
+    /*std::cout << "Parent: " << std::endl;
+    std::cout << glm::to_string(parentTransform) << std::endl;
+    std::cout << "Parent------------" << std::endl;
+
+    std::cout << "Position: " << std::endl;
+    std::cout << glm::to_string(position) << std::endl;
+    std::cout << "Position------------" << std::endl;
+
+    std::cout << "Rotation: " << std::endl;
+    std::cout << glm::to_string(rotation) << std::endl;
+    std::cout << "Rotation-------------" << std::endl;
+
+    std::cout << "Scale: " << std::endl;
+    std::cout << glm::to_string(scale) << std::endl;
+    std::cout << "Scale------------------" << std::endl;*/
+
+    //std::cout << "Bone ID: " << bone->id << std::endl;
+
+    if (bone->id < MAX_BONES && bone->id >= 0)
+        transformMatrices[bone->id] = globalTransformation * bone->transform;
+
+
+    for (Bone& child : bone->children) {
+        calculateBoneTransform(&child, globalTransformation);
     }
-
-    glm::mat4 globalTransformation = parentTransform * nodeTransform;
-
-    auto boneInfoMap = currentAnimation->getBoneInfoMap();
-    if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
-        int index = boneInfoMap[nodeName].id;
-        glm::mat4 offset = boneInfoMap[nodeName].offset;
-        transformMatrices[index] = globalTransformation * offset;
-    }
-
-    for (int i = 0; i < node->childrenCount; i++)
-        calculateBoneTransform(&node->children[i], globalTransformation);
 }
 
 void SkeletalModelComponent::finalLoop() {
@@ -262,4 +268,10 @@ void SkeletalModelComponent::removeIntACTransition(int id) {
 void SkeletalModelComponent::removeFloatACTransition(int id) {
     assert(selectedNode->floatTransitions.size() > id);
     selectedNode->floatTransitions.erase(selectedNode->floatTransitions.begin() + id);
+}
+
+void SkeletalModelComponent::resetMarices() {
+    for (unsigned int i = 0; i < MAX_BONES; i++) {
+        transformMatrices[i] = glm::mat4(1.0);
+    }
 }

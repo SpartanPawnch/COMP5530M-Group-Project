@@ -24,16 +24,13 @@ class Animation
 public:
     std::string name;
     float duration;
-    int framesPerSecond;
-    std::vector<Bone> bones;
-    AssimpNodeData rootNode;
-    std::map<std::string, BoneInfo> boneInfoMap;
+    int ticksPerSecond;
+    Bone rootBone;
+    std::map<std::string, Bone> boneInfoMap;
 
     Animation();
     ~Animation();
 
     bool loadAnimation(const std::string& animationPath, std::shared_ptr<model::ModelDescriptor> model);
-    Bone* findBoneByName(const std::string& name);
-    void readMissingBones(const aiAnimation* animation, std::shared_ptr<model::ModelDescriptor>& model);
-    void readHierarchyData(AssimpNodeData& dest, const aiNode* src);
+    void setBoneData(aiNode* ai_node, Bone& bone);
 };

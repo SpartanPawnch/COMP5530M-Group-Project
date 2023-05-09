@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -12,6 +13,8 @@
 #include "../asset_import/images.h"
 #include "../asset_import/folders.h"
 #include "mesh.h"
+#include "bone.h"
+
 
 class Model {
 public:
@@ -22,7 +25,7 @@ public:
     std::string directory;
 
     //skeleton information
-    std::map < std::string, BoneInfo > boneInfoMap;
+    std::map < std::string, Bone > boneInfoMap;
     unsigned int boneCounter = 0;
 
     bool loadModel(const std::string& path);
@@ -30,7 +33,4 @@ public:
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
-
-    //skeleton methods
-    void getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
 };
