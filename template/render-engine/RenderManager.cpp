@@ -639,8 +639,18 @@ std::shared_ptr<LightDescriptor> RenderManager::addLightSource(glm::vec3& positi
 }
 
 void RenderManager::removeLightSource(size_t idx) {
-    // fix indices
-    // swap to back
+    if (lights.size() < idx)
+        return;
+    // swap with back
+    std::swap(lights[idx], lights.back());
+    std::swap(lightsMetadata[idx], lightsMetadata.back());
+
+    // fix index
+    lightsMetadata[idx].lock()->idx = idx;
+
+    // delete
+    lightsMetadata.pop_back();
+    lights.pop_back();
 }
 
 RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {

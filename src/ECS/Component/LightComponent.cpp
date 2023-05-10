@@ -16,7 +16,8 @@ LightComponent::LightComponent() {
     desc = renderMgr->addLightSource(position, ambient, diffuse, specular);
 }
 LightComponent::~LightComponent() {
-    renderMgr->removeLightSource(desc->idx);
+    if (desc.use_count() == 1)
+        renderMgr->removeLightSource(desc->idx);
 }
 void LightComponent::start() {
 }

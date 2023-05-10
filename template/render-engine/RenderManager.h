@@ -146,6 +146,9 @@ class RenderManager {
     RenderPipeline* getPipeline(Pipeline pipe);
 
     LightSource* getLightSource(std::size_t index);
+    size_t getLightCount() {
+        return lights.size();
+    }
 
     void setupColourPipelineUniforms();
     void setupTexturePipelineUniforms();

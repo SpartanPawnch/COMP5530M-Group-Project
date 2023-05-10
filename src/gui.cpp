@@ -2101,6 +2101,9 @@ void drawStats() {
         // Texture stuff
         ImGui::Text("TEXTURES %i loaded", getTextureCount());
 
+        // Lights
+        ImGui::Text("Point lights: %zu", renderManager->getLightCount());
+
         ImGui::PopFont();
     }
     ImGui::End();
