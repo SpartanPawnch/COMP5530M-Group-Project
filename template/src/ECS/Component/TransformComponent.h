@@ -10,6 +10,7 @@
 class TransformComponent : public BaseComponent {
   public:
     TransformComponent();
+    TransformComponent(const std::string& name, const int uuid);
     ~TransformComponent();
     virtual void start() override;
     virtual void update(float dt, EntityState& state) override;

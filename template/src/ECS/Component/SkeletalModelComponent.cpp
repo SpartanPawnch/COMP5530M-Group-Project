@@ -18,6 +18,24 @@ SkeletalModelComponent::SkeletalModelComponent() {
         transformMatrices.push_back(glm::mat4(1.0f));
     }
 }
+
+SkeletalModelComponent::SkeletalModelComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+
+    currentTime = 0.0;
+    currentLoopCount = 0;
+    currentNode = nullptr;
+    selectedNode = nullptr;
+
+    transformMatrices.reserve(MAX_BONES);
+
+    for (unsigned int i = 0; i < MAX_BONES; i++) {
+        transformMatrices.push_back(glm::mat4(1.0f));
+    }
+}
+
 void SkeletalModelComponent::start() {
 }
 void SkeletalModelComponent::update(float dt, EntityState& state) {

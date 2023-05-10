@@ -8,6 +8,13 @@ AudioSourceComponent::AudioSourceComponent() {
     name = "Audio Source Component";
     uuid = baseUuid++;
 }
+
+AudioSourceComponent::AudioSourceComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+}
+
 void AudioSourceComponent::start() {
     if (playOnStart)
         startSound();

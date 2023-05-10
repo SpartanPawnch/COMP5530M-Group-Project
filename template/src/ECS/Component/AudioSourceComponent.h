@@ -10,6 +10,7 @@
 
 struct AudioSourceComponent : BaseComponent {
     AudioSourceComponent();
+    AudioSourceComponent(const std::string& name, const int uuid);
     ~AudioSourceComponent() {
     }
     void start() override;

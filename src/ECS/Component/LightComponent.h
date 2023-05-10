@@ -10,6 +10,7 @@ struct LightComponent : BaseComponent {
     glm::vec3 specular = glm::vec3(1.f);
 
     LightComponent();
+    LightComponent(const std::string& name, const int uuid);
     ~LightComponent();
     virtual void start() override;
     virtual void update(float dt, EntityState& state) override;

@@ -6,6 +6,11 @@ TransformComponent::TransformComponent() {
     uuid = baseUuid++;
     name = "Transform Component";
 }
+TransformComponent::TransformComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+}
 
 TransformComponent::~TransformComponent() {
     stop();

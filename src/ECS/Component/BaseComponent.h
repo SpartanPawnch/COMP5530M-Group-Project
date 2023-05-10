@@ -9,6 +9,7 @@
 class BaseComponent {
   public:
     BaseComponent();
+    BaseComponent(const std::string& name, const int uuid);
     ~BaseComponent();
     virtual void start();
     virtual void update(float dt, EntityState& state);

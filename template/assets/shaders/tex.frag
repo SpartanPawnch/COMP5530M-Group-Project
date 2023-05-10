@@ -34,7 +34,7 @@ uniform vec3 viewPos;
 
 uniform sampler2D texSampler;
 
-vec4 computeBlinnPhongLighting(int lightIndex)
+vec3 computeBlinnPhongLighting(int lightIndex)
 {
     vec3 ambient = lights[lightIndex].ambient * material.ambient;
 
@@ -51,7 +51,7 @@ vec4 computeBlinnPhongLighting(int lightIndex)
     spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
     vec3 specular = spec * lights[lightIndex].specular * material.specular; 
 
-    return (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
+    return (ambient+diffuse+specular);
 }
 
 vec3 computeNormalColor()
@@ -91,11 +91,12 @@ void main()
    
     vec3 colour = texture(texSampler,vsTex).rgb;
     
-    vec4 lighting = vec4(0.0);
+    vec3 lighting = vec3(0.0);
     for(int i = 0; i < numLights; i++)
     {
         lighting += computeBlinnPhongLighting(i);
     }
-    fsColour = vec4(colour,1.f) * lighting;
+    fsColour.rgb = colour * lighting;
     fsColour.rgb = pow(fsColour.rgb, vec3(1.0/gamma));
+    fsColour.a=1.f;
 }

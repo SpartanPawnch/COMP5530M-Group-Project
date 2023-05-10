@@ -119,10 +119,8 @@ void loadLevel(const char* path, Scene& scene) {
             auto entity = jsonEntities[i].GetObject();
 
             // add entity
-            BaseEntity baseEntity;
+            BaseEntity baseEntity(std::string(entity["name"].GetString()), entity["uuid"].GetInt());
 
-            baseEntity.uuid = entity["uuid"].GetInt();
-            baseEntity.name = std::string(entity["name"].GetString());
             baseEntity.parent = entity["parent"].GetInt();
             baseEntity.state.position = glm::vec3(entity["position"][0].GetFloat(),
                 entity["position"][1].GetFloat(), entity["position"][2].GetFloat());
@@ -137,9 +135,13 @@ void loadLevel(const char* path, Scene& scene) {
             for (unsigned int j = 0; j < jsonComponents.Size(); j++) {
                 auto jsonComponent = jsonComponents[j].GetObject();
 
+                std::string name = std::string(jsonComponent["name"].GetString());
+                int uuid = jsonComponent["uuid"].GetInt();
+
                 // TransformComponent
                 if (strcmp(jsonComponent["type"].GetString(), "TransformComponent") == 0) {
-                    TransformComponent trComponent;
+                    TransformComponent trComponent(name, uuid);
+
                     trComponent.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
                         jsonComponent["position"][1].GetFloat(),
                         jsonComponent["position"][2].GetFloat());
@@ -152,17 +154,13 @@ void loadLevel(const char* path, Scene& scene) {
                     trComponent.scale = glm::vec3(jsonComponent["scale"][0].GetFloat(),
                         jsonComponent["scale"][1].GetFloat(), jsonComponent["scale"][2].GetFloat());
 
-                    trComponent.name = std::string(jsonComponent["name"].GetString());
-                    trComponent.uuid = jsonComponent["uuid"].GetInt();
-
                     baseEntity.components.addComponent(trComponent);
                 }
 
                 // AudioSourceComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "AudioSourceComponent") == 0) {
-                    AudioSourceComponent audioSrc;
-                    audioSrc.uuid = jsonComponent["uuid"].GetInt();
-                    audioSrc.name = std::string(jsonComponent["name"].GetString());
+                    AudioSourceComponent audioSrc(name, uuid);
+
                     audioSrc.clipUuid = std::string(jsonComponent["clipUuid"].GetString());
                     audioSrc.clipDescriptor = audio::audioGetByUuid(audioSrc.clipUuid);
                     audioSrc.playOnStart = jsonComponent.HasMember("playOnStart")
@@ -176,9 +174,8 @@ void loadLevel(const char* path, Scene& scene) {
 
                 // CameraComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "CameraComponent") == 0) {
-                    CameraComponent cam;
-                    cam.uuid = jsonComponent["uuid"].GetInt();
-                    cam.name = std::string(jsonComponent["name"].GetString());
+                    CameraComponent cam(name, uuid);
+
                     cam.eye = glm::vec3(jsonComponent["eye"][0].GetFloat(),
                         jsonComponent["eye"][1].GetFloat(), jsonComponent["eye"][2].GetFloat());
                     cam.center = glm::vec3(jsonComponent["center"][0].GetFloat(),
@@ -195,9 +192,8 @@ void loadLevel(const char* path, Scene& scene) {
 
                 // Light Component
                 else if (strcmp(jsonComponent["type"].GetString(), "LightComponent") == 0) {
-                    LightComponent light;
-                    light.uuid = jsonComponent["uuid"].GetInt();
-                    light.name = std::string(jsonComponent["name"].GetString());
+                    LightComponent light(name, uuid);
+
                     light.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
                         jsonComponent["position"][1].GetFloat(),
                         jsonComponent["position"][2].GetFloat());
@@ -215,17 +211,14 @@ void loadLevel(const char* path, Scene& scene) {
 
                 // ModelComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
-                    ModelComponent model;
-                    model.uuid = jsonComponent["uuid"].GetInt();
-                    model.name = std::string(jsonComponent["name"].GetString());
+                    ModelComponent model(name, uuid);
+
                     model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
                     baseEntity.components.addComponent(model);
                 }
                 // ScriptComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ScriptComponent") == 0) {
-                    int uuid = jsonComponent["uuid"].GetInt();
-                    std::string name = std::string(jsonComponent["name"].GetString());
                     ScriptComponent script(name, uuid);
                     script.scriptPath = projRoot + jsonComponent["scriptPath"].GetString();
 
@@ -266,9 +259,7 @@ void loadLevel(const char* path, Scene& scene) {
                 }
                 // BaseComponent
                 else {
-                    BaseComponent base;
-                    base.name = std::string(jsonComponent["name"].GetString());
-                    base.uuid = jsonComponent["uuid"].GetInt();
+                    BaseComponent base(name, uuid);
 
                     baseEntity.components.addComponent(base);
                 }

@@ -58,6 +58,7 @@ struct FloatACTransition {
 
 struct SkeletalModelComponent : BaseComponent {
     SkeletalModelComponent();
+    SkeletalModelComponent(const std::string& name, const int uuid);
     ~SkeletalModelComponent() {
     }
     void start() override;

@@ -9,6 +9,12 @@ BaseEntity::BaseEntity() {
     name = "Base Entity";
 }
 
+BaseEntity::BaseEntity(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+}
+
 BaseEntity::~BaseEntity() {
     stop();
     components.clearAll();

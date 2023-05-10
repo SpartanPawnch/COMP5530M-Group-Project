@@ -15,6 +15,15 @@ LightComponent::LightComponent() {
     renderMgr = RenderManager::getInstance();
     desc = renderMgr->addLightSource(position, ambient, diffuse, specular);
 }
+
+LightComponent::LightComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+    renderMgr = RenderManager::getInstance();
+    desc = renderMgr->addLightSource(position, ambient, diffuse, specular);
+}
+
 LightComponent::~LightComponent() {
     if (desc.use_count() == 1)
         renderMgr->removeLightSource(desc->idx);

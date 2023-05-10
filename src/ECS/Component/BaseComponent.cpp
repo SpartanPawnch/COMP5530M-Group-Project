@@ -10,6 +10,12 @@ BaseComponent::~BaseComponent() {
     stop();
 }
 
+BaseComponent::BaseComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+}
+
 void BaseComponent::start() {
 }
 

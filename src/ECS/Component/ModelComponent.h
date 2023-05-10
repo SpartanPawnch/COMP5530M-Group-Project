@@ -9,6 +9,7 @@
 
 struct ModelComponent : BaseComponent {
     ModelComponent();
+    ModelComponent(const std::string& name, const int uuid);
     ~ModelComponent() {
     }
     void start() override;

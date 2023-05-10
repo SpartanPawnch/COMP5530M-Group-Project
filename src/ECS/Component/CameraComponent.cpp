@@ -23,6 +23,7 @@ CameraComponent::CameraComponent() {
 CameraComponent::CameraComponent(const std::string& _name, const int _uuid) {
     name = _name;
     uuid = _uuid;
+    renderMgr = RenderManager::getInstance();
     baseUuid = std::max(baseUuid, _uuid + 1);
     activeUuid = (activeUuid < 0) ? uuid : activeUuid;
 }

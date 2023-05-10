@@ -11,6 +11,7 @@
 class BaseEntity {
   public:
     BaseEntity();
+    BaseEntity(const std::string& name, const int uuid);
     ~BaseEntity();
     virtual void start();
     void genTransform(const glm::mat4& parentMat);
