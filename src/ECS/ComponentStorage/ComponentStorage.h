@@ -15,6 +15,7 @@
 #include "../Component/ModelComponent.h"
 #include "../Component/SkeletalModelComponent.h"
 #include "../Component/LightComponent.h"
+#include "../Component/SkyBoxComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -25,6 +26,7 @@ struct ComponentStorage{
     std::vector<ModelComponent> vecModelComponent;
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     std::vector<LightComponent> vecLightComponent;
+    std::vector<SkyBoxComponent> vecSkyBoxComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -98,6 +100,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<SkyBoxComponent>(const SkyBoxComponent& component){
+        vecSkyBoxComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -150,6 +157,13 @@ struct ComponentStorage{
     void start<LightComponent>(){
         for(unsigned int i=0;i<vecLightComponent.size();i++){
             vecLightComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<SkyBoxComponent>(){
+        for(unsigned int i=0;i<vecSkyBoxComponent.size();i++){
+            vecSkyBoxComponent[i].start();
         }
     }
 
@@ -210,6 +224,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void update<SkyBoxComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecSkyBoxComponent.size();i++){
+            vecSkyBoxComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
     static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
         return ComponentLocation::BASECOMPONENT;
     }
@@ -240,5 +261,9 @@ struct ComponentStorage{
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<LightComponent>(){
         return ComponentLocation::LIGHTCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<SkyBoxComponent>(){
+        return ComponentLocation::SKYBOXCOMPONENT;
     }
 };

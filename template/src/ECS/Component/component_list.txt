@@ -6,3 +6,4 @@ AudioSourceComponent
 ModelComponent
 SkeletalModelComponent
 LightComponent
+SkyBoxComponent

@@ -39,6 +39,7 @@
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/CameraComponent.h"
 #include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/SkyBoxComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
@@ -1400,6 +1401,37 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
 }
 
+void drawComponentProps(SkyBoxComponent& component) {
+    std::string faceNames[6] = { "right","left","top","bottom","back","front" };
+    
+    static std::vector<assetfolder::AssetDescriptor> textureFiles;
+    assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE, textureFiles);
+
+    for (unsigned int i = 0; i < 6; i++) {
+        ImGui::PushID(i);
+        ImGui::Text((std::string("Face ")+faceNames[i]).c_str());
+        
+        std::string previewStr = "Select a Texture";
+        
+        if (component.skybox.faces[i].textureDescriptor && component.skybox.faces[i].textureDescriptor->path) {
+            previewStr = *component.skybox.faces[i].textureDescriptor->path;
+            previewStr = assetfolder::getRelativePath(previewStr.c_str());
+        }
+
+        if (ImGui::BeginCombo("##skyboxtexture", previewStr.c_str())) {
+            // list available audio clips
+            for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                bool isSelected = (previewStr == textureFiles[i].path);
+                if (ImGui::Selectable(textureFiles[i].name.c_str(), &isSelected)) {
+                    component.updateTex(i, textureFiles[i].path);
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopID();
+    }
+}
+
 void drawComponentProps(AudioSourceComponent& component) {
     // clip selector
     std::string previewPath = "";
@@ -1516,8 +1548,8 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     // TODO rest of function is hard to maintain - try to generate this in the future
     // type selector
     const char* types[] = {"BaseComponent", "TransformComponent", "ScriptComponent",
-        "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent",
-        "LightComponent"};
+        "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent", 
+        "LightComponent", "SkyBoxModelComponent"};
     previewStr =
         (loc.type >= 0 && loc.type < ComponentLocation::COMPTYPE_MAX) ? types[loc.type] : "None";
     if (ImGui::BeginCombo("##typeselector", previewStr.c_str())) {
@@ -1557,6 +1589,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
         break;
     case ComponentLocation::LIGHTCOMPONENT:
         drawComponentSelector(loc.componentIdx, storage.vecLightComponent);
+        break;
+    case ComponentLocation::SKYBOXCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecSkyBoxComponent);
         break;
     default:;
     }
@@ -1803,6 +1838,9 @@ inline void drawProperties() {
             // SkeletalModelComponent
             drawComponentList(scene.selectedEntity->components.vecSkeletalModelComponent);
 
+            // SkyBoxModelComponent
+            drawComponentList(scene.selectedEntity->components.vecSkyBoxComponent);
+
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
@@ -1827,6 +1865,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Animated Model Component")) {
                     scene.selectedEntity->components.addComponent(SkeletalModelComponent());
+                }
+                if (ImGui::MenuItem("Add Skybox Component")) {
+                    scene.selectedEntity->components.addComponent(SkyBoxComponent());
                 }
                 if (ImGui::MenuItem("Add Script Component")) {
                     scene.selectedEntity->components.addComponent(ScriptComponent());

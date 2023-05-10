@@ -373,19 +373,15 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                         static_cast<int>(this->lights.size()));
 
                     // set per-light uniforms
-                    for (std::size_t i = 0; i < lights.size(); i++) {
-                        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i),
-                            lights[i].getPosition().x, lights[i].getPosition().y,
-                            lights[i].getPosition().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i),
-                            lights[i].getAmbient().x, lights[i].getAmbient().y,
-                            lights[i].getAmbient().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i),
-                            lights[i].getDiffuse().x, lights[i].getDiffuse().y,
-                            lights[i].getDiffuse().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
-                            lights[i].getSpecular().x, lights[i].getSpecular().y,
-                            lights[i].getSpecular().z);
+                    for (std::size_t l = 0; l < lights.size(); l++) {
+                        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(l), lights[l].getPosition().x,
+                            lights[l].getPosition().y, lights[l].getPosition().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(l),
+                            lights[l].getAmbient().x, lights[l].getAmbient().y, lights[l].getAmbient().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(l),
+                            lights[l].getDiffuse().x, lights[l].getDiffuse().y, lights[l].getDiffuse().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(k),
+                            lights[l].getSpecular().x, lights[l].getSpecular().y, lights[l].getSpecular().z);
                     }
                 }
                 glBindVertexArray(desc->getVAO(k));
@@ -411,15 +407,15 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             static_cast<int>(this->lights.size()));
 
         // set per-light uniforms
-        for (std::size_t i = 0; i < lights.size(); i++) {
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(i), lights[i].getPosition().x,
-                lights[i].getPosition().y, lights[i].getPosition().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightAmbientID(i),
-                lights[i].getAmbient().x, lights[i].getAmbient().y, lights[i].getAmbient().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightDiffuseID(i),
-                lights[i].getDiffuse().x, lights[i].getDiffuse().y, lights[i].getDiffuse().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightSpecularID(i),
-                lights[i].getSpecular().x, lights[i].getSpecular().y, lights[i].getSpecular().z);
+        for (std::size_t k = 0; k < lights.size(); k++) {
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(k), lights[k].getPosition().x,
+                lights[k].getPosition().y, lights[k].getPosition().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightAmbientID(k),
+                lights[k].getAmbient().x, lights[k].getAmbient().y, lights[k].getAmbient().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightDiffuseID(k),
+                lights[k].getDiffuse().x, lights[k].getDiffuse().y, lights[k].getDiffuse().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightSpecularID(k),
+                lights[k].getSpecular().x, lights[k].getSpecular().y, lights[k].getSpecular().z);
         }
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
