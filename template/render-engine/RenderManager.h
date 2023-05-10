@@ -29,6 +29,7 @@ enum Pipeline {
     EmptyVisPipeline = 8,
     EntIDPipeline = 9,
     AnimatedPipeline = 10,
+    CubemapPipeline = 11,
     Pipeline_MAX
 };
 
@@ -135,6 +136,7 @@ public:
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
+    void renderSkybox(const Scene& scene, Camera* camera, int width, int height);
     void renderGrid(Camera* camera, int width, int height);
     void renderEntitiesID(const Scene& scene, Camera* camera, int width, int height);
     void renderCamPreview(const Scene& scene, int width, int height);

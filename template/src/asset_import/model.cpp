@@ -195,7 +195,7 @@ namespace model {
     }
 
     bool ModelDescriptor::meshHasMaterial(int meshIndex) {
-        return !(loadedModels[idx].model->meshes[meshIndex].material == nullptr);
+        return loadedModels[idx].model->meshes[meshIndex].material != nullptr;
     }
 
     void ModelDescriptor::setMeshMaterial(int meshIndex, std::shared_ptr<ActiveMaterial> mat) {

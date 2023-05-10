@@ -89,25 +89,25 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         material->Get(AI_MATKEY_OPACITY, mat.occlusion);
         aiString texturePath;
         if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
-            mat.baseColorMap = std::string(texturePath.C_Str());
+            mat.baseColorMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(),directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_SHININESS, 0, &texturePath) == AI_SUCCESS) {
-            mat.roughnessMap = std::string(texturePath.C_Str());
+            mat.roughnessMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_REFLECTION, 0, &texturePath) == AI_SUCCESS) {
-            mat.metalnessMap = std::string(texturePath.C_Str());
+            mat.metalnessMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_NORMALS, 0, &texturePath) == AI_SUCCESS) {
-            mat.normalMap = std::string(texturePath.C_Str());
+            mat.normalMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_OPACITY, 0, &texturePath) == AI_SUCCESS) {
-            mat.alphaMap = std::string(texturePath.C_Str());
+            mat.alphaMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath) == AI_SUCCESS) {
-            mat.emissiveMap = std::string(texturePath.C_Str());
+            mat.emissiveMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &texturePath) == AI_SUCCESS) {
-            mat.occlusionMap = std::string(texturePath.C_Str());
+            mat.occlusionMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
 
         MaterialSystem* materialSystem = MaterialSystem::getInstance();

@@ -1136,6 +1136,28 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::EndCombo();
     }
 
+    if (component.modelDescriptor) {
+        for (uint32_t i = 0; i < component.modelDescriptor->getMeshCount(); i++) {
+            ImGui::PushID(i);
+            ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
+            std::string meshPreviewStr = "Select a Material";
+            if (component.modelDescriptor->meshHasMaterial(i)) {
+                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            }
+            //materials select options by name
+            if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
+                for (auto const& mat : materialSystem->materials) {
+                    bool selected = (meshPreviewStr == mat.first);
+                    if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                        component.modelDescriptor->setMeshMaterial(i, materialSystem->loadActiveMaterial(mat.second));
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+    }
+
     if (!hasModel) {
         ImGui::Text("Select a Model with a Skeleton to view the animation controller properties");
         return;
@@ -1161,6 +1183,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
     ImGui::Separator();
     for (unsigned int i = 0; i < component.nodes.size(); i++) {
         ImGui::PushID(i);
+        ImGui::InputText("##name", &component.nodes[i].name[0], component.nodes[i].name.capacity());
+        component.nodes[i].name.resize(std::strlen(&component.nodes[i].name[0]));
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
         if (component.nodes[i].animationDescriptor &&
@@ -1438,10 +1462,11 @@ void drawComponentProps(SkyBoxComponent& component) {
 
         if (ImGui::BeginCombo("##skyboxtexture", previewStr.c_str())) {
             // list available audio clips
-            for (unsigned int i = 0; i < textureFiles.size(); i++) {
-                bool isSelected = (previewStr == textureFiles[i].path);
-                if (ImGui::Selectable(textureFiles[i].name.c_str(), &isSelected)) {
-                    component.updateTex(i, textureFiles[i].path);
+            for (unsigned int j = 0; j < textureFiles.size(); j++) {
+                bool isSelected = (previewStr == textureFiles[j].path);
+                if (ImGui::Selectable(textureFiles[j].name.c_str(), &isSelected)) {
+                    component.updateTex(i, textureFiles[j].path);
+                    std::cout << "set texture to " << component.skybox.faces[i].textureDescriptor->texId << std::endl;
                 }
             }
             ImGui::EndCombo();
@@ -2213,80 +2238,80 @@ inline void drawScriptDemo() {
 }
 
 void drawStats() {
-    if (ImGui::Begin("Statistics")) {
-        ImGui::PushFont(guicfg::regularFont);
+    //if (ImGui::Begin("Statistics")) {
+    //    ImGui::PushFont(guicfg::regularFont);
 
-        // CPU
-        ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
-            metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
+    //    // CPU
+    //    ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
+    //        metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
 
-        // draw plot
-        if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Physical Mem
-        float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
-            minPhysMemMB, maxPhysMemMB);
+    //    // Physical Mem
+    //    float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
+    //        minPhysMemMB, maxPhysMemMB);
 
-        // draw plot
-        if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
 
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
 
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Virtual Mem
-        float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
-        float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
-        float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
-            minVirtMemMB, maxVirtMemMB);
+    //    // Virtual Mem
+    //    float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
+    //        minVirtMemMB, maxVirtMemMB);
 
-        // draw plot
-        if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Audio stuff
-        ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+    //    // Audio stuff
+    //    ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
 
-        // Texture stuff
-        ImGui::Text("TEXTURES %i loaded", getTextureCount());
+    //    // Texture stuff
+    //    ImGui::Text("TEXTURES %i loaded", getTextureCount());
 
-        ImGui::PopFont();
-    }
-    ImGui::End();
+    //    ImGui::PopFont();
+    //}
+    //ImGui::End();
 }
 
 void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,

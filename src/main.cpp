@@ -160,6 +160,7 @@ int main() {
         // update editor state
         scene.updatePositions();
 
+
         //--- Draw Results ---
         // draw scene to texture
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
@@ -175,6 +176,9 @@ int main() {
             glClearBufferfv(GL_COLOR, 0, clearVals);
             glClearBufferfv(GL_DEPTH, 0, &clearDepth);
         }
+
+        renderManager->renderSkybox(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
 
         // draw grid
         renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
@@ -197,6 +201,7 @@ int main() {
             // setup preview camera object
             cam.copyToCamera(renderManager->previewCamera,
                 scene.selectedEntity->state.runtimeTransform);
+
 
             // draw border
             // TODO nicer way to do this

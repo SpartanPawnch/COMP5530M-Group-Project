@@ -169,6 +169,8 @@ void RenderManager::loadScene() {
     const char* emptyVertPath = "assets/shaders/empty.vert";
     const char* emptyFragPath = "assets/shaders/empty.frag";
     const char* AnimatedVertexPath = "assets/shaders/animated.vert";
+    const char* cubemapVertPath = "assets/shaders/cubemap.vert";
+    const char* cubemapFragPath = "assets/shaders/cubemap.frag";
     const char* entIDVertexPath = "assets/shaders/entID.vert";
     const char* entIDFragPath = "assets/shaders/entID.frag";
 
@@ -210,6 +212,7 @@ void RenderManager::loadScene() {
     addPipeline(EmptyVisPipeline, emptyVertPath, emptyFragPath);
     addPipeline(EntIDPipeline, entIDVertexPath, entIDFragPath);
     addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
+    addPipeline(CubemapPipeline, cubemapVertPath, cubemapFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -487,6 +490,43 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
         glBindVertexArray(0);
     }
 }
+
+void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, int height) {
+    // updateMatrices(&width, &height);
+    viewMatrix = camera->getViewMatrix();
+    float aspect = float(width) / height;
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+        !(aspect != aspect))
+        ? aspect
+        : 1.f;
+
+    projectionMatrix = glm::perspective(glm::radians(camera->fov / 2.f), aspect, .01f, 100.0f);
+
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+
+#ifdef ONO_ENGINE_ONLY
+        if (scene.entities[i].components.vecSkyBoxComponent.empty()) {
+            continue;
+        }
+#endif
+        glUseProgram(getPipeline(CubemapPipeline)->getProgram());
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkyBoxComponent.size(); j++) {
+            if (scene.entities[i].components.vecSkyBoxComponent[j].skybox.id == 0) continue;
+
+            glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE,
+                &viewMatrix[0][0]);
+            glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
+                &projectionMatrix[0][0]);
+
+            glDepthMask(GL_FALSE);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDepthMask(GL_TRUE);
+        }
+    }
+}
+
 void RenderManager::renderGrid(Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();

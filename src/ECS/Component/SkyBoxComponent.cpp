@@ -1,5 +1,6 @@
 #include "SkyBoxComponent.h"
 #include <GL/glew.h>
+#include <iostream>
 
 static int baseUuid = 0;
 
@@ -50,7 +51,9 @@ void SkyBoxComponent::updateTex(unsigned int side, std::string path) {
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 
-            glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 0, 0, width, height, 0);
+            glCopyImageSubData(skybox.faces[i].textureDescriptor->texId, GL_TEXTURE_2D, 0, 0, 0, 0,
+                skybox.id, GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, 0, 0, 0,
+                width, height, 1);
 
             glBindTexture(GL_TEXTURE_2D, 0);
         }
