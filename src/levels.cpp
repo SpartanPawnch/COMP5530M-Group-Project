@@ -193,6 +193,26 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(cam);
                 }
 
+                // Light Component
+                else if (strcmp(jsonComponent["type"].GetString(), "LightComponent") == 0) {
+                    LightComponent light;
+                    light.uuid = jsonComponent["uuid"].GetInt();
+                    light.name = std::string(jsonComponent["name"].GetString());
+                    light.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
+                        jsonComponent["position"][1].GetFloat(),
+                        jsonComponent["position"][2].GetFloat());
+                    light.ambient = glm::vec3(jsonComponent["ambient"][0].GetFloat(),
+                        jsonComponent["ambient"][1].GetFloat(),
+                        jsonComponent["ambient"][2].GetFloat());
+                    light.diffuse = glm::vec3(jsonComponent["diffuse"][0].GetFloat(),
+                        jsonComponent["diffuse"][1].GetFloat(),
+                        jsonComponent["diffuse"][2].GetFloat());
+                    light.specular = glm::vec3(jsonComponent["specular"][0].GetFloat(),
+                        jsonComponent["specular"][1].GetFloat(),
+                        jsonComponent["specular"][2].GetFloat());
+                    baseEntity.components.addComponent(light);
+                }
+
                 // ModelComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
                     ModelComponent model;
@@ -254,6 +274,14 @@ void loadLevel(const char* path, Scene& scene) {
                 }
             }
             scene.addEntity(baseEntity);
+        }
+    }
+
+    // perform initial update on scene
+    scene.updatePositions();
+    for (size_t i = 0; i < scene.entities.size(); i++) {
+        for (size_t j = 0; j < scene.entities[i].components.vecLightComponent.size(); j++) {
+            scene.entities[i].components.vecLightComponent[j].update(.0f, scene.entities[i].state);
         }
     }
 
@@ -389,6 +417,50 @@ static void saveComponent(const CameraComponent& component,
         writer.Key("default");
         writer.Bool(true);
     }
+
+    writer.EndObject();
+}
+
+static void saveComponent(const LightComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("LightComponent");
+
+    writer.Key("position");
+    writer.StartArray();
+    writer.Double(float(component.position[0]));
+    writer.Double(float(component.position[1]));
+    writer.Double(float(component.position[2]));
+    writer.EndArray();
+
+    writer.Key("ambient");
+    writer.StartArray();
+    writer.Double(float(component.ambient[0]));
+    writer.Double(float(component.ambient[1]));
+    writer.Double(float(component.ambient[2]));
+    writer.EndArray();
+
+    writer.Key("diffuse");
+    writer.StartArray();
+    writer.Double(float(component.diffuse[0]));
+    writer.Double(float(component.diffuse[1]));
+    writer.Double(float(component.diffuse[2]));
+    writer.EndArray();
+
+    writer.Key("specular");
+    writer.StartArray();
+    writer.Double(float(component.specular[0]));
+    writer.Double(float(component.specular[1]));
+    writer.Double(float(component.specular[2]));
+    writer.EndArray();
 
     writer.EndObject();
 }
@@ -560,6 +632,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecCameraComponent;
             for (unsigned int j = 0; j < cameraComponents.size(); j++) {
                 saveComponent(cameraComponents[j], writer);
+            }
+
+            // LightComponent
+            const std::vector<LightComponent>& lightComponents =
+                scene.entities[i].components.vecLightComponent;
+            for (unsigned int j = 0; j < lightComponents.size(); j++) {
+                saveComponent(lightComponents[j], writer);
             }
 
             // ModelComponent
