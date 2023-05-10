@@ -736,6 +736,8 @@ int viewportTexHeight = 0;
 
 static int viewportSamples = 4;
 
+ImGuizmo::OPERATION imguizmoOperation = ImGuizmo::TRANSLATE;
+
 inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
@@ -799,7 +801,7 @@ inline void drawViewport() {
             glm::mat4 transform = scene.selectedEntity->state.runtimeTransform;
 
             ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-                ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::LOCAL, glm::value_ptr(transform));
+                imguizmoOperation, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
             if (ImGuizmo::IsUsing()) {
                 glm::vec3 skew;
@@ -820,6 +822,22 @@ inline void drawViewport() {
                     viewportSamples = i;
             }
             ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Translate")) {
+            imguizmoOperation = ImGuizmo::TRANSLATE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Rotate")) {
+            imguizmoOperation = ImGuizmo::ROTATE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Scale")) {
+            imguizmoOperation = ImGuizmo::SCALE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("All")) {
+            imguizmoOperation = ImGuizmo::UNIVERSAL;
         }
         ImGui::PopFont();
     }
