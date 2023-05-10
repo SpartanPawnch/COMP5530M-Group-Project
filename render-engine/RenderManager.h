@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 #include "RenderPipeline.h"
 #include "Camera.h"
@@ -14,8 +15,6 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
-
-
 
 enum Pipeline {
     ColourPipeline = 0,
@@ -43,7 +42,7 @@ struct Buffer {
 };
 
 class RenderManager {
-private:
+  private:
     // pointer to single instance of RenderEngine
     static RenderManager* instance;
     bool initialized = false;
@@ -58,6 +57,7 @@ private:
     std::unordered_map<Pipeline, std::vector<Buffer>> PipelineMeshBufferMap;
     //
     // Light Sources
+    std::vector<std::weak_ptr<LightDescriptor>> lightsMetadata;
     std::vector<LightSource> lights;
 
     // considering windows
@@ -87,16 +87,15 @@ private:
     void runFrustumVisPipeline();
     void runEmptyVisPipeline();
 
-public:
+  public:
     // members
     // TODO
     Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
     Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
     double deltaTime;
-    //Gamma value for gamma correction
+    // Gamma value for gamma correction
     float gammaValue = 2.2f;
-
 
     // mouse input variables
     double xPos, yPos, xPosLast, yPosLast;
@@ -118,7 +117,10 @@ public:
 
     void addCamera();
 
-    void addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular);
+    std::shared_ptr<LightDescriptor> addLightSource(glm::vec3& position, glm::vec3& ambient,
+        glm::vec3& diffuse, glm::vec3& specular);
+
+    void removeLightSource(size_t idx);
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,

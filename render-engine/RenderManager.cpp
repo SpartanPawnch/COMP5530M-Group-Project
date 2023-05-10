@@ -1,4 +1,3 @@
-
 #include "RenderManager.h"
 
 RenderManager* RenderManager::getInstance() {
@@ -153,11 +152,11 @@ void RenderManager::loadScene() {
 
     // ADD LIGHT SOURCES
 
-    this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f), glm::vec3(0.2f, 0.2f, 0.2f),
-        glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f));
-    this->addLightSource(glm::vec3(-10.0f, -10.0f, 1.0f), glm::vec3(0.2f, 0.2f, 0.2f),
-        glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f));
-
+    // this->addLightSource(glm::vec3(10.0f, 10.0f, 1.0f), glm::vec3(0.2f, 0.2f, 0.2f),
+    //     glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f));
+    // this->addLightSource(glm::vec3(-10.0f, -10.0f, 1.0f), glm::vec3(0.2f, 0.2f, 0.2f),
+    //     glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f));
+    //
     ///////////////////////////////////////////////////////
     const char* colorVertexPath = "assets/shaders/colours.vert";
     const char* colorFragPath = "assets/shaders/colours.frag";
@@ -630,9 +629,18 @@ void RenderManager::runTexturePipeline() {
     glBindVertexArray(0);
 }
 
-void RenderManager::addLightSource(glm::vec3& position, glm::vec3& ambient, glm::vec3& diffuse,
-    glm::vec3& specular) {
+std::shared_ptr<LightDescriptor> RenderManager::addLightSource(glm::vec3& position,
+    glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular) {
     lights.emplace_back(position, ambient, diffuse, specular);
+    std::shared_ptr<LightDescriptor> ptr = std::make_shared<LightDescriptor>();
+    lightsMetadata.emplace_back(std::weak_ptr<LightDescriptor>(ptr));
+    ptr->idx = lights.size() - 1;
+    return ptr;
+}
+
+void RenderManager::removeLightSource(size_t idx) {
+    // fix indices
+    // swap to back
 }
 
 RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {

@@ -1666,6 +1666,13 @@ void drawComponentProps(CameraComponent& component) {
         CameraComponent::activeUuid = component.uuid;
 }
 
+void drawComponentProps(LightComponent& component) {
+    ImGui::InputFloat3("Position", &component.position[0]);
+    ImGui::InputFloat3("Ambient", &component.ambient[0]);
+    ImGui::InputFloat3("Diffuse", &component.diffuse[0]);
+    ImGui::InputFloat3("Specular", &component.specular[0]);
+}
+
 void drawComponentContextMenu(int i, int& componentToDelete) {
     if (ImGui::BeginPopupContextItem()) {
         if (ImGui::MenuItem("Add Audio Source Component")) {
@@ -1673,6 +1680,9 @@ void drawComponentContextMenu(int i, int& componentToDelete) {
         }
         if (ImGui::MenuItem("Add Camera Component")) {
             scene.selectedEntity->components.addComponent(CameraComponent());
+        }
+        if (ImGui::MenuItem("Add Point Light Component")) {
+            scene.selectedEntity->components.addComponent(LightComponent());
         }
         if (ImGui::MenuItem("Add Script Component")) {
             scene.selectedEntity->components.addComponent(ScriptComponent());
@@ -1769,6 +1779,11 @@ inline void drawProperties() {
             // CameraComponent
             drawComponentList(scene.selectedEntity->components.vecCameraComponent);
 
+            // LightComponent
+            drawComponentList(scene.selectedEntity->components.vecLightComponent);
+            scene.selectedEntity->components.update<LightComponent>(.0f,
+                scene.selectedEntity->state);
+
             // ModelComponent
             drawComponentList(scene.selectedEntity->components.vecModelComponent);
 
@@ -1796,6 +1811,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Camera Component")) {
                     scene.selectedEntity->components.addComponent(CameraComponent());
+                }
+                if (ImGui::MenuItem("Add Point Light Component")) {
+                    scene.selectedEntity->components.addComponent(LightComponent());
                 }
                 if (ImGui::MenuItem("Add Model Component")) {
                     scene.selectedEntity->components.addComponent(ModelComponent());

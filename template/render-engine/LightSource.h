@@ -6,38 +6,38 @@
 
 #include <glm/glm.hpp>
 
-class LightSource
-{
-private:
+struct LightDescriptor {
+    size_t idx = 0;
+};
 
-	glm::vec3 position;
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+class LightSource {
+  private:
+    glm::vec3 position;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
 
+  public:
+    LightSource(const glm::vec3& position, const glm::vec3& ambient, const glm::vec3& diffuse,
+        const glm::vec3& specular);
 
-public:
-	LightSource(const glm::vec3& position, const glm::vec3& ambient,
-		const glm::vec3& diffuse, const glm::vec3& specular);
+    // setters
+    void setPosition(const glm::vec3& newPosition);
 
-	//setters
-	void setPosition(const glm::vec3& newPosition);
+    void setAmbient(const glm::vec3& newAmbient);
 
-	void setAmbient(const glm::vec3& newAmbient);
+    void setDiffuse(const glm::vec3& newDiffuse);
 
-	void setDiffuse(const glm::vec3& newDiffuse);
+    void setSpecular(const glm::vec3& newSpecular);
 
-	void setSpecular(const glm::vec3& newSpecular);
+    // getters
+    const glm::vec3& getPosition() const;
 
-	//getters
-	const glm::vec3& getPosition() const;
+    const glm::vec3& getAmbient() const;
 
-	const glm::vec3& getAmbient() const;
+    const glm::vec3& getDiffuse() const;
 
-	const glm::vec3& getDiffuse() const;
-
-	const glm::vec3& getSpecular() const;
-
+    const glm::vec3& getSpecular() const;
 };
 
 #endif // CAMERA_H
