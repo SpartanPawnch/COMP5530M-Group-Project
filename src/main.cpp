@@ -183,7 +183,9 @@ int main() {
 
 
         // draw grid
+        glDisable(GL_CULL_FACE);
         renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
+        glEnable(GL_CULL_FACE);
 
         // draw scene
         renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,

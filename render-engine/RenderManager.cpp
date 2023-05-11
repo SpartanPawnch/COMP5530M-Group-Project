@@ -508,6 +508,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
         if (scene.entities[i].components.vecSkyBoxComponent.empty()) {
             continue;
         }
+
 #endif
         glUseProgram(getPipeline(CubemapPipeline)->getProgram());
 
@@ -515,7 +516,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
             if (scene.entities[i].components.vecSkyBoxComponent[j].skybox.id == 0) continue;
 
             glUniformMatrix4fv(getPipeline(CubemapPipeline)->getViewID(), 1, GL_FALSE,
-                &viewMatrix[0][0]);
+                glm::value_ptr(glm::mat4(glm::mat3(viewMatrix))));
             glUniformMatrix4fv(getPipeline(CubemapPipeline)->getProjectionID(), 1, GL_FALSE,
                 &projectionMatrix[0][0]);
 
