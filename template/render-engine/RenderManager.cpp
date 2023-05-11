@@ -514,9 +514,9 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkyBoxComponent.size(); j++) {
             if (scene.entities[i].components.vecSkyBoxComponent[j].skybox.id == 0) continue;
 
-            glUniformMatrix4fv(getPipeline(TexturePipeline)->getViewID(), 1, GL_FALSE,
+            glUniformMatrix4fv(getPipeline(CubemapPipeline)->getViewID(), 1, GL_FALSE,
                 &viewMatrix[0][0]);
-            glUniformMatrix4fv(getPipeline(TexturePipeline)->getProjectionID(), 1, GL_FALSE,
+            glUniformMatrix4fv(getPipeline(CubemapPipeline)->getProjectionID(), 1, GL_FALSE,
                 &projectionMatrix[0][0]);
 
             glDepthMask(GL_FALSE);
