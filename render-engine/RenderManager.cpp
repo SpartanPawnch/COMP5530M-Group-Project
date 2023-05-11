@@ -637,6 +637,10 @@ void RenderManager::setupEntIDPipelineUniforms() {
     getPipeline(EntIDPipeline)->setIDUniformLocations();
 }
 
+void RenderManager::setupCubemapPipelineUniforms() {
+    getPipeline(CubemapPipeline)->setIDUniformLocations();
+}
+
 void RenderManager::runTexturePipeline() {
     glUseProgram(getPipeline(TexturePipeline)->getProgram());
 

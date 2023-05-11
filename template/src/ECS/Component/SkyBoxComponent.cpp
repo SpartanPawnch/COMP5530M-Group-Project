@@ -51,9 +51,14 @@ void SkyBoxComponent::updateTex(unsigned int side, std::string path) {
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 
-            glCopyImageSubData(skybox.faces[i].textureDescriptor->texId, GL_TEXTURE_2D, 0, 0, 0, 0,
-                skybox.id, GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, 0, 0, 0,
-                width, height, 1);
+            unsigned char* data = new unsigned char[width * height * 4];
+
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            
+            // Free the pixel data memory
+            delete[] data;
 
             glBindTexture(GL_TEXTURE_2D, 0);
         }

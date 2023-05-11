@@ -138,6 +138,7 @@ int main() {
     renderManager->setupTexturePipelineUniforms();
     renderManager->setupAnimatedPipelineUniforms();
     renderManager->setupEntIDPipelineUniforms();
+    renderManager->setupCubemapPipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -179,6 +180,7 @@ int main() {
 
         renderManager->renderSkybox(scene, &renderManager->camera, viewportTexWidth,
             viewportTexHeight);
+
 
         // draw grid
         renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);

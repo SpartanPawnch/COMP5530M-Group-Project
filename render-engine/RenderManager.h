@@ -151,6 +151,7 @@ public:
     void setupTexturePipelineUniforms();
     void setupAnimatedPipelineUniforms();
     void setupEntIDPipelineUniforms();
+    void setupCubemapPipelineUniforms();
     void runPipeline(Pipeline pipeline);
 
     static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO,
