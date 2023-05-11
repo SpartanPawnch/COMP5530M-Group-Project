@@ -30,6 +30,7 @@ enum Pipeline {
     EntIDPipeline = 9,
     AnimatedPipeline = 10,
     CubemapPipeline = 11,
+    IconPipeline = 12,
     Pipeline_MAX
 };
 
@@ -94,6 +95,10 @@ public:
     Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
     Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
+    std::shared_ptr<TextureDescriptor> ligthIconDescriptor;
+    std::shared_ptr<TextureDescriptor> cameraIconDescriptor;
+    std::shared_ptr<TextureDescriptor> soundIconDescriptor;
+
     double deltaTime;
     //Gamma value for gamma correction
     float gammaValue = 2.2f;
@@ -152,6 +157,8 @@ public:
     void setupAnimatedPipelineUniforms();
     void setupEntIDPipelineUniforms();
     void setupCubemapPipelineUniforms();
+    void setupIconPipelineUniforms();
+    void loadIcons();
     void runPipeline(Pipeline pipeline);
 
     static void uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>* i, unsigned int* VAO,

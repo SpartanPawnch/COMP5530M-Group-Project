@@ -139,6 +139,9 @@ int main() {
     renderManager->setupAnimatedPipelineUniforms();
     renderManager->setupEntIDPipelineUniforms();
     renderManager->setupCubemapPipelineUniforms();
+    renderManager->setupIconPipelineUniforms();
+
+    renderManager->loadIcons();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
