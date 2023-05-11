@@ -2105,10 +2105,9 @@ inline void drawLevels() {
     }
     ImGui::End();
 }
-
+std::string newMaterialName = "";
 inline void drawMaterials() {
     if (ImGui::Begin("Materials")) {
-        std::string newMaterialName="";
         ImGui::InputText("##name", &newMaterialName[0], newMaterialName.capacity());
         newMaterialName.resize(std::strlen(&newMaterialName[0]));
         if (ImGui::Button("Create Material")) {
