@@ -181,6 +181,8 @@ void RenderManager::loadScene() {
     const char* iconFragPath = "assets/shaders/icon.frag";
     const char* entIDVertexPath = "assets/shaders/entID.vert";
     const char* entIDFragPath = "assets/shaders/entID.frag";
+    const char* iconIDVertexPath = "assets/shaders/iconID.vert";
+    const char* iconIDFragPath = "assets/shaders/iconID.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -222,6 +224,7 @@ void RenderManager::loadScene() {
     addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
     addPipeline(CubemapPipeline, cubemapVertPath, cubemapFragPath);
     addPipeline(IconPipeline, iconVertPath, iconFragPath);
+    addPipeline(IconIDPipeline, iconIDVertexPath, iconIDFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -520,7 +523,11 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+
+
+
+
 
     // RENDERING
     // Go through all the Pipelines
@@ -535,6 +542,82 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
         int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
 
         glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
+
+
+        if (scene.entities[i].components.vecModelComponent.empty() &&
+            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
+            if (!scene.entities[i].components.vecCameraComponent.empty() && cameraIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                glBindTexture(GL_TEXTURE_2D, cameraIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecLightComponent.empty() &&
+                ligthIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                // bind texture
+                glBindTexture(GL_TEXTURE_2D, ligthIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecAudioSourceComponent.empty() &&
+                soundIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                glBindTexture(GL_TEXTURE_2D, soundIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else {
+                runEmptyVisPipeline();
+            }
+            continue;
+        }
+
+        glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+        
 
         // bind model matrix
         glUniformMatrix4fv(getPipeline(EntIDPipeline)->getModelID(), 1, GL_FALSE,
@@ -702,6 +785,10 @@ void RenderManager::setupAnimatedPipelineUniforms() {
 }
 void RenderManager::setupEntIDPipelineUniforms() {
     getPipeline(EntIDPipeline)->setIDUniformLocations();
+}
+
+void RenderManager::setupIconIDPipelineUniforms() {
+    getPipeline(IconIDPipeline)->setIDUniformLocations();
 }
 
 void RenderManager::setupCubemapPipelineUniforms() {
