@@ -403,44 +403,6 @@ static void handleMouseInput(GLFWwindow* window) {
 
 // --- GUI Widgets ---
 
-// inline void drawAudioDemo() {
-//     if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-//         ImGui::PushFont(guicfg::regularFont);
-//         ImGui::Text("Active Clip: %s", audioPath.c_str());
-//         if (ImGui::Button("Load Audio File")) {
-//             const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
-//             const char* filterDesc = "Audio Files";
-//             std::string path = fdutil::openFile(
-//                 "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
-//             if (!path.empty()) {
-//                 audio::audioStopAll();
-//                 // TODO replace with nicer uuid
-//                 audioClip = audio::audioLoad(path.c_str(), path);
-//                 if (audioClip >= 0) {
-//                     audioPath = path;
-//                     logging::logInfo("Opened audio file {}\n", path);
-//                 }
-//                 else {
-//                     logging::logErr("Failed to load audio file ", path);
-//                 }
-//             }
-//         }
-//
-//         // adjust source position, listening position is center
-//         if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
-//             audio::audioSetPosition(audioPos);
-//         }
-//
-//         // play audio with 3d effects
-//         if (ImGui::Button("Play Audio File")) {
-//             if (!audioPath.empty())
-//                 audio::audioPlay(audioClip);
-//         }
-//         ImGui::PopFont();
-//     }
-//     ImGui::End();
-// }
-
 inline float drawMainMenu(const char* executablePath) {
     float barHeight = .0f;
     if (ImGui::BeginMainMenuBar()) {
