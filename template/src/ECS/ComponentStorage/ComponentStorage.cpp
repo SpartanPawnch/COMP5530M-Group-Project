@@ -9,6 +9,7 @@ void ComponentStorage::startAll(){
     start<ModelComponent>();
     start<SkeletalModelComponent>();
     start<LightComponent>();
+    start<SkyBoxComponent>();
 }
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
@@ -19,6 +20,7 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<ModelComponent>(dt,state);
     update<SkeletalModelComponent>(dt,state);
     update<LightComponent>(dt,state);
+    update<SkyBoxComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
@@ -29,6 +31,7 @@ void ComponentStorage::clearAll(){
     vecModelComponent.clear();
     vecSkeletalModelComponent.clear();
     vecLightComponent.clear();
+    vecSkyBoxComponent.clear();
 }
 void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
     switch(loc.type){
@@ -64,6 +67,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecLightComponent.size())
             return nullptr;
         return &vecLightComponent[loc.componentIdx];
+    case ComponentLocation::SKYBOXCOMPONENT:
+        if(loc.componentIdx>=vecSkyBoxComponent.size())
+            return nullptr;
+        return &vecSkyBoxComponent[loc.componentIdx];
     default:;
     }
     return nullptr;
@@ -109,6 +116,11 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((LightComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::SKYBOXCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((SkyBoxComponent*)ptr)->pushLuaTable(state);
         return;
     default:;
     }

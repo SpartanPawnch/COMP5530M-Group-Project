@@ -12,6 +12,9 @@ RenderManager* RenderManager::getInstance() {
     return instance;
 }
 
+// empty VAO for pipelines without attributes
+static GLuint dummyVAO;
+
 void RenderManager::startUp(GLFWwindow* aWindow) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
@@ -51,10 +54,14 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->viewMatrix = glm::lookAt(glm::vec3(0.0f, 3.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f));
     this->projectionMatrix = glm::mat4(1.0f);
+
+    // generate visualization primitives
+    glGenVertexArrays(1, &dummyVAO);
 }
 
 void RenderManager::shutDown() {
     this->pipelines.clear();
+    glDeleteVertexArrays(1, &dummyVAO);
 }
 
 void RenderManager::addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
@@ -168,6 +175,10 @@ void RenderManager::loadScene() {
     const char* emptyVertPath = "assets/shaders/empty.vert";
     const char* emptyFragPath = "assets/shaders/empty.frag";
     const char* AnimatedVertexPath = "assets/shaders/animated.vert";
+    const char* cubemapVertPath = "assets/shaders/cubemap.vert";
+    const char* cubemapFragPath = "assets/shaders/cubemap.frag";
+    const char* iconVertPath = "assets/shaders/icon.vert";
+    const char* iconFragPath = "assets/shaders/icon.frag";
     const char* entIDVertexPath = "assets/shaders/entID.vert";
     const char* entIDFragPath = "assets/shaders/entID.frag";
 
@@ -209,6 +220,8 @@ void RenderManager::loadScene() {
     addPipeline(EmptyVisPipeline, emptyVertPath, emptyFragPath);
     addPipeline(EntIDPipeline, entIDVertexPath, entIDFragPath);
     addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
+    addPipeline(CubemapPipeline, cubemapVertPath, cubemapFragPath);
+    addPipeline(IconPipeline, iconVertPath, iconFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -297,7 +310,63 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 #ifdef ONO_ENGINE_ONLY
         if (scene.entities[i].components.vecModelComponent.empty() &&
             scene.entities[i].components.vecSkeletalModelComponent.empty()) {
-            runEmptyVisPipeline();
+            if (!scene.entities[i].components.vecCameraComponent.empty() && cameraIconDescriptor) {
+                glUseProgram(getPipeline(IconPipeline)->getProgram());
+
+                glBindTexture(GL_TEXTURE_2D, cameraIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecLightComponent.empty() &&
+                ligthIconDescriptor) {
+                glUseProgram(getPipeline(IconPipeline)->getProgram());
+
+                // bind texture
+                glBindTexture(GL_TEXTURE_2D, ligthIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecAudioSourceComponent.empty() &&
+                soundIconDescriptor) {
+                glUseProgram(getPipeline(IconPipeline)->getProgram());
+
+                glBindTexture(GL_TEXTURE_2D, soundIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else {
+                runEmptyVisPipeline();
+            }
             continue;
         }
 #endif
@@ -309,7 +378,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
 
-                GLuint tex = desc->getTexture(k);
+                // GLuint tex = desc->getTexture(k);
+                GLuint tex = 0;
                 if (tex) {
                     // draw textured
                     glUseProgram(getPipeline(TexturePipeline)->getProgram());
@@ -371,19 +441,19 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                         static_cast<int>(this->lights.size()));
 
                     // set per-light uniforms
-                    for (std::size_t i = 0; i < lights.size(); i++) {
-                        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(i),
-                            lights[i].getPosition().x, lights[i].getPosition().y,
-                            lights[i].getPosition().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(i),
-                            lights[i].getAmbient().x, lights[i].getAmbient().y,
-                            lights[i].getAmbient().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(i),
-                            lights[i].getDiffuse().x, lights[i].getDiffuse().y,
-                            lights[i].getDiffuse().z);
-                        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(i),
-                            lights[i].getSpecular().x, lights[i].getSpecular().y,
-                            lights[i].getSpecular().z);
+                    for (std::size_t l = 0; l < lights.size(); l++) {
+                        glUniform3f(getPipeline(ColourPipeline)->getLightPosID(l),
+                            lights[l].getPosition().x, lights[l].getPosition().y,
+                            lights[l].getPosition().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightAmbientID(l),
+                            lights[l].getAmbient().x, lights[l].getAmbient().y,
+                            lights[l].getAmbient().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightDiffuseID(l),
+                            lights[l].getDiffuse().x, lights[l].getDiffuse().y,
+                            lights[l].getDiffuse().z);
+                        glUniform3f(getPipeline(ColourPipeline)->getLightSpecularID(k),
+                            lights[l].getSpecular().x, lights[l].getSpecular().y,
+                            lights[l].getSpecular().z);
                     }
                 }
                 glBindVertexArray(desc->getVAO(k));
@@ -409,15 +479,15 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             static_cast<int>(this->lights.size()));
 
         // set per-light uniforms
-        for (std::size_t i = 0; i < lights.size(); i++) {
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(i), lights[i].getPosition().x,
-                lights[i].getPosition().y, lights[i].getPosition().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightAmbientID(i),
-                lights[i].getAmbient().x, lights[i].getAmbient().y, lights[i].getAmbient().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightDiffuseID(i),
-                lights[i].getDiffuse().x, lights[i].getDiffuse().y, lights[i].getDiffuse().z);
-            glUniform3f(getPipeline(AnimatedPipeline)->getLightSpecularID(i),
-                lights[i].getSpecular().x, lights[i].getSpecular().y, lights[i].getSpecular().z);
+        for (std::size_t k = 0; k < lights.size(); k++) {
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightPosID(k), lights[k].getPosition().x,
+                lights[k].getPosition().y, lights[k].getPosition().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightAmbientID(k),
+                lights[k].getAmbient().x, lights[k].getAmbient().y, lights[k].getAmbient().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightDiffuseID(k),
+                lights[k].getDiffuse().x, lights[k].getDiffuse().y, lights[k].getDiffuse().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getLightSpecularID(k),
+                lights[k].getSpecular().x, lights[k].getSpecular().y, lights[k].getSpecular().z);
         }
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
@@ -432,7 +502,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                          .components.vecSkeletalModelComponent[j]
                          .transformMatrices[0][0][0]);
 
-                glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+                // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -489,6 +559,41 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
         glBindVertexArray(0);
     }
 }
+
+void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, int height) {
+    // updateMatrices(&width, &height);
+    viewMatrix = camera->getViewMatrix();
+    float aspect = float(width) / height;
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+                 !(aspect != aspect))
+        ? aspect
+        : 1.f;
+
+    projectionMatrix = glm::perspective(glm::radians(camera->fov / 2.f), aspect, .01f, 100.0f);
+
+    glUseProgram(getPipeline(CubemapPipeline)->getProgram());
+    // steal first VAO from textured pipeline
+    glBindVertexArray(dummyVAO);
+
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkyBoxComponent.size(); j++) {
+            if (scene.entities[i].components.vecSkyBoxComponent[j].skybox.id == 0)
+                continue;
+
+            glUniformMatrix4fv(getPipeline(CubemapPipeline)->getViewID(), 1, GL_FALSE,
+                glm::value_ptr(glm::mat4(glm::mat3(viewMatrix))));
+            glUniformMatrix4fv(getPipeline(CubemapPipeline)->getProjectionID(), 1, GL_FALSE,
+                &projectionMatrix[0][0]);
+
+            glDepthMask(GL_FALSE);
+            glBindTexture(GL_TEXTURE_CUBE_MAP,
+                scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDepthMask(GL_TRUE);
+        }
+    }
+}
+
 void RenderManager::renderGrid(Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
@@ -599,6 +704,21 @@ void RenderManager::setupEntIDPipelineUniforms() {
     getPipeline(EntIDPipeline)->setIDUniformLocations();
 }
 
+void RenderManager::setupCubemapPipelineUniforms() {
+    getPipeline(CubemapPipeline)->setUniformLocations();
+}
+
+void RenderManager::setupIconPipelineUniforms() {
+    getPipeline(IconPipeline)->setUniformLocations();
+}
+
+void RenderManager::loadIcons() {
+    // load necessary icons
+    ligthIconDescriptor = loadTexture("assets/lightico.png", "assets/lightico.png");
+    cameraIconDescriptor = loadTexture("assets/cameraico.png", "assets/cameraico.png");
+    soundIconDescriptor = loadTexture("assets/soundico.png", "assets/soundico.png");
+}
+
 void RenderManager::runTexturePipeline() {
     glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
@@ -693,7 +813,7 @@ void RenderManager::runGridPipeline() {
     glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
 
     // Render the grid
-    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
+    glBindVertexArray(dummyVAO);
     glDrawArrays(GL_LINES, 0, 4 * GRIDSIZE + 4);
 }
 void RenderManager::runFrustumVisPipeline() {
@@ -711,7 +831,7 @@ void RenderManager::runFrustumVisPipeline() {
     glUniformMatrix4fv(previewInverseID, 1, GL_FALSE, &previewInverse[0][0]);
 
     // Render the grid
-    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
+    glBindVertexArray(dummyVAO);
     glDrawArrays(GL_LINES, 0, 16);
 }
 
@@ -730,7 +850,7 @@ void RenderManager::runEmptyVisPipeline() {
     glUniformMatrix4fv(projID, 1, GL_FALSE, &proj[0][0]);
 
     // render empty
-    glBindVertexArray(pipelines[ColourPipeline].getVAO(0));
+    glBindVertexArray(dummyVAO);
     glDrawArrays(GL_LINES, 0, 6);
 }
 
@@ -761,6 +881,14 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
+    // vertex tangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, tangent));
+    // vertex bitangents
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, bitangent));
 
     // vertex texture coords
     glEnableVertexAttribArray(3);

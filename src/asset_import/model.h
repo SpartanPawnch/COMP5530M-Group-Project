@@ -15,10 +15,14 @@ namespace model {
         unsigned int getVAO(int meshIndex);
         unsigned int getVBO(int meshIndex);
         unsigned int getEBO(int meshIndex);
-        unsigned int getTexture(int meshIndex);
+        //unsigned int getTexture(int meshIndex);
         unsigned int getIndexCount(int meshIndex);
         unsigned int getMeshCount();
         std::map<std::string, Bone> getBoneInfoMap();
+        std::string getMeshName(int meshIndex);
+        std::string getMeshMaterialName(int meshIndex);
+        bool meshHasMaterial(int meshIndex);
+        void setMeshMaterial(int meshIndex,std::shared_ptr<ActiveMaterial> mat);
         unsigned int getBoneCount();
         void setBoneCount(unsigned int bc);
         void setBoneInfoMap(std::map<std::string, Bone> bimp);

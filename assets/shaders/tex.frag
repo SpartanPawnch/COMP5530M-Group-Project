@@ -3,6 +3,8 @@
 in vec3 vsPos;
 in vec3 vsNormal;
 in vec2 vsTex;
+in vec3 vsTangent;
+in vec3 vsBitangent;
 
 out vec4 fsColour;
 

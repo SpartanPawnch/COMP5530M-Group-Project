@@ -9,6 +9,7 @@ SkeletalModelComponent::SkeletalModelComponent() {
     uuid = baseUuid++;
     currentTime = 0.0;
     currentLoopCount = 0;
+    isPlaying = false;
     currentNode = nullptr;
     selectedNode = nullptr;
 
@@ -54,7 +55,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
     updateAnimation(dt);
 
     for each (NoConditionACTransition transition in currentNode->noConditionTransitions) {
-        if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
+        if (currentNode->loopCount > 0 && currentLoopCount >= currentNode->loopCount) {
             transitionToNode(transition.transitionTo);
             return;
         }

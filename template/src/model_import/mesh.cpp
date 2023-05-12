@@ -2,11 +2,12 @@
 #include "mesh.h"
 #include "../../render-engine/RenderManager.h"
 
-Mesh::Mesh(std::vector<Vertex> v, std::vector<unsigned int> i, std::vector<Texture> t)
+Mesh::Mesh(std::string n, std::vector<Vertex> v, std::vector<unsigned int> i, std::shared_ptr<ActiveMaterial> mat)
 {
+    name = n;
     vertices = v;
     indices = i;
-    textures = t;
+    material = mat;
     RenderManager::uploadMesh(&vertices, &indices, &VAO, &VBO, &EBO);
 }
 Mesh::~Mesh() {

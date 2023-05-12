@@ -28,13 +28,16 @@
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "asset_import/materials.h"
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 
 RenderManager* renderManager;
+MaterialSystem* materialSystem;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
+MaterialSystem* MaterialSystem::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -106,12 +109,17 @@ int main() {
 
     //////////////////////////////////
 
+    materialSystem = MaterialSystem::getInstance();
+    materialSystem->createMaterial("test");
+
     // Render Engine
     renderManager = RenderManager::getInstance();
 
     renderManager->startUp(window);
 
     renderManager->loadScene();
+    renderManager->loadIcons();
+
     // init shader
 
     // float lastQueryTime = float(glfwGetTime());
@@ -132,6 +140,8 @@ int main() {
     renderManager->setupTexturePipelineUniforms();
     renderManager->setupAnimatedPipelineUniforms();
     renderManager->setupEntIDPipelineUniforms();
+    renderManager->setupCubemapPipelineUniforms();
+    renderManager->setupIconPipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -170,8 +180,13 @@ int main() {
             glClearBufferfv(GL_DEPTH, 0, &clearDepth);
         }
 
+        renderManager->renderSkybox(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
+
         // draw grid
+        glDisable(GL_CULL_FACE);
         renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
+        glEnable(GL_CULL_FACE);
 
         // draw scene
         renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,

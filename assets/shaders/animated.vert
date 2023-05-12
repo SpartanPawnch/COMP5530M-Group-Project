@@ -15,6 +15,7 @@ uniform mat4 projection;
 
 uniform mat4 bonesMatrix[MAX_BONES];
 
+out vec3 vsPos;
 out vec2 vsTex;
 out vec3 vsNormal;
 
@@ -38,7 +39,7 @@ void main()
     }
     
     
-
+    vsPos = vec3((model * totalPosition).xyz);
     gl_Position =  projection * view * model * totalPosition;
     vsTex = tex;
     vsNormal = normalize(transpose(inverse(mat3(model)))*totalNormal);

@@ -34,10 +34,12 @@
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
 #include "asset_import/animation.h"
+#include "asset_import/materials.h"
 #include "model_import/model.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/CameraComponent.h"
 #include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/SkyBoxComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
@@ -91,6 +93,8 @@ static std::shared_ptr<TextureDescriptor> folderTexture;
 
 // model demo vars
 // static Model model;
+
+static MaterialSystem* materialSystem;
 
 // renderer vars
 static RenderManager* renderManager;
@@ -210,6 +214,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
+    materialSystem = MaterialSystem::getInstance();
     renderManager = RenderManager::getInstance();
 }
 GUIManager::~GUIManager() {
@@ -720,6 +725,8 @@ int viewportTexHeight = 0;
 
 static int viewportSamples = 4;
 
+ImGuizmo::OPERATION imguizmoOperation = ImGuizmo::TRANSLATE;
+
 inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
@@ -783,7 +790,7 @@ inline void drawViewport() {
             glm::mat4 transform = scene.selectedEntity->state.runtimeTransform;
 
             ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-                ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::LOCAL, glm::value_ptr(transform));
+                imguizmoOperation, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
             if (ImGuizmo::IsUsing()) {
                 glm::vec3 skew;
@@ -804,6 +811,22 @@ inline void drawViewport() {
                     viewportSamples = i;
             }
             ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Translate")) {
+            imguizmoOperation = ImGuizmo::TRANSLATE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Rotate")) {
+            imguizmoOperation = ImGuizmo::ROTATE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Scale")) {
+            imguizmoOperation = ImGuizmo::SCALE;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("All")) {
+            imguizmoOperation = ImGuizmo::UNIVERSAL;
         }
         ImGui::PopFont();
     }
@@ -1024,6 +1047,28 @@ void drawComponentProps(ModelComponent& component) {
 
         ImGui::EndCombo();
     }
+    if (component.modelDescriptor) {
+        for (uint32_t i = 0; i < component.modelDescriptor->getMeshCount(); i++) {
+            ImGui::PushID(i);
+            ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
+            std::string meshPreviewStr = "Select a Material";
+            if (component.modelDescriptor->meshHasMaterial(i)) {
+                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            }
+            // materials select options by name
+            if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
+                for (auto const& mat : materialSystem->materials) {
+                    bool selected = (meshPreviewStr == mat.first);
+                    if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                        component.modelDescriptor->setMeshMaterial(i,
+                            materialSystem->loadActiveMaterial(mat.second));
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+    }
 }
 
 void drawComponentProps(SkeletalModelComponent& component) {
@@ -1081,6 +1126,29 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::EndCombo();
     }
 
+    if (component.modelDescriptor) {
+        for (uint32_t i = 0; i < component.modelDescriptor->getMeshCount(); i++) {
+            ImGui::PushID(i);
+            ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
+            std::string meshPreviewStr = "Select a Material";
+            if (component.modelDescriptor->meshHasMaterial(i)) {
+                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            }
+            // materials select options by name
+            if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
+                for (auto const& mat : materialSystem->materials) {
+                    bool selected = (meshPreviewStr == mat.first);
+                    if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                        component.modelDescriptor->setMeshMaterial(i,
+                            materialSystem->loadActiveMaterial(mat.second));
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+    }
+
     if (!hasModel) {
         ImGui::Text("Select a Model with a Skeleton to view the animation controller properties");
         return;
@@ -1106,6 +1174,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
     ImGui::Separator();
     for (unsigned int i = 0; i < component.nodes.size(); i++) {
         ImGui::PushID(i);
+        ImGui::InputText("##name", &component.nodes[i].name[0], component.nodes[i].name.capacity());
+        component.nodes[i].name.resize(std::strlen(&component.nodes[i].name[0]));
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
         if (component.nodes[i].animationDescriptor &&
@@ -1364,6 +1434,40 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
 }
 
+void drawComponentProps(SkyBoxComponent& component) {
+    std::string faceNames[6] = {"right", "left", "top", "bottom", "back", "front"};
+
+    static std::vector<assetfolder::AssetDescriptor> textureFiles;
+    assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE, textureFiles);
+
+    for (unsigned int i = 0; i < 6; i++) {
+        ImGui::PushID(i);
+        ImGui::Text((std::string("Face ") + faceNames[i]).c_str());
+
+        std::string previewStr = "Select a Texture";
+
+        if (component.skybox.faces[i].textureDescriptor &&
+            component.skybox.faces[i].textureDescriptor->path) {
+            previewStr = *component.skybox.faces[i].textureDescriptor->path;
+            previewStr = assetfolder::getRelativePath(previewStr.c_str());
+        }
+
+        if (ImGui::BeginCombo("##skyboxtexture", previewStr.c_str())) {
+            // list available audio clips
+            for (unsigned int j = 0; j < textureFiles.size(); j++) {
+                bool isSelected = (previewStr == textureFiles[j].path);
+                if (ImGui::Selectable(textureFiles[j].name.c_str(), &isSelected)) {
+                    component.updateTex(i, textureFiles[j].path);
+                    std::cout << "set texture to "
+                              << component.skybox.faces[i].textureDescriptor->texId << std::endl;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopID();
+    }
+}
+
 void drawComponentProps(AudioSourceComponent& component) {
     // clip selector
     std::string previewPath = "";
@@ -1481,7 +1585,7 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     // type selector
     const char* types[] = {"BaseComponent", "TransformComponent", "ScriptComponent",
         "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent",
-        "LightComponent"};
+        "LightComponent", "SkyBoxModelComponent"};
     previewStr =
         (loc.type >= 0 && loc.type < ComponentLocation::COMPTYPE_MAX) ? types[loc.type] : "None";
     if (ImGui::BeginCombo("##typeselector", previewStr.c_str())) {
@@ -1521,6 +1625,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
         break;
     case ComponentLocation::LIGHTCOMPONENT:
         drawComponentSelector(loc.componentIdx, storage.vecLightComponent);
+        break;
+    case ComponentLocation::SKYBOXCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecSkyBoxComponent);
         break;
     default:;
     }
@@ -1782,6 +1889,9 @@ inline void drawProperties() {
             // SkeletalModelComponent
             drawComponentList(scene.selectedEntity->components.vecSkeletalModelComponent);
 
+            // SkyBoxModelComponent
+            drawComponentList(scene.selectedEntity->components.vecSkyBoxComponent);
+
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
@@ -1809,6 +1919,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Animated Model Component")) {
                     scene.selectedEntity->components.addComponent(SkeletalModelComponent());
+                }
+                if (ImGui::MenuItem("Add Skybox Component")) {
+                    scene.selectedEntity->components.addComponent(SkyBoxComponent());
                 }
                 if (ImGui::MenuItem("Add Script Component")) {
                     scene.selectedEntity->components.addComponent(ScriptComponent());
@@ -2003,6 +2116,123 @@ inline void drawLevels() {
     }
     ImGui::End();
 }
+std::string newMaterialName = "";
+inline void drawMaterials() {
+    if (ImGui::Begin("Materials")) {
+        ImGui::InputText("##name", &newMaterialName[0], newMaterialName.capacity());
+        newMaterialName.resize(std::strlen(&newMaterialName[0]));
+        if (ImGui::Button("Create Material")) {
+            if (newMaterialName.size() > 0) {
+                if (materialSystem->createMaterial(newMaterialName)) {
+                    newMaterialName = "";
+                }
+                else {
+                    newMaterialName = "Invalid Name, choose new one";
+                }
+            }
+        }
+
+        std::string previewStr = "Select a Material";
+
+        if (materialSystem->selectedMaterial.size() > 0) {
+            previewStr = materialSystem->selectedMaterial;
+        }
+
+        // materials select options by name
+        if (ImGui::BeginCombo("##materialscombo", previewStr.c_str())) {
+            for (auto const& mat : materialSystem->materials) {
+                bool selected = (materialSystem->selectedMaterial == mat.first);
+                if (ImGui::Selectable(mat.first.c_str(), selected)) {
+                    materialSystem->selectMaterial(mat.first);
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        // selected material properties
+        if (materialSystem->selectedMaterial.size() > 0) {
+            Material* mat = materialSystem->getMaterial(materialSystem->selectedMaterial);
+
+            static std::vector<assetfolder::AssetDescriptor> textureFiles;
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE,
+                textureFiles);
+
+            ImGui::Text("Name %s", mat->name.c_str());
+            ImGui::ColorEdit3("Base Color", &mat->baseColor[0]);
+            // texture for base color combo box from textures
+            std::string previewStrBaseColor = "Select a texture";
+            if (mat->baseColorMap.size() > 0) {
+                previewStrBaseColor = mat->baseColorMap;
+            }
+            if (ImGui::BeginCombo("Base Color Map", previewStrBaseColor.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrBaseColor == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->baseColorMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::ColorEdit3("Emissive Color", &mat->emissiveColor[0]);
+            std::string previewStrEmissive = "Select a texture";
+            if (mat->emissiveMap.size() > 0) {
+                previewStrEmissive = mat->emissiveMap;
+            }
+            if (ImGui::BeginCombo("Emissive Map", previewStrEmissive.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrEmissive == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->emissiveMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
+            std::string previewStrRoughness = "Select a texture";
+            if (mat->roughnessMap.size() > 0) {
+                previewStrRoughness = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Roughness Map", previewStrRoughness.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrRoughness == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->roughnessMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
+            std::string previewStrMetalness = "Select a texture";
+            if (mat->metalnessMap.size() > 0) {
+                previewStrMetalness = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Metalness Map", previewStrMetalness.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrMetalness == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->metalnessMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
+            std::string previewStrOcclusion = "Select a texture";
+            if (mat->occlusionMap.size() > 0) {
+                previewStrOcclusion = mat->roughnessMap;
+            }
+            if (ImGui::BeginCombo("Occlusion Map", previewStrOcclusion.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrOcclusion == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->occlusionMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+        }
+    }
+    ImGui::End();
+}
 
 inline void drawScriptDemo() {
     if (ImGui::Begin("Scripting")) {
@@ -2019,83 +2249,81 @@ inline void drawScriptDemo() {
 }
 
 void drawStats() {
-    if (ImGui::Begin("Statistics")) {
-        ImGui::PushFont(guicfg::regularFont);
+    // if (ImGui::Begin("Statistics")) {
+    //     ImGui::PushFont(guicfg::regularFont);
 
-        // CPU
-        ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
-            metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
+    //    // CPU
+    //    ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
+    //        metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
 
-        // draw plot
-        if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Physical Mem
-        float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
-            minPhysMemMB, maxPhysMemMB);
+    //    // Physical Mem
+    //    float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
+    //    ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
+    //        minPhysMemMB, maxPhysMemMB);
 
-        // draw plot
-        if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
 
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
 
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Virtual Mem
-        float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
-        float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
-        float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
-        ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
-            minVirtMemMB, maxVirtMemMB);
+    //    // Virtual Mem
+    //    float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
+    //    ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
+    //        minVirtMemMB, maxVirtMemMB);
 
-        // draw plot
-        if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
-                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-            // setup y
-            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
-            // hide x axis ticks
-            ImPlot::SetupAxis(ImAxis_X1, nullptr,
-                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-            ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
-                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-        }
-        ImPlot::EndPlot();
+    //    // draw plot
+    //    if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
+    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+    //        // setup y
+    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+    //        // hide x axis ticks
+    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
+    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+    //        ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
+    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+    //    }
+    //    ImPlot::EndPlot();
 
-        // Audio stuff
-        ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+    //    // Audio stuff
+    //    ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
 
-        // Texture stuff
-        ImGui::Text("TEXTURES %i loaded", getTextureCount());
+    //    // Texture stuff
+    //    ImGui::Text("TEXTURES %i loaded", getTextureCount());
+    //      ImGui::Text("Point lights: %zu", renderManager->getLightCount());
 
-        // Lights
-        ImGui::Text("Point lights: %zu", renderManager->getLightCount());
-
-        ImGui::PopFont();
-    }
-    ImGui::End();
+    //    ImGui::PopFont();
+    //}
+    // ImGui::End();
 }
 
 float newUIWidth = 300.f;
@@ -2316,6 +2544,9 @@ void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
 
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawMaterials();
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser();
