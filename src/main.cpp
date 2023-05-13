@@ -143,6 +143,9 @@ int main() {
     renderManager->setupCubemapPipelineUniforms();
     renderManager->setupIconPipelineUniforms();
 
+    // register lua stuff
+    scene.registerLuaTable();
+
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         // get window dimensions

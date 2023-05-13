@@ -66,6 +66,7 @@ namespace scripting {
             lua_pushliteral(state,
                 "FloatRef:set() - wrong number of arguments; "
                 "Usage: FloatRef:set(var,f) or var:set(f)");
+            return 0;
         }
 
         // first argument is the userdata

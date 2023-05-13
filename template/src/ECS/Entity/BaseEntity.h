@@ -17,12 +17,13 @@ class BaseEntity {
     void genTransform(const glm::mat4& parentMat);
     virtual void update(const glm::mat4& parentMat, float dt);
     virtual void stop();
-    // void removeComponent(int uuid);
+    static int genUuid();
 
     EntityState state;
 
-    // look for the best uuid generator
-    int uuid;
+    int uuid = -1;
+    bool active = true;
+    bool visible = true;
     std::string name;
 
     int parent = -1;

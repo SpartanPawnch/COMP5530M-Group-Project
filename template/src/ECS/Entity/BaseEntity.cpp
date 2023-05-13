@@ -4,8 +4,11 @@
 
 static int baseUuid = 0;
 
+int BaseEntity::genUuid() {
+    return baseUuid++;
+}
+
 BaseEntity::BaseEntity() {
-    uuid = baseUuid++;
     name = "Base Entity";
 }
 

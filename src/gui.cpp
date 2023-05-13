@@ -886,7 +886,7 @@ inline void drawEntities() {
                         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
                             ImGuiTreeNodeFlags_OpenOnDoubleClick |
                             (ImGuiTreeNodeFlags_Leaf * isLeaf),
-                        "%s", scene.entities[i].name.c_str())) {
+                        "%s #%i", scene.entities[i].name.c_str(), scene.entities[i].uuid)) {
                     openDepth = currDepth + 1;
                 }
                 else {
