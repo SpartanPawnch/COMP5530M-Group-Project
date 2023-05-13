@@ -47,4 +47,7 @@ class Bone {
     glm::mat4 interpolatePosition(float animationTime);
     glm::mat4 interpolateRotation(float animationTime);
     glm::mat4 interpolateScale(float animationTime);
+    glm::vec3 interpolatePositionDirectly(float animationTime);
+    glm::quat interpolateRotationDirectly(float animationTime);
+    glm::vec3 interpolateScaleDirectly(float animationTime);
 };

@@ -29,6 +29,7 @@ struct AnimationControllerNode {
 
 struct NoConditionACTransition {
     AnimationControllerNode* transitionTo;
+    float blendTime = 0.0f;
 };
 
 struct BoolACTransition {
@@ -36,6 +37,7 @@ struct BoolACTransition {
     bool immediate; // should translate instantly or only when animation is done
     bool condition;
     bool desiredValue;
+    float blendTime = 0.0f;
 };
 struct IntACTransition {
     AnimationControllerNode* transitionTo;
@@ -45,6 +47,7 @@ struct IntACTransition {
     bool shouldBeGreater;
     bool shouldBeEqual;
     bool shouldBeLower;
+    float blendTime = 0.0f;
 };
 struct FloatACTransition {
     AnimationControllerNode* transitionTo;
@@ -54,11 +57,11 @@ struct FloatACTransition {
     bool shouldBeGreater;
     bool shouldBeEqual;
     bool shouldBeLower;
+    float blendTime = 0.0f;
 };
 
 struct SkeletalModelComponent : BaseComponent {
     SkeletalModelComponent();
-    SkeletalModelComponent(const std::string& name, const int uuid);
     ~SkeletalModelComponent() {
     }
     void start() override;
@@ -66,7 +69,7 @@ struct SkeletalModelComponent : BaseComponent {
     void stop() override;
 
     void finalLoop();
-    void transitionToNode(AnimationControllerNode* node);
+    void transitionToNode(AnimationControllerNode* node, float bt = 0.0f);
 
     void addNode();
     void addNoConditionTransition();
@@ -81,6 +84,7 @@ struct SkeletalModelComponent : BaseComponent {
 
     void updateAnimation(float dt);
     void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
+    void calculateBoneTransformBlended(Bone* current, Bone* previous, glm::mat4 parentTransform);
     void resetMarices();
 
     // model info
@@ -89,6 +93,7 @@ struct SkeletalModelComponent : BaseComponent {
 
     // animation controller
     std::vector<AnimationControllerNode> nodes;
+    AnimationControllerNode* previousNode;
     AnimationControllerNode* currentNode;
     AnimationControllerNode* nextNode;
     AnimationControllerNode* selectedNode;
@@ -97,5 +102,9 @@ struct SkeletalModelComponent : BaseComponent {
     int currentLoopCount;
     float prevTime;
     bool isPlaying;
+    bool isBlending;
+    float blendFactor;
+    float blendTime;
+    float currentBlendTime;
     std::vector<glm::mat4> transformMatrices;
 };

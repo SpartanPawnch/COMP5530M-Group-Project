@@ -1241,9 +1241,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
     ImGui::Text("Transitions:");
     if (component.selectedNode) {
-        ImGui::Columns(2);
+        ImGui::Columns(3);
         ImGui::Separator();
         ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
         ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
@@ -1264,13 +1266,16 @@ void drawComponentProps(SkeletalModelComponent& component) {
                 ImGui::EndCombo();
             }
             ImGui::NextColumn();
+            ImGui::InputFloat("##nocond_blendtime",
+                &component.selectedNode->noConditionTransitions[i].blendTime);
+            ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeNoConditionTransition(i);
             }
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(5);
+        ImGui::Columns(6);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1279,6 +1284,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Text("Current Value");
         ImGui::NextColumn();
         ImGui::Text("Desired Value");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
         ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
@@ -1307,13 +1314,16 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::Checkbox("##desired_bool",
                 &component.selectedNode->boolTransitions[i].desiredValue);
             ImGui::NextColumn();
+            ImGui::InputFloat("##bool_blendtime",
+                &component.selectedNode->boolTransitions[i].blendTime);
+            ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeBoolACTransition(i);
             }
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(8);
+        ImGui::Columns(9);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1328,6 +1338,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Text("Condition Equal?");
         ImGui::NextColumn();
         ImGui::Text("Condition Greater?");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
         ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
@@ -1364,13 +1376,16 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::Checkbox("##should_greater_int",
                 &component.selectedNode->intTransitions[i].shouldBeGreater);
             ImGui::NextColumn();
+            ImGui::InputFloat("##int_blendtime",
+                &component.selectedNode->intTransitions[i].blendTime);
+            ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeIntACTransition(i);
             }
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(8);
+        ImGui::Columns(9);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1385,6 +1400,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::Text("Condition Equal?");
         ImGui::NextColumn();
         ImGui::Text("Condition Greater?");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
         ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
@@ -1420,6 +1437,9 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::NextColumn();
             ImGui::Checkbox("##should_greater_float",
                 &component.selectedNode->floatTransitions[i].shouldBeGreater);
+            ImGui::NextColumn();
+            ImGui::InputFloat("##float_blendtime",
+                &component.selectedNode->floatTransitions[i].blendTime);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeFloatACTransition(i);

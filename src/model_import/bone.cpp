@@ -91,3 +91,45 @@ glm::mat4 Bone::interpolateScale(float animationTime) {
     glm::vec3 keyScale = glm::mix(prev.scale, next.scale, interpolationFactor);
     return glm::scale(glm::mat4(1.0f), keyScale);
 }
+
+glm::vec3 Bone::interpolatePositionDirectly(float animationTime) {
+    if (positionKeys.size() == 0) {
+        return glm::vec3(0.0f);
+    }
+    if (positionKeys.size() == 1) {
+        return positionKeys.at(0).position;
+    }
+    KeyPosition prev, next;
+    getPositionPrevAndNext(animationTime, prev, next);
+    float interpolationFactor = getInterpolationFactor(prev.time, next.time, animationTime);
+    return glm::mix(prev.position, next.position, interpolationFactor);
+}
+
+glm::quat Bone::interpolateRotationDirectly(float animationTime) {
+    if (rotationKeys.size() == 0) {
+        return glm::quat();
+    }
+    if (rotationKeys.size() == 1) {
+        glm::quat rotation = glm::normalize(rotationKeys.at(0).rotation);
+        return rotation;
+    }
+
+    KeyRotation prev, next;
+    getRotationPrevAndNext(animationTime, prev, next);
+    float interpolationFactor = getInterpolationFactor(prev.time, next.time, animationTime);
+    return glm::slerp(prev.rotation, next.rotation, interpolationFactor);
+}
+
+glm::vec3 Bone::interpolateScaleDirectly(float animationTime) {
+    if (scaleKeys.size() == 0) {
+        return glm::vec3(0.0f);
+    }
+    if (scaleKeys.size() == 1) {
+        return scaleKeys.at(0).scale;
+    }
+
+    KeyScale prev, next;
+    getScalePrevAndNext(animationTime, prev, next);
+    float interpolationFactor = getInterpolationFactor(prev.time, next.time, animationTime);
+    return glm::mix(prev.scale, next.scale, interpolationFactor);
+}

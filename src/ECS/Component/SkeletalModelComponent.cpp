@@ -12,6 +12,9 @@ SkeletalModelComponent::SkeletalModelComponent() {
     isPlaying = false;
     currentNode = nullptr;
     selectedNode = nullptr;
+    nextNode = nullptr;
+    blendFactor = 0.0f;
+    isBlending = false;
 
     transformMatrices.reserve(MAX_BONES);
 
@@ -19,24 +22,6 @@ SkeletalModelComponent::SkeletalModelComponent() {
         transformMatrices.push_back(glm::mat4(1.0f));
     }
 }
-
-SkeletalModelComponent::SkeletalModelComponent(const std::string& _name, const int _uuid) {
-    name = _name;
-    uuid = _uuid;
-    baseUuid = std::max(baseUuid, _uuid + 1);
-
-    currentTime = 0.0;
-    currentLoopCount = 0;
-    currentNode = nullptr;
-    selectedNode = nullptr;
-
-    transformMatrices.reserve(MAX_BONES);
-
-    for (unsigned int i = 0; i < MAX_BONES; i++) {
-        transformMatrices.push_back(glm::mat4(1.0f));
-    }
-}
-
 void SkeletalModelComponent::start() {
 }
 void SkeletalModelComponent::update(float dt, EntityState& state) {
@@ -56,7 +41,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
 
     for each (NoConditionACTransition transition in currentNode->noConditionTransitions) {
         if (currentNode->loopCount > 0 && currentLoopCount >= currentNode->loopCount) {
-            transitionToNode(transition.transitionTo);
+            transitionToNode(transition.transitionTo, transition.blendTime);
             return;
         }
     }
@@ -64,7 +49,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
     for each (BoolACTransition transition in currentNode->boolTransitions) {
         if (transition.condition == transition.desiredValue) {
             if (transition.immediate) {
-                transitionToNode(transition.transitionTo);
+                transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
             else if (!(nextNode)) {
@@ -78,7 +63,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
             (transition.shouldBeEqual && transition.condition == transition.desiredValue) ||
             (transition.shouldBeGreater && transition.condition > transition.desiredValue)) {
             if (transition.immediate) {
-                transitionToNode(transition.transitionTo);
+                transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
             else if (!(nextNode)) {
@@ -92,7 +77,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
             (transition.shouldBeEqual && transition.condition == transition.desiredValue) ||
             (transition.shouldBeGreater && transition.condition > transition.desiredValue)) {
             if (transition.immediate) {
-                transitionToNode(transition.transitionTo);
+                transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
             else if (!(nextNode)) {
@@ -109,6 +94,14 @@ void SkeletalModelComponent::updateAnimation(float dt) {
         currentNode->animationDescriptor;
     if (currentAnimation) {
         currentTime += currentAnimation->getTicksPerSecond() * dt;
+        if (isBlending) {
+            currentBlendTime += currentAnimation->getTicksPerSecond() *  dt;
+            blendFactor = currentBlendTime / blendTime;
+            if (currentBlendTime >= blendTime) {
+                isBlending = false;
+                blendFactor = 0.0f;
+            }
+        }
         if (currentTime / currentAnimation->getDuration() >= 1.0) {
             currentLoopCount++;
             if (currentNode->loopCount > 0 && currentLoopCount > currentNode->loopCount) {
@@ -117,6 +110,11 @@ void SkeletalModelComponent::updateAnimation(float dt) {
             }
         }
         currentTime = fmod(currentTime, currentAnimation->getDuration());
+        if (isBlending) {
+            std::shared_ptr<animation::AnimationDescriptor> previousAnimation =
+                previousNode->animationDescriptor;
+            calculateBoneTransformBlended(currentAnimation->getRootBone(), previousAnimation->getRootBone(), glm::mat4(1.0f));
+        }
         calculateBoneTransform(currentAnimation->getRootBone(), glm::mat4(1.0f));
     }
 }
@@ -157,6 +155,38 @@ void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parent
     }
 }
 
+void SkeletalModelComponent::calculateBoneTransformBlended(Bone* bone, Bone* previousBone, glm::mat4 parentTransform) {
+    std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
+        currentNode->animationDescriptor;
+    std::shared_ptr<animation::AnimationDescriptor> previousAnimation =
+        previousNode->animationDescriptor;
+
+    glm::vec3 position = bone->interpolatePositionDirectly(currentTime);
+    glm::quat rotation = bone->interpolateRotationDirectly(currentTime);
+    glm::vec3 scale = bone->interpolateScaleDirectly(currentTime);
+
+    glm::vec3 previousPosition = previousBone->interpolatePositionDirectly(currentTime);
+    glm::quat previousRotation = previousBone->interpolateRotationDirectly(currentTime);
+    glm::vec3 previousScale = previousBone->interpolateScaleDirectly(currentTime);
+
+    glm::vec3 blendedPosition = glm::mix(previousPosition, position, blendFactor);
+    glm::quat blendedRotation = glm::slerp(previousRotation, rotation, blendFactor);
+    glm::vec3 blendedScale = glm::mix(previousScale, scale, blendFactor);
+
+    glm::mat4 positionMat = glm::translate(glm::mat4(1.0f), glm::vec3(blendedPosition));
+    glm::mat4 rotationMat = glm::toMat4(blendedRotation);
+    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(blendedScale));
+
+    glm::mat4 globalTransformation = parentTransform * positionMat * rotationMat * scaleMat;
+
+    if (bone->id < MAX_BONES && bone->id >= 0)
+        transformMatrices[bone->id] = globalTransformation * bone->transform;
+
+    for (unsigned int i = 0; i < bone->children.size(); i++) {
+        calculateBoneTransformBlended(&bone->children[i], &previousBone->children[i], globalTransformation);
+    }
+}
+
 void SkeletalModelComponent::finalLoop() {
     if (nextNode) {
         transitionToNode(nextNode);
@@ -166,11 +196,19 @@ void SkeletalModelComponent::finalLoop() {
     }
 }
 
-void SkeletalModelComponent::transitionToNode(AnimationControllerNode* node) {
+void SkeletalModelComponent::transitionToNode(AnimationControllerNode* node, float bt) {
+    previousNode = currentNode;
     currentNode = node;
     currentTime = 0;
     currentLoopCount = 0;
     nextNode = nullptr;
+    if (bt > 0.0f)
+        isBlending = true;
+    else
+        isBlending = false;
+    blendFactor = 0.0f;
+    blendTime = bt;
+    currentBlendTime = 0.0f;
 }
 
 void SkeletalModelComponent::addNode() {
