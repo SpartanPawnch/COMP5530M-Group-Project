@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\src\px_globals.cpp">
+      <Filter>API Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcContactCache.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcContactMethodImpl.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcMaterialHeightField.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcMaterialMesh.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcMaterialMethodImpl.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcMaterialShape.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcNpBatch.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcNpCacheStreamPair.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcNpContactPrepShared.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcNpMemBlockPool.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\src\pipeline\PxcNpThreadContext.cpp">
+      <Filter>Common Source\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsCCD.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsContactManager.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsContext.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsDefaultMemoryManager.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsIslandSim.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsMaterialCombiner.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsNphaseImplementationContext.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\src\PxsSimpleIslandManager.cpp">
+      <Filter>Software Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxsMaterialCore.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxsMaterialManager.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvConfig.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvDynamics.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvGeometry.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvGlobals.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvManager.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\api\include\PxvSimStats.h">
+      <Filter>API Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\collision\PxcContactMethodImpl.h">
+      <Filter>Common Includes\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcConstraintBlockStream.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcContactCache.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcMaterialMethodImpl.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpBatch.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpCache.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpCacheStreamPair.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpContactPrepShared.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpMemBlockPool.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpThreadContext.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\pipeline\PxcNpWorkUnit.h">
+      <Filter>Common Includes\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\utils\PxcScratchAllocator.h">
+      <Filter>Common Includes\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\common\include\utils\PxcThreadCoherentCache.h">
+      <Filter>Common Includes\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsBodySim.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsCCD.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsContactManager.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsContactManagerState.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsContext.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsDefaultMemoryManager.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsHeapMemoryAllocator.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsIncrementalConstraintPartitioning.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsIslandManagerTypes.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsIslandSim.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsIslandNodeIndex.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsKernelWrangler.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsMaterialCombiner.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsMemoryManager.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsNphaseImplementationContext.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsRigidBody.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsShapeSim.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsSimpleIslandManager.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsSimulationController.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxsTransformCache.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\lowlevel\software\include\PxvNphaseImplementationContext.h">
+      <Filter>Software Includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\source\compiler\cmake\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="API Includes">
+      <UniqueIdentifier>{BFF81DE5-ECA6-344D-821B-ACB9A965A445}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="API Source">
+      <UniqueIdentifier>{AC637757-44A7-38C6-B295-526B511E577D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Includes">
+      <UniqueIdentifier>{5E1988DD-A23A-3BBB-8FF1-D7DE66DDD56A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Includes\collision">
+      <UniqueIdentifier>{29AFD5C5-0578-3EA0-815F-EA14BC8B2DE8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Includes\pipeline">
+      <UniqueIdentifier>{36409637-12AC-3714-AC0A-B6942539D0D5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Includes\utils">
+      <UniqueIdentifier>{FE41F4DC-0080-3A5E-8311-E681C0031E53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Source">
+      <UniqueIdentifier>{E4D617D9-8AE3-3BC4-A3B8-6F8C664E69C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Source\pipeline">
+      <UniqueIdentifier>{CCD582E8-9CB1-34AB-9B69-5F2FB1F051C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Software Includes">
+      <UniqueIdentifier>{051FECDF-C495-3B8D-B9F7-B0CC4F28AE63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Software Source">
+      <UniqueIdentifier>{13FAAD0D-31B9-3A72-812F-1B1136B88A44}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

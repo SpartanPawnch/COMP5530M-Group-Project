@@ -10,6 +10,8 @@
 #include <rapidjson/document.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
+#include <PxPhysics.h>
+#include <PxPhysicsAPI.h>
 
 #include "logging.h"
 #include "util.h"
@@ -29,6 +31,12 @@
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
 static Scene* currentScene;
+
+// test to see that physx is loading
+//  TODO remove
+physx::PxDefaultAllocator mAllocator;
+physx::PxDefaultErrorCallback mErrorCallback;
+physx::PxFoundation* test = PxCreateFoundation(PX_PHYSICS_VERSION, mAllocator, mErrorCallback);
 
 // load level from manifest in path
 void loadLevel(const char* path, Scene& scene) {
@@ -280,6 +288,20 @@ void loadLevel(const char* path, Scene& scene) {
     currentLevelPath = path;
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
+}
+static std::string enqueuedLevel;
+static int luaEnqueueLevel(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1) {
+        return 0;
+    }
+    enqueuedLevel = std::string(luaL_tolstring(state, 1, nullptr));
+    return 0;
+}
+void registerLevelFunctionsLua() {
+    scripting::beginModule(1);
+    scripting::registerModuleFunction("enqueueLevel", &luaEnqueueLevel);
+    scripting::finalizeModule("levels");
 }
 
 #ifdef ONO_ENGINE_ONLY

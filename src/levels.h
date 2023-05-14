@@ -3,6 +3,8 @@
 
 #include "ECS/Scene/Scene.h"
 
+void registerLevelFunctionsLua();
+
 // load level from manifest in path
 void loadLevel(const char* path, Scene& scene);
 #ifdef ONO_ENGINE_ONLY

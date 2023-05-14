@@ -886,7 +886,7 @@ inline void drawEntities() {
                         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
                             ImGuiTreeNodeFlags_OpenOnDoubleClick |
                             (ImGuiTreeNodeFlags_Leaf * isLeaf),
-                        "%s #%i", scene.entities[i].name.c_str(), scene.entities[i].uuid)) {
+                        "%s", scene.entities[i].name.c_str())) {
                     openDepth = currDepth + 1;
                 }
                 else {
@@ -936,6 +936,11 @@ inline void drawEntities() {
                     }
                     ImGui::EndPopup();
                 }
+
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+                ImGui::Text(" #%i", scene.entities[i].uuid);
+                ImGui::PopStyleColor();
             }
         }
 
@@ -1530,8 +1535,9 @@ static void drawEntitySelector(ScriptComponent& component, int i) {
     int idx = scene.uuidToIdx.count(component.args[i].arg._int) > 0
         ? scene.uuidToIdx[component.args[i].arg._int]
         : -1;
-    std::string previewStr =
-        (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
+    std::string previewStr = (idx >= 0 && idx < scene.entities.size())
+        ? (scene.entities[idx].name + " #" + std::to_string(scene.entities[idx].uuid))
+        : "None";
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
@@ -1539,6 +1545,12 @@ static void drawEntitySelector(ScriptComponent& component, int i) {
             if (ImGui::Selectable(scene.entities[j].name.c_str(), &isSelected)) {
                 component.args[i].arg._int = scene.entities[j].uuid;
             }
+
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", scene.entities[j].uuid);
+            ImGui::PopStyleColor();
+
             ImGui::PopID();
         }
         ImGui::EndCombo();
@@ -2540,13 +2552,13 @@ void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
 
     // TODO undocked windows in front
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
+    drawMaterials();
+
+    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawLevels();
 
     ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
     drawEntities();
-
-    ImGui::SetNextWindowDockID(dockLeft, ImGuiCond_Once);
-    drawMaterials();
 
     ImGui::SetNextWindowDockID(dockBotLeft, ImGuiCond_Once);
     drawAssetBrowser();
