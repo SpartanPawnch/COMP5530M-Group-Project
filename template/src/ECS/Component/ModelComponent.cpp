@@ -1,7 +1,5 @@
 #include "ModelComponent.h"
 
-#include "../../model_import/model.h"
-
 static int baseUuid = 0;
 
 ModelComponent::ModelComponent() {
@@ -19,4 +17,15 @@ void ModelComponent::start() {
 void ModelComponent::update(float dt, EntityState& state) {
 }
 void ModelComponent::stop() {
+}
+
+void ModelComponent::readMaterials() {
+    materials.clear();
+    MaterialSystem* instance = MaterialSystem::getInstance();
+    if (modelDescriptor) {
+        materials.resize(modelDescriptor->getMeshCount());
+        for (uint32_t i = 0; i < modelDescriptor->getMeshCount(); i++) {
+            materials[i] = instance->getActiveMaterial(modelDescriptor->getMeshMaterialName(i));
+        }
+    }
 }

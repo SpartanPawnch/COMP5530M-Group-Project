@@ -1041,6 +1041,7 @@ void drawComponentProps(ModelComponent& component) {
 
                 std::swap(component.modelDescriptor, desc);
                 component.modelUuid = component.modelDescriptor ? uuid : "";
+                component.readMaterials();
             }
             ImGui::PopID();
         }
@@ -1052,16 +1053,15 @@ void drawComponentProps(ModelComponent& component) {
             ImGui::PushID(i);
             ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
             std::string meshPreviewStr = "Select a Material";
-            if (component.modelDescriptor->meshHasMaterial(i)) {
-                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            if (component.materials[i]) {
+                meshPreviewStr = component.materials[i]->name;
             }
             // materials select options by name
             if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
                 for (auto const& mat : materialSystem->materials) {
                     bool selected = (meshPreviewStr == mat.first);
                     if (ImGui::Selectable(mat.first.c_str(), selected)) {
-                        component.modelDescriptor->setMeshMaterial(i,
-                            materialSystem->loadActiveMaterial(mat.second));
+                        component.materials[i] = materialSystem->loadActiveMaterial(mat.second);
                     }
                 }
                 ImGui::EndCombo();
@@ -1119,6 +1119,7 @@ void drawComponentProps(SkeletalModelComponent& component) {
 
                 std::swap(component.modelDescriptor, desc);
                 component.modelUuid = component.modelDescriptor ? uuid : "";
+                component.readMaterials();
             }
             ImGui::PopID();
         }
@@ -1131,16 +1132,15 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::PushID(i);
             ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
             std::string meshPreviewStr = "Select a Material";
-            if (component.modelDescriptor->meshHasMaterial(i)) {
-                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            if (component.materials[i]) {
+                meshPreviewStr = component.materials[i]->name;
             }
             // materials select options by name
             if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
                 for (auto const& mat : materialSystem->materials) {
                     bool selected = (meshPreviewStr == mat.first);
                     if (ImGui::Selectable(mat.first.c_str(), selected)) {
-                        component.modelDescriptor->setMeshMaterial(i,
-                            materialSystem->loadActiveMaterial(mat.second));
+                        component.materials[i] = materialSystem->loadActiveMaterial(mat.second);
                     }
                 }
                 ImGui::EndCombo();
@@ -2189,6 +2189,7 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrBaseColor == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->baseColorMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
@@ -2224,7 +2225,7 @@ inline void drawMaterials() {
             ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
             std::string previewStrMetalness = "Select a texture";
             if (mat->metalnessMap.size() > 0) {
-                previewStrMetalness = mat->roughnessMap;
+                previewStrMetalness = mat->metalnessMap;
             }
             if (ImGui::BeginCombo("Metalness Map", previewStrMetalness.c_str())) {
                 for (unsigned int i = 0; i < textureFiles.size(); i++) {
@@ -2238,13 +2239,39 @@ inline void drawMaterials() {
             ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
             std::string previewStrOcclusion = "Select a texture";
             if (mat->occlusionMap.size() > 0) {
-                previewStrOcclusion = mat->roughnessMap;
+                previewStrOcclusion = mat->occlusionMap;
             }
             if (ImGui::BeginCombo("Occlusion Map", previewStrOcclusion.c_str())) {
                 for (unsigned int i = 0; i < textureFiles.size(); i++) {
                     bool isSelected = (previewStrOcclusion == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->occlusionMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            std::string previewStrNormal = "Select a texture";
+            if (mat->normalMap.size() > 0) {
+                previewStrNormal = mat->normalMap;
+            }
+            if (ImGui::BeginCombo("Normal Map", previewStrNormal.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrNormal == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->normalMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            std::string previewStrAlpha = "Select a texture";
+            if (mat->alphaMap.size() > 0) {
+                previewStrAlpha = mat->alphaMap;
+            }
+            if (ImGui::BeginCombo("Alpha Map", previewStrAlpha.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrAlpha == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->alphaMap = textureFiles[i].path;
                     }
                 }
                 ImGui::EndCombo();

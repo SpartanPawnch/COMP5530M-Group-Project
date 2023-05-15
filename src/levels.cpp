@@ -17,6 +17,7 @@
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "asset_import/materials.h"
 #include "ECS/Scene/Scene.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
@@ -29,6 +30,14 @@
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
 static Scene* currentScene;
+
+glm::vec3 getVec3(rapidjson::Value& in) {
+    glm::vec3 ret;
+    ret.x = in[0].GetFloat();
+    ret.y = in[1].GetFloat();
+    ret.z = in[2].GetFloat();
+    return ret;
+}
 
 // load level from manifest in path
 void loadLevel(const char* path, Scene& scene) {
@@ -93,6 +102,33 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
 
+    MaterialSystem* matInstance = MaterialSystem::getInstance();
+    // load materials
+    {
+        assert(doc.HasMember("materials"));
+        auto jsonMaterials = doc["materials"].GetArray();
+        for (unsigned int i = 0; i < jsonMaterials.Size(); i++) {
+            Material mat;
+            mat.name = jsonMaterials[i]["name"].GetString();
+            mat.baseColor = getVec3(jsonMaterials[i]["baseColor"]);
+            mat.emissiveColor = getVec3(jsonMaterials[i]["emissiveColor"]);
+
+            mat.roughness = jsonMaterials[i]["roughness"].GetFloat();
+            mat.metalness = jsonMaterials[i]["metalness"].GetFloat();
+            mat.occlusion = jsonMaterials[i]["occlusion"].GetFloat();
+
+            mat.baseColorMap = jsonMaterials[i]["baseColorMap"].GetString();
+            mat.roughnessMap = jsonMaterials[i]["roughnessMap"].GetString();
+            mat.metalnessMap = jsonMaterials[i]["metalnessMap"].GetString();
+            mat.normalMap = jsonMaterials[i]["normalMap"].GetString();
+            mat.alphaMap = jsonMaterials[i]["alphaMap"].GetString();
+            mat.emissiveMap = jsonMaterials[i]["emissiveMap"].GetString();
+            mat.occlusionMap = jsonMaterials[i]["occlusionMap"].GetString();
+            
+            matInstance->createMaterialDirectly(mat);
+        }
+    }
+
     // load models
     std::vector<std::shared_ptr<model::ModelDescriptor>> modelPtrs;
     {
@@ -102,6 +138,18 @@ void loadLevel(const char* path, Scene& scene) {
             modelPtrs.emplace_back(
                 model::modelLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
                     jsonModels[i]["uuid"].GetString()));
+        }
+    }
+
+    // load animations
+    std::vector<std::shared_ptr<animation::AnimationDescriptor>> animationPtrs;
+    {
+        assert(doc.HasMember("animations"));
+        auto jsonModels = doc["animations"].GetArray();
+        for (unsigned int i = 0; i < jsonModels.Size(); i++) {
+            animationPtrs.emplace_back(
+                animation::animationLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
+                    jsonModels[i]["uuid"].GetString(),model::modelGetByUuid(projRoot + jsonModels[i]["modelUuid"].GetString())));
         }
     }
 
@@ -157,6 +205,117 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(trComponent);
                 }
 
+                // ModelComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
+                    ModelComponent model(name, uuid);
+
+                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
+                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
+                    
+                    model.materials.resize(jsonComponent["materials"].Size());
+                    for (unsigned int material = 0; material < jsonComponent["materials"].Size(); material++) {
+                        model.materials[material] = matInstance->getActiveMaterial(jsonComponent["materials"][material].GetString());
+                    }
+
+                    baseEntity.components.addComponent(model);
+                }
+
+                // SkeletalModelComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "SkeletalModelComponent") == 0) {
+                    SkeletalModelComponent model(name, uuid);
+
+                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
+                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
+
+                    model.materials.resize(jsonComponent["materials"].Size());
+                    for (unsigned int material = 0; material < jsonComponent["materials"].Size(); material++) {
+                        model.materials[material] = matInstance->getActiveMaterial(jsonComponent["materials"][material].GetString());
+                    }
+
+                    model.nodes.resize(jsonComponent["nodes"].Size());
+                    for (unsigned int node = 0; node < jsonComponent["nodes"].Size(); node++) {
+                        //read nodes without transitions
+                        AnimationControllerNode currNode;
+                        currNode.name = jsonComponent["nodes"][node]["name"].GetString();
+                        currNode.animationUuid = jsonComponent["nodes"][node]["animationUuid"].GetString();
+                        currNode.animationDescriptor = animation::animationGetByUuid(currNode.animationUuid);
+                        currNode.loopCount = jsonComponent["nodes"][node]["loopCount"].GetInt();
+                        model.nodes[node] = currNode;
+                    }
+                    for (unsigned int node = 0; node < jsonComponent["nodes"].Size(); node++) {
+                        //get transitions
+                        model.nodes[node].noConditionTransitions.resize(jsonComponent["nodes"][node]["noconditiontransitions"].Size());
+                        for (unsigned int noCond = 0; noCond < jsonComponent["nodes"][node]["noconditiontransitions"].Size(); noCond++) {
+                            NoConditionACTransition noCondTr;
+                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
+                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["transitionTo"].GetString()) {
+                                    noCondTr.transitionTo = &model.nodes[nodeFind];
+                                    break;
+                                }
+                            }
+                            noCondTr.blendTime = jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["blendTime"].GetDouble();
+                            model.nodes[node].noConditionTransitions[noCond] = noCondTr;
+                        }
+
+                        model.nodes[node].boolTransitions.resize(jsonComponent["nodes"][node]["booltransitions"].Size());
+                        for (unsigned int boolCond = 0; boolCond < jsonComponent["nodes"][node]["booltransitions"].Size(); boolCond++) {
+                            BoolACTransition boolCondTr;
+                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
+                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["booltransitions"][boolCond]["transitionTo"].GetString()) {
+                                    boolCondTr.transitionTo = &model.nodes[nodeFind];
+                                    break;
+                                }
+                            }
+                            boolCondTr.blendTime = jsonComponent["nodes"][node]["booltransitions"][boolCond]["blendTime"].GetDouble();
+                            boolCondTr.immediate = jsonComponent["nodes"][node]["booltransitions"][boolCond]["immediate"].GetBool();
+                            boolCondTr.condition = jsonComponent["nodes"][node]["booltransitions"][boolCond]["condition"].GetBool();
+                            boolCondTr.desiredValue = jsonComponent["nodes"][node]["booltransitions"][boolCond]["desiredValue"].GetBool();
+                            model.nodes[node].boolTransitions[boolCond] = boolCondTr;
+                        }
+
+                        model.nodes[node].intTransitions.resize(jsonComponent["nodes"][node]["inttransitions"].Size());
+                        for (unsigned int intCond = 0; intCond < jsonComponent["nodes"][node]["inttransitions"].Size(); intCond++) {
+                            IntACTransition intCondTr;
+                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
+                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["inttransitions"][intCond]["transitionTo"].GetString()) {
+                                    intCondTr.transitionTo = &model.nodes[nodeFind];
+                                    break;
+                                }
+                            }
+                            intCondTr.blendTime = jsonComponent["nodes"][node]["inttransitions"][intCond]["blendTime"].GetDouble();
+                            intCondTr.immediate = jsonComponent["nodes"][node]["inttransitions"][intCond]["immediate"].GetBool();
+                            intCondTr.condition = jsonComponent["nodes"][node]["inttransitions"][intCond]["condition"].GetInt();
+                            intCondTr.desiredValue = jsonComponent["nodes"][node]["inttransitions"][intCond]["desiredValue"].GetInt();
+                            intCondTr.shouldBeLower = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeLower"].GetBool();
+                            intCondTr.shouldBeEqual = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeEqual"].GetBool();
+                            intCondTr.shouldBeGreater = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeGreater"].GetBool();
+                            model.nodes[node].intTransitions[intCond] = intCondTr;
+                        }
+
+                        model.nodes[node].floatTransitions.resize(jsonComponent["nodes"][node]["floattransitions"].Size());
+                        for (unsigned int floatCond = 0; floatCond < jsonComponent["nodes"][node]["floattransitions"].Size(); floatCond++) {
+                            FloatACTransition floatCondTr;
+                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
+                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["floattransitions"][floatCond]["transitionTo"].GetString()) {
+                                    floatCondTr.transitionTo = &model.nodes[nodeFind];
+                                    break;
+                                }
+                            }
+                            floatCondTr.blendTime = jsonComponent["nodes"][node]["floattransitions"][floatCond]["blendTime"].GetDouble();
+                            floatCondTr.immediate = jsonComponent["nodes"][node]["floattransitions"][floatCond]["immediate"].GetBool();
+                            floatCondTr.condition = jsonComponent["nodes"][node]["floattransitions"][floatCond]["condition"].GetDouble();
+                            floatCondTr.desiredValue = jsonComponent["nodes"][node]["floattransitions"][floatCond]["desiredValue"].GetDouble();
+                            floatCondTr.shouldBeLower = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeLower"].GetBool();
+                            floatCondTr.shouldBeEqual = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeEqual"].GetBool();
+                            floatCondTr.shouldBeGreater = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeGreater"].GetBool();
+                            model.nodes[node].floatTransitions[floatCond] = floatCondTr;
+                        }
+
+                    }
+
+                    baseEntity.components.addComponent(model);
+                }
+
                 // AudioSourceComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "AudioSourceComponent") == 0) {
                     AudioSourceComponent audioSrc(name, uuid);
@@ -209,14 +368,6 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(light);
                 }
 
-                // ModelComponent
-                else if (strcmp(jsonComponent["type"].GetString(), "ModelComponent") == 0) {
-                    ModelComponent model(name, uuid);
-
-                    model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
-                    model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
-                    baseEntity.components.addComponent(model);
-                }
                 // ScriptComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ScriptComponent") == 0) {
                     ScriptComponent script(name, uuid);
@@ -281,7 +432,6 @@ void loadLevel(const char* path, Scene& scene) {
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
 }
-
 #ifdef ONO_ENGINE_ONLY
 // --- Per-Component-Type serialization functions
 static void saveComponent(const TransformComponent& trComponent,
@@ -363,6 +513,182 @@ static void saveComponent(const AudioSourceComponent& component,
 
     writer.Key("playOnStart");
     writer.Bool(component.playOnStart);
+
+    writer.EndObject();
+}
+static void saveComponent(const ModelComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("ModelComponent");
+
+    writer.Key("modelUuid");
+    writer.String(component.modelUuid.c_str());
+
+    writer.Key("materials");
+    writer.StartArray();
+    for (int i = 0; i < component.materials.size(); i++) {
+        writer.String(component.materials[i]->name.c_str());
+    }
+    writer.EndArray();
+    
+
+    writer.EndObject();
+}
+
+static void saveComponent(const SkeletalModelComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("SkeletalModelComponent");
+
+    writer.Key("modelUuid");
+    writer.String(component.modelUuid.c_str());
+
+    writer.Key("materials");
+    writer.StartArray();
+    for (int i = 0; i < component.materials.size(); i++) {
+        writer.String(component.materials[i]->name.c_str());
+    }
+    writer.EndArray();
+
+    writer.Key("nodes");
+    writer.StartArray();
+    for (int i = 0; i < component.nodes.size(); i++) {
+        writer.StartObject();
+
+        writer.Key("name");
+        writer.String(component.nodes[i].name.c_str());
+
+        writer.Key("animationUuid");
+        writer.String(component.nodes[i].animationUuid.c_str());
+
+        writer.Key("loopCount");
+        writer.Int(component.nodes[i].loopCount);
+
+        writer.Key("noconditiontransitions");
+        writer.StartArray();
+        for (int j = 0; i < component.nodes[i].noConditionTransitions.size(); j++) {
+            writer.StartObject();
+
+            writer.Key("transitionTo");
+            writer.String(component.nodes[i].noConditionTransitions[j].transitionTo->name.c_str());
+
+            writer.Key("blendTime");
+            writer.Double(component.nodes[i].noConditionTransitions[j].blendTime);
+
+            writer.EndObject();
+        }
+        writer.EndArray();
+
+        writer.Key("booltransitions");
+        writer.StartArray();
+        for (int j = 0; i < component.nodes[i].boolTransitions.size(); j++) {
+            writer.StartObject();
+
+            writer.Key("transitionTo");
+            writer.String(component.nodes[i].boolTransitions[j].transitionTo->name.c_str());
+
+            writer.Key("blendTime");
+            writer.Double(component.nodes[i].boolTransitions[j].blendTime);
+
+            writer.Key("immediate");
+            writer.Bool(component.nodes[i].boolTransitions[j].immediate);
+
+            writer.Key("condition");
+            writer.Bool(component.nodes[i].boolTransitions[j].condition);
+
+            writer.Key("desiredValue");
+            writer.Bool(component.nodes[i].boolTransitions[j].desiredValue);
+
+            writer.EndObject();
+        }
+        writer.EndArray();
+
+        writer.Key("inttransitions");
+        writer.StartArray();
+        for (int j = 0; i < component.nodes[i].intTransitions.size(); j++) {
+            writer.StartObject();
+
+            writer.Key("transitionTo");
+            writer.String(component.nodes[i].intTransitions[j].transitionTo->name.c_str());
+
+            writer.Key("blendTime");
+            writer.Double(component.nodes[i].intTransitions[j].blendTime);
+
+            writer.Key("immediate");
+            writer.Bool(component.nodes[i].intTransitions[j].immediate);
+
+            writer.Key("condition");
+            writer.Int(component.nodes[i].intTransitions[j].condition);
+
+            writer.Key("desiredValue");
+            writer.Int(component.nodes[i].intTransitions[j].desiredValue);
+
+            writer.Key("shouldBeLower");
+            writer.Bool(component.nodes[i].intTransitions[j].shouldBeLower);
+
+            writer.Key("shouldBeEqual");
+            writer.Bool(component.nodes[i].intTransitions[j].shouldBeEqual);
+
+            writer.Key("shouldBeGreater");
+            writer.Bool(component.nodes[i].intTransitions[j].shouldBeGreater);
+
+            writer.EndObject();
+        }
+        writer.EndArray();
+
+        writer.Key("floattransitions");
+        writer.StartArray();
+        for (int j = 0; i < component.nodes[i].floatTransitions.size(); j++) {
+            writer.StartObject();
+
+            writer.Key("transitionTo");
+            writer.String(component.nodes[i].floatTransitions[j].transitionTo->name.c_str());
+
+            writer.Key("blendTime");
+            writer.Double(component.nodes[i].floatTransitions[j].blendTime);
+
+            writer.Key("immediate");
+            writer.Bool(component.nodes[i].floatTransitions[j].immediate);
+
+            writer.Key("condition");
+            writer.Double(component.nodes[i].floatTransitions[j].condition);
+
+            writer.Key("desiredValue");
+            writer.Double(component.nodes[i].floatTransitions[j].desiredValue);
+
+            writer.Key("shouldBeLower");
+            writer.Bool(component.nodes[i].floatTransitions[j].shouldBeLower);
+
+            writer.Key("shouldBeEqual");
+            writer.Bool(component.nodes[i].floatTransitions[j].shouldBeEqual);
+
+            writer.Key("shouldBeGreater");
+            writer.Bool(component.nodes[i].floatTransitions[j].shouldBeGreater);
+
+            writer.EndObject();
+        }
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+
 
     writer.EndObject();
 }
@@ -452,25 +778,6 @@ static void saveComponent(const LightComponent& component,
     writer.Double(float(component.specular[1]));
     writer.Double(float(component.specular[2]));
     writer.EndArray();
-
-    writer.EndObject();
-}
-
-static void saveComponent(const ModelComponent& component,
-    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
-    writer.StartObject();
-
-    writer.Key("name");
-    writer.String(component.name.c_str());
-
-    writer.Key("uuid");
-    writer.Int(component.uuid);
-
-    writer.Key("type");
-    writer.String("ModelComponent");
-
-    writer.Key("modelUuid");
-    writer.String(component.modelUuid.c_str());
 
     writer.EndObject();
 }
@@ -639,6 +946,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 saveComponent(modelComponents[j], writer);
             }
 
+            // SkeletalModelComponent
+            const std::vector<SkeletalModelComponent>& skeletalModelComponents =
+                scene.entities[i].components.vecSkeletalModelComponent;
+            for (unsigned int j = 0; j < skeletalModelComponents.size(); j++) {
+                saveComponent(skeletalModelComponents[j], writer);
+            }
+
             // ScriptComponent
             const std::vector<ScriptComponent>& scriptComponents =
                 scene.entities[i].components.vecScriptComponent;
@@ -681,6 +995,59 @@ void saveLevel(const char* path, const Scene& scene) {
         writer.EndArray();
     }
 
+    // save materials
+    {
+        writer.Key("materials");
+        writer.StartArray();
+        MaterialSystem* matInstance = MaterialSystem::getInstance();
+        for (auto const& mat : matInstance->materials) {
+            writer.StartObject();
+
+            writer.Key("name");
+            writer.String(mat.second.name.c_str());
+
+            writer.Key("baseColor");
+            writer.StartArray();
+            writer.Double(mat.second.baseColor.x);
+            writer.Double(mat.second.baseColor.y);
+            writer.Double(mat.second.baseColor.z);
+            writer.EndArray();
+
+            writer.Key("emissiveColor");
+            writer.StartArray();
+            writer.Double(mat.second.emissiveColor.x);
+            writer.Double(mat.second.emissiveColor.y);
+            writer.Double(mat.second.emissiveColor.z);
+            writer.EndArray();
+
+            writer.Key("roughness");
+            writer.Double(mat.second.roughness);
+            writer.Key("metalness");
+            writer.Double(mat.second.metalness);
+            writer.Key("occlusion");
+            writer.Double(mat.second.occlusion);
+
+            writer.Key("baseColorMap");
+            writer.String(mat.second.baseColorMap.c_str());
+            writer.Key("roughnessMap");
+            writer.String(mat.second.roughnessMap.c_str());
+            writer.Key("metalnessMap");
+            writer.String(mat.second.metalnessMap.c_str());
+            writer.Key("normalMap");
+            writer.String(mat.second.normalMap.c_str());
+            writer.Key("alphaMap");
+            writer.String(mat.second.alphaMap.c_str());
+            writer.Key("emissiveMap");
+            writer.String(mat.second.emissiveMap.c_str());
+            writer.Key("occlusionMap");
+            writer.String(mat.second.occlusionMap.c_str());
+
+            writer.EndObject();
+        }
+        writer.EndArray();
+
+    }
+
     // TODO - save models
     {
         writer.Key("models");
@@ -696,6 +1063,31 @@ void saveLevel(const char* path, const Scene& scene) {
 
             writer.Key("path");
             writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.EndObject();
+        }
+
+        writer.EndArray();
+    }
+
+    //save animations
+    {
+        writer.Key("animations");
+        writer.StartArray();
+        std::vector<animation::AnimationDiskData> data;
+        animation::getDiskData(data);
+
+        for (unsigned int i = 0; i < data.size(); i++) {
+            writer.StartObject();
+
+            writer.Key("uuid");
+            writer.String(data[i].uuid.c_str());
+
+            writer.Key("path");
+            writer.String(assetfolder::getRelativePath(data[i].path.c_str()).c_str());
+
+            writer.Key("modelUuid");
+            writer.String(data[i].modelUuid.c_str());
 
             writer.EndObject();
         }

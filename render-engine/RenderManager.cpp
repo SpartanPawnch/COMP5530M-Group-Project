@@ -380,10 +380,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
-
-                // GLuint tex = desc->getTexture(k);
-                GLuint tex = 0;
-                if (tex) {
+                if (scene.entities[i].components.vecModelComponent[j].materials[k]) {
                     // draw textured
                     glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
@@ -418,8 +415,38 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                             lights[i].getSpecular().x, lights[i].getSpecular().y,
                             lights[i].getSpecular().z);
                     }
+                    std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecModelComponent[j].materials[k];
 
-                    glBindTexture(GL_TEXTURE_2D, tex);
+                    //todo: send 1x1 white image on the elses of all
+                    glActiveTexture(GL_TEXTURE0);
+                    if (meshMat->baseColorMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+
+                    glActiveTexture(GL_TEXTURE1);
+                    if (meshMat->roughnessMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+
+                    glActiveTexture(GL_TEXTURE2);
+                    if (meshMat->metalnessMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+
+                    glActiveTexture(GL_TEXTURE3);
+                    if (meshMat->normalMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+
+                    glActiveTexture(GL_TEXTURE4);
+                    if (meshMat->alphaMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+
+                    glActiveTexture(GL_TEXTURE5);
+                    if (meshMat->emissiveMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+
+                    glActiveTexture(GL_TEXTURE6);
+                    if (meshMat->occlusionMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                    
+                    glActiveTexture(GL_TEXTURE0);
                 }
                 else {
                     // TODO use vertex colours
@@ -506,6 +533,38 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                          .transformMatrices[0][0][0]);
 
                 // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+                std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
+
+                //todo: send 1x1 white image on the elses of all
+                glActiveTexture(GL_TEXTURE0);
+                if (meshMat->baseColorMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+
+                glActiveTexture(GL_TEXTURE1);
+                if (meshMat->roughnessMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+
+                glActiveTexture(GL_TEXTURE2);
+                if (meshMat->metalnessMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+
+                glActiveTexture(GL_TEXTURE3);
+                if (meshMat->normalMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+
+                glActiveTexture(GL_TEXTURE4);
+                if (meshMat->alphaMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+
+                glActiveTexture(GL_TEXTURE5);
+                if (meshMat->emissiveMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+
+                glActiveTexture(GL_TEXTURE6);
+                if (meshMat->occlusionMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+
+                glActiveTexture(GL_TEXTURE0);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -969,22 +1028,22 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
     // vertex tangents
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, tangent));
     // vertex bitangents
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, bitangent));
 
     // vertex texture coords
-    glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex),
+    glEnableVertexAttribArray(5);
+    glVertexAttribIPointer(5, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex),
         (void*)offsetof(Vertex, boneId));
 
     // vertex texture coords
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, weight));
 
     glBindVertexArray(0);

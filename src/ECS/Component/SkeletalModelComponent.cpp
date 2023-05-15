@@ -22,6 +22,26 @@ SkeletalModelComponent::SkeletalModelComponent() {
         transformMatrices.push_back(glm::mat4(1.0f));
     }
 }
+
+SkeletalModelComponent::SkeletalModelComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+    currentTime = 0.0;
+    currentLoopCount = 0;
+    isPlaying = false;
+    currentNode = nullptr;
+    selectedNode = nullptr;
+    nextNode = nullptr;
+    blendFactor = 0.0f;
+    isBlending = false;
+
+    transformMatrices.reserve(MAX_BONES);
+
+    for (unsigned int i = 0; i < MAX_BONES; i++) {
+        transformMatrices.push_back(glm::mat4(1.0f));
+    }
+}
 void SkeletalModelComponent::start() {
 }
 void SkeletalModelComponent::update(float dt, EntityState& state) {
@@ -331,5 +351,16 @@ void SkeletalModelComponent::removeFloatACTransition(int id) {
 void SkeletalModelComponent::resetMarices() {
     for (unsigned int i = 0; i < MAX_BONES; i++) {
         transformMatrices[i] = glm::mat4(1.0);
+    }
+}
+
+void SkeletalModelComponent::readMaterials() {
+    materials.clear();
+    MaterialSystem* instance = MaterialSystem::getInstance();
+    if (modelDescriptor) {
+        materials.resize(modelDescriptor->getMeshCount());
+        for (uint32_t i = 0; i < modelDescriptor->getMeshCount(); i++) {
+            materials[i] = instance->getActiveMaterial(modelDescriptor->getMeshMaterialName(i));
+        }
     }
 }

@@ -45,9 +45,9 @@ public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     unsigned int VAO, VBO, EBO;
-    std::shared_ptr<ActiveMaterial> material=nullptr;
+    int defaultMaterialID;
 
-    Mesh(std::string n, std::vector<Vertex> v, std::vector<unsigned int> i, std::shared_ptr<ActiveMaterial> mat);
+    Mesh(std::string n, std::vector<Vertex> v, std::vector<unsigned int> i, int matID);
     ~Mesh();
     void deleteBuffers();
 };  

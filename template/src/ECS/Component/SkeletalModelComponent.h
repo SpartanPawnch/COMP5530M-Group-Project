@@ -4,6 +4,7 @@
 #include <map>
 #include <glm/gtx/string_cast.hpp>
 #include "BaseComponent.h"
+#include "../../asset_import/materials.h"
 #include "../../asset_import/model.h"
 #include "../../asset_import/animation.h"
 #include "../../model_import/animation.h"
@@ -62,6 +63,7 @@ struct FloatACTransition {
 
 struct SkeletalModelComponent : BaseComponent {
     SkeletalModelComponent();
+    SkeletalModelComponent(const std::string& name, const int uuid);
     ~SkeletalModelComponent() {
     }
     void start() override;
@@ -86,6 +88,9 @@ struct SkeletalModelComponent : BaseComponent {
     void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
     void calculateBoneTransformBlended(Bone* current, Bone* previous, glm::mat4 parentTransform);
     void resetMarices();
+    
+    void readMaterials();
+    std::vector<std::shared_ptr<ActiveMaterial>> materials;
 
     // model info
     std::string modelUuid = std::string("");
