@@ -14,13 +14,14 @@ namespace animation {
         // redundant info for easy deletion
         std::string uuid;
         std::string path;
+        std::string modelUuid;
         std::shared_ptr<Animation> animation;
         std::weak_ptr<AnimationDescriptor> ref;
 
         // brace init constructor
-        AnimationInfo(const std::string& _uuid, const std::string& _path,
+        AnimationInfo(const std::string& _uuid, const std::string& _path, const std::string& _modelUuid,
             std::shared_ptr<Animation> _animation, std::weak_ptr<AnimationDescriptor> _ref)
-            : uuid(_uuid), path(_path), animation(_animation), ref(_ref) {
+            : uuid(_uuid), path(_path), modelUuid(_modelUuid), animation(_animation), ref(_ref) {
         }
 
         // copy constructor
@@ -28,6 +29,7 @@ namespace animation {
             // copy as normal
             uuid = aInfo.uuid;
             path = aInfo.path;
+            modelUuid = aInfo.modelUuid;
             animation = aInfo.animation;
             ref = aInfo.ref;
 
@@ -40,6 +42,7 @@ namespace animation {
             // copy as normal
             uuid = aInfo.uuid;
             path = aInfo.path;
+            modelUuid = aInfo.modelUuid;
             animation = aInfo.animation;
             ref = aInfo.ref;
 
@@ -55,6 +58,7 @@ namespace animation {
             // copy as normal
             uuid = std::move(aInfo.uuid);
             path = std::move(aInfo.path);
+            modelUuid = std::move(aInfo.modelUuid);
             animation = std::move(aInfo.animation);
             ref = std::move(aInfo.ref);
 
@@ -68,6 +72,7 @@ namespace animation {
             // copy as normal
             uuid = std::move(aInfo.uuid);
             path = std::move(aInfo.path);
+            modelUuid = std::move(aInfo.modelUuid);
             animation = std::move(aInfo.animation);
             ref = std::move(aInfo.ref);
 
@@ -110,7 +115,7 @@ namespace animation {
         // try to add new model
         if (uuidToIdx.count(uuid) == 0) {
             // construct new info element
-            loadedAnimations.emplace_back(AnimationInfo{ uuid, std::string(path),
+            loadedAnimations.emplace_back(AnimationInfo{ uuid, std::string(path), std::string(model->getUuid()),
                 std::make_shared<Animation>(), std::weak_ptr<AnimationDescriptor>() });
 
             // try to load clip
@@ -138,6 +143,7 @@ namespace animation {
         int idx = uuidToIdx[uuid];
         loadedAnimations[idx].animation->loadAnimation(path,model);
         loadedAnimations[idx].path = std::string(path);
+        loadedAnimations[idx].modelUuid = std::string(model->getUuid());
         return std::shared_ptr<AnimationDescriptor>(loadedAnimations[idx].ref);
     }
 
@@ -154,6 +160,7 @@ namespace animation {
         for (unsigned int i = 0; i < loadedAnimations.size(); i++) {
             data[i].uuid = loadedAnimations[i].uuid;
             data[i].path = loadedAnimations[i].path;
+            data[i].modelUuid = loadedAnimations[i].modelUuid;
         }
     }
 

@@ -24,6 +24,6 @@ void main()
     vsPos = vec3(model * vec4(pos, 1.0));
     vsTex = tex;
     vsNormal = mat3(transpose(inverse(model))) * normal;
-    vsTangent = tangent;
-    vsBitangent = bitangent;
+    vsTangent = mat3(transpose(inverse(model))) * tangent;
+    vsBitangent = mat3(transpose(inverse(model))) * bitangent;
 }

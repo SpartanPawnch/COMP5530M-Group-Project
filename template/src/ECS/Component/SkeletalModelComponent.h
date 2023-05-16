@@ -4,6 +4,7 @@
 #include <map>
 #include <glm/gtx/string_cast.hpp>
 #include "BaseComponent.h"
+#include "../../asset_import/materials.h"
 #include "../../asset_import/model.h"
 #include "../../asset_import/animation.h"
 #include "../../model_import/animation.h"
@@ -28,32 +29,36 @@ struct AnimationControllerNode {
 };
 
 struct NoConditionACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
+    float blendTime = 0.0f;
 };
 
 struct BoolACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate; // should translate instantly or only when animation is done
     bool condition;
     bool desiredValue;
+    float blendTime = 0.0f;
 };
 struct IntACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate;
     int condition;
     int desiredValue;
     bool shouldBeGreater;
     bool shouldBeEqual;
     bool shouldBeLower;
+    float blendTime = 0.0f;
 };
 struct FloatACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate;
     float condition;
     float desiredValue;
     bool shouldBeGreater;
     bool shouldBeEqual;
     bool shouldBeLower;
+    float blendTime = 0.0f;
 };
 
 struct SkeletalModelComponent : BaseComponent {
@@ -66,7 +71,7 @@ struct SkeletalModelComponent : BaseComponent {
     void stop() override;
 
     void finalLoop();
-    void transitionToNode(AnimationControllerNode* node);
+    void transitionToNode(std::string name, float bt = 0.0f);
 
     void addNode();
     void addNoConditionTransition();
@@ -79,9 +84,15 @@ struct SkeletalModelComponent : BaseComponent {
     void removeIntACTransition(int id);
     void removeFloatACTransition(int id);
 
+    AnimationControllerNode* getNodeByName(std::string name);
+
     void updateAnimation(float dt);
     void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
+    void calculateBoneTransformBlended(Bone* current, Bone* previous, glm::mat4 parentTransform);
     void resetMarices();
+    
+    void readMaterials();
+    std::vector<std::shared_ptr<ActiveMaterial>> materials;
 
     // model info
     std::string modelUuid = std::string("");
@@ -89,13 +100,18 @@ struct SkeletalModelComponent : BaseComponent {
 
     // animation controller
     std::vector<AnimationControllerNode> nodes;
+    AnimationControllerNode* previousNode;
     AnimationControllerNode* currentNode;
-    AnimationControllerNode* nextNode;
+    std::string nextNode;
     AnimationControllerNode* selectedNode;
 
     float currentTime;
     int currentLoopCount;
     float prevTime;
     bool isPlaying;
+    bool isBlending;
+    float blendFactor;
+    float blendTime;
+    float currentBlendTime;
     std::vector<glm::mat4> transformMatrices;
 };

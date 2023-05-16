@@ -71,11 +71,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             indices.push_back(face.mIndices[j]);
         }
     }
-    std::shared_ptr<ActiveMaterial> activeMat;
-    if (mesh->mMaterialIndex >= 0) {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+        aiMaterial* material = scene->mMaterials[i];
         Material mat;
         mat.name = material->GetName().C_Str();
+
+        defaultMaterialNames.push_back(mat.name);
 
         aiColor3D color;
         material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
@@ -89,7 +90,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         material->Get(AI_MATKEY_OPACITY, mat.occlusion);
         aiString texturePath;
         if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
-            mat.baseColorMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(),directory.c_str()));
+            mat.baseColorMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_SHININESS, 0, &texturePath) == AI_SUCCESS) {
             mat.roughnessMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
@@ -111,8 +112,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
 
         MaterialSystem* materialSystem = MaterialSystem::getInstance();
-        activeMat = materialSystem->loadActiveMaterial(mat);
+        materialSystem->createMaterialDirectly(mat);
     }
+    int matID = mesh->mMaterialIndex;
 
     for (uint32_t i = 0; i < mesh->mNumBones; i++) {
         aiBone* bone = mesh->mBones[i];
@@ -146,5 +148,5 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
      
-    return Mesh(meshName,vertices, indices, activeMat);
+    return Mesh(meshName,vertices, indices, matID);
 }

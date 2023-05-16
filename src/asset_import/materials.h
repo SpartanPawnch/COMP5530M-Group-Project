@@ -59,6 +59,7 @@ public:
     static MaterialSystem* getInstance();
 
     bool createMaterial(std::string name);
+    bool createMaterialDirectly(Material mat);
     std::string getSelectedMaterialName();
     Material* getMaterial(std::string name);
     Material* getSelectedMaterial();
@@ -67,12 +68,13 @@ public:
     std::shared_ptr<ActiveMaterial> getActiveMaterial(const std::string& name);
     std::shared_ptr<ActiveMaterial> loadActiveMaterial(Material material);
     void setTextureFromPath(std::string path, std::shared_ptr<TextureDescriptor>& baseColorMap, std::string& uuid);
-    void createActiveMaterial(const std::string& name);
+    std::shared_ptr<ActiveMaterial> createActiveMaterial(const std::string& name);
+    void reloadActiveMaterial(const std::string& name);
 
     std::map<std::string, Material> materials;
     std::string selectedMaterial = "";
 
-private:
+//private:
     static MaterialSystem* instance;
     MaterialSystem() {};
     MaterialSystem(const MaterialSystem&) = delete;

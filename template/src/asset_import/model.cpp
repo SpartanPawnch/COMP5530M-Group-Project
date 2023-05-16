@@ -169,6 +169,10 @@ namespace model {
         return loadedModels[idx].model->meshes[meshIndex].EBO;
     }
 
+    std::string ModelDescriptor::getUuid() {
+        return loadedModels[idx].uuid;
+    }
+
     //unsigned int ModelDescriptor::getTexture(int meshIndex) {
     //    if (loadedModels[idx].model->textures_loaded.size() <= meshIndex ||
     //        loadedModels[idx].model->textures_loaded[meshIndex].textureDescriptor == nullptr) {
@@ -191,17 +195,12 @@ namespace model {
     }
 
     std::string ModelDescriptor::getMeshMaterialName(int meshIndex) {
-        return loadedModels[idx].model->meshes[meshIndex].material->name;
+        return loadedModels[idx].model->defaultMaterialNames[loadedModels[idx].model->meshes[meshIndex].defaultMaterialID];
     }
 
     bool ModelDescriptor::meshHasMaterial(int meshIndex) {
-        return loadedModels[idx].model->meshes[meshIndex].material != nullptr;
+        return loadedModels[idx].model->meshes[meshIndex].defaultMaterialID >= 0;
     }
-
-    void ModelDescriptor::setMeshMaterial(int meshIndex, std::shared_ptr<ActiveMaterial> mat) {
-        loadedModels[idx].model->meshes[meshIndex].material = mat;
-    }
-
 
     std::map<std::string, Bone> ModelDescriptor::getBoneInfoMap() {
         return loadedModels[idx].model->boneInfoMap;

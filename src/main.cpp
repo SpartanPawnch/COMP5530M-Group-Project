@@ -152,6 +152,8 @@ int main() {
     renderManager->setupEntIDPipelineUniforms();
     renderManager->setupCubemapPipelineUniforms();
     renderManager->setupIconPipelineUniforms();
+    renderManager->setupIconIDPipelineUniforms();
+    renderManager->setupAnimationIDPipelineUniforms();
 
     // register lua stuff
     scene.registerLuaTable();

@@ -1074,6 +1074,7 @@ void drawComponentProps(ModelComponent& component) {
 
                 std::swap(component.modelDescriptor, desc);
                 component.modelUuid = component.modelDescriptor ? uuid : "";
+                component.readMaterials();
             }
             ImGui::PopID();
         }
@@ -1085,16 +1086,15 @@ void drawComponentProps(ModelComponent& component) {
             ImGui::PushID(i);
             ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
             std::string meshPreviewStr = "Select a Material";
-            if (component.modelDescriptor->meshHasMaterial(i)) {
-                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            if (component.materials[i]) {
+                meshPreviewStr = component.materials[i]->name;
             }
             // materials select options by name
             if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
                 for (auto const& mat : materialSystem->materials) {
                     bool selected = (meshPreviewStr == mat.first);
                     if (ImGui::Selectable(mat.first.c_str(), selected)) {
-                        component.modelDescriptor->setMeshMaterial(i,
-                            materialSystem->loadActiveMaterial(mat.second));
+                        component.materials[i] = materialSystem->loadActiveMaterial(mat.second);
                     }
                 }
                 ImGui::EndCombo();
@@ -1152,6 +1152,7 @@ void drawComponentProps(SkeletalModelComponent& component) {
 
                 std::swap(component.modelDescriptor, desc);
                 component.modelUuid = component.modelDescriptor ? uuid : "";
+                component.readMaterials();
             }
             ImGui::PopID();
         }
@@ -1164,16 +1165,15 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::PushID(i);
             ImGui::Text(component.modelDescriptor->getMeshName(i).c_str());
             std::string meshPreviewStr = "Select a Material";
-            if (component.modelDescriptor->meshHasMaterial(i)) {
-                meshPreviewStr = component.modelDescriptor->getMeshMaterialName(i);
+            if (component.materials[i]) {
+                meshPreviewStr = component.materials[i]->name;
             }
             // materials select options by name
             if (ImGui::BeginCombo("##modelmaterialscombo", meshPreviewStr.c_str())) {
                 for (auto const& mat : materialSystem->materials) {
                     bool selected = (meshPreviewStr == mat.first);
                     if (ImGui::Selectable(mat.first.c_str(), selected)) {
-                        component.modelDescriptor->setMeshMaterial(i,
-                            materialSystem->loadActiveMaterial(mat.second));
+                        component.materials[i] = materialSystem->loadActiveMaterial(mat.second);
                     }
                 }
                 ImGui::EndCombo();
@@ -1207,8 +1207,33 @@ void drawComponentProps(SkeletalModelComponent& component) {
     ImGui::Separator();
     for (unsigned int i = 0; i < component.nodes.size(); i++) {
         ImGui::PushID(i);
+        std::string prevText = component.nodes[i].name;
         ImGui::InputText("##name", &component.nodes[i].name[0], component.nodes[i].name.capacity());
         component.nodes[i].name.resize(std::strlen(&component.nodes[i].name[0]));
+        if (prevText != component.nodes[i].name) {
+            for (unsigned int k = 0; k < component.nodes.size(); k++) {
+                for (unsigned int j = 0; j < component.nodes[k].noConditionTransitions.size(); j++) {
+                    if (component.nodes[k].noConditionTransitions[j].transitionTo == prevText) {
+                        component.nodes[k].noConditionTransitions[j].transitionTo = component.nodes[i].name;
+                    }
+                }
+                for (unsigned int j = 0; j < component.nodes[k].boolTransitions.size(); j++) {
+                    if (component.nodes[k].boolTransitions[j].transitionTo == prevText) {
+                        component.nodes[k].boolTransitions[j].transitionTo = component.nodes[i].name;
+                    }
+                }
+                for (unsigned int j = 0; j < component.nodes[k].intTransitions.size(); j++) {
+                    if (component.nodes[k].intTransitions[j].transitionTo == prevText) {
+                        component.nodes[k].intTransitions[j].transitionTo = component.nodes[i].name;
+                    }
+                }
+                for (unsigned int j = 0; j < component.nodes[k].floatTransitions.size(); j++) {
+                    if (component.nodes[k].floatTransitions[j].transitionTo == prevText) {
+                        component.nodes[k].floatTransitions[j].transitionTo = component.nodes[i].name;
+                    }
+                }
+            }
+        }
         ImGui::NextColumn();
         std::string previewStr2 = "Select an Animation";
         if (component.nodes[i].animationDescriptor &&
@@ -1274,9 +1299,11 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
     ImGui::Text("Transitions:");
     if (component.selectedNode) {
-        ImGui::Columns(2);
+        ImGui::Columns(3);
         ImGui::Separator();
         ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
         ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
@@ -1284,18 +1311,21 @@ void drawComponentProps(SkeletalModelComponent& component) {
         for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_nocond",
-                    component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->noConditionTransitions[i].transitionTo.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     bool isSelected =
                         component.selectedNode->noConditionTransitions[i].transitionTo ==
-                        &component.nodes[j];
+                        component.nodes[j].name;
                     if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->noConditionTransitions[i].transitionTo =
-                            &component.nodes[j];
+                            component.nodes[j].name;
                     }
                 }
                 ImGui::EndCombo();
             }
+            ImGui::NextColumn();
+            ImGui::InputFloat("##nocond_blendtime",
+                &component.selectedNode->noConditionTransitions[i].blendTime);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeNoConditionTransition(i);
@@ -1303,7 +1333,7 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(5);
+        ImGui::Columns(6);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1313,19 +1343,21 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::NextColumn();
         ImGui::Text("Desired Value");
         ImGui::NextColumn();
+        ImGui::Text("Blend Time");
+        ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_bool",
-                    component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->boolTransitions[i].transitionTo.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     bool isSelected = component.selectedNode->boolTransitions[i].transitionTo ==
-                        &component.nodes[j];
+                        component.nodes[j].name;
                     if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
                         component.selectedNode->boolTransitions[i].transitionTo =
-                            &component.nodes[j];
+                            component.nodes[j].name;
                     }
                 }
                 ImGui::EndCombo();
@@ -1340,13 +1372,16 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::Checkbox("##desired_bool",
                 &component.selectedNode->boolTransitions[i].desiredValue);
             ImGui::NextColumn();
+            ImGui::InputFloat("##bool_blendtime",
+                &component.selectedNode->boolTransitions[i].blendTime);
+            ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeBoolACTransition(i);
             }
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(8);
+        ImGui::Columns(9);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1362,19 +1397,21 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::NextColumn();
         ImGui::Text("Condition Greater?");
         ImGui::NextColumn();
+        ImGui::Text("Blend Time");
+        ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_int",
-                    component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->intTransitions[i].transitionTo.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
                             component.selectedNode->intTransitions[i].transitionTo ==
-                                &component.nodes[j])) {
+                                component.nodes[j].name)) {
                         component.selectedNode->intTransitions[i].transitionTo =
-                            &component.nodes[j];
+                            component.nodes[j].name;
                     }
                 }
                 ImGui::EndCombo();
@@ -1397,13 +1434,16 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::Checkbox("##should_greater_int",
                 &component.selectedNode->intTransitions[i].shouldBeGreater);
             ImGui::NextColumn();
+            ImGui::InputFloat("##int_blendtime",
+                &component.selectedNode->intTransitions[i].blendTime);
+            ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeIntACTransition(i);
             }
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(8);
+        ImGui::Columns(9);
         ImGui::Separator();
         ImGui::Text("Destination Node");
         ImGui::NextColumn();
@@ -1419,19 +1459,21 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::NextColumn();
         ImGui::Text("Condition Greater?");
         ImGui::NextColumn();
+        ImGui::Text("Blend Time");
+        ImGui::NextColumn();
         ImGui::Text("Remove Transition");
         ImGui::NextColumn();
         ImGui::Separator();
         for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
             ImGui::PushID(i);
             if (ImGui::BeginCombo("##transition_to_float",
-                    component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
+                    component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
                 for (unsigned int j = 0; j < component.nodes.size(); j++) {
                     if (ImGui::Selectable(component.nodes[j].name.c_str(),
                             component.selectedNode->floatTransitions[i].transitionTo ==
-                                &component.nodes[j])) {
+                                component.nodes[j].name)) {
                         component.selectedNode->floatTransitions[i].transitionTo =
-                            &component.nodes[j];
+                            component.nodes[j].name;
                     }
                 }
                 ImGui::EndCombo();
@@ -1453,6 +1495,9 @@ void drawComponentProps(SkeletalModelComponent& component) {
             ImGui::NextColumn();
             ImGui::Checkbox("##should_greater_float",
                 &component.selectedNode->floatTransitions[i].shouldBeGreater);
+            ImGui::NextColumn();
+            ImGui::InputFloat("##float_blendtime",
+                &component.selectedNode->floatTransitions[i].blendTime);
             ImGui::NextColumn();
             if (ImGui::Button("Remove Transition")) {
                 component.removeFloatACTransition(i);
@@ -2287,6 +2332,7 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrBaseColor == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->baseColorMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
@@ -2322,7 +2368,7 @@ inline void drawMaterials() {
             ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
             std::string previewStrMetalness = "Select a texture";
             if (mat->metalnessMap.size() > 0) {
-                previewStrMetalness = mat->roughnessMap;
+                previewStrMetalness = mat->metalnessMap;
             }
             if (ImGui::BeginCombo("Metalness Map", previewStrMetalness.c_str())) {
                 for (unsigned int i = 0; i < textureFiles.size(); i++) {
@@ -2336,13 +2382,39 @@ inline void drawMaterials() {
             ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
             std::string previewStrOcclusion = "Select a texture";
             if (mat->occlusionMap.size() > 0) {
-                previewStrOcclusion = mat->roughnessMap;
+                previewStrOcclusion = mat->occlusionMap;
             }
             if (ImGui::BeginCombo("Occlusion Map", previewStrOcclusion.c_str())) {
                 for (unsigned int i = 0; i < textureFiles.size(); i++) {
                     bool isSelected = (previewStrOcclusion == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->occlusionMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            std::string previewStrNormal = "Select a texture";
+            if (mat->normalMap.size() > 0) {
+                previewStrNormal = mat->normalMap;
+            }
+            if (ImGui::BeginCombo("Normal Map", previewStrNormal.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrNormal == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->normalMap = textureFiles[i].path;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            std::string previewStrAlpha = "Select a texture";
+            if (mat->alphaMap.size() > 0) {
+                previewStrAlpha = mat->alphaMap;
+            }
+            if (ImGui::BeginCombo("Alpha Map", previewStrAlpha.c_str())) {
+                for (unsigned int i = 0; i < textureFiles.size(); i++) {
+                    bool isSelected = (previewStrAlpha == textureFiles[i].path);
+                    if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
+                        mat->alphaMap = textureFiles[i].path;
                     }
                 }
                 ImGui::EndCombo();

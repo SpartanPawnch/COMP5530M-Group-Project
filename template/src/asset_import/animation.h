@@ -30,6 +30,7 @@ namespace animation {
     struct AnimationDiskData {
         std::string uuid;
         std::string path;
+        std::string modelUuid;
     };
     void getDiskData(std::vector<AnimationDiskData>& data);
 }

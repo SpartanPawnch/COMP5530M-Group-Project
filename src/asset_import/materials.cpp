@@ -17,6 +17,13 @@ bool MaterialSystem::createMaterial(std::string name) {
     return true;
 }
 
+bool MaterialSystem::createMaterialDirectly(Material mat) {
+    if (materials.count(mat.name) > 0) return false;
+
+    materials[mat.name] = mat;
+    return true;
+}
+
 std::string MaterialSystem::getSelectedMaterialName() {
     return materials[selectedMaterial].name;
 }
@@ -49,7 +56,7 @@ void MaterialSystem::setTextureFromPath(std::string path, std::shared_ptr<Textur
     uuid = baseColorMap ? localUuid : "";
 }
 
-void MaterialSystem::createActiveMaterial(const std::string& name) {
+std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::string& name) {
     if (materials.count(name) > 0 && (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
         Material mat = materials[name];
         ActiveMaterial activeMat;
@@ -71,22 +78,44 @@ void MaterialSystem::createActiveMaterial(const std::string& name) {
         setTextureFromPath(mat.emissiveMap, activeMat.emissiveMap, activeMat.emissiveMapUuid);
         setTextureFromPath(mat.occlusionMap, activeMat.occlusionMap, activeMat.occlusionMapUuid);
 
-        activeMaterials[name] = std::make_shared<ActiveMaterial>(activeMat);
+        std::shared_ptr<ActiveMaterial> activeMatPtr = std::make_shared<ActiveMaterial>(activeMat);
+        activeMaterials[name] = activeMatPtr;
+        return activeMatPtr;
+    }
+    return nullptr;
+}
+
+void MaterialSystem::reloadActiveMaterial(const std::string& name) {
+    if (activeMaterials.count(name) > 0) {
+        Material mat = materials[name];
+        std::shared_ptr<ActiveMaterial> activeMatPtr = activeMaterials[name].lock();
+
+        if (activeMatPtr) {
+            activeMatPtr->baseColor = mat.baseColor;
+            activeMatPtr->emissiveColor = mat.emissiveColor;
+
+            activeMatPtr->roughness = mat.roughness;
+            activeMatPtr->metalness = mat.metalness;
+            activeMatPtr->occlusion = mat.occlusion;
+
+            setTextureFromPath(mat.baseColorMap, activeMatPtr->baseColorMap, activeMatPtr->baseColorMapUuid);
+            setTextureFromPath(mat.roughnessMap, activeMatPtr->roughnessMap, activeMatPtr->roughnessMapUuid);
+            setTextureFromPath(mat.metalnessMap, activeMatPtr->metalnessMap, activeMatPtr->metalnessMapUuid);
+            setTextureFromPath(mat.normalMap, activeMatPtr->normalMap, activeMatPtr->normalMapUuid);
+            setTextureFromPath(mat.alphaMap, activeMatPtr->alphaMap, activeMatPtr->alphaMapUuid);
+            setTextureFromPath(mat.emissiveMap, activeMatPtr->emissiveMap, activeMatPtr->emissiveMapUuid);
+            setTextureFromPath(mat.occlusionMap, activeMatPtr->occlusionMap, activeMatPtr->occlusionMapUuid);
+        }
     }
 }
 
 std::shared_ptr<ActiveMaterial> MaterialSystem::getActiveMaterial(const std::string& name) {
     if (activeMaterials.count(name) == 0 || activeMaterials[name].expired()) {
         if (materials.count(name) > 0) {
-            createActiveMaterial(name);
-        }
-        else {
-            return nullptr;
+            return createActiveMaterial(name);
         }
     }
-    std::shared_ptr<ActiveMaterial> ret = activeMaterials[name].lock();
-    return ret;
-
+    return activeMaterials[name].lock();
 }
 
 std::shared_ptr<ActiveMaterial> MaterialSystem::loadActiveMaterial(Material material) {

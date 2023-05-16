@@ -181,6 +181,8 @@ void RenderManager::loadScene() {
     const char* iconFragPath = "assets/shaders/icon.frag";
     const char* entIDVertexPath = "assets/shaders/entID.vert";
     const char* entIDFragPath = "assets/shaders/entID.frag";
+    const char* iconIDVertexPath = "assets/shaders/iconID.vert";
+    const char* iconIDFragPath = "assets/shaders/iconID.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -222,6 +224,8 @@ void RenderManager::loadScene() {
     addPipeline(AnimatedPipeline, AnimatedVertexPath, texFragPath);
     addPipeline(CubemapPipeline, cubemapVertPath, cubemapFragPath);
     addPipeline(IconPipeline, iconVertPath, iconFragPath);
+    addPipeline(IconIDPipeline, iconIDVertexPath, iconIDFragPath);
+    addPipeline(AnimationIDPipeline, AnimatedVertexPath, entIDFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -377,10 +381,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
-
-                // GLuint tex = desc->getTexture(k);
-                GLuint tex = 0;
-                if (tex) {
+                if (scene.entities[i].components.vecModelComponent[j].materials[k]) {
                     // draw textured
                     glUseProgram(getPipeline(TexturePipeline)->getProgram());
 
@@ -415,8 +416,38 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                             lights[i].getSpecular().x, lights[i].getSpecular().y,
                             lights[i].getSpecular().z);
                     }
+                    std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecModelComponent[j].materials[k];
 
-                    glBindTexture(GL_TEXTURE_2D, tex);
+                    //todo: send 1x1 white image on the elses of all
+                    glActiveTexture(GL_TEXTURE0);
+                    if (meshMat->baseColorMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+
+                    glActiveTexture(GL_TEXTURE1);
+                    if (meshMat->roughnessMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+
+                    glActiveTexture(GL_TEXTURE2);
+                    if (meshMat->metalnessMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+
+                    glActiveTexture(GL_TEXTURE3);
+                    if (meshMat->normalMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+
+                    glActiveTexture(GL_TEXTURE4);
+                    if (meshMat->alphaMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+
+                    glActiveTexture(GL_TEXTURE5);
+                    if (meshMat->emissiveMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+
+                    glActiveTexture(GL_TEXTURE6);
+                    if (meshMat->occlusionMap)
+                        glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                    
+                    glActiveTexture(GL_TEXTURE0);
                 }
                 else {
                     // TODO use vertex colours
@@ -503,6 +534,38 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                          .transformMatrices[0][0][0]);
 
                 // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
+                std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
+
+                //todo: send 1x1 white image on the elses of all
+                glActiveTexture(GL_TEXTURE0);
+                if (meshMat->baseColorMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+
+                glActiveTexture(GL_TEXTURE1);
+                if (meshMat->roughnessMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+
+                glActiveTexture(GL_TEXTURE2);
+                if (meshMat->metalnessMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+
+                glActiveTexture(GL_TEXTURE3);
+                if (meshMat->normalMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+
+                glActiveTexture(GL_TEXTURE4);
+                if (meshMat->alphaMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+
+                glActiveTexture(GL_TEXTURE5);
+                if (meshMat->emissiveMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+
+                glActiveTexture(GL_TEXTURE6);
+                if (meshMat->occlusionMap)
+                    glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+
+                glActiveTexture(GL_TEXTURE0);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -520,7 +583,11 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+
+
+
+
 
     // RENDERING
     // Go through all the Pipelines
@@ -535,6 +602,82 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
         int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
 
         glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
+
+
+        if (scene.entities[i].components.vecModelComponent.empty() &&
+            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
+            if (!scene.entities[i].components.vecCameraComponent.empty() && cameraIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                glBindTexture(GL_TEXTURE_2D, cameraIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecLightComponent.empty() &&
+                ligthIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                // bind texture
+                glBindTexture(GL_TEXTURE_2D, ligthIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecAudioSourceComponent.empty() &&
+                soundIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                glBindTexture(GL_TEXTURE_2D, soundIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else {
+                runEmptyVisPipeline();
+            }
+            continue;
+        }
+
+        glUseProgram(getPipeline(EntIDPipeline)->getProgram());
+
+        
 
         // bind model matrix
         glUniformMatrix4fv(getPipeline(EntIDPipeline)->getModelID(), 1, GL_FALSE,
@@ -551,6 +694,35 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
+
+        glUseProgram(getPipeline(AnimationIDPipeline)->getProgram());
+
+
+        // bind model matrix
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getModelID(), 1, GL_FALSE,
+            &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getProjectionID(), 1, GL_FALSE,
+            &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(AnimationIDPipeline)->getEntID(), reconstructed_color.x,
+            reconstructed_color.y, reconstructed_color.z);
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
+            j++) {
+            auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100, GL_FALSE,
+                    &scene.entities[i]
+                    .components.vecSkeletalModelComponent[j]
+                    .transformMatrices[0][0][0]);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -702,6 +874,14 @@ void RenderManager::setupAnimatedPipelineUniforms() {
 }
 void RenderManager::setupEntIDPipelineUniforms() {
     getPipeline(EntIDPipeline)->setIDUniformLocations();
+}
+
+void RenderManager::setupIconIDPipelineUniforms() {
+    getPipeline(IconIDPipeline)->setIDUniformLocations();
+}
+
+void RenderManager::setupAnimationIDPipelineUniforms() {
+    getPipeline(AnimationIDPipeline)->setIDUniformLocations();
 }
 
 void RenderManager::setupCubemapPipelineUniforms() {
@@ -882,22 +1062,22 @@ void RenderManager::uploadMesh(std::vector<Vertex>* v, std::vector<unsigned int>
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoords));
     // vertex tangents
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, tangent));
     // vertex bitangents
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, bitangent));
 
     // vertex texture coords
-    glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex),
+    glEnableVertexAttribArray(5);
+    glVertexAttribIPointer(5, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex),
         (void*)offsetof(Vertex, boneId));
 
     // vertex texture coords
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, weight));
 
     glBindVertexArray(0);

@@ -22,6 +22,7 @@ public:
 	Model();
 
     std::vector<Mesh> meshes;
+    std::vector<std::string> defaultMaterialNames;
     std::string directory;
 
     //skeleton information
@@ -32,7 +33,4 @@ public:
     void deleteBuffers();
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-
-    //skeleton methods
-    void getSkeletonInfo(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
 };
