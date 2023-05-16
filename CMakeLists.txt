@@ -113,26 +113,26 @@ set(PHYSX_LIBRARIES
 set(CMAKE_BUILD_TYPE $<$<CONFIG:Debug>:Debug> $<$<CONFIG:Release>:Release>)
 add_subdirectory("external/physx-4.1/physx/compiler/public")
 
-if (TARGET_BUILD_PLATFORM STREQUAL "windows")
+#if (TARGET_BUILD_PLATFORM STREQUAL "windows")
 	# References NvidiaBuildOptions.cmake to figure out if system is 32/64 bit
-	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		SET(LIBPATH_SUFFIX "64")
-	ELSE()
-		SET(LIBPATH_SUFFIX "32")
-	ENDIF()
-	GetPlatformBinName(PLATFORM_BIN_NAME ${LIBPATH_SUFFIX})
-	set(PhysxOutputPath ${PX_OUTPUT_LIB_DIR}/bin/${PLATFORM_BIN_NAME})
-	message("Physx Output Path: " ${PhysxOutputPath})
+	#IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	#	SET(LIBPATH_SUFFIX "64")
+	#ELSE()
+	#	SET(LIBPATH_SUFFIX "32")
+	#ENDIF()
+	#GetPlatformBinName(PLATFORM_BIN_NAME ${LIBPATH_SUFFIX})
+	#set(PhysxOutputPath ${PX_OUTPUT_LIB_DIR}/bin/${PLATFORM_BIN_NAME})
+	#message("Physx Output Path: " ${PhysxOutputPath})
 
 	# copy PhysX dll's to build dir. Happens on every build.
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCommon$<$<CONFIG:Debug>:d>.dll 
-        ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysX$<$<CONFIG:Debug>:d>.dll
-        ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCooking$<$<CONFIG:Debug>:d>.dll
-        ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXFoundation$<$<CONFIG:Debug>:d>.dll
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
-endif()
+    #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    #    COMMAND ${CMAKE_COMMAND} -E copy 
+    #    ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCommon$<$<CONFIG:Debug>:d>.dll 
+    #    ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysX$<$<CONFIG:Debug>:d>.dll
+    #    ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCooking$<$<CONFIG:Debug>:d>.dll
+    #    ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXFoundation$<$<CONFIG:Debug>:d>.dll
+    #    $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+#endif()
 
 
 #setup linker
