@@ -6,6 +6,7 @@
 
 #include "../EntityState/EntityState.h"
 
+
 class BaseComponent {
   public:
     BaseComponent();

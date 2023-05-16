@@ -1918,6 +1918,7 @@ void drawComponentList(std::vector<T>& components) {
         }
         */
         if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+            drawComponentContextMenu(i, componentToDelete);
             drawComponentProps(components[i]);
         }
         ImGui::PopID();

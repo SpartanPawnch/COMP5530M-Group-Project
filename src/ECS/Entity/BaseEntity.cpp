@@ -56,25 +56,24 @@ void BaseEntity::genTransform(const glm::mat4& parentMat) {
 //     }
 // }
 
-
 void BaseEntity::updateKeyboardInput(const float& deltaTime, const int direction) {
     // Update position vector
     switch (direction) {
     case FORWARD:
-        //this->position += this->front * this->movementSpeed * deltaTime;
-        this->position += glm::vec3(0.f, 0.f, -1.f) * this->movementSpeed * deltaTime;
+        // this->position += this->front * this->movementSpeed * deltaTime;
+        state.position += glm::vec3(0.f, 0.f, -1.f) * this->movementSpeed * deltaTime;
         break;
     case BACKWARD:
-        //this->position -= this->front * this->movementSpeed * deltaTime;
-        this->position += glm::vec3(0.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        // this->position -= this->front * this->movementSpeed * deltaTime;
+        state.position += glm::vec3(0.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
         break;
     case LEFT:
-        //this->position -= this->right * this->movementSpeed * deltaTime;
-        this->position += glm::vec3(-1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        // this->position -= this->right * this->movementSpeed * deltaTime;
+        state.position += glm::vec3(-1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
         break;
     case RIGHT:
-        //this->position += this->right * this->movementSpeed * deltaTime;
-        this->position += glm::vec3(1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
+        // this->position += this->right * this->movementSpeed * deltaTime;
+        state.position += glm::vec3(1.f, 0.f, 1.f) * this->movementSpeed * deltaTime;
         break;
     case ASCEND:
         break;

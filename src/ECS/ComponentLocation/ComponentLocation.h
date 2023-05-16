@@ -12,6 +12,8 @@ struct ComponentLocation{
         SKELETALMODELCOMPONENT,
         LIGHTCOMPONENT,
         SKYBOXCOMPONENT,
+        CONTROLLERCOMPONENT,
+        PLAYERCONTROLLERCOMPONENT,
         COMPTYPE_MAX
     };
     CompType type;

@@ -10,3 +10,4 @@
 /template/external/soloud
 /src/ECS/ComponentStorage/codegen.cache
 /template - Copy
+CMakeSettings.json
