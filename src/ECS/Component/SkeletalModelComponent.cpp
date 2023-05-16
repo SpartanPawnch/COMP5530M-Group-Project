@@ -135,7 +135,9 @@ void SkeletalModelComponent::updateAnimation(float dt) {
                 previousNode->animationDescriptor;
             calculateBoneTransformBlended(currentAnimation->getRootBone(), previousAnimation->getRootBone(), glm::mat4(1.0f));
         }
-        calculateBoneTransform(currentAnimation->getRootBone(), glm::mat4(1.0f));
+        else {
+            calculateBoneTransform(currentAnimation->getRootBone(), glm::mat4(1.0f));
+        }
     }
 }
 
@@ -191,6 +193,7 @@ void SkeletalModelComponent::calculateBoneTransformBlended(Bone* bone, Bone* pre
     glm::quat previousRotation = previousBone->interpolateRotationDirectly(currentBlendTime);
     glm::vec3 previousScale = previousBone->interpolateScaleDirectly(currentBlendTime);
 
+    std::cout << blendFactor << std::endl;
     glm::vec3 blendedPosition = glm::mix(previousPosition, position, blendFactor);
     glm::quat blendedRotation = glm::slerp(previousRotation, rotation, blendFactor);
     glm::vec3 blendedScale = glm::mix(previousScale, scale, blendFactor);
