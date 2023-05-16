@@ -2,11 +2,12 @@
 //I have used https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/HelloWorld.html
 //as the reference for the following code.
 
-#include <PxPhysics.h>
-#include <PxPhysicsAPI.h>
+//#include <PxPhysics.h>
+//#include <PxPhysicsAPI.h>
+#include "physicsCallbacks.h"
 #include <memory>
-#include "physXCallbacks.h"
-#include "physxFilters.hpp"
+#include <string>
+
 
 
 namespace physics
@@ -94,4 +95,3 @@ static bool EnableDebugging = true;
 PhysXEngine* PhysXEngine::physxE = nullptr;
 bool staticRunOnGpu = false;
 }
-

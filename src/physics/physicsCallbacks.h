@@ -6,6 +6,16 @@
 
 namespace physics
 {
+	//filter for collision callback
+	//Since we only need a minimilistic collision filter, this is refered from the collison filter documentation.
+	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/RigidBodyCollision.html
+	physx::PxFilterFlags CollisionFilterShader(
+		physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+		physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+		physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
+
+
+
 	//link to the logging function.
 	class physXErrorCallback : public physx::PxErrorCallback 
 	{
