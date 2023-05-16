@@ -968,6 +968,7 @@ static void saveComponent(const ScriptComponent& component,
             break;
         default:;
         }
+        writer.EndObject();
     }
     writer.EndArray();
     writer.EndObject();
