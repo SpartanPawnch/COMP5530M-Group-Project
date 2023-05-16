@@ -16,6 +16,8 @@
 #include "../Component/SkeletalModelComponent.h"
 #include "../Component/LightComponent.h"
 #include "../Component/SkyBoxComponent.h"
+#include "../Component/ControllerComponent.h"
+#include "../Component/PlayerControllerComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -27,6 +29,8 @@ struct ComponentStorage{
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     std::vector<LightComponent> vecLightComponent;
     std::vector<SkyBoxComponent> vecSkyBoxComponent;
+    std::vector<ControllerComponent> vecControllerComponent;
+    std::vector<PlayerControllerComponent> vecPlayerControllerComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -105,6 +109,16 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<ControllerComponent>(const ControllerComponent& component){
+        vecControllerComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<PlayerControllerComponent>(const PlayerControllerComponent& component){
+        vecPlayerControllerComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -164,6 +178,20 @@ struct ComponentStorage{
     void start<SkyBoxComponent>(){
         for(unsigned int i=0;i<vecSkyBoxComponent.size();i++){
             vecSkyBoxComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<ControllerComponent>(){
+        for(unsigned int i=0;i<vecControllerComponent.size();i++){
+            vecControllerComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<PlayerControllerComponent>(){
+        for(unsigned int i=0;i<vecPlayerControllerComponent.size();i++){
+            vecPlayerControllerComponent[i].start();
         }
     }
 
@@ -231,6 +259,20 @@ struct ComponentStorage{
     }
 
     template<>
+    void update<ControllerComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecControllerComponent.size();i++){
+            vecControllerComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    void update<PlayerControllerComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecPlayerControllerComponent.size();i++){
+            vecPlayerControllerComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
     static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
         return ComponentLocation::BASECOMPONENT;
     }
@@ -265,5 +307,13 @@ struct ComponentStorage{
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<SkyBoxComponent>(){
         return ComponentLocation::SKYBOXCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ControllerComponent>(){
+        return ComponentLocation::CONTROLLERCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<PlayerControllerComponent>(){
+        return ComponentLocation::PLAYERCONTROLLERCOMPONENT;
     }
 };

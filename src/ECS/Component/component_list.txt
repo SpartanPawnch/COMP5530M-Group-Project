@@ -7,3 +7,5 @@ ModelComponent
 SkeletalModelComponent
 LightComponent
 SkyBoxComponent
+ControllerComponent
+PlayerControllerComponent

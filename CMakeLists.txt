@@ -55,9 +55,11 @@ add_executable(
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp
     src/ECS/Component/ModelComponent.cpp src/ECS/Component/SkyBoxComponent.cpp src/ECS/Component/LightComponent.cpp
+    src/ECS/Component/ControllerComponent.cpp src/ECS/Component/PlayerControllerComponent.cpp 
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
-    src/ECS/EntityState/EntityState.cpp
+    src/ECS/EntityState/EntityState.cpp 
+    src/ECS/System/InputSystem.cpp
     src/ECS/Scene/Scene.cpp  src/ECS/ComponentStorage/ComponentStorage.cpp
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp

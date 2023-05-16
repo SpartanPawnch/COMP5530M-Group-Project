@@ -41,11 +41,13 @@
 #include "ECS/Component/ModelComponent.h"
 #include "ECS/Component/SkyBoxComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
+#include "ECS/Component/PlayerControllerComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
 
 #include "../external/ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
@@ -101,6 +103,9 @@ static RenderManager* renderManager;
 
 // editor vars
 Scene scene;
+
+// input system
+static InputSystem* inputSystem;
 
 // viewport widget vars
 GLuint viewportMultisampleFramebuffer;
@@ -216,6 +221,9 @@ GUIManager::GUIManager(GLFWwindow* window) {
     baseWindow = window;
     materialSystem = MaterialSystem::getInstance();
     renderManager = RenderManager::getInstance();
+
+    inputSystem = InputSystem::getInstance();
+    inputSystem->attachScene(&scene);
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -341,10 +349,30 @@ static void handleKeyboardInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 6);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 6);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 7);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+
+    // player controls
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        // Move the camera forward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        // Move the camera backward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        // Strafe the camera left
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        // Strafe the camera right
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 3);
     }
 }
 
@@ -1780,6 +1808,69 @@ void drawComponentProps(LightComponent& component) {
     ImGui::InputFloat3("Diffuse", &component.diffuse[0]);
     ImGui::InputFloat3("Specular", &component.specular[0]);
 }
+void drawComponentProps(PlayerControllerComponent& component) {
+    if (ImGui::Button("Add Key")) {
+        component.addKey();
+    }
+    for (unsigned int i = 0; i < component.virtualKeys.size(); i++) {
+        ImGui::PushID(i);
+        /*
+        ImGui::Columns(5);
+        ImGui::InputText("##name", &component.virtualKeys[i].name[0],
+        component.virtualKeys[0].name.capacity());
+        component.virtualKeys[i].name.resize(std::strlen(&component.virtualKeys[i].name[0]));
+        ImGui::NextColumn();
+        if (component.virtualKeys.at(i).key == -1) {
+            ImGui::Text("Key Not Set");
+        }
+        else {
+            const char* keyName = glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+            ImGui::Text("%s", keyName);
+        }
+        ImGui::NextColumn();
+        ImGui::InputFloat("##direction", &component.virtualKeys.at(i).scale);
+        ImGui::NextColumn();
+        if (ImGui::Button("Set Key")) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            //logString += "Starting scan for key ";
+            //logString += keyindex;
+            //logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::NextColumn();
+        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move
+        Up", "Move Down", "N/A"}; ImGui::Combo("function", &component.virtualKeys.at(i).action,
+        items, IM_ARRAYSIZE(items));
+        //ImGui::NextColumn();
+        if (ImGui::Button("Remove Key")) {
+            component.removeKey(i);
+        }
+        ImGui::NextColumn();
+        */
+        const char* items[] = {"Move Forward", "Move Backwards", "Move Left", "Move Right",
+            "Move Up", "Move Down", "N/A"};
+
+        ImGui::Combo("", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        ImGui::SameLine();
+        const char* keyName = component.virtualKeys.at(i).key == -1
+            ? "Unassigned"
+            : glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+        if (ImGui::Button(keyName)) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            // logString += "Starting scan for key ";
+            // logString += keyindex;
+            // logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::SameLine();
+        ImGui::InputFloat("##scale", &component.virtualKeys.at(i).scale);
+        ImGui::PopID();
+    }
+}
 
 void drawComponentContextMenu(int i, int& componentToDelete) {
     if (ImGui::BeginPopupContextItem()) {
@@ -1798,6 +1889,9 @@ void drawComponentContextMenu(int i, int& componentToDelete) {
         if (ImGui::MenuItem("Add Transform Component")) {
             scene.selectedEntity->components.addComponent(TransformComponent());
         }
+        if (ImGui::MenuItem("Add Player Controller Component")) {
+            scene.selectedEntity->components.addComponent(PlayerControllerComponent());
+        }
         if (ImGui::MenuItem("Delete Component")) {
             componentToDelete = i;
         }
@@ -1813,6 +1907,7 @@ void drawComponentList(std::vector<T>& components) {
     // draw list
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
+        /*
         if (ImGui::TreeNodeEx(components[i].name.c_str(),
                 ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
                     ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1820,6 +1915,10 @@ void drawComponentList(std::vector<T>& components) {
 
             drawComponentProps(components[i]);
             ImGui::TreePop();
+        }
+        */
+        if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+            drawComponentProps(components[i]);
         }
         ImGui::PopID();
     }
@@ -1907,6 +2006,9 @@ inline void drawProperties() {
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
+            // PlayerControllerComponent
+            drawComponentList(scene.selectedEntity->components.vecPlayerControllerComponent);
+
             // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();
             ImVec2 buttonSize = ImGui::GetWindowSize();
@@ -1940,6 +2042,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Transform Component")) {
                     scene.selectedEntity->components.addComponent(TransformComponent());
+                }
+                if (ImGui::MenuItem("Add Player Controller Component")) {
+                    scene.selectedEntity->components.addComponent(PlayerControllerComponent());
                 }
                 ImGui::EndPopup();
             }

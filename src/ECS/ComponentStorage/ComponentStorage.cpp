@@ -10,6 +10,8 @@ void ComponentStorage::startAll(){
     start<SkeletalModelComponent>();
     start<LightComponent>();
     start<SkyBoxComponent>();
+    start<ControllerComponent>();
+    start<PlayerControllerComponent>();
 }
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
@@ -21,6 +23,8 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<SkeletalModelComponent>(dt,state);
     update<LightComponent>(dt,state);
     update<SkyBoxComponent>(dt,state);
+    update<ControllerComponent>(dt,state);
+    update<PlayerControllerComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
@@ -32,6 +36,8 @@ void ComponentStorage::clearAll(){
     vecSkeletalModelComponent.clear();
     vecLightComponent.clear();
     vecSkyBoxComponent.clear();
+    vecControllerComponent.clear();
+    vecPlayerControllerComponent.clear();
 }
 void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
     switch(loc.type){
@@ -71,6 +77,14 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecSkyBoxComponent.size())
             return nullptr;
         return &vecSkyBoxComponent[loc.componentIdx];
+    case ComponentLocation::CONTROLLERCOMPONENT:
+        if(loc.componentIdx>=vecControllerComponent.size())
+            return nullptr;
+        return &vecControllerComponent[loc.componentIdx];
+    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
+        if(loc.componentIdx>=vecPlayerControllerComponent.size())
+            return nullptr;
+        return &vecPlayerControllerComponent[loc.componentIdx];
     default:;
     }
     return nullptr;
@@ -121,6 +135,16 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((SkyBoxComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::CONTROLLERCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((ControllerComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((PlayerControllerComponent*)ptr)->pushLuaTable(state);
         return;
     default:;
     }

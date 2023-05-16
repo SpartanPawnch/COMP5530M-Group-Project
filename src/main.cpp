@@ -31,13 +31,19 @@
 #include "asset_import/materials.h"
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
 
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
 
+InputSystem* inputSystem;
+
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
+
+// set InputSystem to nullptr intially
+InputSystem* InputSystem::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -120,6 +126,10 @@ int main() {
     renderManager->loadScene();
     renderManager->loadIcons();
 
+    // Input System
+    inputSystem = InputSystem::getInstance();
+    inputSystem->start(window);
+
     // init shader
 
     // float lastQueryTime = float(glfwGetTime());
@@ -172,12 +182,12 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
         glDrawBuffers(2, attachments);
 
         // clear screen
         {
-            const float clearVals[] = {.2f, .2f, .2f, 1.f};
+            const float clearVals[] = { .2f, .2f, .2f, 1.f };
             const float clearDepth = 1.f;
             glClearBufferfv(GL_COLOR, 0, clearVals);
             glClearBufferfv(GL_DEPTH, 0, &clearDepth);
@@ -246,12 +256,12 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
-        GLuint entIDattachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        GLuint entIDattachments[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
         glDrawBuffers(2, entIDattachments);
 
         // clear screen
         {
-            const float clearVals[] = {.0f, .0f, .0f, 1.f};
+            const float clearVals[] = { .0f, .0f, .0f, 1.f };
             const float clearDepth = 1.f;
             glClearBufferfv(GL_COLOR, 0, clearVals);
             glClearBufferfv(GL_DEPTH, 0, &clearDepth);

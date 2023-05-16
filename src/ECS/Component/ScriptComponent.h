@@ -31,6 +31,7 @@ struct ScriptArgument {
     std::string key;
 };
 
+
 struct ScriptComponent : BaseComponent {
     ScriptComponent();
     ScriptComponent(const std::string& _name, const int _uuid);
