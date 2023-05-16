@@ -490,7 +490,8 @@ void loadLevel(const char* path, Scene& scene) {
                         controls.virtualKeys[j].name = virtualKeys[j]["name"].GetString();
                         controls.virtualKeys[j].key = virtualKeys[j]["Key"].GetInt();
                         controls.virtualKeys[j].scale = virtualKeys[j]["scale"].GetFloat();
-                        controls.virtualKeys[j].action = virtualKeys[j]["action"].GetInt();
+                        controls.virtualKeys[j].action =
+                            (VirtualKey::Action)virtualKeys[j]["action"].GetInt();
                     }
                     baseEntity.components.addComponent(controls);
                 }

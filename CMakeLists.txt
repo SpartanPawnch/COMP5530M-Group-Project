@@ -115,15 +115,16 @@ set(PHYSX_LIBRARIES
 set(CMAKE_BUILD_TYPE $<$<CONFIG:Debug>:Debug> $<$<CONFIG:Release>:Release>)
 add_subdirectory("external/physx-4.1/physx/compiler/public")
 
+# References NvidiaBuildOptions.cmake to figure out if system is 32/64 bit
+IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	SET(LIBPATH_SUFFIX "64")
+ELSE()
+	SET(LIBPATH_SUFFIX "32")
+ENDIF()
+GetPlatformBinName(PLATFORM_BIN_NAME ${LIBPATH_SUFFIX})
+set(PhysxOutputPath ${PX_OUTPUT_LIB_DIR}/bin/${PLATFORM_BIN_NAME})
+
 if (TARGET_BUILD_PLATFORM STREQUAL "windows")
-	# References NvidiaBuildOptions.cmake to figure out if system is 32/64 bit
-	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		SET(LIBPATH_SUFFIX "64")
-	ELSE()
-		SET(LIBPATH_SUFFIX "32")
-	ENDIF()
-	GetPlatformBinName(PLATFORM_BIN_NAME ${LIBPATH_SUFFIX})
-	set(PhysxOutputPath ${PX_OUTPUT_LIB_DIR}/bin/${PLATFORM_BIN_NAME})
 	message("Physx Output Path: " ${PhysxOutputPath})
 
 	# copy PhysX dll's to build dir. Happens on every build.
@@ -135,7 +136,6 @@ if (TARGET_BUILD_PLATFORM STREQUAL "windows")
         ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXFoundation$<$<CONFIG:Debug>:d>.dll
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif()
-
 
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
@@ -204,6 +204,11 @@ add_custom_command(
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
     $<$<CONFIG:Release>:Release>
     --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
+
+    #install physx
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+        ${CMAKE_CURRENT_SOURCE_DIR}/template/external/physx-4.1
 
     #copy template
     COMMAND ${CMAKE_COMMAND} -E copy_directory 

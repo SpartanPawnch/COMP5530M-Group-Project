@@ -1,6 +1,5 @@
 #include "materials.h"
 
-
 MaterialSystem* MaterialSystem::getInstance() {
     if (instance == nullptr) {
         instance = new MaterialSystem();
@@ -9,7 +8,8 @@ MaterialSystem* MaterialSystem::getInstance() {
 }
 
 bool MaterialSystem::createMaterial(std::string name) {
-    if (materials.count(name) > 0) return false;
+    if (materials.count(name) > 0)
+        return false;
 
     Material newMat;
     newMat.name = name;
@@ -18,7 +18,8 @@ bool MaterialSystem::createMaterial(std::string name) {
 }
 
 bool MaterialSystem::createMaterialDirectly(Material mat) {
-    if (materials.count(mat.name) > 0) return false;
+    if (materials.count(mat.name) > 0)
+        return false;
 
     materials[mat.name] = mat;
     return true;
@@ -43,7 +44,8 @@ void MaterialSystem::selectMaterial(std::string name) {
     selectedMaterial = name;
 }
 
-void MaterialSystem::setTextureFromPath(std::string path, std::shared_ptr<TextureDescriptor>& baseColorMap, std::string& uuid) {
+void MaterialSystem::setTextureFromPath(std::string path,
+    std::shared_ptr<TextureDescriptor>& baseColorMap, std::string& uuid) {
     std::string localUuid = assetfolder::getRelativePath(path.c_str());
     auto desc = getTexture(localUuid);
 
@@ -57,7 +59,8 @@ void MaterialSystem::setTextureFromPath(std::string path, std::shared_ptr<Textur
 }
 
 std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::string& name) {
-    if (materials.count(name) > 0 && (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
+    if (materials.count(name) > 0 &&
+        (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
         Material mat = materials[name];
         ActiveMaterial activeMat;
 
@@ -98,13 +101,18 @@ void MaterialSystem::reloadActiveMaterial(const std::string& name) {
             activeMatPtr->metalness = mat.metalness;
             activeMatPtr->occlusion = mat.occlusion;
 
-            setTextureFromPath(mat.baseColorMap, activeMatPtr->baseColorMap, activeMatPtr->baseColorMapUuid);
-            setTextureFromPath(mat.roughnessMap, activeMatPtr->roughnessMap, activeMatPtr->roughnessMapUuid);
-            setTextureFromPath(mat.metalnessMap, activeMatPtr->metalnessMap, activeMatPtr->metalnessMapUuid);
+            setTextureFromPath(mat.baseColorMap, activeMatPtr->baseColorMap,
+                activeMatPtr->baseColorMapUuid);
+            setTextureFromPath(mat.roughnessMap, activeMatPtr->roughnessMap,
+                activeMatPtr->roughnessMapUuid);
+            setTextureFromPath(mat.metalnessMap, activeMatPtr->metalnessMap,
+                activeMatPtr->metalnessMapUuid);
             setTextureFromPath(mat.normalMap, activeMatPtr->normalMap, activeMatPtr->normalMapUuid);
             setTextureFromPath(mat.alphaMap, activeMatPtr->alphaMap, activeMatPtr->alphaMapUuid);
-            setTextureFromPath(mat.emissiveMap, activeMatPtr->emissiveMap, activeMatPtr->emissiveMapUuid);
-            setTextureFromPath(mat.occlusionMap, activeMatPtr->occlusionMap, activeMatPtr->occlusionMapUuid);
+            setTextureFromPath(mat.emissiveMap, activeMatPtr->emissiveMap,
+                activeMatPtr->emissiveMapUuid);
+            setTextureFromPath(mat.occlusionMap, activeMatPtr->occlusionMap,
+                activeMatPtr->occlusionMapUuid);
         }
     }
 }
@@ -124,5 +132,3 @@ std::shared_ptr<ActiveMaterial> MaterialSystem::loadActiveMaterial(Material mate
     }
     return getActiveMaterial(material.name);
 }
-
-

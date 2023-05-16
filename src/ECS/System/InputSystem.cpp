@@ -2,17 +2,14 @@
 
 #include <iostream>
 
-InputSystem::InputSystem(GLFWwindow* window, Scene* sc) {
+InputSystem::InputSystem(GLFWwindow* window) {
     start(window);
-
-    scene = sc;
 }
 
 InputSystem::InputSystem() {
 }
 
 InputSystem::~InputSystem() {
-    stop();
 }
 
 InputSystem* InputSystem::getInstance() {
@@ -27,14 +24,6 @@ InputSystem* InputSystem::getInstance() {
     return instance;
 }
 
-void InputSystem::attachScene(Scene* sc) {
-    scene = sc;
-}
-
-void InputSystem::detachScene() {
-    scene = nullptr;
-}
-
 void InputSystem::glfw_callback_wrapper(GLFWwindow* window, int key, int scancode, int action,
     int mods) {
     InputSystem* is = static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
@@ -43,67 +32,31 @@ void InputSystem::glfw_callback_wrapper(GLFWwindow* window, int key, int scancod
 
 void InputSystem::glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aScanCode, int aAction,
     int) {
-    for (auto& entity : scene->entities) {
-        for (auto& component : entity.components.vecPlayerControllerComponent) {
-            if (component.listeningForKey) {
-                component.virtualKeys.at(component.listeningForKeyIndex).key = aKey;
-                component.listeningForKey = false;
-                return;
-            }
+    if (aAction == GLFW_PRESS) {
+        isDown[aKey] = true;
 
-            for (auto const& vk : component.virtualKeys) {
-                if (vk.key == aKey) {
-                    AssignAction(entity, vk.scale, vk.action);
-                    // vk.action(entity, vk.scale);
-                    // MoveLeftRight(entity,1.f);
+        // check for key listening
+        if (scene->selectedEntity != nullptr) {
+            for (size_t i = 0;
+                 i < scene->selectedEntity->components.vecPlayerControllerComponent.size(); i++) {
+                if (scene->selectedEntity->components.vecPlayerControllerComponent[i]
+                        .listeningForKey) {
+                    scene->selectedEntity->components.vecPlayerControllerComponent[i]
+                        .virtualKeys[scene->selectedEntity->components
+                                         .vecPlayerControllerComponent[i]
+                                         .listeningForKeyIndex]
+                        .key = aKey;
+                    scene->selectedEntity->components.vecPlayerControllerComponent[i]
+                        .listeningForKey = false;
                 }
             }
         }
     }
-}
-
-void InputSystem::AssignAction(BaseEntity& entity, float scale, unsigned int action) {
-    switch (action) {
-    case 0:
-        MoveForwardBackward(entity, scale);
-        break;
-    case 1:
-        MoveForwardBackward(entity, scale);
-        break;
-    case 2:
-        MoveLeftRight(entity, scale);
-        break;
-    case 3:
-        MoveLeftRight(entity, scale);
-        break;
-    case 4:
-        MoveAscendDescend(entity, scale);
-        break;
-    case 5:
-        MoveAscendDescend(entity, scale);
-        break;
-    }
-}
-
-void InputSystem::MoveLeftRight(BaseEntity& entity, float scale) {
-    entity.state.position = entity.state.position + glm::vec3(1.0f, 0.f, 0.f) * scale;
-}
-
-void InputSystem::MoveForwardBackward(BaseEntity& entity, float scale) {
-    entity.state.position = entity.state.position + glm::vec3(0.0f, 0.f, -1.f) * scale;
-}
-
-void InputSystem::MoveAscendDescend(BaseEntity& entity, float scale) {
-    entity.state.position = entity.state.position + glm::vec3(0.0f, 1.f, 0.f) * scale;
+    else if (aAction == GLFW_RELEASE)
+        isDown[aKey] = false;
 }
 
 void InputSystem::start(GLFWwindow* window) {
     glfwSetWindowUserPointer(window, this);
     glfwSetKeyCallback(window, glfw_callback_wrapper);
-}
-
-void InputSystem::update() {
-}
-
-void InputSystem::stop() {
 }

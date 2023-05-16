@@ -4,15 +4,27 @@
 #include "ControllerComponent.h"
 
 struct VirtualKey {
+    enum Action {
+        NONE = -1,
+        FORWARD = 0,
+        BACK,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN,
+        ACTIONS_MAX
+    };
     std::string name;
     int key;
     float scale;
-    int action;
+    Action action = NONE;
 };
 
 struct PlayerControllerComponent : BaseComponent {
     PlayerControllerComponent();
     PlayerControllerComponent(const std::string& _name, int _uuid);
+
+    void update(float dt, EntityState& state) override;
 
     std::vector<VirtualKey> virtualKeys;
 

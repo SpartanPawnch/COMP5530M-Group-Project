@@ -223,7 +223,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     renderManager = RenderManager::getInstance();
 
     inputSystem = InputSystem::getInstance();
-    inputSystem->attachScene(&scene);
+    inputSystem->scene = &scene;
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -1861,50 +1861,16 @@ void drawComponentProps(PlayerControllerComponent& component) {
     }
     for (unsigned int i = 0; i < component.virtualKeys.size(); i++) {
         ImGui::PushID(i);
-        /*
-        ImGui::Columns(5);
-        ImGui::InputText("##name", &component.virtualKeys[i].name[0],
-        component.virtualKeys[0].name.capacity());
-        component.virtualKeys[i].name.resize(std::strlen(&component.virtualKeys[i].name[0]));
-        ImGui::NextColumn();
-        if (component.virtualKeys.at(i).key == -1) {
-            ImGui::Text("Key Not Set");
-        }
-        else {
-            const char* keyName = glfwGetKeyName(component.virtualKeys.at(i).key, 0);
-            ImGui::Text("%s", keyName);
-        }
-        ImGui::NextColumn();
-        ImGui::InputFloat("##direction", &component.virtualKeys.at(i).scale);
-        ImGui::NextColumn();
-        if (ImGui::Button("Set Key")) {
-            std::string ki = std::to_string(i);
-            const char* keyindex = ki.c_str();
-            //logString += "Starting scan for key ";
-            //logString += keyindex;
-            //logString += "\n";
-            component.listeningForKey = true;
-            component.listeningForKeyIndex = i;
-        }
-        ImGui::NextColumn();
-        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move
-        Up", "Move Down", "N/A"}; ImGui::Combo("function", &component.virtualKeys.at(i).action,
-        items, IM_ARRAYSIZE(items));
-        //ImGui::NextColumn();
-        if (ImGui::Button("Remove Key")) {
-            component.removeKey(i);
-        }
-        ImGui::NextColumn();
-        */
         const char* items[] = {"Move Forward", "Move Backwards", "Move Left", "Move Right",
             "Move Up", "Move Down", "N/A"};
 
-        ImGui::Combo("", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        ImGui::Combo("", (int*)&component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
         ImGui::SameLine();
         const char* keyName = component.virtualKeys.at(i).key == -1
             ? "Unassigned"
             : glfwGetKeyName(component.virtualKeys.at(i).key, 0);
-        if (ImGui::Button(keyName)) {
+
+        if (ImGui::Button(keyName ? keyName : "?")) {
             std::string ki = std::to_string(i);
             const char* keyindex = ki.c_str();
             // logString += "Starting scan for key ";
@@ -2056,6 +2022,8 @@ inline void drawProperties() {
 
             // PlayerControllerComponent
             drawComponentList(scene.selectedEntity->components.vecPlayerControllerComponent);
+            scene.selectedEntity->components.update<PlayerControllerComponent>(
+                renderManager->deltaTime, scene.selectedEntity->state);
 
             // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();
