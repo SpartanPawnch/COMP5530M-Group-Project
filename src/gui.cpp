@@ -349,31 +349,29 @@ static void handleKeyboardInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 6);
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 6);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         // increase camera movement speed
         renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 7);
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 7);
     }
-
-    // player controls
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        // Move the camera forward
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 0);
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        // Move the camera backward
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 1);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        // Strafe the camera left
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 2);
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        // Strafe the camera right
-        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 3);
-    }
+    //
+    // // player controls
+    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    //     // Move the camera forward
+    //     scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 0);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    //     // Move the camera backward
+    //     scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 1);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    //     // Strafe the camera left
+    //     scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 2);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    //     // Strafe the camera right
+    //     scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 3);
+    // }
 }
 
 static void handleMouseInput(GLFWwindow* window) {
@@ -1212,14 +1210,17 @@ void drawComponentProps(SkeletalModelComponent& component) {
         component.nodes[i].name.resize(std::strlen(&component.nodes[i].name[0]));
         if (prevText != component.nodes[i].name) {
             for (unsigned int k = 0; k < component.nodes.size(); k++) {
-                for (unsigned int j = 0; j < component.nodes[k].noConditionTransitions.size(); j++) {
+                for (unsigned int j = 0; j < component.nodes[k].noConditionTransitions.size();
+                     j++) {
                     if (component.nodes[k].noConditionTransitions[j].transitionTo == prevText) {
-                        component.nodes[k].noConditionTransitions[j].transitionTo = component.nodes[i].name;
+                        component.nodes[k].noConditionTransitions[j].transitionTo =
+                            component.nodes[i].name;
                     }
                 }
                 for (unsigned int j = 0; j < component.nodes[k].boolTransitions.size(); j++) {
                     if (component.nodes[k].boolTransitions[j].transitionTo == prevText) {
-                        component.nodes[k].boolTransitions[j].transitionTo = component.nodes[i].name;
+                        component.nodes[k].boolTransitions[j].transitionTo =
+                            component.nodes[i].name;
                     }
                 }
                 for (unsigned int j = 0; j < component.nodes[k].intTransitions.size(); j++) {
@@ -1229,7 +1230,8 @@ void drawComponentProps(SkeletalModelComponent& component) {
                 }
                 for (unsigned int j = 0; j < component.nodes[k].floatTransitions.size(); j++) {
                     if (component.nodes[k].floatTransitions[j].transitionTo == prevText) {
-                        component.nodes[k].floatTransitions[j].transitionTo = component.nodes[i].name;
+                        component.nodes[k].floatTransitions[j].transitionTo =
+                            component.nodes[i].name;
                     }
                 }
             }

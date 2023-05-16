@@ -99,7 +99,7 @@ vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){
     vec3 l = normalize(lights[lightIndex].position-vsPos);
 	vec3 h = normalize(l+v);
     vec3 reflection = reflect(-v, n);
-    vec3 reflectionColor = textureCube(skybox, reflection).rgb;
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
 
     vec3 clight = lights[lightIndex].diffuse;
     vec3 frValue = fr(h,l,v,n);
