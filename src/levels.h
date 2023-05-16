@@ -7,6 +7,7 @@ void registerLevelFunctionsLua();
 
 // load level from manifest in path
 void loadLevel(const char* path, Scene& scene);
+void updateLevels(Scene& scene);
 #ifdef ONO_ENGINE_ONLY
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene);

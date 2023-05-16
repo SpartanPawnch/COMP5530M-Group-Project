@@ -166,7 +166,7 @@ int main() {
 
         // update editor state
         scene.updatePositions();
-
+        updateLevels(scene);
         //--- Draw Results ---
         // draw scene to texture
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);

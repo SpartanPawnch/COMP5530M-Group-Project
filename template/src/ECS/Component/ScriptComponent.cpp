@@ -93,11 +93,12 @@ void ScriptComponent::update(float dt, EntityState& state) {
     lua_getfield(luaState, -1, "update");
 
     // push arguments
-    lua_pushnumber(luaState, dt);
-    state.pushLuaTable(luaState);
-    pushArgs(luaState, args);
+    lua_pushvalue(luaState, -2); // self
+    lua_pushnumber(luaState, dt); // dt
+    state.pushLuaTable(luaState); // entityState
+    pushArgs(luaState, args); // args
     // call
-    int err = lua_pcall(luaState, 3, 0, 0);
+    int err = lua_pcall(luaState, 4, 0, 0);
     if (err != LUA_OK) {
         const char* err = luaL_tolstring(luaState, -1, nullptr);
         logging::logErr("LUA RUNTIME ERROR: {}\n", err);
