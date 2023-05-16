@@ -29,19 +29,19 @@ struct AnimationControllerNode {
 };
 
 struct NoConditionACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     float blendTime = 0.0f;
 };
 
 struct BoolACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate; // should translate instantly or only when animation is done
     bool condition;
     bool desiredValue;
     float blendTime = 0.0f;
 };
 struct IntACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate;
     int condition;
     int desiredValue;
@@ -51,7 +51,7 @@ struct IntACTransition {
     float blendTime = 0.0f;
 };
 struct FloatACTransition {
-    AnimationControllerNode* transitionTo;
+    std::string transitionTo;
     bool immediate;
     float condition;
     float desiredValue;
@@ -71,7 +71,7 @@ struct SkeletalModelComponent : BaseComponent {
     void stop() override;
 
     void finalLoop();
-    void transitionToNode(AnimationControllerNode* node, float bt = 0.0f);
+    void transitionToNode(std::string name, float bt = 0.0f);
 
     void addNode();
     void addNoConditionTransition();
@@ -83,6 +83,8 @@ struct SkeletalModelComponent : BaseComponent {
     void removeBoolACTransition(int id);
     void removeIntACTransition(int id);
     void removeFloatACTransition(int id);
+
+    AnimationControllerNode* getNodeByName(std::string name);
 
     void updateAnimation(float dt);
     void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
@@ -100,7 +102,7 @@ struct SkeletalModelComponent : BaseComponent {
     std::vector<AnimationControllerNode> nodes;
     AnimationControllerNode* previousNode;
     AnimationControllerNode* currentNode;
-    AnimationControllerNode* nextNode;
+    std::string nextNode;
     AnimationControllerNode* selectedNode;
 
     float currentTime;

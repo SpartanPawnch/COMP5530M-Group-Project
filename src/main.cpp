@@ -143,6 +143,7 @@ int main() {
     renderManager->setupCubemapPipelineUniforms();
     renderManager->setupIconPipelineUniforms();
     renderManager->setupIconIDPipelineUniforms();
+    renderManager->setupAnimationIDPipelineUniforms();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());

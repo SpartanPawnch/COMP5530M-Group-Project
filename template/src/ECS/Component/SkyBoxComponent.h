@@ -19,6 +19,7 @@ struct SkyBoxTexture {
 
 struct SkyBoxComponent : BaseComponent {
     SkyBoxComponent();
+    SkyBoxComponent(const std::string& name, const int uuid);
     ~SkyBoxComponent() {
     }
     void start() override;

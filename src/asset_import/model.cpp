@@ -170,7 +170,7 @@ namespace model {
     }
 
     std::string ModelDescriptor::getUuid() {
-        return *path;
+        return loadedModels[idx].uuid;
     }
 
     //unsigned int ModelDescriptor::getTexture(int meshIndex) {

@@ -225,6 +225,7 @@ void RenderManager::loadScene() {
     addPipeline(CubemapPipeline, cubemapVertPath, cubemapFragPath);
     addPipeline(IconPipeline, iconVertPath, iconFragPath);
     addPipeline(IconIDPipeline, iconIDVertexPath, iconIDFragPath);
+    addPipeline(AnimationIDPipeline, AnimatedVertexPath, entIDFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -698,6 +699,35 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
             }
         }
+
+        glUseProgram(getPipeline(AnimationIDPipeline)->getProgram());
+
+
+        // bind model matrix
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getModelID(), 1, GL_FALSE,
+            &modelMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getProjectionID(), 1, GL_FALSE,
+            &projectionMatrix[0][0]);
+        glUniform3f(getPipeline(AnimationIDPipeline)->getEntID(), reconstructed_color.x,
+            reconstructed_color.y, reconstructed_color.z);
+
+        for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
+            j++) {
+            auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
+            if (!desc) {
+                continue;
+            }
+            for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
+                glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100, GL_FALSE,
+                    &scene.entities[i]
+                    .components.vecSkeletalModelComponent[j]
+                    .transformMatrices[0][0][0]);
+
+                glBindVertexArray(desc->getVAO(k));
+                glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
+            }
+        }
         glBindVertexArray(0);
     }
 }
@@ -848,6 +878,10 @@ void RenderManager::setupEntIDPipelineUniforms() {
 
 void RenderManager::setupIconIDPipelineUniforms() {
     getPipeline(IconIDPipeline)->setIDUniformLocations();
+}
+
+void RenderManager::setupAnimationIDPipelineUniforms() {
+    getPipeline(AnimationIDPipeline)->setIDUniformLocations();
 }
 
 void RenderManager::setupCubemapPipelineUniforms() {

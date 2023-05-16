@@ -31,6 +31,7 @@ enum Pipeline {
     CubemapPipeline = 11,
     IconPipeline = 12,
     IconIDPipeline = 13,
+    AnimationIDPipeline = 14,
     Pipeline_MAX
 };
 
@@ -163,6 +164,7 @@ class RenderManager {
     void setupAnimatedPipelineUniforms();
     void setupEntIDPipelineUniforms();
     void setupIconIDPipelineUniforms();
+    void setupAnimationIDPipelineUniforms();
     void setupCubemapPipelineUniforms();
     void setupIconPipelineUniforms();
     void loadIcons();

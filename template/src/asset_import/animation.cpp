@@ -143,7 +143,7 @@ namespace animation {
         int idx = uuidToIdx[uuid];
         loadedAnimations[idx].animation->loadAnimation(path,model);
         loadedAnimations[idx].path = std::string(path);
-        loadedAnimations[idx].modelUuid = model->getUuid();
+        loadedAnimations[idx].modelUuid = std::string(model->getUuid());
         return std::shared_ptr<AnimationDescriptor>(loadedAnimations[idx].ref);
     }
 

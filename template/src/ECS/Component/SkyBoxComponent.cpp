@@ -8,6 +8,11 @@ SkyBoxComponent::SkyBoxComponent() {
     name = "Skybox Component";
     uuid = baseUuid++;
 }
+SkyBoxComponent::SkyBoxComponent(const std::string& _name, const int _uuid) {
+    name = _name;
+    uuid = _uuid;
+    baseUuid = std::max(baseUuid, _uuid + 1);
+}
 void SkyBoxComponent::start() {
 }
 void SkyBoxComponent::update(float dt, EntityState& state) {

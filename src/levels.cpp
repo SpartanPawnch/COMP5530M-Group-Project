@@ -26,6 +26,7 @@
 #include "ECS/Component/TransformComponent.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/SkyBoxComponent.h"
 
 static std::string currentLevelPath;
 static std::string defaultLevelPath;
@@ -149,7 +150,7 @@ void loadLevel(const char* path, Scene& scene) {
         for (unsigned int i = 0; i < jsonModels.Size(); i++) {
             animationPtrs.emplace_back(
                 animation::animationLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
-                    jsonModels[i]["uuid"].GetString(),model::modelGetByUuid(projRoot + jsonModels[i]["modelUuid"].GetString())));
+                    jsonModels[i]["uuid"].GetString(),model::modelGetByUuid(jsonModels[i]["modelUuid"].GetString())));
         }
     }
 
@@ -241,18 +242,11 @@ void loadLevel(const char* path, Scene& scene) {
                         currNode.animationDescriptor = animation::animationGetByUuid(currNode.animationUuid);
                         currNode.loopCount = jsonComponent["nodes"][node]["loopCount"].GetInt();
                         model.nodes[node] = currNode;
-                    }
-                    for (unsigned int node = 0; node < jsonComponent["nodes"].Size(); node++) {
-                        //get transitions
+
                         model.nodes[node].noConditionTransitions.resize(jsonComponent["nodes"][node]["noconditiontransitions"].Size());
                         for (unsigned int noCond = 0; noCond < jsonComponent["nodes"][node]["noconditiontransitions"].Size(); noCond++) {
                             NoConditionACTransition noCondTr;
-                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
-                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["transitionTo"].GetString()) {
-                                    noCondTr.transitionTo = &model.nodes[nodeFind];
-                                    break;
-                                }
-                            }
+                            noCondTr.transitionTo = jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["transitionTo"].GetString();
                             noCondTr.blendTime = jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["blendTime"].GetDouble();
                             model.nodes[node].noConditionTransitions[noCond] = noCondTr;
                         }
@@ -260,12 +254,7 @@ void loadLevel(const char* path, Scene& scene) {
                         model.nodes[node].boolTransitions.resize(jsonComponent["nodes"][node]["booltransitions"].Size());
                         for (unsigned int boolCond = 0; boolCond < jsonComponent["nodes"][node]["booltransitions"].Size(); boolCond++) {
                             BoolACTransition boolCondTr;
-                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
-                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["booltransitions"][boolCond]["transitionTo"].GetString()) {
-                                    boolCondTr.transitionTo = &model.nodes[nodeFind];
-                                    break;
-                                }
-                            }
+                            boolCondTr.transitionTo = jsonComponent["nodes"][node]["booltransitions"][boolCond]["transitionTo"].GetString();
                             boolCondTr.blendTime = jsonComponent["nodes"][node]["booltransitions"][boolCond]["blendTime"].GetDouble();
                             boolCondTr.immediate = jsonComponent["nodes"][node]["booltransitions"][boolCond]["immediate"].GetBool();
                             boolCondTr.condition = jsonComponent["nodes"][node]["booltransitions"][boolCond]["condition"].GetBool();
@@ -276,12 +265,7 @@ void loadLevel(const char* path, Scene& scene) {
                         model.nodes[node].intTransitions.resize(jsonComponent["nodes"][node]["inttransitions"].Size());
                         for (unsigned int intCond = 0; intCond < jsonComponent["nodes"][node]["inttransitions"].Size(); intCond++) {
                             IntACTransition intCondTr;
-                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
-                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["inttransitions"][intCond]["transitionTo"].GetString()) {
-                                    intCondTr.transitionTo = &model.nodes[nodeFind];
-                                    break;
-                                }
-                            }
+                            intCondTr.transitionTo = jsonComponent["nodes"][node]["inttransitions"][intCond]["transitionTo"].GetString();
                             intCondTr.blendTime = jsonComponent["nodes"][node]["inttransitions"][intCond]["blendTime"].GetDouble();
                             intCondTr.immediate = jsonComponent["nodes"][node]["inttransitions"][intCond]["immediate"].GetBool();
                             intCondTr.condition = jsonComponent["nodes"][node]["inttransitions"][intCond]["condition"].GetInt();
@@ -295,12 +279,7 @@ void loadLevel(const char* path, Scene& scene) {
                         model.nodes[node].floatTransitions.resize(jsonComponent["nodes"][node]["floattransitions"].Size());
                         for (unsigned int floatCond = 0; floatCond < jsonComponent["nodes"][node]["floattransitions"].Size(); floatCond++) {
                             FloatACTransition floatCondTr;
-                            for (unsigned int nodeFind = 0; nodeFind < jsonComponent["nodes"].Size(); nodeFind++) {
-                                if (model.nodes[nodeFind].name == jsonComponent["nodes"][node]["floattransitions"][floatCond]["transitionTo"].GetString()) {
-                                    floatCondTr.transitionTo = &model.nodes[nodeFind];
-                                    break;
-                                }
-                            }
+                            floatCondTr.transitionTo = jsonComponent["nodes"][node]["floattransitions"][floatCond]["transitionTo"].GetString();
                             floatCondTr.blendTime = jsonComponent["nodes"][node]["floattransitions"][floatCond]["blendTime"].GetDouble();
                             floatCondTr.immediate = jsonComponent["nodes"][node]["floattransitions"][floatCond]["immediate"].GetBool();
                             floatCondTr.condition = jsonComponent["nodes"][node]["floattransitions"][floatCond]["condition"].GetDouble();
@@ -310,10 +289,23 @@ void loadLevel(const char* path, Scene& scene) {
                             floatCondTr.shouldBeGreater = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeGreater"].GetBool();
                             model.nodes[node].floatTransitions[floatCond] = floatCondTr;
                         }
-
                     }
 
                     baseEntity.components.addComponent(model);
+                }
+
+                // SkyBoxComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "SkyBoxComponent") == 0) {
+                    SkyBoxComponent sk(name, uuid);
+
+                    sk.updateTex(0, jsonComponent["right"].GetString());
+                    sk.updateTex(1, jsonComponent["left"].GetString());
+                    sk.updateTex(2, jsonComponent["top"].GetString());
+                    sk.updateTex(3, jsonComponent["bottom"].GetString());
+                    sk.updateTex(4, jsonComponent["back"].GetString());
+                    sk.updateTex(5, jsonComponent["front"].GetString());
+
+                    baseEntity.components.addComponent(sk);
                 }
 
                 // AudioSourceComponent
@@ -516,6 +508,39 @@ static void saveComponent(const AudioSourceComponent& component,
 
     writer.EndObject();
 }
+static void saveComponent(const SkyBoxComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("SkyBoxComponent");
+
+    writer.Key("right");
+    writer.String(component.skybox.faces[0].path.c_str());
+
+    writer.Key("left");
+    writer.String(component.skybox.faces[1].path.c_str());
+
+    writer.Key("top");
+    writer.String(component.skybox.faces[2].path.c_str());
+
+    writer.Key("bottom");
+    writer.String(component.skybox.faces[3].path.c_str());
+
+    writer.Key("back");
+    writer.String(component.skybox.faces[4].path.c_str());
+
+    writer.Key("front");
+    writer.String(component.skybox.faces[5].path.c_str());
+
+    writer.EndObject();
+}
 static void saveComponent(const ModelComponent& component,
     rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
@@ -582,11 +607,11 @@ static void saveComponent(const SkeletalModelComponent& component,
 
         writer.Key("noconditiontransitions");
         writer.StartArray();
-        for (int j = 0; i < component.nodes[i].noConditionTransitions.size(); j++) {
+        for (int j = 0; j < component.nodes[i].noConditionTransitions.size(); j++) {
             writer.StartObject();
 
             writer.Key("transitionTo");
-            writer.String(component.nodes[i].noConditionTransitions[j].transitionTo->name.c_str());
+            writer.String(component.nodes[i].noConditionTransitions[j].transitionTo.c_str());
 
             writer.Key("blendTime");
             writer.Double(component.nodes[i].noConditionTransitions[j].blendTime);
@@ -597,11 +622,11 @@ static void saveComponent(const SkeletalModelComponent& component,
 
         writer.Key("booltransitions");
         writer.StartArray();
-        for (int j = 0; i < component.nodes[i].boolTransitions.size(); j++) {
+        for (int j = 0; j < component.nodes[i].boolTransitions.size(); j++) {
             writer.StartObject();
 
             writer.Key("transitionTo");
-            writer.String(component.nodes[i].boolTransitions[j].transitionTo->name.c_str());
+            writer.String(component.nodes[i].boolTransitions[j].transitionTo.c_str());
 
             writer.Key("blendTime");
             writer.Double(component.nodes[i].boolTransitions[j].blendTime);
@@ -621,11 +646,11 @@ static void saveComponent(const SkeletalModelComponent& component,
 
         writer.Key("inttransitions");
         writer.StartArray();
-        for (int j = 0; i < component.nodes[i].intTransitions.size(); j++) {
+        for (int j = 0; j < component.nodes[i].intTransitions.size(); j++) {
             writer.StartObject();
 
             writer.Key("transitionTo");
-            writer.String(component.nodes[i].intTransitions[j].transitionTo->name.c_str());
+            writer.String(component.nodes[i].intTransitions[j].transitionTo.c_str());
 
             writer.Key("blendTime");
             writer.Double(component.nodes[i].intTransitions[j].blendTime);
@@ -654,11 +679,11 @@ static void saveComponent(const SkeletalModelComponent& component,
 
         writer.Key("floattransitions");
         writer.StartArray();
-        for (int j = 0; i < component.nodes[i].floatTransitions.size(); j++) {
+        for (int j = 0; j < component.nodes[i].floatTransitions.size(); j++) {
             writer.StartObject();
 
             writer.Key("transitionTo");
-            writer.String(component.nodes[i].floatTransitions[j].transitionTo->name.c_str());
+            writer.String(component.nodes[i].floatTransitions[j].transitionTo.c_str());
 
             writer.Key("blendTime");
             writer.Double(component.nodes[i].floatTransitions[j].blendTime);
@@ -951,6 +976,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecSkeletalModelComponent;
             for (unsigned int j = 0; j < skeletalModelComponents.size(); j++) {
                 saveComponent(skeletalModelComponents[j], writer);
+            }
+
+            // SkyBoxComponent
+            const std::vector<SkyBoxComponent>& skyboxComponents =
+                scene.entities[i].components.vecSkyBoxComponent;
+            for (unsigned int j = 0; j < skyboxComponents.size(); j++) {
+                saveComponent(skyboxComponents[j], writer);
             }
 
             // ScriptComponent
