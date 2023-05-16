@@ -10,6 +10,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
 // #include <PxPhysics.h>
 // #include <PxPhysicsAPI.h>
 
@@ -481,9 +482,7 @@ void loadLevel(const char* path, Scene& scene) {
                 // PlayerControllerComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "PlayerControllerComponent") ==
                     0) {
-                    PlayerControllerComponent controls;
-                    controls.uuid = jsonComponent["uuid"].GetInt();
-                    controls.name = jsonComponent["name"].GetString();
+                    PlayerControllerComponent controls(name, uuid);
                     auto const virtualKeys = jsonComponent["virtualKeys"].GetArray();
                     for (int j = 0; j < virtualKeys.Size(); j++) {
                         controls.addKey();
@@ -1021,7 +1020,7 @@ void saveLevel(const char* path, const Scene& scene) {
 
     char writeBuf[BUFSIZ];
     rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+    rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(osw);
 
     writer.StartObject();
 

@@ -4,7 +4,7 @@ struct ComponentLocation{
     int componentIdx;
     enum CompType{
         BASECOMPONENT,
-        TRANSFORMCOMPONENT,
+        PLAYERCONTROLLERCOMPONENT,
         SCRIPTCOMPONENT,
         CAMERACOMPONENT,
         AUDIOSOURCECOMPONENT,
@@ -13,7 +13,7 @@ struct ComponentLocation{
         LIGHTCOMPONENT,
         SKYBOXCOMPONENT,
         CONTROLLERCOMPONENT,
-        PLAYERCONTROLLERCOMPONENT,
+        TRANSFORMCOMPONENT,
         COMPTYPE_MAX
     };
     CompType type;

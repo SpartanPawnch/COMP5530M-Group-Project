@@ -44,7 +44,7 @@ void PlayerControllerComponent::update(float dt, EntityState& state) {
     // update position
     state.position = state.position +
         dt *
-            glm::vec3(actions[VirtualKey::RIGHT] - actions[VirtualKey::LEFT],
+            glm::vec3(actions[VirtualKey::LEFT] - actions[VirtualKey::RIGHT],
                 actions[VirtualKey::UP] - actions[VirtualKey::DOWN],
                 actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
 }

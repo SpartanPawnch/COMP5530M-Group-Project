@@ -103,7 +103,6 @@ int main() {
 
     // Input System
     inputSystem = InputSystem::getInstance();
-    inputSystem->start(window);
 
     // float lastQueryTime = float(glfwGetTime());
     float currTime = float(glfwGetTime());
@@ -127,11 +126,23 @@ int main() {
     }
 
     scene.start();
+    inputSystem->scene = &scene;
+    inputSystem->start(window);
 
     double previous_time = glfwGetTime();
 
+    // ------------- UNIFORMS --------------------------
     renderManager->setupColourPipelineUniforms();
     renderManager->setupTexturePipelineUniforms();
+    renderManager->setupAnimatedPipelineUniforms();
+    renderManager->setupEntIDPipelineUniforms();
+    renderManager->setupCubemapPipelineUniforms();
+    renderManager->setupIconPipelineUniforms();
+    renderManager->setupIconIDPipelineUniforms();
+    renderManager->setupAnimationIDPipelineUniforms();
+
+    // register lua stuff
+    scene.registerLuaTable();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -158,8 +169,10 @@ int main() {
         // draw scene
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderManager->renderSkybox(scene, &renderManager->camera, width, height);
+
         renderManager->renderEntities(scene, &renderManager->camera, width, height);
-        // renderManager->renderSceneRefactor(renderManager->camera, width, height);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

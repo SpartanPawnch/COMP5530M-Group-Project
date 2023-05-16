@@ -2022,8 +2022,8 @@ inline void drawProperties() {
 
             // PlayerControllerComponent
             drawComponentList(scene.selectedEntity->components.vecPlayerControllerComponent);
-            scene.selectedEntity->components.update<PlayerControllerComponent>(
-                renderManager->deltaTime, scene.selectedEntity->state);
+            // scene.selectedEntity->components.update<PlayerControllerComponent>(
+            //     renderManager->deltaTime, scene.selectedEntity->state);
 
             // Universal Context Menu
             ImVec2 currPos = ImGui::GetCursorPos();

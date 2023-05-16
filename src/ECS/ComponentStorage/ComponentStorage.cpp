@@ -2,7 +2,7 @@
 
 void ComponentStorage::startAll(){
     start<BaseComponent>();
-    start<TransformComponent>();
+    start<PlayerControllerComponent>();
     start<ScriptComponent>();
     start<CameraComponent>();
     start<AudioSourceComponent>();
@@ -11,11 +11,11 @@ void ComponentStorage::startAll(){
     start<LightComponent>();
     start<SkyBoxComponent>();
     start<ControllerComponent>();
-    start<PlayerControllerComponent>();
+    start<TransformComponent>();
 }
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
-    update<TransformComponent>(dt,state);
+    update<PlayerControllerComponent>(dt,state);
     update<ScriptComponent>(dt,state);
     update<CameraComponent>(dt,state);
     update<AudioSourceComponent>(dt,state);
@@ -24,11 +24,11 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<LightComponent>(dt,state);
     update<SkyBoxComponent>(dt,state);
     update<ControllerComponent>(dt,state);
-    update<PlayerControllerComponent>(dt,state);
+    update<TransformComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
-    vecTransformComponent.clear();
+    vecPlayerControllerComponent.clear();
     vecScriptComponent.clear();
     vecCameraComponent.clear();
     vecAudioSourceComponent.clear();
@@ -37,7 +37,7 @@ void ComponentStorage::clearAll(){
     vecLightComponent.clear();
     vecSkyBoxComponent.clear();
     vecControllerComponent.clear();
-    vecPlayerControllerComponent.clear();
+    vecTransformComponent.clear();
 }
 void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
     switch(loc.type){
@@ -45,10 +45,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecBaseComponent.size())
             return nullptr;
         return &vecBaseComponent[loc.componentIdx];
-    case ComponentLocation::TRANSFORMCOMPONENT:
-        if(loc.componentIdx>=vecTransformComponent.size())
+    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
+        if(loc.componentIdx>=vecPlayerControllerComponent.size())
             return nullptr;
-        return &vecTransformComponent[loc.componentIdx];
+        return &vecPlayerControllerComponent[loc.componentIdx];
     case ComponentLocation::SCRIPTCOMPONENT:
         if(loc.componentIdx>=vecScriptComponent.size())
             return nullptr;
@@ -81,10 +81,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecControllerComponent.size())
             return nullptr;
         return &vecControllerComponent[loc.componentIdx];
-    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
-        if(loc.componentIdx>=vecPlayerControllerComponent.size())
+    case ComponentLocation::TRANSFORMCOMPONENT:
+        if(loc.componentIdx>=vecTransformComponent.size())
             return nullptr;
-        return &vecPlayerControllerComponent[loc.componentIdx];
+        return &vecTransformComponent[loc.componentIdx];
     default:;
     }
     return nullptr;
@@ -96,10 +96,10 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
             break;
         ((BaseComponent*)ptr)->pushLuaTable(state);
         return;
-    case ComponentLocation::TRANSFORMCOMPONENT:
+    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
         if(ptr==nullptr)
             break;
-        ((TransformComponent*)ptr)->pushLuaTable(state);
+        ((PlayerControllerComponent*)ptr)->pushLuaTable(state);
         return;
     case ComponentLocation::SCRIPTCOMPONENT:
         if(ptr==nullptr)
@@ -141,10 +141,10 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
             break;
         ((ControllerComponent*)ptr)->pushLuaTable(state);
         return;
-    case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
+    case ComponentLocation::TRANSFORMCOMPONENT:
         if(ptr==nullptr)
             break;
-        ((PlayerControllerComponent*)ptr)->pushLuaTable(state);
+        ((TransformComponent*)ptr)->pushLuaTable(state);
         return;
     default:;
     }

@@ -1,5 +1,5 @@
 BaseComponent
-TransformComponent
+PlayerControllerComponent
 ScriptComponent
 CameraComponent
 AudioSourceComponent
@@ -8,4 +8,4 @@ SkeletalModelComponent
 LightComponent
 SkyBoxComponent
 ControllerComponent
-PlayerControllerComponent
+TransformComponent
