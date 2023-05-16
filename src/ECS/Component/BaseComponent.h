@@ -3,8 +3,9 @@
 #include <vector>
 #include <string>
 
-class BaseComponent{
-public:
+
+class BaseComponent {
+  public:
     BaseComponent();
     ~BaseComponent();
     virtual void start();

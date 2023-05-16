@@ -4,6 +4,7 @@
 
 #include "BaseComponent.h"
 
+
 struct ScriptComponent : BaseComponent {
     ScriptComponent();
     ~ScriptComponent();

@@ -6,6 +6,9 @@
 #include <limits.h>
 #endif
 
+#pragma warning(disable : 4312)
+#pragma warning(disable : 4244)
+
 #include <iostream>
 #include <stdio.h>
 #include <imgui.h>
@@ -20,7 +23,6 @@
 #include <mutex>
 
 #include "fdutil.h"
-#include "drawing.h"
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
@@ -29,11 +31,23 @@
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "asset_import/animation.h"
 #include "model_import/model.h"
+#include "ECS/Component/AudioSourceComponent.h"
+#include "ECS/Component/CameraComponent.h"
+#include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/SkeletalModelComponent.h"
+#include "ECS/Component/PlayerControllerComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
+#include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
+
+#include "../external/ImGuizmo/ImGuizmo.h"
+#include <glm/gtx/matrix_decompose.hpp>
+
 
 using namespace ImGui;
 
@@ -50,70 +64,17 @@ namespace guicfg {
     ImFont* regularFont = nullptr;
 };
 
-void createProj(const std::string& path) {
-    char buf[1024];
-    FILE* copyProc = _popen((std::string("xcopy /s /e /q /y .\\template ") + path).c_str(), "r");
-    while (!feof(copyProc)) {
-        fgets(buf, sizeof(char) * 1024, copyProc);
-        logging::logInfo(buf);
-    }
-    logging::logInfo("Created project at {}\n", path);
-    fclose(copyProc);
-}
+// --- Internal GUI State ---
 
-void buildRunProj(const std::string& activePath, const char* executablePath) {
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    // change to buildDir
-    std::string buildDir = std::string(activePath) + "/build";
-    _mkdir(buildDir.c_str());
-    _chdir(buildDir.c_str());
-
-    // build target
-    FILE* cmakeProc = _popen("cmake .. && cmake --build . --target BuildTest", "r");
-    char buf[1024];
-    while (!feof(cmakeProc)) {
-        fgets(buf, sizeof(char) * 1024, cmakeProc);
-        logging::logInfo(buf);
-    }
-    logging::logInfo("Building Done!\n");
-
-    // build cleanup
-    fclose(cmakeProc);
-
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-
-    CreateProcess(NULL, // No module name (use command line)
-        LPSTR("./Debug/BuildTest.exe"), // Command line
-        NULL, // Process handle not inheritable
-        NULL, // Thread handle not inheritable
-        FALSE, // Set handle inheritance to FALSE
-        0, // No creation flags
-        NULL, // Use parent's environment block
-        NULL, // Use parent's starting directory
-        &si, // Pointer to STARTUPINFO structure
-        &pi); // Pointer to PROCESS_INFORMATION structure
-
-    // Wait until child process exits.
-    WaitForSingleObject(pi.hProcess, INFINITE);
-
-    // Close process and thread handles.
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-
-    // restore path
-    _chdir(executablePath);
-}
-
+// base functionality vars
 static GLFWwindow* baseWindow;
 static std::string activePath;
-
 static std::thread projectThread;
 
-static int activeTexture = -1;
+// texture demo vars
+static std::shared_ptr<TextureDescriptor> activeTexture;
 
+// audio demo vars
 static int audioClip = -1;
 static std::string audioPath("");
 static glm::vec3 audioPos(.0f);
@@ -122,17 +83,29 @@ static glm::vec3 audioPos(.0f);
 static assetfolder::AssetDescriptor currAssetFolder = {
     "", "", assetfolder::AssetDescriptor::EFileType::INVALID};
 static std::vector<assetfolder::AssetDescriptor> folderItems;
-
 static bool queryAssetsFolder = true;
 static bool queryLevelsFolder = true;
 
-static int fileTexture;
-static int folderTexture;
+// ui textures
+static std::shared_ptr<TextureDescriptor> fileTexture;
+static std::shared_ptr<TextureDescriptor> folderTexture;
 
-static Model model;
+// model demo vars
+// static Model model;
 
-static Scene scene;
+// renderer vars
+static RenderManager* renderManager;
 
+
+
+
+// editor vars
+Scene scene;
+
+// input system
+static InputSystem* inputSystem;
+
+// viewport widget vars
 GLuint viewportFramebuffer;
 static GLuint viewportTex;
 static GLuint viewportDepthBuf;
@@ -140,6 +113,7 @@ static GLuint viewportDepthBuf;
 // TODO Load/Save style to disk
 static ImGuiStyle guiStyle;
 
+// --- Module Init/Deinit
 GUIManager::GUIManager(GLFWwindow* window) {
     // Init ImGui
     IMGUI_CHECKVERSION();
@@ -197,6 +171,10 @@ GUIManager::GUIManager(GLFWwindow* window) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     baseWindow = window;
+    renderManager = RenderManager::getInstance();
+
+    inputSystem = InputSystem::getInstance();
+    inputSystem->attachScene(&scene);
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -206,43 +184,222 @@ GUIManager::~GUIManager() {
     glDeleteTextures(1, &viewportTex);
 }
 
-inline void drawAudioDemo() {
-    if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::PushFont(guicfg::regularFont);
-        ImGui::Text("Active Clip: %s", audioPath.c_str());
-        if (ImGui::Button("Load Audio File")) {
-            const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
-            const char* filterDesc = "Audio Files";
-            std::string path = fdutil::openFile(
-                "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
-            if (!path.empty()) {
-                audio::audioStopAll();
-                // TODO replace with nicer uuid
-                audioClip = audio::audioLoad(path.c_str(), path);
-                if (audioClip >= 0) {
-                    audioPath = path;
-                    logging::logInfo("Opened audio file {}\n", path);
-                }
-                else {
-                    logging::logErr("Failed to load audio file ", path);
-                }
-            }
-        }
-
-        // adjust source position, listening position is center
-        if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
-            audio::audioSetPosition(audioPos);
-        }
-
-        // play audio with 3d effects
-        if (ImGui::Button("Play Audio File")) {
-            if (!audioPath.empty())
-                audio::audioPlay(audioClip);
-        }
-        ImGui::PopFont();
+// --- Build System Utilities ---
+void createProj(const std::string& path) {
+    char buf[1024];
+    FILE* copyProc =
+        _popen((std::string("xcopy /s /e /q /y .\\template \"") + path + "\" 2>>&1").c_str(), "r");
+    while (!feof(copyProc)) {
+        fgets(buf, sizeof(char) * 1024, copyProc);
+        logging::logInfo(buf);
     }
-    ImGui::End();
+    int res = _pclose(copyProc);
+    if (res == 0) {
+        logging::logInfo("Created project at {}\n", path);
+        _mkdir((path + "/assets").c_str());
+        activePath = path;
+        assetfolder::setActiveDirectory(path);
+        currAssetFolder = assetfolder::getAssetsRootDir();
+        std::string level = loadProjectFile((path + "/project.json").c_str());
+        if (!level.empty())
+            loadLevel((activePath + "/" + level).c_str(), scene);
+
+        queryAssetsFolder = true;
+        queryLevelsFolder = true;
+    }
 }
+
+void buildRunProj(const std::string& activePath, const char* executablePath) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    // change to buildDir
+    std::string buildDir = std::string(activePath) + "/build";
+    _mkdir(buildDir.c_str());
+    _chdir(buildDir.c_str());
+
+    // build target
+    FILE* cmakeProc =
+        _popen("cmake .. 2>>&1 && cmake --build . -j 24 --target BuildTest 2>>&1", "r");
+    char buf[1024];
+    while (!feof(cmakeProc)) {
+        fgets(buf, sizeof(char) * 1024, cmakeProc);
+        logging::logInfo(buf);
+    }
+    logging::logInfo("Building Done!\n");
+
+    // build cleanup
+    int res = _pclose(cmakeProc);
+
+    if (res != 0) {
+        logging::logErr("Build returned error {}\n\n", res);
+        return;
+    }
+    logging::logInfo("Build returned 0\n\n");
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    CreateProcess(NULL, // No module name (use command line)
+        LPSTR("./Debug/BuildTest.exe"), // Command line
+        NULL, // Process handle not inheritable
+        NULL, // Thread handle not inheritable
+        FALSE, // Set handle inheritance to FALSE
+        0, // No creation flags
+        NULL, // Use parent's environment block
+        NULL, // Use parent's starting directory
+        &si, // Pointer to STARTUPINFO structure
+        &pi); // Pointer to PROCESS_INFORMATION structure
+
+    // Wait until child process exits.
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Close process and thread handles.
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    // restore path
+    _chdir(executablePath);
+}
+
+// --- Custom Input Handlers ---
+static void handleKeyboardInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        // Move the camera forward
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        // Move the camera backward
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        // Strafe the camera left
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        // Strafe the camera right
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        // Ascend camera
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 4);
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        // Descend camera
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        // Reset camera position
+        renderManager->camera.resetPosition();
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 6);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 6);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        // increase camera movement speed
+        renderManager->camera.updateKeyboardInput(renderManager->deltaTime, 7);
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 7);
+    }
+
+
+    // player controls
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        // Move the camera forward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        // Move the camera backward
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 1);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        // Strafe the camera left
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        // Strafe the camera right
+        scene.selectedEntity->updateKeyboardInput(renderManager->deltaTime, 3);
+    }
+}
+
+static void handleMouseInput(GLFWwindow* window) {
+    glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
+
+    // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+        if (renderManager->camera.focusState == false) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderManager->camera.focusState = true;
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderManager->camera.focusState = false;
+        }
+
+        // if (renderManager->firstRClick  == true) {
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        // renderManager->firstRClick = false;
+        // }
+    }
+
+    if (renderManager->camera.focusState == true) {
+        // now we can change the orientation of the camera
+
+        // offset
+        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
+        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
+
+        // send data to camera
+        renderManager->camera.updateInput(
+            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
+
+        renderManager->xPosLast = renderManager->xPos;
+        renderManager->yPosLast = renderManager->yPos;
+        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
+    }
+}
+
+// --- GUI Widgets ---
+
+// inline void drawAudioDemo() {
+//     if (ImGui::Begin("Audio Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+//         ImGui::PushFont(guicfg::regularFont);
+//         ImGui::Text("Active Clip: %s", audioPath.c_str());
+//         if (ImGui::Button("Load Audio File")) {
+//             const char* filters[] = {"*.mp3", "*.ogg", "*.flac", "*.wav"};
+//             const char* filterDesc = "Audio Files";
+//             std::string path = fdutil::openFile(
+//                 "Select File", NULL, sizeof(filters) / sizeof(filters[0]), filters, filterDesc);
+//             if (!path.empty()) {
+//                 audio::audioStopAll();
+//                 // TODO replace with nicer uuid
+//                 audioClip = audio::audioLoad(path.c_str(), path);
+//                 if (audioClip >= 0) {
+//                     audioPath = path;
+//                     logging::logInfo("Opened audio file {}\n", path);
+//                 }
+//                 else {
+//                     logging::logErr("Failed to load audio file ", path);
+//                 }
+//             }
+//         }
+//
+//         // adjust source position, listening position is center
+//         if (ImGui::SliderFloat3("Src Position", &audioPos.x, -1.f, 1.f, "%.3f", 1)) {
+//             audio::audioSetPosition(audioPos);
+//         }
+//
+//         // play audio with 3d effects
+//         if (ImGui::Button("Play Audio File")) {
+//             if (!audioPath.empty())
+//                 audio::audioPlay(audioClip);
+//         }
+//         ImGui::PopFont();
+//     }
+//     ImGui::End();
+// }
 
 inline float drawMainMenu(const char* executablePath) {
     float barHeight = .0f;
@@ -259,11 +416,6 @@ inline float drawMainMenu(const char* executablePath) {
                     if (projectThread.joinable())
                         projectThread.join();
                     projectThread = std::thread(createProj, path);
-                    activePath = path;
-                    assetfolder::setActiveDirectory(path);
-                    currAssetFolder = assetfolder::getAssetsRootDir();
-                    queryAssetsFolder = true;
-                    queryLevelsFolder = true;
                 }
             }
             if (ImGui::MenuItem("Open Project")) {
@@ -333,24 +485,25 @@ inline float drawMainMenu(const char* executablePath) {
     return barHeight;
 }
 
-inline void drawModelDemo() {
-    if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::PushFont(guicfg::regularFont);
-        ImGui::Text("Model Loading Demo");
-        if (ImGui::Button("Load Model")) {
-            std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL, NULL);
-            // wait for current op to finish
-            if (!path.empty()) {
-                model.loadModel(path);
-            }
-        }
-        ImGui::Text("Model Meshes: %ul", model.meshes.size());
-        ImGui::Text("Model Textures: %ul", model.textures_loaded.size());
-        ImGui::Text("From: %s", model.directory.c_str());
-        ImGui::PopFont();
-    }
-    ImGui::End();
-}
+// inline void drawModelDemo() {
+//     if (ImGui::Begin("Model Demo", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+//         ImGui::PushFont(guicfg::regularFont);
+//         ImGui::Text("Model Loading Demo");
+//         if (ImGui::Button("Load Model")) {
+//             std::string path = fdutil::openFile("Select Model File to Import", NULL, 0, NULL,
+//             NULL);
+//             // wait for current op to finish
+//             if (!path.empty()) {
+//                 model.loadModel(path);
+//             }
+//         }
+//         ImGui::Text("Model Meshes: %llu", model.meshes.size());
+//         ImGui::Text("Model Textures: %llu", model.textures_loaded.size());
+//         ImGui::Text("From: %s", model.directory.c_str());
+//         ImGui::PopFont();
+//     }
+//     ImGui::End();
+// }
 
 inline void drawLog() {
     if (ImGui::Begin("Log", NULL, NULL)) {
@@ -377,13 +530,15 @@ inline void drawTextureDebug() {
                 "Load Texture", NULL, sizeof(filters) / sizeof(filters[0]), filters, NULL);
 
             if (!path.empty()) {
-                clearDynamicTextures();
                 activeTexture = loadTexture(path.c_str(), path.c_str());
             }
         }
-        if (activeTexture != -1) {
-            const TextureInfo& texInfo = getTexture(activeTexture);
-            ImGui::Image((void*)texInfo.id, ImVec2(400, 400));
+        ImGui::SameLine();
+        if (ImGui::Button("Clear")) {
+            activeTexture.reset();
+        }
+        if (activeTexture) {
+            ImGui::Image((void*)activeTexture->texId, ImVec2(400, 400));
         }
         ImGui::PopFont();
     }
@@ -467,12 +622,10 @@ inline void drawAssetBrowser() {
                 ImGui::BeginGroup();
                 // icon
                 if (folderItems[i].type == assetfolder::AssetDescriptor::EFileType::FOLDER) {
-                    const TextureInfo& texInfo = getTexture(folderTexture);
-                    ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    ImGui::Image((void*)folderTexture->texId, guicfg::assetMgrIconSize);
                 }
                 else {
-                    const TextureInfo& texInfo = getTexture(fileTexture);
-                    ImGui::Image((void*)texInfo.id, guicfg::assetMgrIconSize);
+                    ImGui::Image((void*)fileTexture->texId, guicfg::assetMgrIconSize);
                 }
 
                 // filename
@@ -540,6 +693,13 @@ inline void drawViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, .0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(.0f, .0f));
     if (ImGui::Begin("Viewport")) {
+        // send input to renderer if window is hovered
+        if (ImGui::IsWindowHovered() || ImGui::IsWindowFocused() ||
+            renderManager->camera.focusState) {
+            handleKeyboardInput(baseWindow);
+            handleMouseInput(baseWindow);
+        }
+
         // adjust for titlebar
         ImVec2 windowSize = ImGui::GetWindowSize();
         windowSize.y -= ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
@@ -560,6 +720,26 @@ inline void drawViewport() {
 
         // draw viewport
         ImGui::Image((void*)viewportTex, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+
+        if (scene.selectedEntity) {
+            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowSize.x, windowSize.y);
+            
+            //glm::mat4 cameraView = glm::inverse(renderManager->viewMatrix);
+            glm::mat4 cameraView = renderManager->viewMatrix;
+            glm::mat4 cameraProjection = renderManager->projectionMatrix;
+            glm::mat4 transform = scene.selectedEntity->runtimeTransform;
+
+            ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),ImGuizmo::OPERATION::UNIVERSAL,ImGuizmo::LOCAL,glm::value_ptr(transform));
+
+            if (ImGuizmo::IsUsing()) {
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::decompose(transform, scene.selectedEntity->scale, scene.selectedEntity->rotation, scene.selectedEntity->position,skew, perspective);
+            }
+            
+        }
     }
     ImGui::PopStyleVar(2);
     ImGui::End();
@@ -577,42 +757,150 @@ inline void drawStyleEditor() {
 inline void drawEntities() {
     if (ImGui::Begin("Entities")) {
         ImGui::PushFont(guicfg::regularFont);
+
+        // drawing info vars
+        int openDepth = 0;
+        std::vector<int> depths(scene.entities.size());
+        setVec(depths, 0);
+
+        // context menu vars
+        BaseEntity targetChild;
+        int targetParent = -1;
+        int targetToDelete = -1;
+
+        static int entityPayload = -1;
+
         for (unsigned int i = 0; i < scene.entities.size(); i++) {
-            if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(), ImGuiTreeNodeFlags_DefaultOpen,
-                    "%s", scene.entities[i].name.c_str())) {
-                if (ImGui::IsItemClicked()) {
-                    if (scene.selectedEntity != &scene.entities[i]) {
-                        scene.selectedEntity = &scene.entities[i];
-                    }
-                }
-                // TODO:display children if open
-                ImGui::TreePop();
+            // get current node depth
+            int currDepth = scene.entities[i].parent < 0 ? 0 : depths[scene.entities[i].parent] + 1;
+            depths[i] = currDepth;
+
+            // check if node is leaf based on next element
+            int isLeaf = (i == scene.entities.size() - 1);
+            if (isLeaf == 0) {
+                int nextDepth =
+                    scene.entities[i + 1].parent < 0 ? 0 : depths[scene.entities[i + 1].parent] + 1;
+                isLeaf = (nextDepth <= currDepth);
             }
+
+            // close all previous nodes at same or higher depth
+            while (currDepth < openDepth) {
+                ImGui::TreePop();
+                ImGui::PopID();
+                openDepth--;
+            }
+
+            if (currDepth <= openDepth) {
+                // start new tree node if visible
+                ImGui::PushID(i);
+                if (ImGui::TreeNodeEx(scene.entities.at(i).name.c_str(),
+                        ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow |
+                            ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                            (ImGuiTreeNodeFlags_Leaf * isLeaf),
+                        "%s", scene.entities[i].name.c_str())) {
+                    openDepth = currDepth + 1;
+                }
+                else {
+                    ImGui::PopID();
+                }
+
+                // handle select
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+                    scene.selectedEntity = &scene.entities[i];
+                }
+
+                // handle drag and drop
+                if (ImGui::BeginDragDropSource()) {
+                    entityPayload = i;
+                    ImGui::SetDragDropPayload("entityIdx", &entityPayload, sizeof(int));
+                    ImGui::Text("%s", scene.entities[i].name.c_str());
+                    ImGui::EndDragDropSource();
+                }
+
+                if (ImGui::BeginDragDropTarget()) {
+                    if (const ImGuiPayload* target = ImGui::AcceptDragDropPayload("entityIdx"))
+                        scene.setParent(*((int*)target->Data), i);
+                    ImGui::EndDragDropTarget();
+                }
+
+                // handle context menu
+                if (ImGui::BeginPopupContextItem()) {
+                    if (ImGui::MenuItem("Add Child Entity")) {
+                        targetChild = BaseEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Camera Entity")) {
+                        targetChild = CameraEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Model Entity")) {
+                        targetChild = ModelEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Add Child Skeletal Mesh Entity")) {
+                        targetChild = SkeletalMeshEntity();
+                        targetParent = i;
+                    }
+                    if (ImGui::MenuItem("Delete Entity")) {
+                        targetToDelete = i;
+                    }
+                    ImGui::EndPopup();
+                }
+            }
+        }
+
+        // close off all remaining tree nodes
+        while (openDepth > 0) {
+            ImGui::TreePop();
+            ImGui::PopID();
+            openDepth--;
+        }
+
+        // add new child if requested
+        if (targetParent >= 0) {
+            scene.selectedEntity = nullptr;
+            scene.addChild(targetChild, targetParent);
+        }
+
+        // delete entity if requested
+        if (targetToDelete >= 0) {
+            scene.removeEntityByIdx(targetToDelete);
+            scene.selectedEntity = nullptr;
         }
 
         // draw invisible button to allow context menu for full window
         // TODO - adjust size and pos when entity children are implemented
-        ImGui::SetCursorPos(ImVec2(.0f, .0f));
+        ImVec2 restPos = ImGui::GetCursorPos();
         ImVec2 buttonSize = ImGui::GetWindowSize();
         float borderSize = ImGui::GetStyle().WindowBorderSize;
         ImVec2 padding = ImGui::GetStyle().WindowPadding;
-        buttonSize.x -= borderSize + 2 * padding.x;
-        buttonSize.y -= borderSize + 2 * padding.y;
+        buttonSize.x -= borderSize + 2 * padding.x + restPos.x;
+        buttonSize.y -= borderSize + 2 * padding.y + restPos.y;
 
         ImGui::InvisibleButton("##entitiesinvisblebutton", buttonSize);
+
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* target = ImGui::AcceptDragDropPayload("entityIdx"))
+                scene.setParent(*((int*)target->Data), -1);
+            ImGui::EndDragDropTarget();
+        }
 
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Add Entity")) {
                 scene.addEntity(BaseEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Camera Entity")) {
                 scene.addEntity(CameraEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Model Entity")) {
                 scene.addEntity(ModelEntity());
+                scene.selectedEntity = nullptr;
             }
             if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
                 scene.addEntity(SkeletalMeshEntity());
+                scene.selectedEntity = nullptr;
             }
             ImGui::EndPopup();
         }
@@ -628,24 +916,595 @@ void drawComponentProps(TransformComponent& component) {
     ImGui::InputFloat3("Scale", &component.scale[0]);
 }
 
+void drawComponentProps(ModelComponent& component) {
+    std::string previewStr = "Select a Model";
+    if (component.modelDescriptor && component.modelDescriptor->path) {
+        previewStr = *component.modelDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewStr.c_str());
+    }
+
+    if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> modelFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < modelFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (previewStr == modelFiles[i].path);
+            if (ImGui::Selectable(modelFiles[i].name.c_str(), &isSelected)) {
+                // check if we need to load file
+                // TODO better unique id scheme
+                std::string uuid = assetfolder::getRelativePath(modelFiles[i].path.c_str());
+                auto desc = model::modelGetByUuid(uuid);
+
+                if (!desc) {
+                    // load file from disk
+                    desc = model::modelLoad(modelFiles[i].path.c_str(), uuid);
+                }
+
+                std::swap(component.modelDescriptor, desc);
+                component.modelUuid = component.modelDescriptor ? uuid : "";
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+}
+
+void drawComponentProps(SkeletalModelComponent& component) {
+    bool hasModel = false;
+    std::string previewStr = "Select a Model";
+    if (component.modelDescriptor && component.modelDescriptor->path) {
+        previewStr = *component.modelDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewStr.c_str());
+        hasModel = true;
+    }
+
+    if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> modelFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < modelFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (previewStr == modelFiles[i].path);
+            if (ImGui::Selectable(modelFiles[i].name.c_str(), &isSelected)) {
+                // check if we need to load file
+                // TODO better unique id scheme
+                std::string uuid = assetfolder::getRelativePath(modelFiles[i].path.c_str());
+                auto desc = model::modelGetByUuid(uuid);
+
+                if (!desc) {
+                    // load file from disk
+                    desc = model::modelLoad(modelFiles[i].path.c_str(), uuid);
+                }
+
+                std::swap(component.modelDescriptor, desc);
+                component.modelUuid = component.modelDescriptor ? uuid : "";
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    if (!hasModel) {
+        ImGui::Text("Select a Model with a Skeleton to view the animation controller properties");
+        return;
+    }
+
+    ImGui::Columns(1);
+    if (ImGui::Button("Add Node")) {
+        component.addNode();
+    }
+    ImGui::Text("Nodes:");
+    ImGui::Columns(5);
+    ImGui::Separator();
+    ImGui::Text("Name");
+    ImGui::NextColumn();
+    ImGui::Text("Animation");
+    ImGui::NextColumn();
+    ImGui::Text("Loop Count");
+    ImGui::NextColumn();
+    ImGui::Text("Select Node");
+    ImGui::NextColumn();
+    ImGui::Text("Remove Node");
+    ImGui::NextColumn();
+    ImGui::Separator();
+    for (unsigned int i = 0; i < component.nodes.size(); i++) {
+        ImGui::PushID(i);
+        ImGui::NextColumn();
+        std::string previewStr2 = "Select an Animation";
+        if (component.selectedNode && component.selectedNode->animationDescriptor && component.selectedNode->animationDescriptor->path) {
+            previewStr2 = *component.selectedNode->animationDescriptor->path;
+            previewStr2 = assetfolder::getRelativePath(previewStr2.c_str());
+        }
+
+        if (ImGui::BeginCombo("##node_animation", previewStr2.c_str())) {
+            // get available audio clips
+            static std::vector<assetfolder::AssetDescriptor> animationFiles;
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, animationFiles);
+
+            // list available audio clips
+            for (unsigned int i = 0; i < animationFiles.size(); i++) {
+                ImGui::PushID(i);
+                bool isSelected = (previewStr2 == animationFiles[i].path);
+                if (ImGui::Selectable(animationFiles[i].name.c_str(), &isSelected)) {
+                    // check if we need to load file
+                    // TODO better unique id scheme
+                    std::string uuid = assetfolder::getRelativePath(animationFiles[i].path.c_str());
+                    auto desc = animation::animationGetByUuid(uuid);
+
+                    if (!desc) {
+                        // load file from disk
+                        desc = animation::animationLoad(animationFiles[i].path.c_str(), uuid, component.modelDescriptor);
+                    }
+
+                    std::swap(component.selectedNode->animationDescriptor, desc);
+                    component.selectedNode->animationUuid = (component.selectedNode && component.selectedNode->animationDescriptor) ? uuid : "";
+                }
+                ImGui::PopID();
+            }
+
+            ImGui::EndCombo();
+        }
+        ImGui::NextColumn();
+        ImGui::InputScalar("##loop_count", ImGuiDataType_U32, &component.nodes[i].loopCount);
+        ImGui::NextColumn();
+        if (ImGui::Button("Select Node")) {
+            component.selectedNode = &component.nodes[i];
+        }
+        ImGui::NextColumn();
+        if (ImGui::Button("Remove Node")) {
+            component.removeNode(i);
+        }
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+    ImGui::Columns(1);
+    if (ImGui::Button("Add No Condition Transition")) {
+        component.addNoConditionTransition();
+    }
+    if (ImGui::Button("Add Boolean Transition")) {
+        component.addBoolACTransition();
+    }
+    if (ImGui::Button("Add Integer Transition")) {
+        component.addIntACTransition();
+    }
+    if (ImGui::Button("Add Float Transition")) {
+        component.addFloatACTransition();
+    }
+    ImGui::Text("Transitions:");
+    if (component.selectedNode) {
+        ImGui::Columns(2);
+        ImGui::Separator();
+        ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Remove Transition");
+        ImGui::NextColumn();
+        ImGui::Separator();
+        for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size(); i++) {
+            ImGui::PushID(i);
+            if (ImGui::BeginCombo("##transition_to_nocond", component.selectedNode->noConditionTransitions[i].transitionTo->name.c_str())) {
+                for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->noConditionTransitions[i].transitionTo == &component.nodes[j])) {
+                        component.selectedNode->noConditionTransitions[i].transitionTo = &component.nodes[j];
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::NextColumn();
+            if (ImGui::Button("Remove Transition")) {
+                component.removeNoConditionTransition(i);
+            }
+            ImGui::NextColumn();
+            ImGui::PopID();
+        }
+        ImGui::Columns(5);
+        ImGui::Separator();
+        ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Transition Immediately?");
+        ImGui::NextColumn();
+        ImGui::Text("Current Value");
+        ImGui::NextColumn();
+        ImGui::Text("Desired Value");
+        ImGui::NextColumn();
+        ImGui::Text("Remove Transition");
+        ImGui::NextColumn();
+        ImGui::Separator();
+        for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
+            ImGui::PushID(i);
+            if (ImGui::BeginCombo("##transition_to_bool", component.selectedNode->boolTransitions[i].transitionTo->name.c_str())) {
+                for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->boolTransitions[i].transitionTo == &component.nodes[j])) {
+                        component.selectedNode->boolTransitions[i].transitionTo = &component.nodes[j];
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::NextColumn();
+            ImGui::Checkbox("##immediate_bool", &component.selectedNode->boolTransitions[i].immediate);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##condition_bool", &component.selectedNode->boolTransitions[i].condition);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##desired_bool", &component.selectedNode->boolTransitions[i].desiredValue);
+            ImGui::NextColumn();
+            if (ImGui::Button("Remove Transition")) {
+                component.removeBoolACTransition(i);
+            }
+            ImGui::NextColumn();
+            ImGui::PopID();
+        }
+        ImGui::Columns(8);
+        ImGui::Separator();
+        ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Transition Immediately?");
+        ImGui::NextColumn();
+        ImGui::Text("Current Value");
+        ImGui::NextColumn();
+        ImGui::Text("Desired Value");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Lower?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Equal?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Greater?");
+        ImGui::NextColumn();
+        ImGui::Text("Remove Transition");
+        ImGui::NextColumn();
+        ImGui::Separator();
+        for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
+            ImGui::PushID(i);
+            if (ImGui::BeginCombo("##transition_to_int", component.selectedNode->intTransitions[i].transitionTo->name.c_str())) {
+                for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->intTransitions[i].transitionTo == &component.nodes[j])) {
+                        component.selectedNode->intTransitions[i].transitionTo = &component.nodes[j];
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::NextColumn();
+            ImGui::Checkbox("##immediate_int", &component.selectedNode->intTransitions[i].immediate);
+            ImGui::NextColumn();
+            ImGui::Text("%d", component.selectedNode->intTransitions[i].condition);
+            ImGui::NextColumn();
+            ImGui::InputInt("##desired_int", &component.selectedNode->intTransitions[i].desiredValue);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_lower_int", &component.selectedNode->intTransitions[i].shouldBeLower);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_equal_int", &component.selectedNode->intTransitions[i].shouldBeEqual);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_greater_int", &component.selectedNode->intTransitions[i].shouldBeGreater);
+            ImGui::NextColumn();
+            if (ImGui::Button("Remove Transition")) {
+                component.removeIntACTransition(i);
+            }
+            ImGui::NextColumn();
+            ImGui::PopID();
+        }
+        ImGui::Columns(8);
+        ImGui::Separator();
+        ImGui::Text("Destination Node");
+        ImGui::NextColumn();
+        ImGui::Text("Transition Immediately?");
+        ImGui::NextColumn();
+        ImGui::Text("Current Value");
+        ImGui::NextColumn();
+        ImGui::Text("Desired Value");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Lower?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Equal?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Greater?");
+        ImGui::NextColumn();
+        ImGui::Text("Remove Transition");
+        ImGui::NextColumn();
+        ImGui::Separator();
+        for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
+            ImGui::PushID(i);
+            if (ImGui::BeginCombo("##transition_to_float", component.selectedNode->floatTransitions[i].transitionTo->name.c_str())) {
+                for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(), component.selectedNode->floatTransitions[i].transitionTo == &component.nodes[j])) {
+                        component.selectedNode->floatTransitions[i].transitionTo = &component.nodes[j];
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::NextColumn();
+            ImGui::Checkbox("##immediate_float", &component.selectedNode->floatTransitions[i].immediate);
+            ImGui::NextColumn();
+            ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
+            ImGui::NextColumn();
+            ImGui::InputFloat("##desired_float", &component.selectedNode->floatTransitions[i].desiredValue);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_lower_float", &component.selectedNode->floatTransitions[i].shouldBeLower);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_equal_float", &component.selectedNode->floatTransitions[i].shouldBeEqual);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_greater_float", &component.selectedNode->floatTransitions[i].shouldBeGreater);
+            ImGui::NextColumn();
+            if (ImGui::Button("Remove Transition")) {
+                component.removeFloatACTransition(i);
+            }
+            ImGui::NextColumn();
+            ImGui::PopID();
+        }
+        ImGui::Columns(1);
+    }
+    else {
+        ImGui::Text("Select a node to show it's transitions");
+    }
+}
+
+void drawComponentProps(AudioSourceComponent& component) {
+    // clip selector
+    std::string previewPath = "";
+    std::string previewStr = "None";
+    if (component.clipDescriptor && component.clipDescriptor->path) {
+        previewPath = *component.clipDescriptor->path;
+        previewStr = assetfolder::getRelativePath(previewPath.c_str());
+    }
+
+    if (ImGui::BeginCombo("Audio File", previewStr.c_str())) {
+        // get available audio clips
+        static std::vector<assetfolder::AssetDescriptor> audioFiles;
+        assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::AUDIO, audioFiles);
+
+        // list available audio clips
+        for (unsigned int i = 0; i < audioFiles.size(); i++) {
+            ImGui::PushID(i);
+            bool isSelected = (previewPath == audioFiles[i].path);
+            if (ImGui::Selectable(audioFiles[i].name.c_str(), &isSelected)) {
+                // check if we need to load file
+                // TODO better unique id scheme
+                std::string uuid = assetfolder::getRelativePath(audioFiles[i].path.c_str());
+                auto desc = audio::audioGetByUuid(uuid);
+
+                if (!desc) {
+                    // load file from disk
+                    desc = audio::audioLoad(audioFiles[i].path.c_str(), uuid);
+                }
+
+                std::swap(component.clipDescriptor, desc);
+                component.clipUuid = component.clipDescriptor ? uuid : "";
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    // sound demo
+    ImGui::BeginDisabled(!component.clipDescriptor);
+    if (ImGui::Button("Start")) {
+        audio::audioStopAll();
+        component.startSound();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Stop")) {
+        audio::audioStopAll();
+    }
+    ImGui::EndDisabled();
+
+    // sound options
+    ImGui::Checkbox("Play on Start", &component.playOnStart);
+    ImGui::Checkbox("Loop", &component.loop);
+    ImGui::Checkbox("Directional", &component.directional);
+}
+
+void drawComponentProps(CameraComponent& component) {
+    // cam properties
+    ImGui::InputFloat3("Eye", &component.eye[0]);
+    ImGui::InputFloat3("Center", &component.center[0]);
+    ImGui::InputFloat3("Up", &component.up[0]);
+    ImGui::InputFloat("FOV", &component.fov);
+
+    // active on start
+    bool isCamActive = component.uuid == CameraComponent::activeUuid;
+    if (ImGui::Checkbox("Default Active", &isCamActive))
+        CameraComponent::activeUuid = component.uuid;
+}
+
+void drawComponentProps(PlayerControllerComponent& component)
+{
+    if (ImGui::Button("Add Key")) {
+        component.addKey();
+    }
+    for (unsigned int i = 0; i < component.virtualKeys.size(); i++) {
+        ImGui::PushID(i);
+        /*
+        ImGui::Columns(5);
+        ImGui::InputText("##name", &component.virtualKeys[i].name[0], component.virtualKeys[0].name.capacity());
+        component.virtualKeys[i].name.resize(std::strlen(&component.virtualKeys[i].name[0]));
+        ImGui::NextColumn();
+        if (component.virtualKeys.at(i).key == -1) {
+            ImGui::Text("Key Not Set");
+        }
+        else {
+            const char* keyName = glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+            ImGui::Text("%s", keyName);
+        }
+        ImGui::NextColumn();
+        ImGui::InputFloat("##direction", &component.virtualKeys.at(i).scale);
+        ImGui::NextColumn();
+        if (ImGui::Button("Set Key")) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            //logString += "Starting scan for key ";
+            //logString += keyindex;
+            //logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::NextColumn();
+        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move Up", "Move Down", "N/A"};
+        ImGui::Combo("function", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        //ImGui::NextColumn();
+        if (ImGui::Button("Remove Key")) {
+            component.removeKey(i);
+        }
+        ImGui::NextColumn();
+        */
+        const char* items[] = { "Move Forward", "Move Backwards", "Move Left", "Move Right", "Move Up", "Move Down", "N/A" };
+
+        ImGui::Combo("", &component.virtualKeys.at(i).action, items, IM_ARRAYSIZE(items));
+        ImGui::SameLine();
+        const char* keyName = component.virtualKeys.at(i).key == -1 ? "Unassigned" : glfwGetKeyName(component.virtualKeys.at(i).key, 0);
+        if (ImGui::Button(keyName)) {
+            std::string ki = std::to_string(i);
+            const char* keyindex = ki.c_str();
+            //logString += "Starting scan for key ";
+            //logString += keyindex;
+            //logString += "\n";
+            component.listeningForKey = true;
+            component.listeningForKeyIndex = i;
+        }
+        ImGui::SameLine();
+        ImGui::InputFloat("##scale", &component.virtualKeys.at(i).scale);
+        ImGui::PopID();
+    }
+  
+}
+
+void drawComponentContextMenu(int i, int& componentToDelete) {
+    if (ImGui::BeginPopupContextItem()) {
+        if (ImGui::MenuItem("Add Audio Source Component")) {
+            scene.selectedEntity->components.addComponent(AudioSourceComponent());
+        }
+        if (ImGui::MenuItem("Add Camera Component")) {
+            scene.selectedEntity->components.addComponent(CameraComponent());
+        }
+        if (ImGui::MenuItem("Add Script Component")) {
+        }
+        if (ImGui::MenuItem("Add Transform Component")) {
+            scene.selectedEntity->components.addComponent(TransformComponent());
+        }
+        if (ImGui::MenuItem("Add Player Controller Component")) {
+            scene.selectedEntity->components.addComponent(PlayerControllerComponent());
+        }
+        if (ImGui::MenuItem("Delete Component")) {
+            componentToDelete = i;
+        }
+        ImGui::EndPopup();
+    }
+}
+
+template <typename T>
+
+void drawComponentList(std::vector<T>& components) {
+    int componentToDelete = -1;
+
+    // draw list
+    for (int i = 0; i < components.size(); i++) {
+        ImGui::PushID(i);
+        /*
+        if (ImGui::TreeNodeEx(components[i].name.c_str(),
+                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
+            drawComponentContextMenu(i, componentToDelete);
+
+            drawComponentProps(components[i]);
+            ImGui::TreePop();
+        }
+        */
+        if (ImGui::CollapsingHeader(components[i].name.c_str())) {
+            drawComponentProps(components[i]);
+        }
+        ImGui::PopID();
+    }
+
+    // handle deletion requests
+    if (componentToDelete >= 0) {
+        components.erase(components.begin() + componentToDelete);
+    }
+}
+
 inline void drawProperties() {
     if (ImGui::Begin("Properties")) {
         ImGui::PushFont(guicfg::regularFont);
         // TODO properties for other item types
+
         if (scene.selectedEntity == nullptr) {
             ImGui::Text("Select an Entity to show it's components");
         }
         else {
-            for (unsigned int i = 0; i < scene.selectedEntity->components.size(); i++) {
-                if (ImGui::TreeNodeEx(scene.selectedEntity->components[i]->name.c_str())) {
-                    // already running into polymorphism caveats
-                    if (TransformComponent* transform = dynamic_cast<TransformComponent*>(
-                            scene.selectedEntity->components[i])) {
-                        drawComponentProps(*transform);
-                    }
+            ImGui::InputText("Name", &scene.selectedEntity->name);
+            // entitity transform
+            ImGui::InputFloat3("Position", &scene.selectedEntity->position[0]);
+            ImGui::InputFloat4("Rotation", &scene.selectedEntity->rotation[0]);
+            ImGui::InputFloat3("Scale", &scene.selectedEntity->scale[0]);
 
+            ImGui::Separator();
+            // component lists
+            // AudioSourceComponent
+            drawComponentList(scene.selectedEntity->components.vecAudioSourceComponent);
+
+            // CameraComponent
+            drawComponentList(scene.selectedEntity->components.vecCameraComponent);
+
+            // ModelComponent
+            drawComponentList(scene.selectedEntity->components.vecModelComponent);
+
+            // SkeletalModelComponent
+            std::vector<SkeletalModelComponent>& skeletalModelComponents =
+                scene.selectedEntity->components.vecSkeletalModelComponent;
+            for (unsigned int i = 0; i < skeletalModelComponents.size(); i++) {
+                ImGui::PushID(i);
+                if (ImGui::TreeNodeEx(skeletalModelComponents[i].name.c_str(),
+                    ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                    ImGuiTreeNodeFlags_DefaultOpen)) {
+
+                    drawComponentProps(skeletalModelComponents[i]);
                     ImGui::TreePop();
                 }
+                ImGui::PopID();
+            }
+
+            // TransformComponent
+            drawComponentList(scene.selectedEntity->components.vecTransformComponent);
+
+            // PlayerControllerComponent
+            drawComponentList(scene.selectedEntity->components.vecPlayerControllerComponent);
+
+            // Universal Context Menu
+            ImVec2 currPos = ImGui::GetCursorPos();
+            ImVec2 buttonSize = ImGui::GetWindowSize();
+            float borderSize = ImGui::GetStyle().WindowBorderSize;
+            ImVec2 padding = ImGui::GetStyle().WindowPadding;
+            buttonSize.x -= borderSize + 2 * padding.x + currPos.x;
+            buttonSize.y -= borderSize + 2 * padding.y + currPos.y;
+
+            ImGui::InvisibleButton("##propertiesinvisblebutton", buttonSize);
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem("Add Audio Source Component")) {
+                    scene.selectedEntity->components.addComponent(AudioSourceComponent());
+                }
+                if (ImGui::MenuItem("Add Camera Component")) {
+                    scene.selectedEntity->components.addComponent(CameraComponent());
+                }
+                if (ImGui::MenuItem("Add Model Component")) {
+                    scene.selectedEntity->components.addComponent(ModelComponent());
+                }
+                if (ImGui::MenuItem("Add Animated Model Component")) {
+                    scene.selectedEntity->components.addComponent(SkeletalModelComponent());
+                }
+                if (ImGui::MenuItem("Add Script Component")) {
+                }
+                if (ImGui::MenuItem("Add Transform Component")) {
+                    scene.selectedEntity->components.addComponent(TransformComponent());
+                }
+                if (ImGui::MenuItem("Add Player Controller Component")) {
+                    scene.selectedEntity->components.addComponent(PlayerControllerComponent());
+                }
+                ImGui::EndPopup();
             }
         }
         ImGui::PopFont();
@@ -748,6 +1607,7 @@ inline void drawLevels() {
                 if (ImGui::MenuItem("Load Level")) {
                     // load level and change window title
                     loadLevel(levelDescriptors[i].path.c_str(), scene);
+
                     glfwSetWindowTitle(
                         baseWindow, (levelDescriptors[i].name + " - ONO Engine").c_str());
                 }
@@ -846,12 +1706,23 @@ inline void drawScriptDemo() {
     ImGui::End();
 }
 
+void drawStats() {
+    if (ImGui::Begin("Statistics")) {
+        ImGui::PushFont(guicfg::regularFont);
+        ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+        ImGui::Text("TEXTURES %i loaded", getTextureCount());
+        ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,
     int viewportHeight) {
     ImVec2 windowSize = ImVec2(float(viewportWidth), float(viewportHeight));
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
     // ImVec2 mousePos = ImGui::GetMousePos();
 
@@ -913,19 +1784,23 @@ void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewpo
     drawAssetBrowser();
 
     ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
+    drawStats();
+
+    ImGui::SetNextWindowDockID(dockBotRight, ImGuiCond_Once);
     drawLog();
 
     ImGui::SetNextWindowDockID(dockCenter, ImGuiCond_Once);
     drawViewport();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
+    // drawScriptDemo();
+    drawTextureDebug();
+
+    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawStyleEditor();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
     drawProperties();
-
-    ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawScriptDemo();
 
     // prepare gui for rendering
     ImGui::Render();
