@@ -946,15 +946,15 @@ inline void drawEntities() {
                         targetParent = i;
                     }
                     if (ImGui::MenuItem("Add Child Camera Entity")) {
-                        targetChild = CameraEntity();
+                        targetChild = makeCameraEntity();
                         targetParent = i;
                     }
                     if (ImGui::MenuItem("Add Child Model Entity")) {
-                        targetChild = ModelEntity();
+                        targetChild = makeModelEntity();
                         targetParent = i;
                     }
                     if (ImGui::MenuItem("Add Child Skeletal Mesh Entity")) {
-                        targetChild = SkeletalMeshEntity();
+                        targetChild = makeSkeletalMeshEntity();
                         targetParent = i;
                     }
                     if (ImGui::MenuItem("Delete Entity")) {
@@ -1015,17 +1015,17 @@ inline void drawEntities() {
                 scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Camera Entity")) {
-                scene.addEntity(CameraEntity());
+                scene.addEntity(makeCameraEntity());
                 scene.selectedEntity = nullptr;
                 scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Model Entity")) {
-                scene.addEntity(ModelEntity());
+                scene.addEntity(makeModelEntity());
                 scene.selectedEntity = nullptr;
                 scene.selectedCameraIdx = 0;
             }
             if (ImGui::MenuItem("Add Skeletal Mesh Entity")) {
-                scene.addEntity(SkeletalMeshEntity());
+                scene.addEntity(makeSkeletalMeshEntity());
                 scene.selectedEntity = nullptr;
                 scene.selectedCameraIdx = 0;
             }

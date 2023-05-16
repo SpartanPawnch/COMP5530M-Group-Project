@@ -183,6 +183,10 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/util.h
     ${CMAKE_CURRENT_SOURCE_DIR}/template/src
 
+    #shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/assets/shaders
+
     #install assimp
     COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/assimp-5.2.5
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
