@@ -32,12 +32,17 @@
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 
+#include "physics/physicsObj.h"
+
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
+physXSingleTon* physicsSystem;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
+physXSingleTon* physXSingleTon::instance = nullptr;
+
 
 int main() {
     // switch to correct working directory - platform specific
@@ -114,6 +119,8 @@ int main() {
 
     // Render Engine
     renderManager = RenderManager::getInstance();
+    physicsSystem = physXSingleTon::getInstance();
+    
 
     renderManager->startUp(window);
 

@@ -12,6 +12,10 @@ RenderManager* RenderManager::getInstance() {
     return instance;
 }
 
+
+
+
+
 // empty VAO for pipelines without attributes
 static GLuint dummyVAO;
 
@@ -911,4 +915,172 @@ void RenderManager::deleteMesh(unsigned int* VAO, unsigned int* VBO, unsigned in
 
 void RenderManager::setGammaCorrection(float value) {
     this->gammaValue = value;
+}
+
+
+
+
+//unfortunately my files are not getting added so iam adding all the physx defenitions here.
+//error callback
+
+//collision filter.
+    //https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/RigidBodyCollision.html
+physx::PxFilterFlags CollisionFilterShader(
+    physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+    physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+    physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize)
+{
+    // let triggers through
+    if (physx::PxFilterObjectIsTrigger(attributes0) || physx::PxFilterObjectIsTrigger(attributes1))
+    {
+        pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT;
+        return physx::PxFilterFlag::eDEFAULT;
+    }
+    // generate contacts for all that were not filtered above
+    pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+
+    // trigger the contact callback for pairs (A,B) where
+    // the filtermask of A contains the ID of B and vice versa.
+    if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+        pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
+
+    return physx::PxFilterFlag::eDEFAULT;
+}
+
+//callback abstracts.
+physXErrorCallback errorCallback2;
+CollisionCallbacks collisionCallback2;
+
+
+
+
+
+void physXErrorCallback::reportError(physx::PxErrorCode::Enum code, const char* message, const char* file, int line)
+{
+    logging::logErr("PhysX Error %d: %s \n", code, message);
+}
+
+//collison callback
+//to do add extra behaviour
+void CollisionCallbacks::onConstraintBreak(physx::PxConstraintInfo* constraints, physx::PxU32 count)
+{
+    logging::logInfo("%s \n", "onConstraintBreak");
+}
+void CollisionCallbacks::onWake(physx::PxActor** actors, physx::PxU32 count)
+{
+    logging::logInfo("%s \n", "onWake");
+}
+void CollisionCallbacks::onSleep(physx::PxActor** actors, physx::PxU32 count)
+{
+    logging::logInfo("%s \n", "onSleep");
+}
+//this is the function we are concerned with:
+void CollisionCallbacks::onTrigger(physx::PxTriggerPair* pairs, physx::PxU32 count)
+{
+    logging::logInfo("%s \n", "onTrigger");
+}
+void CollisionCallbacks::onAdvance(const physx::PxRigidBody* const* bodyBuffer, const physx::PxTransform* poseBuffer, const physx::PxU32 count)
+{
+    logging::logInfo("%s \n", "onAdvance");
+}
+void CollisionCallbacks::onContact(const physx::PxContactPairHeader& pairHeader,
+    const physx::PxContactPair* pairs, physx::PxU32 nbPairs)
+{
+    logging::logInfo("%s \n", "Collision made");
+    for (physx::PxU32 i = 0; i < nbPairs; i++)
+    {
+        const physx::PxContactPair& cp = pairs[i];
+        std::string test = std::string(cp.shapes[0]->getName());
+        if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_FOUND)
+        {
+            std::string msg = std::string(cp.shapes[0]->getName()) + std::string(" and ");
+            msg + std::string(cp.shapes[1]->getName());
+            logging::logInfo("%s ", msg);
+        }
+        else if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_LOST)
+        {
+            std::string msg = std::string(cp.shapes[0]->getName()) + std::string(" and ");
+            msg + std::string(cp.shapes[1]->getName());
+            logging::logInfo("%s ", msg);
+        }
+    }
+}
+
+
+#define GRAVITY = -9.18f;
+//define the timeout time for physx
+#define timeout = 100;
+
+
+
+
+
+physXSingleTon* physXSingleTon::getInstance() {
+    if (instance == nullptr) {
+        instance = new physXSingleTon();
+    }
+    else {
+    }
+    return instance;
+}
+
+
+void physXSingleTon::createSceneDescriptor(physx::PxSceneDesc& sceneDesc)
+{
+    mDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+    sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+    sceneDesc.cpuDispatcher = mDispatcher;
+    sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+    //static static.
+    sceneDesc.kineKineFilteringMode = physx::PxPairFilteringMode::eKEEP;
+    //static and kinetic.
+    sceneDesc.staticKineFilteringMode = physx::PxPairFilteringMode::eKEEP;
+    sceneDesc.simulationEventCallback = &collisionCallback2;
+    sceneDesc.filterShader = CollisionFilterShader;
+    /*if(!mDispatcher)
+        log*/
+}
+
+
+physx::PxPhysics*  physXSingleTon::createPhysics()
+{
+    return PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, physx::PxTolerancesScale(), mOutstandingAllocation, mPvd);
+
+}
+
+
+physXSingleTon::physXSingleTon()
+{
+    mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mAllocator, errorCallback2);
+    if (!mFoundation)
+        logging::logErr("%s \n", 64, "PHYSX ERROR: Foundation not created \n");
+    return;
+    if (EnableDebugging)
+    {
+        mPvd = PxCreatePvd(*mFoundation);
+        mTransport = physx::PxDefaultPvdSocketTransportCreate(mHost.c_str(), mPort, mTimeout);
+        mPvd->connect(*mTransport, physx::PxPvdInstrumentationFlag::eALL);
+        mOutstandingAllocation = true;
+
+    }
+    if ((mPhysics = createPhysics()) == nullptr)
+    {
+        logging::logErr("%s \n", 64, "PHYSX ERROR: physics not created \n ");
+        return;
+    }
+    if ((mDispatcher = physx::PxDefaultCpuDispatcherCreate(4)) == nullptr)
+    {
+        logging::logErr("%s \n", 64, "PHYSX ERROR: dispatcher not created \n ");
+        return;
+    }
+
+    physx::PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
+    //create callbacks for collision
+
+    createSceneDescriptor(sceneDesc);
+}
+
+void physXSingleTon::createMeshDescriptor(physx::PxTriangleMeshDesc& meshDesc, Model* model)
+{
+
 }
