@@ -301,13 +301,13 @@ void RigidBodyComponent::setMeshColliderModel(int index) {
     std::vector<glm::vec3> vertices;
     std::vector<unsigned int> indices;
     for (unsigned int i = 0; i < meshColliders[index].model->getMeshCount(); i++) {
-        vertexCount += meshColliders[index].model->getVertexCount(i);
-        indexCount += meshColliders[index].model->getIndexCount(i);
-        std::vector<glm::vec3> meshVertices = meshColliders[index].model->getVertices(i);
         std::vector<unsigned int> meshIndices = meshColliders[index].model->getIndices(i);
         for (unsigned int j = 0; j < meshIndices.size(); j++) {
             meshIndices[j] += indexCount;
         }
+        vertexCount += meshColliders[index].model->getVertexCount(i);
+        indexCount += meshColliders[index].model->getIndexCount(i);
+        std::vector<glm::vec3> meshVertices = meshColliders[index].model->getVertices(i);
         vertices.insert(vertices.end(), meshVertices.begin(), meshVertices.end());
         indices.insert(indices.end(), meshIndices.begin(), meshIndices.end());
     }
@@ -326,7 +326,7 @@ void RigidBodyComponent::setMeshColliderModel(int index) {
     }
     
     TriangleVertexArray* triangleArray =
-        new TriangleVertexArray(vertexCount, verticesArray, 3 * sizeof(float), indexCount,
+        new TriangleVertexArray(vertexCount, verticesArray, 3 * sizeof(float), indexCount/3,
             indicesArray, 3 * sizeof(int),
             TriangleVertexArray::VertexDataType::VERTEX_FLOAT_TYPE,
             TriangleVertexArray::IndexDataType::INDEX_INTEGER_TYPE

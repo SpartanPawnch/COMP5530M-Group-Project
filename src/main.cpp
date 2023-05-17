@@ -174,7 +174,6 @@ int main() {
 
                 // Update the Dynamics world with a constant time step 
                 physicsEngine->world->update(timeStep);
-
                 // Decrease the accumulated time 
                 accumulator -= timeStep;
             }
