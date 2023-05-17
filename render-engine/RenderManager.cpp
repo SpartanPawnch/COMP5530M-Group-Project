@@ -313,7 +313,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 
 #ifdef ONO_ENGINE_ONLY
         if (scene.entities[i].components.vecModelComponent.empty() &&
-            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
+            scene.entities[i].components.vecSkeletalModelComponent.empty() &&
+            scene.entities[i].components.vecSkyBoxComponent.empty()) {
             if (!scene.entities[i].components.vecCameraComponent.empty() && cameraIconDescriptor) {
                 glUseProgram(getPipeline(IconPipeline)->getProgram());
 
