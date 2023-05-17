@@ -6,6 +6,29 @@
 
 using namespace reactphysics3d;
 
+enum ColliderTypes {
+	CUBE,
+	SPHERE,
+	CAPSULE,
+	MESH
+};
+
+enum CollisionCategories {
+	CATEGORY1 = 0x0001,
+	CATEGORY2 = 0x0002,
+	CATEGORY3 = 0x0004
+};
+
+struct ColliderObject {
+	Collider* collider;
+	ColliderTypes shape;
+	CollisionCategories category;
+	CollisionCategories currentCollideWith;
+	std::vector<CollisionCategories> collidesWith;
+	float materialBounciness;
+	float materialFrictionCoefficient;
+};
+
 class PhysicsEngine {
 private:
 	PhysicsEngine() = default;
