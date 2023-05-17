@@ -55,6 +55,9 @@ struct ComponentStorage{
     //get raw pointer using component loc
     void* getProtectedPtr(const ComponentLocation& loc);
 
+    //register metatables
+    static void registerMetatables();
+
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 

@@ -5,6 +5,7 @@
 #include "../../logging.h"
 #include "../../scripting.h"
 #include "../ComponentStorage/ComponentStorage.h"
+#include "../../scripting.h"
 
 static int baseUuid = 0;
 
@@ -121,4 +122,26 @@ void ScriptComponent::stop() {
     lua_pushnil(state);
     lua_setfield(state, -2, std::to_string(uuid).c_str());
     lua_setglobal(state, "ScriptComponents");
+}
+
+// lua stuff
+static const char* componentMT = "ONO_ScriptComponent";
+void ScriptComponent::registerLuaMetatable() {
+    lua_State* state = scripting::getState();
+    luaL_newmetatable(state, componentMT);
+    // register index op - REQUIRED
+    lua_pushvalue(state, -1);
+    lua_setfield(state, -2, "__index");
+    lua_pop(state, 1);
+}
+
+void ScriptComponent::pushLuaTable(lua_State* state) {
+    lua_createtable(state, 0, 0);
+    lua_pushstring(state, name.c_str());
+    lua_setfield(state, -2, "name");
+    lua_pushinteger(state, uuid);
+    lua_setfield(state, -2, "uuid");
+    lua_pushlightuserdata(state, this);
+    lua_setfield(state, -2, "ptr");
+    luaL_setmetatable(state, componentMT);
 }

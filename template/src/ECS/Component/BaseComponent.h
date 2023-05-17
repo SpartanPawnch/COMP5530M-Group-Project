@@ -6,7 +6,6 @@
 
 #include "../EntityState/EntityState.h"
 
-
 class BaseComponent {
   public:
     BaseComponent();
@@ -16,6 +15,8 @@ class BaseComponent {
     virtual void update(float dt, EntityState& state);
     virtual void stop();
     void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable() {
+    }
 
     int uuid;
     std::string name;

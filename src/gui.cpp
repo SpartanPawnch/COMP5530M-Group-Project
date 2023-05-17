@@ -1672,9 +1672,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
 
     // TODO rest of function is hard to maintain - try to generate this in the future
     // type selector
-    const char* types[] = {"BaseComponent", "TransformComponent", "ScriptComponent",
-        "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent",
-        "LightComponent", "SkyBoxModelComponent"};
+    const char* types[] = {
+#include "gui-typestrings.generated"
+    };
     previewStr =
         (loc.type >= 0 && loc.type < ComponentLocation::COMPTYPE_MAX) ? types[loc.type] : "None";
     if (ImGui::BeginCombo("##typeselector", previewStr.c_str())) {
@@ -1689,35 +1689,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     }
 
     // component selector
-    const ComponentStorage& storage = scene.entities[loc.entityUuid].components;
+    const ComponentStorage& storage = scene.entities[idx].components;
     switch (loc.type) {
-    case ComponentLocation::BASECOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecBaseComponent);
-        break;
-    case ComponentLocation::TRANSFORMCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecTransformComponent);
-        break;
-    case ComponentLocation::SCRIPTCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecScriptComponent);
-        break;
-    case ComponentLocation::CAMERACOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecCameraComponent);
-        break;
-    case ComponentLocation::AUDIOSOURCECOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecAudioSourceComponent);
-        break;
-    case ComponentLocation::MODELCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecModelComponent);
-        break;
-    case ComponentLocation::SKELETALMODELCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecSkeletalModelComponent);
-        break;
-    case ComponentLocation::LIGHTCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecLightComponent);
-        break;
-    case ComponentLocation::SKYBOXCOMPONENT:
-        drawComponentSelector(loc.componentIdx, storage.vecSkyBoxComponent);
-        break;
+#include "gui-typecases.generated"
     default:;
     }
 }

@@ -35,4 +35,6 @@ struct PlayerControllerComponent : BaseComponent {
     void removeKey(int index);
 
     void addAction();
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 };

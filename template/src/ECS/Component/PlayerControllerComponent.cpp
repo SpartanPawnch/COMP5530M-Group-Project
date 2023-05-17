@@ -2,6 +2,7 @@
 #include <array>
 
 #include "../System/InputSystem.h"
+#include "../../scripting.h"
 
 static int baseUuid = 0;
 PlayerControllerComponent::PlayerControllerComponent()
@@ -47,4 +48,60 @@ void PlayerControllerComponent::update(float dt, EntityState& state) {
             glm::vec3(actions[VirtualKey::LEFT] - actions[VirtualKey::RIGHT],
                 actions[VirtualKey::UP] - actions[VirtualKey::DOWN],
                 actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
+}
+
+// lua stuff
+static const char* componentMT = "ONO_PlayerControllerComponent";
+static int luaGetKey(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_PlayerControllerComponent:getKey() - wrong number of arguments; "
+            "Usage: ONO_PlayerControllerComponent:getKey(var,i) or var:getKey(i)");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    PlayerControllerComponent* c = (PlayerControllerComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_PlayerControllerComponent - ptr is null", 0);
+        return 0;
+    }
+
+    int idx = lua_tointegerx(state, 2, nullptr);
+
+    // return key status
+    lua_settop(state, 0);
+    int key = (idx >= 0 && idx < c->virtualKeys.size()) ? c->virtualKeys[idx].key : -1;
+    static InputSystem* iSys = InputSystem::getInstance();
+    lua_pushboolean(state, (key >= 0 && key <= GLFW_KEY_LAST) ? int(iSys->isDown[key]) : 0);
+    return 1;
+}
+
+void PlayerControllerComponent::registerLuaMetatable() {
+    lua_State* state = scripting::getState();
+    luaL_newmetatable(state, componentMT);
+    // register index op - REQUIRED
+    lua_pushvalue(state, -1);
+    lua_setfield(state, -2, "__index");
+    lua_pushcfunction(state, &luaGetKey);
+    lua_setfield(state, -2, "getKey");
+    lua_pop(state, 1);
+}
+
+void PlayerControllerComponent::pushLuaTable(lua_State* state) {
+    lua_createtable(state, 0, 0);
+    lua_pushstring(state, name.c_str());
+    lua_setfield(state, -2, "name");
+    lua_pushinteger(state, uuid);
+    lua_setfield(state, -2, "uuid");
+    lua_pushlightuserdata(state, this);
+    lua_setfield(state, -2, "ptr");
+    luaL_setmetatable(state, componentMT);
 }

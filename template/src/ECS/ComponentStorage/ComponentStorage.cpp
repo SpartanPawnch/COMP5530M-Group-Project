@@ -39,6 +39,19 @@ void ComponentStorage::clearAll(){
     vecControllerComponent.clear();
     vecTransformComponent.clear();
 }
+void ComponentStorage::registerMetatables(){
+    BaseComponent::registerLuaMetatable();
+    PlayerControllerComponent::registerLuaMetatable();
+    ScriptComponent::registerLuaMetatable();
+    CameraComponent::registerLuaMetatable();
+    AudioSourceComponent::registerLuaMetatable();
+    ModelComponent::registerLuaMetatable();
+    SkeletalModelComponent::registerLuaMetatable();
+    LightComponent::registerLuaMetatable();
+    SkyBoxComponent::registerLuaMetatable();
+    ControllerComponent::registerLuaMetatable();
+    TransformComponent::registerLuaMetatable();
+}
 void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
     switch(loc.type){
     case ComponentLocation::BASECOMPONENT:

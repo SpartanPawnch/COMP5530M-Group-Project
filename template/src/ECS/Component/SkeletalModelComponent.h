@@ -90,8 +90,11 @@ struct SkeletalModelComponent : BaseComponent {
     void calculateBoneTransform(Bone* bone, glm::mat4 parentTransform);
     void calculateBoneTransformBlended(Bone* current, Bone* previous, glm::mat4 parentTransform);
     void resetMarices();
-    
+
     void readMaterials();
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
+
     std::vector<std::shared_ptr<ActiveMaterial>> materials;
 
     // model info

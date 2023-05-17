@@ -157,6 +157,7 @@ int main() {
 
     // register lua stuff
     scene.registerLuaTable();
+    ComponentStorage::registerMetatables();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());

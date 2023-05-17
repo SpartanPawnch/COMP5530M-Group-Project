@@ -13,7 +13,7 @@ struct SkyBoxFace {
 };
 
 struct SkyBoxTexture {
-    unsigned int id=0;
+    unsigned int id = 0;
     SkyBoxFace faces[6];
 };
 
@@ -27,6 +27,8 @@ struct SkyBoxComponent : BaseComponent {
     void stop() override;
 
     void updateTex(unsigned int side, std::string path);
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     SkyBoxTexture skybox;
 };

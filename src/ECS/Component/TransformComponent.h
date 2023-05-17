@@ -15,6 +15,8 @@ class TransformComponent : public BaseComponent {
     virtual void start() override;
     virtual void update(float dt, EntityState& state) override;
     virtual void stop() override;
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     int uuid;
     glm::vec3 position = glm::vec3(.0f);
