@@ -13,6 +13,7 @@ struct EntityState {
 
     // world-space transform
     glm::mat4 runtimeTransform = glm::mat4(1.0f);
+    glm::mat4 parent = glm::mat4(1.f);
 
     void pushLuaTable(lua_State* luaState);
 };

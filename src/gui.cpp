@@ -818,6 +818,8 @@ inline void drawViewport() {
             ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
                 imguizmoOperation, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
+            transform = glm::inverse(scene.selectedEntity->state.parent) * transform;
+
             if (ImGuizmo::IsUsing()) {
                 glm::vec3 skew;
                 glm::vec4 perspective;

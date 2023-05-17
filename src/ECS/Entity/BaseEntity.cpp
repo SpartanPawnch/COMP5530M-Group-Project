@@ -44,6 +44,7 @@ void BaseEntity::stop() {
 void BaseEntity::genTransform(const glm::mat4& parentMat) {
     state.runtimeTransform = parentMat * glm::translate(state.position) *
         glm::mat4_cast(state.rotation) * glm::scale(state.scale);
+    state.parent = parentMat;
 }
 // void BaseEntity::removeComponent(int uuid)
 // {
