@@ -4,3 +4,8 @@
 /out
 /.ccls-cache
 .clang-format
+/template/build
+/template/external/assimp
+/template/external/glfw-3.3.6
+/template/external/soloud
+

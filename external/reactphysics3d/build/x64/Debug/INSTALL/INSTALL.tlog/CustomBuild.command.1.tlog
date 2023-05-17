@@ -1,0 +1,10 @@
+^C:\USERS\JJPGN\DESKTOP\GROUPPROJECT\PROJECT\COMP5530M-GROUP-PROJECT\EXTERNAL\REACTPHYSICS3D\BUILD\CMAKEFILES\797213A75554E7E5EB3124D5FA7A3E14\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -13,100 +13,34 @@
 #include <GLFW/glfw3.h>
 #include <glm/common.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../external/stb_image.h"
+
 #include <string>
 #include <thread>
 #include <mutex>
 
 #include "fdutil.h"
-#include "drawing.h"
 #include "logging.h"
 #include "levels.h"
 #include "gui.h"
+#include "metrics.h"
 #include "scripting.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
+#include "asset_import/materials.h"
 #include "model_import/model.h"
+#include "physics_engine/physicsEngine.h"
 #include "../render-engine/RenderManager.h"
 
 RenderManager* renderManager;
+MaterialSystem* materialSystem;
+PhysicsEngine* physicsEngine;
 
-void handleKeyboardInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        // Move the camera forward
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 0);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        // Move the camera backward
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 1);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        // Strafe the camera left
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 2);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        // Strafe the camera right
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 3);
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        // Ascend camera
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 4);
-    }
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
-        // Descend camera
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 5);
-    }
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        // Reset camera position
-        renderManager->camera->resetPosition();
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        // increase camera movement speed
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 6);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        // increase camera movement speed
-        renderManager->camera->updateKeyboardInput(renderManager->deltaTime, 7);
-    }
-}
-
-void handleMouseInput(GLFWwindow* window) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        if (renderManager->camera->focusState == false) {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            renderManager->camera->focusState = true;
-        }
-        else {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            renderManager->camera->focusState = false;
-        }
-
-        if (renderManager->firstRClick == true) {
-            renderManager->xPosLast = renderManager->xPos;
-            renderManager->yPosLast = renderManager->yPos;
-            renderManager->firstRClick = false;
-        }
-    }
-
-    if (renderManager->camera->focusState == true) {
-        // now we can change the orientation of the camera
-        glfwGetCursorPos(window, &renderManager->xPos, &renderManager->yPos);
-
-        // offset
-        renderManager->xOffset = renderManager->xPos - renderManager->xPosLast;
-        renderManager->yOffset = renderManager->yPos - renderManager->yPosLast;
-
-        // send data to camera
-        renderManager->camera->updateInput(
-            renderManager->deltaTime, -1, renderManager->xOffset, renderManager->yOffset);
-
-        renderManager->xPosLast = renderManager->xPos;
-        renderManager->yPosLast = renderManager->yPos;
-        glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
-    }
-}
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
+MaterialSystem* MaterialSystem::instance = nullptr;
+PhysicsEngine* PhysicsEngine::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -133,10 +67,22 @@ int main() {
     glfwInit();
     glfwWindowHint(GLFW_MAXIMIZED, 1);
     glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // create window
     window = glfwCreateWindow(1600, 900, "ONO Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
 
+    // set icon
+    {
+        GLFWimage icon;
+        unsigned char* iconPixels = stbi_load("assets/logo.png", &icon.width, &icon.height, 0, 4);
+        assert(iconPixels != nullptr);
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+        stbi_image_free(icon.pixels);
+    }
     // setup OpenGL
     GLenum err = glewInit();
     if (err != GLEW_OK) {
@@ -145,23 +91,41 @@ int main() {
     }
 
     // swap buffers to avoid the window not responding
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwSwapBuffers(window);
     glfwPollEvents();
 
+    // init metrics
+    metrics::MetricsTracker metricsTracker;
     // init scripting
     scripting::ScriptManager scriptMgr;
 
     // init logging
     logging::LogManager logMgr;
 
+    // Probably the job of Asset Manager
+    ///////////////////////////////////
+    // Load entity models
+    // Model model;
+    // model.loadModel("assets/tree.obj");
+
+    //////////////////////////////////
+
+    materialSystem = MaterialSystem::getInstance();
+    materialSystem->createMaterial("test");
+
     // Render Engine
     renderManager = RenderManager::getInstance();
+
+    physicsEngine = PhysicsEngine::getInstance();
+    physicsEngine->createWorld();
 
     renderManager->startUp(window);
 
     renderManager->loadScene();
+    renderManager->loadIcons();
+
     // init shader
 
     // float lastQueryTime = float(glfwGetTime());
@@ -177,6 +141,16 @@ int main() {
 
     double previous_time = glfwGetTime();
 
+    // ------------- UNIFORMS --------------------------
+    renderManager->setupColourPipelineUniforms();
+    renderManager->setupTexturePipelineUniforms();
+    renderManager->setupAnimatedPipelineUniforms();
+    renderManager->setupEntIDPipelineUniforms();
+    renderManager->setupCubemapPipelineUniforms();
+    renderManager->setupIconPipelineUniforms();
+    renderManager->setupIconIDPipelineUniforms();
+    renderManager->setupAnimationIDPipelineUniforms();
+
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         // get window dimensions
@@ -186,39 +160,132 @@ int main() {
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
 
+        if (physicsEngine->isSimulating) {
+            physicsEngine->world->update(current_time - previous_time);
+
+            renderManager->movePhysicsEntities(scene, &renderManager->camera, viewportTexWidth,
+                viewportTexHeight);
+        }
+
         // handle inputs
-        handleKeyboardInput(window);
-        handleMouseInput(window);
         previous_time = current_time;
 
         // update matrices
         // renderManager->updateMatrices(&width, &height);
 
-        // prepare gui
+        // prepare gui and get input
         prepUI(window, executablePath, currTime, width, height);
+
+        // update editor state
+        scene.updatePositions();
 
         //--- Draw Results ---
         // draw scene to texture
-        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);
         glViewport(0, 0, viewportTexWidth, viewportTexHeight);
 
         GLuint attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
         glDrawBuffers(2, attachments);
 
+        // clear screen
+        {
+            const float clearVals[] = {.2f, .2f, .2f, 1.f};
+            const float clearDepth = 1.f;
+            glClearBufferfv(GL_COLOR, 0, clearVals);
+            glClearBufferfv(GL_DEPTH, 0, &clearDepth);
+        }
+
+        renderManager->renderSkybox(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
+
+        // draw grid
+        glDisable(GL_CULL_FACE);
+        renderManager->renderGrid(&renderManager->camera, viewportTexWidth, viewportTexHeight);
+        glEnable(GL_CULL_FACE);
+
         // draw scene
-        renderManager->renderSceneRefactor(
-            renderManager->camera, viewportTexWidth, viewportTexHeight);
+        renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
+
+        // draw cam preview frustum
+        renderManager->renderCamPreview(scene, width, height);
+
+        // renderManager->renderSceneRefactor(
+        //     renderManager->camera, viewportTexWidth, viewportTexHeight);
+
+        // draw Camera preview window in corner
+        if (scene.selectedEntity &&
+            scene.selectedEntity->components.vecCameraComponent.size() > 0) {
+            CameraComponent& cam =
+                scene.selectedEntity->components.vecCameraComponent[scene.selectedCameraIdx];
+            // setup preview camera object
+            cam.copyToCamera(renderManager->previewCamera,
+                scene.selectedEntity->state.runtimeTransform);
+
+            // draw border
+            // TODO nicer way to do this
+            const int PREVIEW_BORDER = 5;
+            const float PREVIEW_FRACTION = .35f; // part of the screen used for preview window
+            glEnable(GL_SCISSOR_TEST);
+            glScissor((1.f - PREVIEW_FRACTION) * viewportTexWidth - 2 * PREVIEW_BORDER, 0,
+                PREVIEW_FRACTION * viewportTexWidth + 2 * PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexHeight + 2 * PREVIEW_BORDER);
+            glClearColor(.5f, .5f, .5f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // clear preview section
+            glScissor((1.f - PREVIEW_FRACTION) * viewportTexWidth - PREVIEW_BORDER, PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexWidth, PREVIEW_FRACTION * viewportTexHeight);
+            glClearColor(.2f, .2f, .2f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_SCISSOR_TEST);
+
+            // draw preview
+            glViewport((1.f - PREVIEW_FRACTION) * viewportTexWidth - PREVIEW_BORDER, PREVIEW_BORDER,
+                PREVIEW_FRACTION * viewportTexWidth, PREVIEW_FRACTION * viewportTexHeight);
+            renderManager->renderGrid(&renderManager->previewCamera, viewportTexWidth / 4,
+                viewportTexHeight / 4);
+            renderManager->renderEntities(scene, &renderManager->previewCamera,
+                viewportTexWidth / 4, viewportTexHeight / 4);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, viewportFramebuffer);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, viewportMultisampleFramebuffer);
+        glBlitFramebuffer(0, 0, viewportTexWidth, viewportTexHeight, 0, 0, viewportTexWidth,
+            viewportTexHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        // wait for results
+        glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
+        glViewport(0, 0, viewportTexWidth, viewportTexHeight);
+
+        GLuint entIDattachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        glDrawBuffers(2, entIDattachments);
+
+        // clear screen
+        {
+            const float clearVals[] = {.0f, .0f, .0f, 1.f};
+            const float clearDepth = 1.f;
+            glClearBufferfv(GL_COLOR, 0, clearVals);
+            glClearBufferfv(GL_DEPTH, 0, &clearDepth);
+        }
+
+        renderManager->renderEntitiesID(scene, &renderManager->camera, viewportTexWidth,
+            viewportTexHeight);
 
         glFlush();
 
         // draw UI to full window
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, width, height);
+        glClearColor(.2f, .2f, .2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         drawUI();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    renderManager->shutDown();
 
     return 0;
 }
