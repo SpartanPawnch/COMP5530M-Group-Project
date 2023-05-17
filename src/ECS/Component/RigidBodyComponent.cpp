@@ -47,4 +47,11 @@ void RigidBodyComponent::setGravityEnabled() {
     }
 }
 
+void RigidBodyComponent::applyForce()
+{
+    if (rigidBody != nullptr) {
+        rigidBody->applyLocalForceAtCenterOfMass(Vector3(force.x, force.y, force.z));
+    }
+}
+
 

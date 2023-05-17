@@ -1525,8 +1525,12 @@ void drawComponentProps(SkyBoxComponent& component) {
 void drawComponentProps(RigidBodyComponent& component) {
     ImGui::InputFloat3("Position", &component.position[0]);
     ImGui::InputFloat4("Rotation", &component.rotation[0]);
+    ImGui::InputFloat3("Force", &component.force[0]);
     if(ImGui::Button("Set Position and Rotation")){
         component.setPosition();
+    }
+    if (ImGui::Button("Apply Force")) {
+        component.applyForce();
     }
     std::string previewStr = "type undefined";
     if (component.bodyType == BodyType::DYNAMIC) {

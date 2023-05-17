@@ -17,6 +17,7 @@ struct RigidBodyComponent : BaseComponent {
     void setType(BodyType type);
     void setPosition();
     void setGravityEnabled();
+    void applyForce();
 
     PhysicsEngine* instance;
     BodyType bodyType = BodyType::DYNAMIC;
@@ -26,4 +27,5 @@ struct RigidBodyComponent : BaseComponent {
     RigidBody* rigidBody=nullptr;
     glm::vec3 position=glm::vec3(0.0f);
     glm::quat rotation = glm::quat();
+    glm::vec3 force = glm::vec3(0.0f);
 };
