@@ -28,6 +28,8 @@ struct RigidBodyComponent : BaseComponent {
     void setMaterialBounciness(ColliderTypes type, int index, float bounciness);
     void setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient);
 
+    void setCubeColliderExtents(int index, glm::vec3 extents);
+
 
     PhysicsEngine* instance;
     BodyType bodyType = BodyType::DYNAMIC;
@@ -39,7 +41,6 @@ struct RigidBodyComponent : BaseComponent {
     glm::quat rotation = glm::quat(1.f, .0f, .0f, .0f);
     glm::vec3 force = glm::vec3(0.0f);
     
-    std::vector<ColliderObject> colliders;
     std::vector<CubeColliderObject> cubeColliders;
     std::vector<SphereColliderObject> sphereColliders;
     std::vector<CapsuleColliderObject> capsuleColliders;

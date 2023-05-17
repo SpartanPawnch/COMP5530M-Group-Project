@@ -1525,6 +1525,12 @@ void drawComponentProps(SkyBoxComponent& component) {
 void drawCubeCollidersList(RigidBodyComponent& component) {
     for (unsigned int i = 0; i < component.cubeColliders.size(); i++) {
         ImGui::PushID(i);
+        glm::vec3 prevExtents = component.cubeColliders[i].extents;
+        ImGui::InputFloat3("##cube_extents", &component.cubeColliders[i].extents[0]);
+        if (prevExtents != component.cubeColliders[i].extents) {
+            component.setCubeColliderExtents(i, component.cubeColliders[i].extents);
+        }
+        ImGui::Text("Cube Collider Category:");
         std::string previewStrMask = "type undefined";
         if (component.cubeColliders[i].category & CollisionCategories::CATEGORY1) {
             previewStrMask = "Category 1";
@@ -1547,6 +1553,7 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
             }
             ImGui::EndCombo();
         }
+        ImGui::Text("Cube Collider Collides with Category:");
         std::string previewStrMaskCollideWith = "type undefined";
         if (component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
             previewStrMaskCollideWith = "Category 1";

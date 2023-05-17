@@ -36,6 +36,7 @@ void RigidBodyComponent::createCubeCollider()
 
     CubeColliderObject collider;
     collider.shape = ColliderTypes::CUBE;
+    collider.colliderShape = boxShape;
     collider.collider = rigidBody->addCollider(boxShape, transform);
     collider.collider->getLocalToBodyTransform();
 
@@ -251,6 +252,10 @@ void RigidBodyComponent::setMaterialFrictionCoefficient(ColliderTypes type, int 
     default:
         break;
     }
+}
+
+void RigidBodyComponent::setCubeColliderExtents(int index, glm::vec3 extents) {
+    cubeColliders[index].colliderShape->setHalfExtents(Vector3(extents.x, extents.y, extents.z));
 }
 
 void RigidBodyComponent::setType(BodyType type) {

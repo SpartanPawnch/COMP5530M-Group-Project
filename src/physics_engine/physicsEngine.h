@@ -33,6 +33,7 @@ struct ColliderObject {
 
 struct CubeColliderObject : ColliderObject {
 	glm::vec3 extents = glm::vec3(1.0f);
+	BoxShape* colliderShape;
 };
 
 struct SphereColliderObject : ColliderObject {
