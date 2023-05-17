@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include "../asset_import/model.h"
 
 using namespace reactphysics3d;
 
@@ -49,7 +50,10 @@ struct CapsuleColliderObject : ColliderObject {
 
 struct MeshColliderObject : ColliderObject {
 	//model descriptor
+	std::shared_ptr<model::ModelDescriptor> model;
+	std::string modelUuid = std::string("");
 	ConcaveMeshShape* colliderShape;
+	TriangleMesh* triangleMesh;
 };
 
 class PhysicsEngine {

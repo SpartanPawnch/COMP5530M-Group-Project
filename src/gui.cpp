@@ -1755,6 +1755,41 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
 void drawMeshCollidersList(RigidBodyComponent& component) {
     for (unsigned int i = 0; i < component.meshColliders.size(); i++) {
         ImGui::PushID(i);
+        std::string previewStr = "Select a Model";
+        if (component.meshColliders[i].model && component.meshColliders[i].model->path) {
+            previewStr = *component.meshColliders[i].model->path;
+            previewStr = assetfolder::getRelativePath(previewStr.c_str());
+        }
+
+        if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
+            // get available audio clips
+            static std::vector<assetfolder::AssetDescriptor> modelFiles;
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
+
+            // list available audio clips
+            for (unsigned int j = 0; j < modelFiles.size(); j++) {
+                ImGui::PushID(j);
+                bool isSelected = (previewStr == modelFiles[j].path);
+                if (ImGui::Selectable(modelFiles[j].name.c_str(), &isSelected)) {
+                    // check if we need to load file
+                    // TODO better unique id scheme
+                    std::string uuid = assetfolder::getRelativePath(modelFiles[j].path.c_str());
+                    auto desc = model::modelGetByUuid(uuid);
+
+                    if (!desc) {
+                        // load file from disk
+                        desc = model::modelLoad(modelFiles[j].path.c_str(), uuid);
+                    }
+
+                    std::swap(component.meshColliders[i].model, desc);
+                    component.meshColliders[i].modelUuid = component.meshColliders[i].model ? uuid : "";
+                    component.setMeshColliderModel(i);
+                }
+                ImGui::PopID();
+            }
+
+            ImGui::EndCombo();
+        }
         std::string previewStrMask = "type undefined";
         if (component.meshColliders[i].category & CollisionCategories::CATEGORY1) {
             previewStrMask = "Category 1";

@@ -31,6 +31,7 @@ struct RigidBodyComponent : BaseComponent {
     void setCubeColliderExtents(int index, glm::vec3 extents);
     void setSphereColliderRadius(int index, float radius);
     void setCapsuleColliderRadiusHeight(int index, float radius, float height);
+    void setMeshColliderModel(int index);
 
 
     PhysicsEngine* instance;

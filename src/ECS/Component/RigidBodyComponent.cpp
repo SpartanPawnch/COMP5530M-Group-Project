@@ -71,13 +71,14 @@ void RigidBodyComponent::createCapsuleCollider()
 
 void RigidBodyComponent::createMeshCollider()
 {
-    const Vector3 halfExtents(1.0, 1.0, 1.0);
     Transform transform = Transform::identity();
-    BoxShape* boxShape = instance->physicsCommon.createBoxShape(halfExtents);
-
+    TriangleMesh* triangleMesh = instance->physicsCommon.createTriangleMesh();
+    
     MeshColliderObject collider;
+    collider.triangleMesh = triangleMesh;
+    //collider.colliderShape = instance->physicsCommon.createConcaveMeshShape(triangleMesh);
     collider.shape = ColliderTypes::MESH;
-    collider.collider = rigidBody->addCollider(boxShape, transform);
+    //collider.collider = rigidBody->addCollider(collider.colliderShape, transform);
 
     meshColliders.push_back(collider);
 }
@@ -294,4 +295,51 @@ void RigidBodyComponent::applyForce()
     }
 }
 
+void RigidBodyComponent::setMeshColliderModel(int index) {
+    unsigned int vertexCount = 0;
+    unsigned int indexCount = 0;
+    std::vector<glm::vec3> vertices;
+    std::vector<unsigned int> indices;
+    for (unsigned int i = 0; i < meshColliders[index].model->getMeshCount(); i++) {
+        vertexCount += meshColliders[index].model->getVertexCount(i);
+        indexCount += meshColliders[index].model->getIndexCount(i);
+        std::vector<glm::vec3> meshVertices = meshColliders[index].model->getVertices(i);
+        std::vector<unsigned int> meshIndices = meshColliders[index].model->getIndices(i);
+        for (unsigned int j = 0; j < meshIndices.size(); j++) {
+            meshIndices[j] += indexCount;
+        }
+        vertices.insert(vertices.end(), meshVertices.begin(), meshVertices.end());
+        indices.insert(indices.end(), meshIndices.begin(), meshIndices.end());
+    }
+
+    float* verticesArray = new float[vertexCount*3];
+    int* indicesArray = new int[indexCount];
+
+    for (unsigned int i = 0; i < vertexCount; i++) {
+        verticesArray[i*3] = vertices[i].x;
+        verticesArray[i*3+1] = vertices[i].y;
+        verticesArray[i*3+2] = vertices[i].z;
+    }
+
+    for (unsigned int i = 0; i < indexCount; i++) {
+        indicesArray[i] = indices[i];
+    }
+    
+    TriangleVertexArray* triangleArray =
+        new TriangleVertexArray(vertexCount, verticesArray, 3 * sizeof(float), indexCount,
+            indicesArray, 3 * sizeof(int),
+            TriangleVertexArray::VertexDataType::VERTEX_FLOAT_TYPE,
+            TriangleVertexArray::IndexDataType::INDEX_INTEGER_TYPE
+        );
+
+    Transform transform = Transform::identity();
+
+    meshColliders[index].triangleMesh->addSubpart(triangleArray);
+
+    meshColliders[index].colliderShape = instance->physicsCommon.createConcaveMeshShape(meshColliders[index].triangleMesh);
+    meshColliders[index].collider = rigidBody->addCollider(meshColliders[index].colliderShape, transform);
+
+    delete[] verticesArray;
+    delete[] indicesArray;
+}
 

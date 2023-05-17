@@ -185,6 +185,24 @@ namespace model {
         return loadedModels[idx].model->meshes[meshIndex].indices.size();
     }
 
+    unsigned int ModelDescriptor::getVertexCount(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].vertices.size();
+    }
+
+    std::vector<glm::vec3> ModelDescriptor::getVertices(int meshIndex) {
+        std::vector<glm::vec3> vertices;
+
+        for (unsigned int i = 0; i < loadedModels[idx].model->meshes[meshIndex].vertices.size(); i++) {
+            vertices.push_back(loadedModels[idx].model->meshes[meshIndex].vertices[i].position);
+        }
+
+        return vertices;
+    }
+
+    std::vector<unsigned int> ModelDescriptor::getIndices(int meshIndex) {
+        return loadedModels[idx].model->meshes[meshIndex].indices;
+    }
+
     unsigned int ModelDescriptor::getMeshCount() {
         return loadedModels[idx].model->meshes.size();
     }

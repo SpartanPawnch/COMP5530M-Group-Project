@@ -151,6 +151,9 @@ int main() {
     renderManager->setupIconIDPipelineUniforms();
     renderManager->setupAnimationIDPipelineUniforms();
 
+    const float timeStep = 1.0f / 60.0f;
+    long double accumulator = 0;
+
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         // get window dimensions
@@ -161,7 +164,20 @@ int main() {
         renderManager->deltaTime = current_time - previous_time;
 
         if (physicsEngine->isSimulating) {
-            physicsEngine->world->update(current_time - previous_time);
+
+            // Add the time difference in the accumulator 
+            accumulator += current_time - previous_time;
+
+            // While there is enough accumulated time to take 
+            // one or several physics steps 
+            while (accumulator >= timeStep) {
+
+                // Update the Dynamics world with a constant time step 
+                physicsEngine->world->update(timeStep);
+
+                // Decrease the accumulated time 
+                accumulator -= timeStep;
+            }
 
             renderManager->movePhysicsEntities(scene, &renderManager->camera, viewportTexWidth,
                 viewportTexHeight);
