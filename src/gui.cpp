@@ -1425,63 +1425,63 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::NextColumn();
         ImGui::Text("Transition Immediately?");
         ImGui::NextColumn();
-        ImGui::Text("Current Value");
-        ImGui::NextColumn();
-        ImGui::Text("Desired Value");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Lower?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Equal?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Greater?");
-        ImGui::NextColumn();
-        ImGui::Text("Blend Time");
-        ImGui::NextColumn();
-        ImGui::Text("Remove Transition");
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
-            ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_float",
-                    component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
-                for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                            component.selectedNode->floatTransitions[i].transitionTo ==
-                                component.nodes[j].name)) {
-                        component.selectedNode->floatTransitions[i].transitionTo =
-                            component.nodes[j].name;
-                    }
-                }
-                ImGui::EndCombo();
+ImGui::Text("Current Value");
+ImGui::NextColumn();
+ImGui::Text("Desired Value");
+ImGui::NextColumn();
+ImGui::Text("Condition Lower?");
+ImGui::NextColumn();
+ImGui::Text("Condition Equal?");
+ImGui::NextColumn();
+ImGui::Text("Condition Greater?");
+ImGui::NextColumn();
+ImGui::Text("Blend Time");
+ImGui::NextColumn();
+ImGui::Text("Remove Transition");
+ImGui::NextColumn();
+ImGui::Separator();
+for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
+    ImGui::PushID(i);
+    if (ImGui::BeginCombo("##transition_to_float",
+        component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
+        for (unsigned int j = 0; j < component.nodes.size(); j++) {
+            if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                component.selectedNode->floatTransitions[i].transitionTo ==
+                component.nodes[j].name)) {
+                component.selectedNode->floatTransitions[i].transitionTo =
+                    component.nodes[j].name;
             }
-            ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_float",
-                &component.selectedNode->floatTransitions[i].immediate);
-            ImGui::NextColumn();
-            ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##desired_float",
-                &component.selectedNode->floatTransitions[i].desiredValue);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_lower_float",
-                &component.selectedNode->floatTransitions[i].shouldBeLower);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_equal_float",
-                &component.selectedNode->floatTransitions[i].shouldBeEqual);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_greater_float",
-                &component.selectedNode->floatTransitions[i].shouldBeGreater);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##float_blendtime",
-                &component.selectedNode->floatTransitions[i].blendTime);
-            ImGui::NextColumn();
-            if (ImGui::Button("Remove Transition")) {
-                component.removeFloatACTransition(i);
-            }
-            ImGui::NextColumn();
-            ImGui::PopID();
         }
-        ImGui::Columns(1);
+        ImGui::EndCombo();
+    }
+    ImGui::NextColumn();
+    ImGui::Checkbox("##immediate_float",
+        &component.selectedNode->floatTransitions[i].immediate);
+    ImGui::NextColumn();
+    ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
+    ImGui::NextColumn();
+    ImGui::InputFloat("##desired_float",
+        &component.selectedNode->floatTransitions[i].desiredValue);
+    ImGui::NextColumn();
+    ImGui::Checkbox("##should_lower_float",
+        &component.selectedNode->floatTransitions[i].shouldBeLower);
+    ImGui::NextColumn();
+    ImGui::Checkbox("##should_equal_float",
+        &component.selectedNode->floatTransitions[i].shouldBeEqual);
+    ImGui::NextColumn();
+    ImGui::Checkbox("##should_greater_float",
+        &component.selectedNode->floatTransitions[i].shouldBeGreater);
+    ImGui::NextColumn();
+    ImGui::InputFloat("##float_blendtime",
+        &component.selectedNode->floatTransitions[i].blendTime);
+    ImGui::NextColumn();
+    if (ImGui::Button("Remove Transition")) {
+        component.removeFloatACTransition(i);
+    }
+    ImGui::NextColumn();
+    ImGui::PopID();
+}
+ImGui::Columns(1);
     }
     else {
         ImGui::Text("Select a node to show it's transitions");
@@ -1489,7 +1489,7 @@ void drawComponentProps(SkeletalModelComponent& component) {
 }
 
 void drawComponentProps(SkyBoxComponent& component) {
-    std::string faceNames[6] = {"right", "left", "top", "bottom", "back", "front"};
+    std::string faceNames[6] = { "right", "left", "top", "bottom", "back", "front" };
 
     static std::vector<assetfolder::AssetDescriptor> textureFiles;
     assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE, textureFiles);
@@ -1513,7 +1513,7 @@ void drawComponentProps(SkyBoxComponent& component) {
                 if (ImGui::Selectable(textureFiles[j].name.c_str(), &isSelected)) {
                     component.updateTex(i, textureFiles[j].path);
                     std::cout << "set texture to "
-                              << component.skybox.faces[i].textureDescriptor->texId << std::endl;
+                        << component.skybox.faces[i].textureDescriptor->texId << std::endl;
                 }
             }
             ImGui::EndCombo();
@@ -1523,7 +1523,31 @@ void drawComponentProps(SkyBoxComponent& component) {
 }
 
 void drawComponentProps(RigidBodyComponent& component) {
-    ImGui::Text("RigidBodyProperties soon");
+    ImGui::InputFloat3("Position", &component.position[0]);
+    ImGui::InputFloat4("Rotation", &component.rotation[0]);
+    if(ImGui::Button("Set Position and Rotation")){
+        component.setPosition();
+    }
+    std::string previewStr = "type undefined";
+    if (component.bodyType == BodyType::DYNAMIC) {
+        previewStr = "Dynamic";
+    } else if (component.bodyType == BodyType::KINEMATIC) {
+        previewStr = "Kinematic";
+    } else if (component.bodyType == BodyType::STATIC) {
+        previewStr = "Static";
+    }
+    if (ImGui::BeginCombo("RigidBody Type", previewStr.c_str())) {
+        if (ImGui::Selectable("Dynamic", component.bodyType == BodyType::DYNAMIC)) {
+            component.setType(BodyType::DYNAMIC);
+        }
+        if (ImGui::Selectable("Kinematic", component.bodyType == BodyType::KINEMATIC)) {
+            component.setType(BodyType::KINEMATIC);
+        }
+        if (ImGui::Selectable("Static", component.bodyType == BodyType::STATIC)) {
+            component.setType(BodyType::STATIC);
+        }
+        ImGui::EndCombo();
+    }
 }
 
 void drawComponentProps(AudioSourceComponent& component) {

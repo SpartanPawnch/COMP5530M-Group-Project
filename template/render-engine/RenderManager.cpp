@@ -303,9 +303,12 @@ void RenderManager::movePhysicsEntities(Scene& scene, Camera* camera, int width,
 
         glm::vec3 translation(position.x, position.y, position.z);
         glm::quat rotation(orientation.w, orientation.x, orientation.y, orientation.z);
-        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(rotation);
+        //glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(rotation);
             
-        scene.entities[i].state.runtimeTransform = modelMatrix;
+        //scene.entities[i].state.runtimeTransform = modelMatrix;
+        
+        scene.entities[i].state.position = translation;
+        scene.entities[i].state.rotation = rotation;
     }
 }
 

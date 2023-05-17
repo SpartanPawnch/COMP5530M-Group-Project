@@ -5,7 +5,7 @@ static int baseUuid = 0;
 RigidBodyComponent::RigidBodyComponent() {
     name = "Skybox Component";
     uuid = baseUuid++;
-    PhysicsEngine* instance = PhysicsEngine::getInstance();
+    instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
 }
@@ -22,8 +22,23 @@ void RigidBodyComponent::start() {
 void RigidBodyComponent::update(float dt, EntityState& state) {
 }
 void RigidBodyComponent::stop() {
-    PhysicsEngine* instance = PhysicsEngine::getInstance();
    /* instance->deleteRidigBody(rigidBody);
     delete rigidBody;
     rigidBody = nullptr;*/
 }
+
+void RigidBodyComponent::setType(BodyType type) {
+    if (rigidBody != nullptr) {
+        rigidBody->setType(type);
+        bodyType = type;
+    }
+}
+
+void RigidBodyComponent::setPosition() {
+    const Transform& transform = Transform(Vector3(position.x, position.y, position.z), Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+    rigidBody->setTransform(transform);
+    rigidBody->setLinearVelocity(Vector3(0, 0, 0));
+    rigidBody->setAngularVelocity(Vector3(0, 0, 0));
+}
+
+

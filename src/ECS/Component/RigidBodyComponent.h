@@ -14,5 +14,13 @@ struct RigidBodyComponent : BaseComponent {
     void update(float dt, EntityState& state) override;
     void stop() override;
 
+    void setType(BodyType type);
+    void setPosition();
+
+    PhysicsEngine* instance;
+    BodyType bodyType = BodyType::DYNAMIC;
+
     RigidBody* rigidBody=nullptr;
+    glm::vec3 position=glm::vec3(0.0f);
+    glm::quat rotation = glm::quat();
 };
