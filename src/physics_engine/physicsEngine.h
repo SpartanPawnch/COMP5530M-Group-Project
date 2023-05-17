@@ -38,15 +38,18 @@ struct CubeColliderObject : ColliderObject {
 
 struct SphereColliderObject : ColliderObject {
 	float radius = 1.0f;
+	SphereShape* colliderShape;
 };
 
 struct CapsuleColliderObject : ColliderObject {
 	float radius = 1.0f;
 	float height = 3.0f;
+	CapsuleShape* colliderShape;
 };
 
 struct MeshColliderObject : ColliderObject {
 	//model descriptor
+	ConcaveMeshShape* colliderShape;
 };
 
 class PhysicsEngine {

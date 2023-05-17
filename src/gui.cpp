@@ -1526,6 +1526,7 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
     for (unsigned int i = 0; i < component.cubeColliders.size(); i++) {
         ImGui::PushID(i);
         glm::vec3 prevExtents = component.cubeColliders[i].extents;
+        ImGui::Text("Cube Collider Sizes:");
         ImGui::InputFloat3("##cube_extents", &component.cubeColliders[i].extents[0]);
         if (prevExtents != component.cubeColliders[i].extents) {
             component.setCubeColliderExtents(i, component.cubeColliders[i].extents);
@@ -1600,6 +1601,12 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
 void drawSphereCollidersList(RigidBodyComponent& component) {
     for (unsigned int i = 0; i < component.sphereColliders.size(); i++) {
         ImGui::PushID(i);
+        float prevExtents = component.sphereColliders[i].radius;
+        ImGui::Text("Sphere Collider Radius:");
+        ImGui::InputFloat("##sphere_radius", &component.sphereColliders[i].radius);
+        if (prevExtents != component.sphereColliders[i].radius) {
+            component.setSphereColliderRadius(i, component.sphereColliders[i].radius);
+        }
         std::string previewStrMask = "type undefined";
         if (component.sphereColliders[i].category & CollisionCategories::CATEGORY1) {
             previewStrMask = "Category 1";
@@ -1668,6 +1675,18 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
 void drawCapsuleCollidersList(RigidBodyComponent& component) {
     for (unsigned int i = 0; i < component.capsuleColliders.size(); i++) {
         ImGui::PushID(i);
+        float prevRadius = component.capsuleColliders[i].radius;
+        float prevHeight = component.capsuleColliders[i].height;
+        ImGui::Text("Capsule Collider Radius:");
+        ImGui::InputFloat("##capsule_radius", &component.capsuleColliders[i].radius);
+        if (prevRadius != component.capsuleColliders[i].radius) {
+            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius, component.capsuleColliders[i].height);
+        }
+        ImGui::Text("Capsule Collider Height:");
+        ImGui::InputFloat("##capsule_height", &component.capsuleColliders[i].height);
+        if (prevHeight != component.capsuleColliders[i].height) {
+            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius, component.capsuleColliders[i].height);
+        }
         std::string previewStrMask = "type undefined";
         if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY1) {
             previewStrMask = "Category 1";

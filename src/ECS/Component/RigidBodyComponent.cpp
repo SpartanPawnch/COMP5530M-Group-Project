@@ -49,6 +49,7 @@ void RigidBodyComponent::createSphereCollider()
     SphereShape* sphereShape = instance->physicsCommon.createSphereShape(1.0);
 
     SphereColliderObject collider;
+    collider.colliderShape = sphereShape;
     collider.shape = ColliderTypes::SPHERE;
     collider.collider = rigidBody->addCollider(sphereShape, transform);
 
@@ -61,6 +62,7 @@ void RigidBodyComponent::createCapsuleCollider()
     CapsuleShape* capsuleShape = instance->physicsCommon.createCapsuleShape(1.0, 3.0);
 
     CapsuleColliderObject collider;
+    collider.colliderShape = capsuleShape;
     collider.shape = ColliderTypes::CAPSULE;
     collider.collider = rigidBody->addCollider(capsuleShape, transform);
 
@@ -256,6 +258,13 @@ void RigidBodyComponent::setMaterialFrictionCoefficient(ColliderTypes type, int 
 
 void RigidBodyComponent::setCubeColliderExtents(int index, glm::vec3 extents) {
     cubeColliders[index].colliderShape->setHalfExtents(Vector3(extents.x, extents.y, extents.z));
+}
+void RigidBodyComponent::setSphereColliderRadius(int index, float radius) {
+    sphereColliders[index].colliderShape->setRadius(radius);
+}
+void RigidBodyComponent::setCapsuleColliderRadiusHeight(int index, float radius, float height) {
+    capsuleColliders[index].colliderShape->setRadius(radius);
+    capsuleColliders[index].colliderShape->setHeight(height);
 }
 
 void RigidBodyComponent::setType(BodyType type) {
