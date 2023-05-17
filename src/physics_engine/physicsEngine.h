@@ -25,8 +25,27 @@ struct ColliderObject {
 	CollisionCategories category;
 	CollisionCategories currentCollideWith;
 	std::vector<CollisionCategories> collidesWith;
-	float materialBounciness;
-	float materialFrictionCoefficient;
+	float materialBounciness=0.4f;
+	float materialFrictionCoefficient=0.2f;
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::quat rotation = glm::quat(1.f, .0f, .0f, .0f);
+};
+
+struct CubeColliderObject : ColliderObject {
+	glm::vec3 extents = glm::vec3(1.0f);
+};
+
+struct SphereColliderObject : ColliderObject {
+	float radius = 1.0f;
+};
+
+struct CapsuleColliderObject : ColliderObject {
+	float radius = 1.0f;
+	float height = 3.0f;
+};
+
+struct MeshColliderObject : ColliderObject {
+	//model descriptor
 };
 
 class PhysicsEngine {

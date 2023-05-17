@@ -1522,11 +1522,283 @@ void drawComponentProps(SkyBoxComponent& component) {
     }
 }
 
+void drawCubeCollidersList(RigidBodyComponent& component) {
+    for (unsigned int i = 0; i < component.cubeColliders.size(); i++) {
+        ImGui::PushID(i);
+        std::string previewStrMask = "type undefined";
+        if (component.cubeColliders[i].category & CollisionCategories::CATEGORY1) {
+            previewStrMask = "Category 1";
+        }
+        else if (component.cubeColliders[i].category & CollisionCategories::CATEGORY2) {
+            previewStrMask = "Category 2";
+        }
+        else if (component.cubeColliders[i].category & CollisionCategories::CATEGORY3) {
+            previewStrMask = "Category 3";
+        }
+        if (ImGui::BeginCombo("##cube_collider_type", previewStrMask.c_str())) {
+            if (ImGui::Selectable("Category 1", component.cubeColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY1);
+            }
+            if (ImGui::Selectable("Category 2", component.cubeColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY2);
+            }
+            if (ImGui::Selectable("Category 3", component.cubeColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY3);
+            }
+            ImGui::EndCombo();
+        }
+        std::string previewStrMaskCollideWith = "type undefined";
+        if (component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
+            previewStrMaskCollideWith = "Category 1";
+        }
+        else if (component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
+            previewStrMaskCollideWith = "Category 2";
+        }
+        else if (component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
+            previewStrMaskCollideWith = "Category 3";
+        }
+        if (ImGui::BeginCombo("##cube_collider_current_type", previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+                component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
+            }
+            if (ImGui::Selectable("Category 2", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+                component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
+            }
+            if (ImGui::Selectable("Category 3", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+                component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add Collision Mask")) {
+            component.setCollisionCollideWithMask(ColliderTypes::CUBE, i, component.cubeColliders[i].currentCollideWith);
+        }
+        for (unsigned int j = 0; j < component.cubeColliders[i].collidesWith.size(); j++) {
+            if (component.cubeColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
+                ImGui::Text("Category 1");
+            }
+            else if (component.cubeColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+                ImGui::Text("Category 2");
+            }
+            else if (component.cubeColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+                ImGui::Text("Category 3");
+            }
+            if (ImGui::Button("Delete")) {
+                component.removeCollisionCollideWithMask(ColliderTypes::CUBE, i, j);
+            }
+        }
+        ImGui::PopID();
+    }
+}
+
+void drawSphereCollidersList(RigidBodyComponent& component) {
+    for (unsigned int i = 0; i < component.sphereColliders.size(); i++) {
+        ImGui::PushID(i);
+        std::string previewStrMask = "type undefined";
+        if (component.sphereColliders[i].category & CollisionCategories::CATEGORY1) {
+            previewStrMask = "Category 1";
+        }
+        else if (component.sphereColliders[i].category & CollisionCategories::CATEGORY2) {
+            previewStrMask = "Category 2";
+        }
+        else if (component.sphereColliders[i].category & CollisionCategories::CATEGORY3) {
+            previewStrMask = "Category 3";
+        }
+        if (ImGui::BeginCombo("##sphere_collider_type", previewStrMask.c_str())) {
+            if (ImGui::Selectable("Category 1", component.sphereColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY1);
+            }
+            if (ImGui::Selectable("Category 2", component.sphereColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY2);
+            }
+            if (ImGui::Selectable("Category 3", component.sphereColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY3);
+            }
+            ImGui::EndCombo();
+        }
+        std::string previewStrMaskCollideWith = "type undefined";
+        if (component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
+            previewStrMaskCollideWith = "Category 1";
+        }
+        else if (component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
+            previewStrMaskCollideWith = "Category 2";
+        }
+        else if (component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
+            previewStrMaskCollideWith = "Category 3";
+        }
+        if (ImGui::BeginCombo("##sphere_collider_current_type", previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+                component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
+            }
+            if (ImGui::Selectable("Category 2", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+                component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
+            }
+            if (ImGui::Selectable("Category 3", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+                component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add Collision Mask")) {
+            component.setCollisionCollideWithMask(ColliderTypes::SPHERE, i, component.sphereColliders[i].currentCollideWith);
+        }
+        for (unsigned int j = 0; j < component.sphereColliders[i].collidesWith.size(); j++) {
+            if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
+                ImGui::Text("Category 1");
+            }
+            else if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+                ImGui::Text("Category 2");
+            }
+            else if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+                ImGui::Text("Category 3");
+            }
+            if (ImGui::Button("Delete")) {
+                component.removeCollisionCollideWithMask(ColliderTypes::SPHERE, i, j);
+            }
+        }
+        ImGui::PopID();
+    }
+}
+
+void drawCapsuleCollidersList(RigidBodyComponent& component) {
+    for (unsigned int i = 0; i < component.capsuleColliders.size(); i++) {
+        ImGui::PushID(i);
+        std::string previewStrMask = "type undefined";
+        if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY1) {
+            previewStrMask = "Category 1";
+        }
+        else if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY2) {
+            previewStrMask = "Category 2";
+        }
+        else if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY3) {
+            previewStrMask = "Category 3";
+        }
+        if (ImGui::BeginCombo("##capsule_collider_type", previewStrMask.c_str())) {
+            if (ImGui::Selectable("Category 1", component.capsuleColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY1);
+            }
+            if (ImGui::Selectable("Category 2", component.capsuleColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY2);
+            }
+            if (ImGui::Selectable("Category 3", component.capsuleColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY3);
+            }
+            ImGui::EndCombo();
+        }
+        std::string previewStrMaskCollideWith = "type undefined";
+        if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
+            previewStrMaskCollideWith = "Category 1";
+        }
+        else if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
+            previewStrMaskCollideWith = "Category 2";
+        }
+        else if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
+            previewStrMaskCollideWith = "Category 3";
+        }
+        if (ImGui::BeginCombo("##capsule_collider_current_type", previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+                component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
+            }
+            if (ImGui::Selectable("Category 2", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+                component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
+            }
+            if (ImGui::Selectable("Category 3", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+                component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add Collision Mask")) {
+            component.setCollisionCollideWithMask(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].currentCollideWith);
+        }
+        for (unsigned int j = 0; j < component.capsuleColliders[i].collidesWith.size(); j++) {
+            if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
+                ImGui::Text("Category 1");
+            }
+            else if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+                ImGui::Text("Category 2");
+            }
+            else if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+                ImGui::Text("Category 3");
+            }
+            if (ImGui::Button("Delete")) {
+                component.removeCollisionCollideWithMask(ColliderTypes::CAPSULE, i, j);
+            }
+        }
+        ImGui::PopID();
+    }
+}
+
+void drawMeshCollidersList(RigidBodyComponent& component) {
+    for (unsigned int i = 0; i < component.meshColliders.size(); i++) {
+        ImGui::PushID(i);
+        std::string previewStrMask = "type undefined";
+        if (component.meshColliders[i].category & CollisionCategories::CATEGORY1) {
+            previewStrMask = "Category 1";
+        }
+        else if (component.meshColliders[i].category & CollisionCategories::CATEGORY2) {
+            previewStrMask = "Category 2";
+        }
+        else if (component.meshColliders[i].category & CollisionCategories::CATEGORY3) {
+            previewStrMask = "Category 3";
+        }
+        if (ImGui::BeginCombo("##mesh_collider_type", previewStrMask.c_str())) {
+            if (ImGui::Selectable("Category 1", component.meshColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY1);
+            }
+            if (ImGui::Selectable("Category 2", component.meshColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY2);
+            }
+            if (ImGui::Selectable("Category 3", component.meshColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY3);
+            }
+            ImGui::EndCombo();
+        }
+        std::string previewStrMaskCollideWith = "type undefined";
+        if (component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
+            previewStrMaskCollideWith = "Category 1";
+        }
+        else if (component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
+            previewStrMaskCollideWith = "Category 2";
+        }
+        else if (component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
+            previewStrMaskCollideWith = "Category 3";
+        }
+        if (ImGui::BeginCombo("##mesh_collider_current_type", previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+                component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
+            }
+            if (ImGui::Selectable("Category 2", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+                component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
+            }
+            if (ImGui::Selectable("Category 3", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+                component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add Collision Mask")) {
+            component.setCollisionCollideWithMask(ColliderTypes::MESH, i, component.meshColliders[i].currentCollideWith);
+        }
+        for (unsigned int j = 0; j < component.meshColliders[i].collidesWith.size(); j++) {
+            if (component.meshColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
+                ImGui::Text("Category 1");
+            }
+            else if (component.meshColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+                ImGui::Text("Category 2");
+            }
+            else if (component.meshColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+                ImGui::Text("Category 3");
+            }
+            if (ImGui::Button("Delete")) {
+                component.removeCollisionCollideWithMask(ColliderTypes::MESH, i, j);
+            }
+        }
+        ImGui::PopID();
+    }
+}
+
 void drawComponentProps(RigidBodyComponent& component) {
     ImGui::InputFloat3("Position", &component.position[0]);
     ImGui::InputFloat4("Rotation", &component.rotation[0]);
     ImGui::InputFloat3("Force", &component.force[0]);
-    if(ImGui::Button("Set Position and Rotation")){
+    if (ImGui::Button("Set Position and Rotation")) {
         component.setPosition();
     }
     if (ImGui::Button("Apply Force")) {
@@ -1535,9 +1807,11 @@ void drawComponentProps(RigidBodyComponent& component) {
     std::string previewStr = "type undefined";
     if (component.bodyType == BodyType::DYNAMIC) {
         previewStr = "Dynamic";
-    } else if (component.bodyType == BodyType::KINEMATIC) {
+    }
+    else if (component.bodyType == BodyType::KINEMATIC) {
         previewStr = "Kinematic";
-    } else if (component.bodyType == BodyType::STATIC) {
+    }
+    else if (component.bodyType == BodyType::STATIC) {
         previewStr = "Static";
     }
     if (ImGui::BeginCombo("RigidBody Type", previewStr.c_str())) {
@@ -1555,102 +1829,22 @@ void drawComponentProps(RigidBodyComponent& component) {
     if (ImGui::Checkbox("Gravity Enabled", &component.gravityEnabled)) {
         component.setGravityEnabled();
     }
-    std::string previewStrCollider = "type undefined";
-    if (component.currentColliderType == ColliderTypes::CUBE) {
-        previewStrCollider = "Cube";
+    if (ImGui::Button("Add Cube Collider")) {
+        component.createCubeCollider();
     }
-    else if (component.currentColliderType == ColliderTypes::SPHERE) {
-        previewStrCollider = "Sphere";
+    if (ImGui::Button("Add Sphere Collider")) {
+        component.createSphereCollider();
     }
-    else if (component.currentColliderType == ColliderTypes::CAPSULE) {
-        previewStrCollider = "Capsule";
+    if (ImGui::Button("Add Capsule Collider")) {
+        component.createCapsuleCollider();
     }
-    else if (component.currentColliderType == ColliderTypes::MESH) {
-        previewStrCollider = "Mesh";
+    if (ImGui::Button("Add Mesh Collider")) {
+        component.createMeshCollider();
     }
-    if (ImGui::BeginCombo("Collider Type", previewStrCollider.c_str())) {
-        if (ImGui::Selectable("Cube", component.currentColliderType == ColliderTypes::CUBE)) {
-            component.currentColliderType = ColliderTypes::CUBE;
-        }
-        if (ImGui::Selectable("Sphere", component.currentColliderType == ColliderTypes::SPHERE)) {
-            component.currentColliderType = ColliderTypes::SPHERE;
-        }
-        if (ImGui::Selectable("Capsule", component.currentColliderType == ColliderTypes::CAPSULE)) {
-            component.currentColliderType = ColliderTypes::CAPSULE;
-        }
-        if (ImGui::Selectable("Mesh", component.currentColliderType == ColliderTypes::MESH)) {
-            component.currentColliderType = ColliderTypes::MESH;
-        }
-        ImGui::EndCombo();
-    }
-    if (ImGui::Button("Add Collider")) {
-        component.addCollider();
-    }
-    for (unsigned int i = 0; i < component.colliders.size(); i++) {
-        ImGui::PushID(i);
-        std::string previewStrMask = "type undefined";
-        if (component.colliders[i].category & CollisionCategories::CATEGORY1) {
-            previewStrMask = "Category 1";
-        }
-        else if (component.colliders[i].category & CollisionCategories::CATEGORY2) {
-            previewStrMask = "Category 2";
-        }
-        else if (component.colliders[i].category & CollisionCategories::CATEGORY3) {
-            previewStrMask = "Category 3";
-        }
-        if (ImGui::BeginCombo("##collider_type", previewStrMask.c_str())) {
-            if (ImGui::Selectable("Category 1", component.colliders[i].category & CollisionCategories::CATEGORY1)) {
-                component.setCollisionMask(i, CollisionCategories::CATEGORY1);
-            }
-            if (ImGui::Selectable("Category 2", component.colliders[i].category & CollisionCategories::CATEGORY2)) {
-                component.setCollisionMask(i, CollisionCategories::CATEGORY2);
-            }
-            if (ImGui::Selectable("Category 3", component.colliders[i].category & CollisionCategories::CATEGORY3)) {
-                component.setCollisionMask(i, CollisionCategories::CATEGORY3);
-            }
-            ImGui::EndCombo();
-        }
-        std::string previewStrMaskCollideWith = "type undefined";
-        if (component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
-            previewStrMaskCollideWith = "Category 1";
-        }
-        else if (component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
-            previewStrMaskCollideWith = "Category 2";
-        }
-        else if (component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
-            previewStrMaskCollideWith = "Category 3";
-        }
-        if (ImGui::BeginCombo("##collider_current_type", previewStrMaskCollideWith.c_str())) {
-            if (ImGui::Selectable("Category 1", component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
-                component.colliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
-            }
-            if (ImGui::Selectable("Category 2", component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
-                component.colliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
-            }
-            if (ImGui::Selectable("Category 3", component.colliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
-                component.colliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
-            }
-            ImGui::EndCombo();
-        }
-        if (ImGui::Button("Add Collision Mask")) {
-            component.setCollisionCollideWithMask(i, component.colliders[i].currentCollideWith);
-        }
-        for (unsigned int j = 0; j < component.colliders[i].collidesWith.size(); j++) {
-            if (component.colliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
-                ImGui::Text("Category 1");
-            }
-            else if (component.colliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
-                ImGui::Text("Category 2");
-            }
-            else if (component.colliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
-                ImGui::Text("Category 3");
-            }
-            if(ImGui::Button("Delete")) {
-                component.removeCollisionCollideWithMask(i, j);
-            }
-        }
-        ImGui::PopID();
-    }
+    drawCubeCollidersList(component);
+    drawSphereCollidersList(component);
+    drawCapsuleCollidersList(component);
+    drawMeshCollidersList(component);
 }
 
 void drawComponentProps(AudioSourceComponent& component) {

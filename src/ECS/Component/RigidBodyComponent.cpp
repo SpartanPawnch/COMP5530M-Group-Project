@@ -21,26 +21,7 @@ void RigidBodyComponent::start() {
 }
 void RigidBodyComponent::update(float dt, EntityState& state) {
 }
-void RigidBodyComponent::addCollider()
-{
-    switch (currentColliderType)
-    {
-    case CUBE:
-        createCubeCollider();
-        break;
-    case SPHERE:
-        createSphereCollider();
-        break;
-    case CAPSULE:
-        createCapsuleCollider();
-        break;
-    case MESH:
-        createMeshCollider();
-        break;
-    default:
-        break;
-    }
-}
+
 void RigidBodyComponent::stop() {
    /* instance->deleteRidigBody(rigidBody);
     delete rigidBody;
@@ -53,73 +34,36 @@ void RigidBodyComponent::createCubeCollider()
     Transform transform = Transform::identity();
     BoxShape* boxShape = instance->physicsCommon.createBoxShape(halfExtents);
 
-    ColliderObject collider;
+    CubeColliderObject collider;
     collider.shape = ColliderTypes::CUBE;
     collider.collider = rigidBody->addCollider(boxShape, transform);
+    collider.collider->getLocalToBodyTransform();
 
-    colliders.push_back(collider);
+    cubeColliders.push_back(collider);
 }
 
 void RigidBodyComponent::createSphereCollider()
 {
     Transform transform = Transform::identity();
-    SphereShape* sphereShape = instance->physicsCommon.createSphereShape(2.0);
+    SphereShape* sphereShape = instance->physicsCommon.createSphereShape(1.0);
 
-    ColliderObject collider;
+    SphereColliderObject collider;
     collider.shape = ColliderTypes::SPHERE;
     collider.collider = rigidBody->addCollider(sphereShape, transform);
 
-    colliders.push_back(collider);
-}
-
-void RigidBodyComponent::setCollisionMask(int index, CollisionCategories mask)
-{
-    colliders[index].collider->setCollisionCategoryBits(mask);
-}
-
-
-void RigidBodyComponent::setCollisionCollideWithMask(int index, CollisionCategories mask)
-{
-    colliders[index].collidesWith.push_back(mask);
-    uint32_t combinedMaskBits = 0;
-    for (uint32_t maskBits : colliders[index].collidesWith) {
-        combinedMaskBits |= maskBits;
-    }
-    colliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
-}
-
-void RigidBodyComponent::removeCollisionCollideWithMask(int index, int maskIndex)
-{
-    if (maskIndex < colliders[index].collidesWith.size()) {
-        colliders[index].collidesWith.erase(colliders[index].collidesWith.begin() + maskIndex);
-    }
-    uint32_t combinedMaskBits = 0;
-    for (uint32_t maskBits : colliders[index].collidesWith) {
-        combinedMaskBits |= maskBits;
-    }
-    colliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
-}
-
-void RigidBodyComponent::setMaterialBounciness(int index, float bounciness)
-{
-    colliders[index].materialBounciness = bounciness;
-}
-
-void RigidBodyComponent::setMaterialFrictionCoefficient(int index, float frictionCoefficient)
-{
-    colliders[index].materialFrictionCoefficient = frictionCoefficient;
+    sphereColliders.push_back(collider);
 }
 
 void RigidBodyComponent::createCapsuleCollider()
 {
     Transform transform = Transform::identity();
-    CapsuleShape* capsuleShape = instance->physicsCommon.createCapsuleShape(1.0, 2.0);
+    CapsuleShape* capsuleShape = instance->physicsCommon.createCapsuleShape(1.0, 3.0);
 
-    ColliderObject collider;
+    CapsuleColliderObject collider;
     collider.shape = ColliderTypes::CAPSULE;
     collider.collider = rigidBody->addCollider(capsuleShape, transform);
 
-    colliders.push_back(collider);
+    capsuleColliders.push_back(collider);
 }
 
 void RigidBodyComponent::createMeshCollider()
@@ -128,11 +72,185 @@ void RigidBodyComponent::createMeshCollider()
     Transform transform = Transform::identity();
     BoxShape* boxShape = instance->physicsCommon.createBoxShape(halfExtents);
 
-    ColliderObject collider;
+    MeshColliderObject collider;
     collider.shape = ColliderTypes::MESH;
     collider.collider = rigidBody->addCollider(boxShape, transform);
 
-    colliders.push_back(collider);
+    meshColliders.push_back(collider);
+}
+
+void RigidBodyComponent::setCollisionMask(ColliderTypes type, int index, CollisionCategories mask)
+{
+    switch (type)
+    {
+    case CUBE:
+        cubeColliders[index].collider->setCollisionCategoryBits(mask);
+        cubeColliders[index].category = mask;
+        break;
+    case SPHERE:
+        sphereColliders[index].collider->setCollisionCategoryBits(mask);
+        sphereColliders[index].category = mask;
+        break;
+    case CAPSULE:
+        capsuleColliders[index].collider->setCollisionCategoryBits(mask);
+        capsuleColliders[index].category = mask;
+        break;
+    case MESH:
+        meshColliders[index].collider->setCollisionCategoryBits(mask);
+        meshColliders[index].category = mask;
+        break;
+    default:
+        break;
+    }
+}
+
+
+void RigidBodyComponent::setCollisionCollideWithMask(ColliderTypes type, int index, CollisionCategories mask)
+{
+    switch (type)
+    {
+    case CUBE:
+    {
+        cubeColliders[index].collidesWith.push_back(mask);
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : cubeColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        cubeColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case SPHERE:
+    {
+        sphereColliders[index].collidesWith.push_back(mask);
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : sphereColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        sphereColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case CAPSULE:
+    {
+        capsuleColliders[index].collidesWith.push_back(mask);
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : capsuleColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        capsuleColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case MESH:
+    {
+        meshColliders[index].collidesWith.push_back(mask);
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : meshColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        meshColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+void RigidBodyComponent::removeCollisionCollideWithMask(ColliderTypes type, int index, int maskIndex)
+{
+    switch (type)
+    {
+    case CUBE:
+    {
+        if (maskIndex < cubeColliders[index].collidesWith.size()) {
+            cubeColliders[index].collidesWith.erase(cubeColliders[index].collidesWith.begin() + maskIndex);
+        }
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : cubeColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        cubeColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case SPHERE:
+    {
+        if (maskIndex < sphereColliders[index].collidesWith.size()) {
+            sphereColliders[index].collidesWith.erase(sphereColliders[index].collidesWith.begin() + maskIndex);
+        }
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : sphereColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        sphereColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case CAPSULE:
+    {
+        if (maskIndex < capsuleColliders[index].collidesWith.size()) {
+            capsuleColliders[index].collidesWith.erase(capsuleColliders[index].collidesWith.begin() + maskIndex);
+        }
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : capsuleColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        capsuleColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    case MESH:
+    {
+        if (maskIndex < meshColliders[index].collidesWith.size()) {
+            meshColliders[index].collidesWith.erase(meshColliders[index].collidesWith.begin() + maskIndex);
+        }
+        uint32_t combinedMaskBits = 0;
+        for (uint32_t maskBits : meshColliders[index].collidesWith) {
+            combinedMaskBits |= maskBits;
+        }
+        meshColliders[index].collider->setCollideWithMaskBits(combinedMaskBits);
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+void RigidBodyComponent::setMaterialBounciness(ColliderTypes type, int index, float bounciness)
+{
+    switch (type)
+    {
+    case CUBE:
+        cubeColliders[index].materialBounciness = bounciness;
+        break;
+    case SPHERE:
+        sphereColliders[index].materialBounciness = bounciness;
+        break;
+    case CAPSULE:
+        capsuleColliders[index].materialBounciness = bounciness;
+        break;
+    case MESH:
+        meshColliders[index].materialBounciness = bounciness;
+        break;
+    default:
+        break;
+    }
+}
+
+void RigidBodyComponent::setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient)
+{
+    switch (type)
+    {
+    case CUBE:
+        cubeColliders[index].materialFrictionCoefficient = frictionCoefficient;
+        break;
+    case SPHERE:
+        sphereColliders[index].materialFrictionCoefficient = frictionCoefficient;
+        break;
+    case CAPSULE:
+        capsuleColliders[index].materialFrictionCoefficient = frictionCoefficient;
+        break;
+    case MESH:
+        meshColliders[index].materialFrictionCoefficient = frictionCoefficient;
+        break;
+    default:
+        break;
+    }
 }
 
 void RigidBodyComponent::setType(BodyType type) {

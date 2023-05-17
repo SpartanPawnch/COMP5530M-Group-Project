@@ -18,16 +18,15 @@ struct RigidBodyComponent : BaseComponent {
     void setPosition();
     void setGravityEnabled();
     void applyForce();
-    void addCollider();
     void createCubeCollider();
     void createSphereCollider();
     void createCapsuleCollider();
     void createMeshCollider();
-    void setCollisionMask(int index, CollisionCategories mask);
-    void setCollisionCollideWithMask(int index, CollisionCategories mask);
-    void removeCollisionCollideWithMask(int index, int maskIndex);
-    void setMaterialBounciness(int index, float bounciness);
-    void setMaterialFrictionCoefficient(int index, float frictionCoefficient);
+    void setCollisionMask(ColliderTypes type, int index, CollisionCategories mask);
+    void setCollisionCollideWithMask(ColliderTypes type, int index, CollisionCategories mask);
+    void removeCollisionCollideWithMask(ColliderTypes type, int index, int maskIndex);
+    void setMaterialBounciness(ColliderTypes type, int index, float bounciness);
+    void setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient);
 
 
     PhysicsEngine* instance;
@@ -37,9 +36,13 @@ struct RigidBodyComponent : BaseComponent {
 
     RigidBody* rigidBody=nullptr;
     glm::vec3 position=glm::vec3(0.0f);
-    glm::quat rotation = glm::quat();
+    glm::quat rotation = glm::quat(1.f, .0f, .0f, .0f);
     glm::vec3 force = glm::vec3(0.0f);
     
-    ColliderTypes currentColliderType;
     std::vector<ColliderObject> colliders;
+    std::vector<CubeColliderObject> cubeColliders;
+    std::vector<SphereColliderObject> sphereColliders;
+    std::vector<CapsuleColliderObject> capsuleColliders;
+    std::vector<MeshColliderObject> meshColliders;
+
 };
