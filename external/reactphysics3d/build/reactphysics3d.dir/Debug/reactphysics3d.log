@@ -1,0 +1,130 @@
+﻿  Building Custom Rule C:/Users/jjpgn/Desktop/groupproject/Project/COMP5530M-Group-Project/external/reactphysics3d/CMakeLists.txt
+  CollisionBody.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  RigidBody.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  DynamicAABBTree.cpp
+  CollisionDispatch.cpp
+  VoronoiSimplex.cpp
+  GJKAlgorithm.cpp
+  SATAlgorithm.cpp
+  SphereVsSphereAlgorithm.cpp
+  CapsuleVsCapsuleAlgorithm.cpp
+  SphereVsCapsuleAlgorithm.cpp
+  SphereVsConvexPolyhedronAlgorithm.cpp
+  CapsuleVsConvexPolyhedronAlgorithm.cpp
+  ConvexPolyhedronVsConvexPolyhedronAlgorithm.cpp
+  NarrowPhaseInput.cpp
+  NarrowPhaseInfoBatch.cpp
+  AABB.cpp
+  ConvexShape.cpp
+  ConvexPolyhedronShape.cpp
+  ConcaveShape.cpp
+  BoxShape.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Generating Code...
+  Compiling...
+  CapsuleShape.cpp
+  CollisionShape.cpp
+  ConvexMeshShape.cpp
+  SphereShape.cpp
+  TriangleShape.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  ConcaveMeshShape.cpp
+  HeightFieldShape.cpp
+  RaycastInfo.cpp
+  Collider.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  TriangleVertexArray.cpp
+  PolygonVertexArray.cpp
+  TriangleMesh.cpp
+  PolyhedronMesh.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  HalfEdgeStructure.cpp
+  ContactManifold.cpp
+  BallAndSocketJoint.cpp
+  ContactPoint.cpp
+  FixedJoint.cpp
+  HingeJoint.cpp
+  Joint.cpp
+  Generating Code...
+  Compiling...
+  SliderJoint.cpp
+  PhysicsCommon.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  ConstraintSolverSystem.cpp
+  ContactSolverSystem.cpp
+  DynamicsSystem.cpp
+  CollisionDetectionSystem.cpp
+  SolveBallAndSocketJointSystem.cpp
+  SolveFixedJointSystem.cpp
+  SolveHingeJointSystem.cpp
+  SolveSliderJointSystem.cpp
+  PhysicsWorld.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Island.cpp
+  Material.cpp
+  OverlappingPairs.cpp
+  Entity.cpp
+  EntityManager.cpp
+  BroadPhaseSystem.cpp
+  Components.cpp
+  CollisionBodyComponents.cpp
+  RigidBodyComponents.cpp
+  Generating Code...
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d\containers\Deque.h(118): warning C4715: 'reactphysics3d::Deque<unsigned int>::getItem': not all control paths return a value
+  Compiling...
+  TransformComponents.cpp
+  ColliderComponents.cpp
+  JointComponents.cpp
+  BallAndSocketJointComponents.cpp
+  FixedJointComponents.cpp
+  HingeJointComponents.cpp
+  SliderJointComponents.cpp
+  CollisionCallback.cpp
+  OverlapCallback.cpp
+  Matrix2x2.cpp
+  Matrix3x3.cpp
+  Quaternion.cpp
+  Transform.cpp
+  Vector2.cpp
+  Vector3.cpp
+  PoolAllocator.cpp
+  SingleFrameAllocator.cpp
+  HeapAllocator.cpp
+  MemoryManager.cpp
+  Profiler.cpp
+  Generating Code...
+  Compiling...
+  DefaultLogger.cpp
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(109,58): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(121,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(167,61): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\include\reactphysics3d/utils/DefaultLogger.h(282,46): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  DebugRenderer.cpp
+  Generating Code...
+  reactphysics3d.vcxproj -> C:\Users\jjpgn\Desktop\groupproject\Project\COMP5530M-Group-Project\external\reactphysics3d\build\Debug\reactphysics3d.lib

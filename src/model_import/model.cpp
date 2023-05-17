@@ -73,7 +73,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
         aiMaterial* material = scene->mMaterials[i];
-        Material mat;
+        MATSYS::Material mat;
         mat.name = material->GetName().C_Str();
 
         defaultMaterialNames.push_back(mat.name);

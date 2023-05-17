@@ -7,3 +7,4 @@ ModelComponent
 SkeletalModelComponent
 LightComponent
 SkyBoxComponent
+RigidBodyComponent

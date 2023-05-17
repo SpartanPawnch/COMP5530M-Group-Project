@@ -11,13 +11,13 @@ MaterialSystem* MaterialSystem::getInstance() {
 bool MaterialSystem::createMaterial(std::string name) {
     if (materials.count(name) > 0) return false;
 
-    Material newMat;
+    MATSYS::Material newMat;
     newMat.name = name;
     materials[name] = newMat;
     return true;
 }
 
-bool MaterialSystem::createMaterialDirectly(Material mat) {
+bool MaterialSystem::createMaterialDirectly(MATSYS::Material mat) {
     if (materials.count(mat.name) > 0) return false;
 
     materials[mat.name] = mat;
@@ -28,14 +28,14 @@ std::string MaterialSystem::getSelectedMaterialName() {
     return materials[selectedMaterial].name;
 }
 
-Material* MaterialSystem::getMaterial(std::string name) {
+MATSYS::Material* MaterialSystem::getMaterial(std::string name) {
     if (materials.count(name) > 0) {
         return &materials[name];
     }
     return nullptr;
 }
 
-Material* MaterialSystem::getSelectedMaterial() {
+MATSYS::Material* MaterialSystem::getSelectedMaterial() {
     return &materials[selectedMaterial];
 }
 
@@ -58,7 +58,7 @@ void MaterialSystem::setTextureFromPath(std::string path, std::shared_ptr<Textur
 
 std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::string& name) {
     if (materials.count(name) > 0 && (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
-        Material mat = materials[name];
+        MATSYS::Material mat = materials[name];
         ActiveMaterial activeMat;
 
         activeMat.name = mat.name;
@@ -87,7 +87,7 @@ std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::
 
 void MaterialSystem::reloadActiveMaterial(const std::string& name) {
     if (activeMaterials.count(name) > 0) {
-        Material mat = materials[name];
+        MATSYS::Material mat = materials[name];
         std::shared_ptr<ActiveMaterial> activeMatPtr = activeMaterials[name].lock();
 
         if (activeMatPtr) {
@@ -118,7 +118,7 @@ std::shared_ptr<ActiveMaterial> MaterialSystem::getActiveMaterial(const std::str
     return activeMaterials[name].lock();
 }
 
-std::shared_ptr<ActiveMaterial> MaterialSystem::loadActiveMaterial(Material material) {
+std::shared_ptr<ActiveMaterial> MaterialSystem::loadActiveMaterial(MATSYS::Material material) {
     if (materials.count(material.name) == 0) {
         materials[material.name] = material;
     }

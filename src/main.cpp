@@ -30,14 +30,17 @@
 #include "asset_import/folders.h"
 #include "asset_import/materials.h"
 #include "model_import/model.h"
+#include "physics_engine/physicsEngine.h"
 #include "../render-engine/RenderManager.h"
 
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
+PhysicsEngine* physicsEngine;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
+PhysicsEngine* PhysicsEngine::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -115,6 +118,9 @@ int main() {
     // Render Engine
     renderManager = RenderManager::getInstance();
 
+    physicsEngine = PhysicsEngine::getInstance();
+    physicsEngine->createWorld();
+
     renderManager->startUp(window);
 
     renderManager->loadScene();
@@ -153,6 +159,13 @@ int main() {
 
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
+
+        if (physicsEngine->isSimulating) {
+            physicsEngine->world->update(current_time - previous_time);
+
+            renderManager->movePhysicsEntities(scene, &renderManager->camera, viewportTexWidth,
+                viewportTexHeight);
+        }
 
         // handle inputs
         previous_time = current_time;

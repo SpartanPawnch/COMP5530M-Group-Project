@@ -1,0 +1,83 @@
+\contentsline {section}{\numberline {1}Introduction}{5}{section.1}%
+\contentsline {section}{\numberline {2}Features}{5}{section.2}%
+\contentsline {section}{\numberline {3}License}{5}{section.3}%
+\contentsline {section}{\numberline {4}Building and installing the library}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Configure and generate the native tool files}{6}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Configure and generate with the command line (Linux and Mac OS X)}{6}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}Configure and generate using the CMake graphical interface (Linux, Mac OS X and Windows)}{7}{subsubsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.2}Building the library}{8}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Building the library using \texttt {make} on the command line (Linux, Mac OS X)}{8}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Building the library with Visual Studio (Windows)}{8}{subsubsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.3}Installing the library}{9}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Installing the library using the \texttt {make} on the command line (Linux, Mac OS X)}{9}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Installing the library on Windows with Visual Studio}{9}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}CMake Options}{10}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Using ReactPhysics3D in your application}{11}{section.5}%
+\contentsline {section}{\numberline {6}The PhysicsCommon object}{13}{section.6}%
+\contentsline {section}{\numberline {7}Memory Management}{14}{section.7}%
+\contentsline {section}{\numberline {8}Physics World}{15}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Creating the Physics World}{16}{subsection.8.1}%
+\contentsline {subsubsection}{\numberline {8.1.1}World settings}{16}{subsubsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.2}Customizing the Physics World}{17}{subsection.8.2}%
+\contentsline {subsubsection}{\numberline {8.2.1}Solver parameters}{17}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.2}Sleeping}{17}{subsubsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.3}Updating the Physics World}{18}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Retrieving contacts}{19}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Destroying the Physics World}{20}{subsection.8.5}%
+\contentsline {section}{\numberline {9}Collision Body}{20}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Creating a Collision Body}{20}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Moving a Collision Body}{21}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Destroying a Collision Body}{21}{subsection.9.3}%
+\contentsline {section}{\numberline {10}Rigid Body}{21}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Creating a Rigid Body}{22}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Type of a Rigid Body (static, kinematic or dynamic)}{22}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Gravity}{23}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Velocity Damping}{23}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}Sleeping}{23}{subsection.10.5}%
+\contentsline {subsection}{\numberline {10.6}Applying Force or Torque to a Rigid Body}{23}{subsection.10.6}%
+\contentsline {subsection}{\numberline {10.7}Updating a Rigid Body}{24}{subsection.10.7}%
+\contentsline {subsection}{\numberline {10.8}Mass, Center of Mass, Inertia Tensor}{26}{subsection.10.8}%
+\contentsline {subsubsection}{\numberline {10.8.1}Mass}{26}{subsubsection.10.8.1}%
+\contentsline {subsubsection}{\numberline {10.8.2}Center of mass}{27}{subsubsection.10.8.2}%
+\contentsline {subsubsection}{\numberline {10.8.3}Inertia Tensor}{27}{subsubsection.10.8.3}%
+\contentsline {subsection}{\numberline {10.9}Restricting linear/angular motion of a Rigid Body}{28}{subsection.10.9}%
+\contentsline {subsection}{\numberline {10.10}Destroying a Rigid Body}{28}{subsection.10.10}%
+\contentsline {section}{\numberline {11}Collider}{28}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Collision Shapes}{29}{subsection.11.1}%
+\contentsline {subsubsection}{\numberline {11.1.1}Box Shape}{29}{subsubsection.11.1.1}%
+\contentsline {subsubsection}{\numberline {11.1.2}Sphere Shape}{30}{subsubsection.11.1.2}%
+\contentsline {subsubsection}{\numberline {11.1.3}Capsule Shape}{30}{subsubsection.11.1.3}%
+\contentsline {subsubsection}{\numberline {11.1.4}Convex Mesh Shape}{31}{subsubsection.11.1.4}%
+\contentsline {subsubsection}{\numberline {11.1.5}Concave Mesh Shape}{33}{subsubsection.11.1.5}%
+\contentsline {subsubsection}{\numberline {11.1.6}Heightfield Shape}{35}{subsubsection.11.1.6}%
+\contentsline {subsection}{\numberline {11.2}Collision filtering}{36}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Material}{38}{subsection.11.3}%
+\contentsline {subsection}{\numberline {11.4}Trigger}{39}{subsection.11.4}%
+\contentsline {section}{\numberline {12}Joints}{39}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Ball and Socket Joint}{39}{subsection.12.1}%
+\contentsline {subsubsection}{\numberline {12.1.1}Cone limit}{40}{subsubsection.12.1.1}%
+\contentsline {subsection}{\numberline {12.2}Hinge Joint}{41}{subsection.12.2}%
+\contentsline {subsubsection}{\numberline {12.2.1}Limits}{41}{subsubsection.12.2.1}%
+\contentsline {subsubsection}{\numberline {12.2.2}Motor}{42}{subsubsection.12.2.2}%
+\contentsline {subsection}{\numberline {12.3}Slider Joint}{43}{subsection.12.3}%
+\contentsline {subsubsection}{\numberline {12.3.1}Limits}{44}{subsubsection.12.3.1}%
+\contentsline {subsubsection}{\numberline {12.3.2}Motor}{45}{subsubsection.12.3.2}%
+\contentsline {subsection}{\numberline {12.4}Fixed Joint}{45}{subsection.12.4}%
+\contentsline {subsection}{\numberline {12.5}Collision between the bodies of a Joint}{46}{subsection.12.5}%
+\contentsline {subsection}{\numberline {12.6}Destroying a Joint}{47}{subsection.12.6}%
+\contentsline {section}{\numberline {13}Ray casting}{47}{section.13}%
+\contentsline {subsection}{\numberline {13.1}Ray casting against multiple bodies}{48}{subsection.13.1}%
+\contentsline {subsubsection}{\numberline {13.1.1}The RaycastCallback class}{48}{subsubsection.13.1.1}%
+\contentsline {subsubsection}{\numberline {13.1.2}Raycast query in the world}{49}{subsubsection.13.1.2}%
+\contentsline {subsection}{\numberline {13.2}Ray casting against a single body}{50}{subsection.13.2}%
+\contentsline {subsection}{\numberline {13.3}Ray casting against the collider of a body}{50}{subsection.13.3}%
+\contentsline {section}{\numberline {14}Testbed application}{51}{section.14}%
+\contentsline {section}{\numberline {15}Receiving Feedback}{51}{section.15}%
+\contentsline {subsection}{\numberline {15.1}Contacts}{52}{subsection.15.1}%
+\contentsline {subsection}{\numberline {15.2}Triggers}{53}{subsection.15.2}%
+\contentsline {section}{\numberline {16}Profiler}{54}{section.16}%
+\contentsline {section}{\numberline {17}Logger}{55}{section.17}%
+\contentsline {section}{\numberline {18}Debug Renderer}{56}{section.18}%
+\contentsline {section}{\numberline {19}Determinism}{57}{section.19}%
+\contentsline {section}{\numberline {20}API Reference Documentation}{58}{section.20}%
+\contentsline {section}{\numberline {21}Issues}{58}{section.21}%

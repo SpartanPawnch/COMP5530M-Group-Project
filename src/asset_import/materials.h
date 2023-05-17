@@ -9,24 +9,26 @@
 #include "images.h"
 #include "folders.h"
 
-struct Material {
-    std::string name="";
+namespace MATSYS {
+    struct Material {
+        std::string name = "";
 
-    glm::vec3 baseColor = glm::vec3(0.2f);
-    glm::vec3 emissiveColor = glm::vec3(0.0f);
+        glm::vec3 baseColor = glm::vec3(0.2f);
+        glm::vec3 emissiveColor = glm::vec3(0.0f);
 
-    float roughness = 1.0f;
-    float metalness = 0.0f;
-    float occlusion = 0.5f;
+        float roughness = 1.0f;
+        float metalness = 0.0f;
+        float occlusion = 0.5f;
 
-    std::string baseColorMap= std::string("");
-    std::string roughnessMap = std::string("");
-    std::string metalnessMap = std::string("");
-    std::string normalMap = std::string("");
-    std::string alphaMap = std::string("");
-    std::string emissiveMap = std::string("");
-    std::string occlusionMap = std::string("");
-};
+        std::string baseColorMap = std::string("");
+        std::string roughnessMap = std::string("");
+        std::string metalnessMap = std::string("");
+        std::string normalMap = std::string("");
+        std::string alphaMap = std::string("");
+        std::string emissiveMap = std::string("");
+        std::string occlusionMap = std::string("");
+    };
+}
 
 struct ActiveMaterial {
     std::string name="";
@@ -59,19 +61,19 @@ public:
     static MaterialSystem* getInstance();
 
     bool createMaterial(std::string name);
-    bool createMaterialDirectly(Material mat);
+    bool createMaterialDirectly(MATSYS::Material mat);
     std::string getSelectedMaterialName();
-    Material* getMaterial(std::string name);
-    Material* getSelectedMaterial();
+    MATSYS::Material* getMaterial(std::string name);
+    MATSYS::Material* getSelectedMaterial();
     void selectMaterial(std::string name);
 
     std::shared_ptr<ActiveMaterial> getActiveMaterial(const std::string& name);
-    std::shared_ptr<ActiveMaterial> loadActiveMaterial(Material material);
+    std::shared_ptr<ActiveMaterial> loadActiveMaterial(MATSYS::Material material);
     void setTextureFromPath(std::string path, std::shared_ptr<TextureDescriptor>& baseColorMap, std::string& uuid);
     std::shared_ptr<ActiveMaterial> createActiveMaterial(const std::string& name);
     void reloadActiveMaterial(const std::string& name);
 
-    std::map<std::string, Material> materials;
+    std::map<std::string, MATSYS::Material> materials;
     std::string selectedMaterial = "";
 
 //private:

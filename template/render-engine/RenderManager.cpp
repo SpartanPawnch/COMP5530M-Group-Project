@@ -16,6 +16,7 @@ RenderManager* RenderManager::getInstance() {
 static GLuint dummyVAO;
 
 void RenderManager::startUp(GLFWwindow* aWindow) {
+    physicsEngine = PhysicsEngine::getInstance();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_MULTISAMPLE);
@@ -288,6 +289,24 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
        {
            runPipeline(Render2DPipeline);
        }*/
+}
+
+void RenderManager::movePhysicsEntities(Scene& scene, Camera* camera, int width, int height) {
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        if (scene.entities[i].components.vecRigidBodyComponent.size() == 0) {
+            continue;
+        }
+        const Transform& transform = scene.entities[i].components.vecRigidBodyComponent[0].rigidBody->getTransform();
+        
+        const Vector3& position = transform.getPosition();
+        const Quaternion& orientation = transform.getOrientation();
+
+        glm::vec3 translation(position.x, position.y, position.z);
+        glm::quat rotation(orientation.w, orientation.x, orientation.y, orientation.z);
+        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(rotation);
+            
+        scene.entities[i].state.runtimeTransform = modelMatrix;
+    }
 }
 
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {

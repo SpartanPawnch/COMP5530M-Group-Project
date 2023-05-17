@@ -16,6 +16,7 @@
 #include "../Component/SkeletalModelComponent.h"
 #include "../Component/LightComponent.h"
 #include "../Component/SkyBoxComponent.h"
+#include "../Component/RigidBodyComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
@@ -27,6 +28,7 @@ struct ComponentStorage{
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     std::vector<LightComponent> vecLightComponent;
     std::vector<SkyBoxComponent> vecSkyBoxComponent;
+    std::vector<RigidBodyComponent> vecRigidBodyComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -105,6 +107,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<RigidBodyComponent>(const RigidBodyComponent& component){
+        vecRigidBodyComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -164,6 +171,13 @@ struct ComponentStorage{
     void start<SkyBoxComponent>(){
         for(unsigned int i=0;i<vecSkyBoxComponent.size();i++){
             vecSkyBoxComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<RigidBodyComponent>(){
+        for(unsigned int i=0;i<vecRigidBodyComponent.size();i++){
+            vecRigidBodyComponent[i].start();
         }
     }
 
@@ -231,6 +245,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void update<RigidBodyComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecRigidBodyComponent.size();i++){
+            vecRigidBodyComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
     static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
         return ComponentLocation::BASECOMPONENT;
     }
@@ -265,5 +286,9 @@ struct ComponentStorage{
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<SkyBoxComponent>(){
         return ComponentLocation::SKYBOXCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<RigidBodyComponent>(){
+        return ComponentLocation::RIGIDBODYCOMPONENT;
     }
 };

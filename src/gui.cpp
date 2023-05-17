@@ -41,11 +41,13 @@
 #include "ECS/Component/ModelComponent.h"
 #include "ECS/Component/SkyBoxComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
+#include "ECS/Component/RigidBodyComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
+#include "physics_engine/physicsEngine.h"
 
 #include "../external/ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
@@ -98,6 +100,8 @@ static MaterialSystem* materialSystem;
 
 // renderer vars
 static RenderManager* renderManager;
+
+static PhysicsEngine* physicsEngine;
 
 // editor vars
 Scene scene;
@@ -216,6 +220,7 @@ GUIManager::GUIManager(GLFWwindow* window) {
     baseWindow = window;
     materialSystem = MaterialSystem::getInstance();
     renderManager = RenderManager::getInstance();
+    physicsEngine = PhysicsEngine::getInstance();
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -827,6 +832,10 @@ inline void drawViewport() {
         ImGui::SameLine();
         if (ImGui::Button("All")) {
             imguizmoOperation = ImGuizmo::UNIVERSAL;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(physicsEngine->isSimulating ? "Pause Simulation" : "Simulate")) {
+            physicsEngine->isSimulating = !physicsEngine->isSimulating;
         }
         ImGui::PopFont();
     }
@@ -1513,6 +1522,10 @@ void drawComponentProps(SkyBoxComponent& component) {
     }
 }
 
+void drawComponentProps(RigidBodyComponent& component) {
+    ImGui::Text("RigidBodyProperties soon");
+}
+
 void drawComponentProps(AudioSourceComponent& component) {
     // clip selector
     std::string previewPath = "";
@@ -1630,7 +1643,7 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     // type selector
     const char* types[] = {"BaseComponent", "TransformComponent", "ScriptComponent",
         "CameraComponent", "AudioSourceComponent", "ModelComponent", "SkeletalModelComponent",
-        "LightComponent", "SkyBoxModelComponent"};
+        "LightComponent", "SkyBoxModelComponent" , "RigidBodyComponent" };
     previewStr =
         (loc.type >= 0 && loc.type < ComponentLocation::COMPTYPE_MAX) ? types[loc.type] : "None";
     if (ImGui::BeginCombo("##typeselector", previewStr.c_str())) {
@@ -1673,6 +1686,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
         break;
     case ComponentLocation::SKYBOXCOMPONENT:
         drawComponentSelector(loc.componentIdx, storage.vecSkyBoxComponent);
+        break;
+    case ComponentLocation::RIGIDBODYCOMPONENT:
+        drawComponentSelector(loc.componentIdx, storage.vecRigidBodyComponent);
         break;
     default:;
     }
@@ -1937,6 +1953,9 @@ inline void drawProperties() {
             // SkyBoxModelComponent
             drawComponentList(scene.selectedEntity->components.vecSkyBoxComponent);
 
+            // SkyBoxModelComponent
+            drawComponentList(scene.selectedEntity->components.vecRigidBodyComponent);
+
             // TransformComponent
             drawComponentList(scene.selectedEntity->components.vecTransformComponent);
 
@@ -1967,6 +1986,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Skybox Component")) {
                     scene.selectedEntity->components.addComponent(SkyBoxComponent());
+                }
+                if (ImGui::MenuItem("Add Rigid Body Component")) {
+                    scene.selectedEntity->components.addComponent(RigidBodyComponent());
                 }
                 if (ImGui::MenuItem("Add Script Component")) {
                     scene.selectedEntity->components.addComponent(ScriptComponent());
@@ -2196,7 +2218,7 @@ inline void drawMaterials() {
 
         // selected material properties
         if (materialSystem->selectedMaterial.size() > 0) {
-            Material* mat = materialSystem->getMaterial(materialSystem->selectedMaterial);
+            MATSYS::Material* mat = materialSystem->getMaterial(materialSystem->selectedMaterial);
 
             static std::vector<assetfolder::AssetDescriptor> textureFiles;
             assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE,

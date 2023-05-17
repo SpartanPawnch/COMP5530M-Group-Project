@@ -38,6 +38,18 @@ set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
 aux_source_directory("${LUADIR}/" LUASRC)
 
+
+# Help CMake to find the installed library on Windows or Mac OS X 
+if(WIN32) 
+  list(APPEND CMAKE_PREFIX_PATH "C:\\Program Files (x86)\\ReactPhysics3D") 
+elseif(APPLE) 
+  list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake/ReactPhysics3D") 
+endif() 
+ 
+# Import the ReactPhysics3D library 
+find_package(ReactPhysics3D REQUIRED) 
+
+
 #setup icon on windows
 if(WIN32)
     set(ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
@@ -67,7 +79,7 @@ add_executable(
 	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp
     src/model_import/bone.cpp src/asset_import/animation.cpp
     ${ICON_RESOURCE}
-)
+ "src/physics_engine/physicsEngine.cpp" "src/ECS/Component/RigidBodyComponent.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -90,7 +102,7 @@ add_subdirectory("external/spdlog")
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
     ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
 )
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog ReactPhysics3D::ReactPhysics3D)
 
 #generate ComponentStorage code if necessary
 add_custom_target(ComponentStorageGen

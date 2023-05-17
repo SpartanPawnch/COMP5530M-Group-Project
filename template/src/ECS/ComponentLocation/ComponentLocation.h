@@ -12,6 +12,7 @@ struct ComponentLocation{
         SKELETALMODELCOMPONENT,
         LIGHTCOMPONENT,
         SKYBOXCOMPONENT,
+        RIGIDBODYCOMPONENT,
         COMPTYPE_MAX
     };
     CompType type;
