@@ -1548,6 +1548,9 @@ void drawComponentProps(RigidBodyComponent& component) {
         }
         ImGui::EndCombo();
     }
+    if (ImGui::Checkbox("Gravity Enabled", &component.gravityEnabled)) {
+        component.setGravityEnabled();
+    }
 }
 
 void drawComponentProps(AudioSourceComponent& component) {

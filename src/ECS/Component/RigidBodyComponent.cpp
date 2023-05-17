@@ -41,4 +41,10 @@ void RigidBodyComponent::setPosition() {
     rigidBody->setAngularVelocity(Vector3(0, 0, 0));
 }
 
+void RigidBodyComponent::setGravityEnabled() {
+    if (rigidBody != nullptr) {
+        rigidBody->enableGravity(gravityEnabled);
+    }
+}
+
 
