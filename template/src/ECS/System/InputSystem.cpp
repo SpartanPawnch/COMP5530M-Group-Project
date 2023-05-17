@@ -32,7 +32,7 @@ void InputSystem::glfw_callback_wrapper(GLFWwindow* window, int key, int scancod
 
 void InputSystem::glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aScanCode, int aAction,
     int) {
-    if (aAction == GLFW_PRESS) {
+    if (aAction == GLFW_PRESS && aKey >= 0 && aKey < GLFW_KEY_LAST + 1) {
         isDown[aKey] = true;
 
         // check for key listening
@@ -52,7 +52,7 @@ void InputSystem::glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aSc
             }
         }
     }
-    else if (aAction == GLFW_RELEASE)
+    else if (aAction == GLFW_RELEASE && aKey >= 0 && aKey < GLFW_KEY_LAST + 1)
         isDown[aKey] = false;
 }
 

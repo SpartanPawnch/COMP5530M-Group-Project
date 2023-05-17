@@ -28,7 +28,7 @@ struct PlayerControllerComponent : BaseComponent {
 
     std::vector<VirtualKey> virtualKeys;
 
-    bool listeningForKey;
+    bool listeningForKey = false;
     unsigned int listeningForKeyIndex;
 
     void addKey();
