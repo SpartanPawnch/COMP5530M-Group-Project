@@ -396,6 +396,7 @@ void Scene::fixDescriptors(int entityUuid, ComponentLocation::CompType deletedTy
 }
 
 void Scene::update(float dt) {
+    updateReferences();
     for (unsigned int i = 0; i < entities.size(); i++) {
         glm::mat4 parentTransform = entities[i].parent < 0
             ? glm::mat4(1.0f)

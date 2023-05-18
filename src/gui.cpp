@@ -1586,13 +1586,13 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
             component.setMaterialFrictionCoefficient(ColliderTypes::CUBE, i,
                 component.cubeColliders[i].materialFrictionCoefficient);
         }
-        ImGui::Text("Local Postion:");
+        ImGui::Text("Local Position:");
         glm::vec3 prevPos = component.cubeColliders[i].position;
         ImGui::InputFloat3("##cube_local_position", &component.cubeColliders[i].position[0]);
         if (prevPos != component.cubeColliders[i].position) {
             component.setLocalColliderPosition(ColliderTypes::CUBE, i);
         }
-        ImGui::Text("Local Postion:");
+        ImGui::Text("Local Rotation:");
         glm::quat prevRot = component.cubeColliders[i].rotation;
         ImGui::InputFloat4("##cube_local_rotation", &component.cubeColliders[i].rotation[0]);
         if (prevRot != component.cubeColliders[i].rotation) {

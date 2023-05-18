@@ -256,6 +256,8 @@ namespace scripting {
             lua_pushliteral(state,
                 "QuatRef:rotateAngleAxis() - wrong number of arguments; "
                 "Usage: QuatRef::rotateAngleAxis(var,deg,x,y,z) or var:rotateAngleAxis(deg,x,y,z)");
+            lua_error(state);
+            return 0;
         }
         lua_getfield(state, 1, "ptr");
         // get pointer
@@ -267,8 +269,40 @@ namespace scripting {
             glm::vec3(lua_tonumber(state, 3), lua_tonumber(state, 4), lua_tonumber(state, 5));
 
         // rotate
-        glm::quat rotation = glm::quat(glm::cos(angle), glm::sin(angle) * axis);
+        glm::quat rotation = glm::quat(glm::cos(angle / 2), glm::sin(angle / 2) * axis);
         *quat = glm::normalize(rotation * (*quat));
+
+        // cleanup
+        lua_settop(state, 0);
+        return 0;
+    }
+
+    int luaQuatRefSetAngleAxis(lua_State* state) {
+        // check argument count
+        int argc = lua_gettop(state);
+        if (argc != 5) {
+            // clear stack
+            lua_settop(state, 0);
+
+            // send error
+            lua_pushliteral(state,
+                "QuatRef:setAngleAxis() - wrong number of arguments; "
+                "Usage: QuatRef.setAngleAxis(var,deg,x,y,z) or var:setAngleAxis(deg,x,y,z)");
+            lua_error(state);
+            return 0;
+        }
+        lua_getfield(state, 1, "ptr");
+        // get pointer
+        glm::quat* quat = (glm::quat*)lua_touserdata(state, -1);
+
+        // get angle and axis
+        float angle = glm::radians(lua_tonumber(state, 2));
+        glm::vec3 axis =
+            glm::vec3(lua_tonumber(state, 3), lua_tonumber(state, 4), lua_tonumber(state, 5));
+
+        // rotate
+        glm::quat rotation = glm::quat(glm::cos(angle / 2), glm::sin(angle / 2) * axis);
+        *quat = rotation;
 
         // cleanup
         lua_settop(state, 0);
@@ -283,6 +317,8 @@ namespace scripting {
         // register set3f op
         lua_pushcfunction(luaState, &luaQuatRefRotateAngleAxis);
         lua_setfield(luaState, -2, "rotateAngleAxis");
+        lua_pushcfunction(luaState, &luaQuatRefSetAngleAxis);
+        lua_setfield(luaState, -2, "setAngleAxis");
         lua_pop(luaState, 1);
     }
 

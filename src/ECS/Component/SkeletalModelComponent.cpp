@@ -9,7 +9,12 @@ SkeletalModelComponent::SkeletalModelComponent() {
     uuid = baseUuid++;
     currentTime = 0.0;
     currentLoopCount = 0;
-    isPlaying = false;
+    isPlaying =
+#ifdef ONO_ENGINE_ONLY
+        false;
+#else
+        true;
+#endif
     currentNode = nullptr;
     selectedNode = nullptr;
     nextNode = "";
@@ -29,7 +34,12 @@ SkeletalModelComponent::SkeletalModelComponent(const std::string& _name, const i
     baseUuid = std::max(baseUuid, _uuid + 1);
     currentTime = 0.0;
     currentLoopCount = 0;
-    isPlaying = false;
+    isPlaying =
+#ifdef ONO_ENGINE_ONLY
+        false;
+#else
+        true;
+#endif
     currentNode = nullptr;
     selectedNode = nullptr;
     nextNode = "";
