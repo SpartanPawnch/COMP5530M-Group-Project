@@ -59,9 +59,10 @@ void PlayerControllerComponent::update(float dt, EntityState& state) {
                     actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
             (*rigidBodies)[i].applyForce();
             if (keepUpright) {
-                glm::quat rot = (*rigidBodies)[i].rotation;
-                (*rigidBodies)[i].rotation =
-                    glm::normalize(glm::quat(rot.w, .0f, rot.x + rot.y + rot.z, .0f));
+                // TODO replace with active rotation
+                // glm::quat rot = (*rigidBodies)[i].rotation;
+                // (*rigidBodies)[i].rotation =
+                //     glm::normalize(glm::quat(rot.w, .0f, rot.x + rot.y + rot.z, .0f));
                 (*rigidBodies)[i].updateRotation();
             }
         }

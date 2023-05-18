@@ -443,6 +443,71 @@ static int luaHandleCollision(lua_State* state) {
     c->collidedAsBody2 = false;
     return 1;
 }
+
+static int luaGetVelocity(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:getVelocity() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent:getVelocity(var) or var:getVelocity()");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Vector3 res = c->rigidBody->getLinearVelocity();
+
+    lua_settop(state, 0);
+    lua_createtable(state, 0, 0);
+    lua_pushnumber(state, res.x);
+    lua_setfield(state, -2, "x");
+    lua_pushnumber(state, res.y);
+    lua_setfield(state, -2, "y");
+    lua_pushnumber(state, res.z);
+    lua_setfield(state, -2, "z");
+    return 1;
+}
+
+static int luaSetVelocity(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 4) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:setVelocity() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent:setVelocity(var,x,y,z) or var:setVelocity(x,y,z)");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Vector3 velocity =
+        Vector3(lua_tonumber(state, 2), lua_tonumber(state, 3), lua_tonumber(state, 4));
+
+    c->rigidBody->setLinearVelocity(velocity);
+
+    lua_settop(state, 0);
+    return 0;
+}
+
 void RigidBodyComponent::registerLuaMetatable() {
     lua_State* state = scripting::getState();
     luaL_newmetatable(state, componentMT);
@@ -451,6 +516,10 @@ void RigidBodyComponent::registerLuaMetatable() {
     lua_setfield(state, -2, "__index");
     lua_pushcfunction(state, &luaHandleCollision);
     lua_setfield(state, -2, "handleCollision");
+    lua_pushcfunction(state, &luaGetVelocity);
+    lua_setfield(state, -2, "getVelocity");
+    lua_pushcfunction(state, &luaSetVelocity);
+    lua_setfield(state, -2, "setVelocity");
     lua_pop(state, 1);
 }
 
