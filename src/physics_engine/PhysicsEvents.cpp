@@ -1,7 +1,9 @@
 #include "PhysicsEvents.h"
 #include "../ECS/Component/RigidBodyComponent.h"
+#include <iostream>
 
 void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackData) {
+    std::cout << "contact detected" << std::endl;
     for (uint p = 0; p < callbackData.getNbContactPairs(); p++) {
 
         CollisionCallback::ContactPair contactPair = callbackData.getContactPair(p);
