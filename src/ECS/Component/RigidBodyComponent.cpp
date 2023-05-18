@@ -3,11 +3,12 @@
 static int baseUuid = 0;
 
 RigidBodyComponent::RigidBodyComponent() {
-    name = "Skybox Component";
+    name = "RigidBody Component";
     uuid = baseUuid++;
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
+    rigidBody->setUserData(this);
 }
 RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid) {
     name = _name;

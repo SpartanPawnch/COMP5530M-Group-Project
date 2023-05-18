@@ -14,6 +14,8 @@ void PhysicsEngine::createWorld()
 	settings.gravity = Vector3(0, -9.81, 0);
 
 	world = physicsCommon.createPhysicsWorld(settings);
+	physicsEvents = new PhysicsEvents();
+	world->setEventListener(physicsEvents);
 }
 
 RigidBody* PhysicsEngine::createRigidBody()

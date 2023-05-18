@@ -51,4 +51,6 @@ struct RigidBodyComponent : BaseComponent {
     std::vector<CapsuleColliderObject> capsuleColliders;
     std::vector<MeshColliderObject> meshColliders;
 
+    bool collidedAsBody1 = false;
+    bool collidedAsBody2 = false;
 };

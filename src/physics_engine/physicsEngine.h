@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include "../asset_import/model.h"
+#include "PhysicsEvents.h"
 
 using namespace reactphysics3d;
 
@@ -63,6 +64,7 @@ public:
 	static PhysicsEngine* instance;
 	static PhysicsEngine* getInstance();
 	void createWorld();
+	PhysicsEvents* physicsEvents;
 
 	RigidBody* createRigidBody();
 	RigidBody* createRigidBody(glm::vec3 p, glm::quat r);
