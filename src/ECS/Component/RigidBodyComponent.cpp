@@ -314,6 +314,86 @@ void RigidBodyComponent::setPosition() {
     rigidBody->setAngularVelocity(Vector3(0, 0, 0));
 }
 
+void RigidBodyComponent::setLocalColliderPosition(ColliderTypes type, int index) {
+    switch (type)
+    {
+    case CUBE:
+    {
+        Transform transform = cubeColliders[index].collider->getLocalToBodyTransform();
+        glm::vec3 pos = cubeColliders[index].position;
+        transform.setPosition(Vector3(pos.x, pos.y, pos.z));
+        cubeColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case SPHERE:
+    {
+        Transform transform = sphereColliders[index].collider->getLocalToBodyTransform();
+        glm::vec3 pos = sphereColliders[index].position;
+        transform.setPosition(Vector3(pos.x, pos.y, pos.z));
+        sphereColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case CAPSULE:
+    {
+        Transform transform = capsuleColliders[index].collider->getLocalToBodyTransform();
+        glm::vec3 pos = capsuleColliders[index].position;
+        transform.setPosition(Vector3(pos.x, pos.y, pos.z));
+        capsuleColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case MESH:
+    {
+        Transform transform = meshColliders[index].collider->getLocalToBodyTransform();
+        glm::vec3 pos = meshColliders[index].position;
+        transform.setPosition(Vector3(pos.x, pos.y, pos.z));
+        meshColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void RigidBodyComponent::setLocalColliderRotation(ColliderTypes type, int index) {
+    switch (type)
+    {
+    case CUBE:
+    {
+        Transform transform = cubeColliders[index].collider->getLocalToBodyTransform();
+        glm::quat rot = cubeColliders[index].rotation;
+        transform.setOrientation(Quaternion(rot.x, rot.y, rot.z, rot.w));
+        cubeColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case SPHERE:
+    {
+        Transform transform = sphereColliders[index].collider->getLocalToBodyTransform();
+        glm::quat rot = sphereColliders[index].rotation;
+        transform.setOrientation(Quaternion(rot.x, rot.y, rot.z, rot.w));
+        sphereColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case CAPSULE:
+    {
+        Transform transform = capsuleColliders[index].collider->getLocalToBodyTransform();
+        glm::quat rot = capsuleColliders[index].rotation;
+        transform.setOrientation(Quaternion(rot.x, rot.y, rot.z, rot.w));
+        capsuleColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    case MESH:
+    {
+        Transform transform = meshColliders[index].collider->getLocalToBodyTransform();
+        glm::quat rot = meshColliders[index].rotation;
+        transform.setOrientation(Quaternion(rot.x, rot.y, rot.z, rot.w));
+        meshColliders[index].collider->setLocalToBodyTransform(transform);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 void RigidBodyComponent::setGravityEnabled() {
     if (rigidBody != nullptr) {
         rigidBody->enableGravity(gravityEnabled);

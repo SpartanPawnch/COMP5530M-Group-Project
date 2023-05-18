@@ -27,6 +27,8 @@ struct RigidBodyComponent : BaseComponent {
     void removeCollisionCollideWithMask(ColliderTypes type, int index, int maskIndex);
     void setMaterialBounciness(ColliderTypes type, int index, float bounciness);
     void setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient);
+    void setLocalColliderPosition(ColliderTypes type, int index);
+    void setLocalColliderRotation(ColliderTypes type, int index);
 
     void setCubeColliderExtents(int index, glm::vec3 extents);
     void setSphereColliderRadius(int index, float radius);

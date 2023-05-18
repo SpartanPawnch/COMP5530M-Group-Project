@@ -1543,6 +1543,18 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
         if (prevBounciness != component.cubeColliders[i].materialFrictionCoefficient) {
             component.setMaterialFrictionCoefficient(ColliderTypes::CUBE, i, component.cubeColliders[i].materialFrictionCoefficient);
         }
+        ImGui::Text("Local Postion:");
+        glm::vec3 prevPos = component.cubeColliders[i].position;
+        ImGui::InputFloat3("##cube_local_position", &component.cubeColliders[i].position[0]);
+        if (prevPos != component.cubeColliders[i].position) {
+            component.setLocalColliderPosition(ColliderTypes::CUBE, i);
+        }
+        ImGui::Text("Local Postion:");
+        glm::quat prevRot = component.cubeColliders[i].rotation;
+        ImGui::InputFloat4("##cube_local_rotation", &component.cubeColliders[i].rotation[0]);
+        if (prevRot != component.cubeColliders[i].rotation) {
+            component.setLocalColliderRotation(ColliderTypes::CUBE, i);
+        }
         ImGui::Text("Cube Collider Category:");
         std::string previewStrMask = "type undefined";
         if (component.cubeColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1630,6 +1642,18 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
         ImGui::InputFloat("##sphere_material_friction", &component.sphereColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.sphereColliders[i].materialFrictionCoefficient) {
             component.setMaterialFrictionCoefficient(ColliderTypes::SPHERE, i, component.sphereColliders[i].materialFrictionCoefficient);
+        }
+        ImGui::Text("Local Postion:");
+        glm::vec3 prevPos = component.sphereColliders[i].position;
+        ImGui::InputFloat3("##sphere_local_position", &component.sphereColliders[i].position[0]);
+        if (prevPos != component.sphereColliders[i].position) {
+            component.setLocalColliderPosition(ColliderTypes::SPHERE, i);
+        }
+        ImGui::Text("Local Postion:");
+        glm::quat prevRot = component.sphereColliders[i].rotation;
+        ImGui::InputFloat4("##sphere_local_rotation", &component.sphereColliders[i].rotation[0]);
+        if (prevRot != component.sphereColliders[i].rotation) {
+            component.setLocalColliderRotation(ColliderTypes::SPHERE, i);
         }
         std::string previewStrMask = "type undefined";
         if (component.sphereColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1722,6 +1746,18 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
         ImGui::InputFloat("##capsule_material_friction", &component.capsuleColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.capsuleColliders[i].materialFrictionCoefficient) {
             component.setMaterialFrictionCoefficient(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].materialFrictionCoefficient);
+        }
+        ImGui::Text("Local Postion:");
+        glm::vec3 prevPos = component.capsuleColliders[i].position;
+        ImGui::InputFloat3("##capsule_local_position", &component.capsuleColliders[i].position[0]);
+        if (prevPos != component.capsuleColliders[i].position) {
+            component.setLocalColliderPosition(ColliderTypes::CAPSULE, i);
+        }
+        ImGui::Text("Local Postion:");
+        glm::quat prevRot = component.capsuleColliders[i].rotation;
+        ImGui::InputFloat4("##capsule_local_rotation", &component.capsuleColliders[i].rotation[0]);
+        if (prevRot != component.capsuleColliders[i].rotation) {
+            component.setLocalColliderRotation(ColliderTypes::CAPSULE, i);
         }
         std::string previewStrMask = "type undefined";
         if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1837,6 +1873,18 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
         ImGui::InputFloat("##mesh_material_friction", &component.meshColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.meshColliders[i].materialFrictionCoefficient) {
             component.setMaterialFrictionCoefficient(ColliderTypes::MESH, i, component.meshColliders[i].materialFrictionCoefficient);
+        }
+        ImGui::Text("Local Postion:");
+        glm::vec3 prevPos = component.meshColliders[i].position;
+        ImGui::InputFloat3("##mesh_local_position", &component.meshColliders[i].position[0]);
+        if (prevPos != component.meshColliders[i].position) {
+            component.setLocalColliderPosition(ColliderTypes::MESH, i);
+        }
+        ImGui::Text("Local Postion:");
+        glm::quat prevRot = component.meshColliders[i].rotation;
+        ImGui::InputFloat4("##mesh_local_rotation", &component.meshColliders[i].rotation[0]);
+        if (prevRot != component.meshColliders[i].rotation) {
+            component.setLocalColliderRotation(ColliderTypes::MESH, i);
         }
         std::string previewStrMask = "type undefined";
         if (component.meshColliders[i].category & CollisionCategories::CATEGORY1) {
