@@ -1018,7 +1018,7 @@ void RenderManager::runTexturePipeline() {
     glUniform1f(getPipeline(TexturePipeline)->getGammaID(), gammaValue);
     glUniform1i(getPipeline(TexturePipeline)->getNumLightsID(),
         static_cast<int>(this->lights.size()));
-    std::cout << this->lights.size() << std::endl;
+    // std::cout << this->lights.size() << std::endl;
 
     for (std::size_t i = 0; i < lights.size(); i++) {
         glUniform3f(getPipeline(TexturePipeline)->getLightPosID(i), lights[i].getPosition().x,

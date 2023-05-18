@@ -16,6 +16,7 @@ struct RigidBodyComponent : BaseComponent {
 
     void setType(BodyType type);
     void setPosition();
+    void updateRotation();
     void setGravityEnabled();
     void applyForce();
     void createCubeCollider();

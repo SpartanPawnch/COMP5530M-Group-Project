@@ -483,6 +483,9 @@ void loadLevel(const char* path, Scene& scene) {
                 else if (strcmp(jsonComponent["type"].GetString(), "PlayerControllerComponent") ==
                     0) {
                     PlayerControllerComponent controls(name, uuid);
+                    if (jsonComponent.HasMember("keepUpright"))
+                        controls.keepUpright = jsonComponent["keepUpright"].GetBool();
+
                     auto const virtualKeys = jsonComponent["virtualKeys"].GetArray();
                     for (int j = 0; j < virtualKeys.Size(); j++) {
                         controls.addKey();
@@ -1125,6 +1128,9 @@ static void saveComponent(const PlayerControllerComponent& component,
 
     writer.Key("type");
     writer.String("PlayerControllerComponent");
+
+    writer.Key("keepUpright");
+    writer.Bool(component.keepUpright);
 
     writer.Key("virtualKeys");
     writer.StartArray();

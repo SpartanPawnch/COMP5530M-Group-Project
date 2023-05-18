@@ -100,6 +100,9 @@ headerFile:write([[
     //get raw pointer using component loc
     void* getProtectedPtr(const ComponentLocation& loc);
 
+    //register metatables
+    static void registerMetatables();
+
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
@@ -209,6 +212,18 @@ end
 
 sourceFile:write("}\n")
 
+-- create registerMetatables method
+sourceFile:write([[
+void ComponentStorage::registerMetatables(){
+]])
+
+for _, type in ipairs(types) do
+	sourceFile:write("    " .. type .. [[::registerLuaMetatable();
+]])
+end
+
+sourceFile:write("}\n")
+
 -- create getProtectedPtr method
 sourceFile:write([[
 void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
@@ -279,6 +294,29 @@ compLocationFile:write([[
 ]])
 compLocationFile:close()
 
+-- code generation for component selector gui
+local guiStrings = io.open("src/gui-typestrings.generated", "w")
+assert(guiStrings, "Failed to open gui-typestrings.generated for writing")
+for i, type in ipairs(types) do
+	guiStrings:write('"' .. type .. '"')
+	if i < #types then
+		guiStrings:write(",")
+	end
+end
+guiStrings:close()
+
+local guiCases = io.open("src/gui-typecases.generated", "w")
+assert(guiCases, "Failed to open gui-typecases.generated for writing")
+for _, type in ipairs(types) do
+	guiCases:write([[
+case ComponentLocation::]] .. string.upper(type) .. [[:
+    drawComponentSelector(loc.componentIdx,storage.vec]] .. type .. [[);
+    break;
+]])
+end
+guiCases:close()
+
+-- update cache
 cacheFile = io.open("src/ECS/ComponentStorage/codegen.cache", "w")
 if cacheFile then
 	cacheFile:write(datemodified)

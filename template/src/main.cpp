@@ -33,10 +33,12 @@
 // set renderEngine instance to nullptr initially
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
+PhysicsEngine* physicsEngine;
 InputSystem* inputSystem;
 
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
+PhysicsEngine* PhysicsEngine::instance = nullptr;
 InputSystem* InputSystem::instance = nullptr;
 
 int main() {
@@ -97,6 +99,9 @@ int main() {
     // Render Engine
     renderManager = RenderManager::getInstance();
 
+    physicsEngine = PhysicsEngine::getInstance();
+    physicsEngine->createWorld();
+
     renderManager->startUp(window);
 
     renderManager->loadScene();
@@ -143,6 +148,12 @@ int main() {
 
     // register lua stuff
     scene.registerLuaTable();
+    ComponentStorage::registerMetatables();
+
+    const float timeStep = 1.0f / 60.0f;
+    long double accumulator = 0;
+
+    physicsEngine->isSimulating = true;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -152,6 +163,24 @@ int main() {
 
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
+
+        if (physicsEngine->isSimulating) {
+
+            // Add the time difference in the accumulator
+            accumulator += current_time - previous_time;
+
+            // While there is enough accumulated time to take
+            // one or several physics steps
+            while (accumulator >= timeStep) {
+
+                // Update the Dynamics world with a constant time step
+                physicsEngine->world->update(timeStep);
+                // Decrease the accumulated time
+                accumulator -= timeStep;
+            }
+
+            renderManager->movePhysicsEntities(scene, &renderManager->camera, width, height);
+        }
 
         // handle inputs
         previous_time = current_time;

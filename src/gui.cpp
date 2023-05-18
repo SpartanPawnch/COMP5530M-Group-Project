@@ -2404,6 +2404,8 @@ void drawComponentProps(PlayerControllerComponent& component) {
     if (ImGui::Button("Add Key")) {
         component.addKey();
     }
+    ImGui::SameLine();
+    ImGui::Checkbox("Keep Upright", &component.keepUpright);
     for (unsigned int i = 0; i < component.virtualKeys.size(); i++) {
         ImGui::PushID(i);
         const char* items[] = {"Move Forward", "Move Backwards", "Move Left", "Move Right",
