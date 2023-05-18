@@ -113,7 +113,7 @@ void loadLevel(const char* path, Scene& scene) {
         assert(doc.HasMember("materials"));
         auto jsonMaterials = doc["materials"].GetArray();
         for (unsigned int i = 0; i < jsonMaterials.Size(); i++) {
-            Material mat;
+            MATSYS::Material mat;
             mat.name = jsonMaterials[i]["name"].GetString();
             mat.baseColor = getVec3(jsonMaterials[i]["baseColor"]);
             mat.emissiveColor = getVec3(jsonMaterials[i]["emissiveColor"]);

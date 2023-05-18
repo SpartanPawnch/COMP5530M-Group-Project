@@ -18,6 +18,9 @@ namespace model {
         std::string getUuid();
         //unsigned int getTexture(int meshIndex);
         unsigned int getIndexCount(int meshIndex);
+        unsigned int getVertexCount(int meshIndex);
+        std::vector<glm::vec3> getVertices(int meshIndex);
+        std::vector<unsigned int> getIndices(int meshIndex);
         unsigned int getMeshCount();
         std::map<std::string, Bone> getBoneInfoMap();
         std::string getMeshName(int meshIndex);

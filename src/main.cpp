@@ -30,17 +30,20 @@
 #include "asset_import/folders.h"
 #include "asset_import/materials.h"
 #include "model_import/model.h"
+#include "physics_engine/physicsEngine.h"
 #include "../render-engine/RenderManager.h"
 #include "ECS/System/InputSystem.h"
 
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
+PhysicsEngine* physicsEngine;
 
 InputSystem* inputSystem;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
+PhysicsEngine* PhysicsEngine::instance = nullptr;
 
 // set InputSystem to nullptr intially
 InputSystem* InputSystem::instance = nullptr;
@@ -121,6 +124,9 @@ int main() {
     // Render Engine
     renderManager = RenderManager::getInstance();
 
+    physicsEngine = PhysicsEngine::getInstance();
+    physicsEngine->createWorld();
+
     renderManager->startUp(window);
 
     renderManager->loadScene();
@@ -158,6 +164,8 @@ int main() {
     // register lua stuff
     scene.registerLuaTable();
     ComponentStorage::registerMetatables();
+    const float timeStep = 1.0f / 60.0f;
+    long double accumulator = 0;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -167,6 +175,25 @@ int main() {
 
         double current_time = glfwGetTime();
         renderManager->deltaTime = current_time - previous_time;
+
+        if (physicsEngine->isSimulating) {
+
+            // Add the time difference in the accumulator
+            accumulator += current_time - previous_time;
+
+            // While there is enough accumulated time to take
+            // one or several physics steps
+            while (accumulator >= timeStep) {
+
+                // Update the Dynamics world with a constant time step
+                physicsEngine->world->update(timeStep);
+                // Decrease the accumulated time
+                accumulator -= timeStep;
+            }
+
+            renderManager->movePhysicsEntities(scene, &renderManager->camera, viewportTexWidth,
+                viewportTexHeight);
+        }
 
         // handle inputs
         previous_time = current_time;
@@ -207,6 +234,9 @@ int main() {
         // draw scene
         renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,
             viewportTexHeight);
+
+        if (scene.showColliders)
+            renderManager->renderColliders(scene, viewportTexWidth, viewportTexHeight);
 
         // draw cam preview frustum
         renderManager->renderCamPreview(scene, width, height);

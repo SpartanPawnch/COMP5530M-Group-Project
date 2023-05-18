@@ -5,6 +5,7 @@ struct ComponentLocation{
     enum CompType{
         BASECOMPONENT,
         PLAYERCONTROLLERCOMPONENT,
+        RIGIDBODYCOMPONENT,
         SCRIPTCOMPONENT,
         CAMERACOMPONENT,
         AUDIOSOURCECOMPONENT,

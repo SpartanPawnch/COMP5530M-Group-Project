@@ -12,6 +12,8 @@
 #include "LightSource.h"
 #include "../src/model_import/model.h"
 
+#include "../src/physics_engine/physicsEngine.h"
+
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
@@ -32,6 +34,8 @@ enum Pipeline {
     IconPipeline = 12,
     IconIDPipeline = 13,
     AnimationIDPipeline = 14,
+    CubeColliderPipeline = 15,
+    SphereColliderPipeline = 16,
     Pipeline_MAX
 };
 
@@ -94,6 +98,7 @@ class RenderManager {
   public:
     // members
     // TODO
+    PhysicsEngine* physicsEngine = nullptr;
     Camera camera = Camera(glm::vec3(.0f, 2.0f, 8.0f), glm::vec3(.0f, -2.0f, -8.0f));
     Camera previewCamera = Camera(glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, .0f, -5.0f));
 
@@ -144,11 +149,13 @@ class RenderManager {
     void loadScene();
     void renderScene(Camera* camera, GLFWwindow* window);
     void renderSceneRefactor(Camera* camera, int width, int height);
+    void movePhysicsEntities(Scene& scene, Camera* camera, int width, int height);
     void renderEntities(const Scene& scene, Camera* camera, int width, int height);
     void renderSkybox(const Scene& scene, Camera* camera, int width, int height);
     void renderGrid(Camera* camera, int width, int height);
     void renderEntitiesID(const Scene& scene, Camera* camera, int width, int height);
     void renderCamPreview(const Scene& scene, int width, int height);
+    void renderColliders(const Scene& scene, int width, int height);
 
     void updateMatrices(int* width, int* height);
 

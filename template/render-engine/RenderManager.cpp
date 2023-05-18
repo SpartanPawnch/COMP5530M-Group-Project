@@ -1,4 +1,5 @@
 #include "RenderManager.h"
+#include <glm/gtx/transform.hpp>
 
 RenderManager* RenderManager::getInstance() {
     if (instance == nullptr) {
@@ -16,6 +17,7 @@ RenderManager* RenderManager::getInstance() {
 static GLuint dummyVAO;
 
 void RenderManager::startUp(GLFWwindow* aWindow) {
+    physicsEngine = PhysicsEngine::getInstance();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_MULTISAMPLE);
@@ -183,6 +185,9 @@ void RenderManager::loadScene() {
     const char* entIDFragPath = "assets/shaders/entID.frag";
     const char* iconIDVertexPath = "assets/shaders/iconID.vert";
     const char* iconIDFragPath = "assets/shaders/iconID.frag";
+    const char* cubeColliderVertexPath = "assets/shaders/cubewire.vert";
+    const char* sphereColliderVertexPath = "assets/shaders/spherewire.vert";
+    const char* colliderFragPath = "assets/shaders/collider.frag";
 
     // TODO: Should probably be called in the Constructor
     // Should be made in the order of Enum Pipeline
@@ -197,15 +202,7 @@ void RenderManager::loadScene() {
     addMeshToPipeline(std::vector<Pipeline>{ColourPipeline}, cubeBuffer, EBO, VAO1);
 
     addPipeline(TexturePipeline, texVertexPath, texFragPath);
-    // std::cout << "we have " << model.meshes.size() << " meshes in model\n";
-    // for (std::size_t i = 0; i < model.meshes[0].vertices.size(); i++)
-    //{
-    //     std::cout << model.meshes[0].vertices[i].position.x << " "
-    //         << model.meshes[0].vertices[i].position.y << " "
-    //         << model.meshes[0].vertices[i].position.z << std::endl;
-    // }
-    // std::cout << "We have " << model.meshes[0].indices.size() << " indices and " <<
-    // model.meshes[0].indices.size() / 3 << "triangles";
+
     GLuint VAO2;
     glGenVertexArrays(1, &VAO2);
     glBindVertexArray(VAO2);
@@ -226,6 +223,8 @@ void RenderManager::loadScene() {
     addPipeline(IconPipeline, iconVertPath, iconFragPath);
     addPipeline(IconIDPipeline, iconIDVertexPath, iconIDFragPath);
     addPipeline(AnimationIDPipeline, AnimatedVertexPath, entIDFragPath);
+    addPipeline(CubeColliderPipeline, cubeColliderVertexPath, colliderFragPath);
+    addPipeline(SphereColliderPipeline, sphereColliderVertexPath, colliderFragPath);
 
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
@@ -288,6 +287,29 @@ void RenderManager::renderSceneRefactor(Camera* camera, int width, int height) {
        {
            runPipeline(Render2DPipeline);
        }*/
+}
+
+void RenderManager::movePhysicsEntities(Scene& scene, Camera* camera, int width, int height) {
+    for (unsigned int i = 0; i < scene.entities.size(); i++) {
+        if (scene.entities[i].components.vecRigidBodyComponent.size() == 0) {
+            continue;
+        }
+        const Transform& transform =
+            scene.entities[i].components.vecRigidBodyComponent[0].rigidBody->getTransform();
+
+        const Vector3& position = transform.getPosition();
+        const Quaternion& orientation = transform.getOrientation();
+
+        glm::vec3 translation(position.x, position.y, position.z);
+        glm::quat rotation(orientation.w, orientation.x, orientation.y, orientation.z);
+        // glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation) *
+        // glm::toMat4(rotation);
+
+        // scene.entities[i].state.runtimeTransform = modelMatrix;
+
+        scene.entities[i].state.position = translation;
+        scene.entities[i].state.rotation = rotation;
+    }
 }
 
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
@@ -776,6 +798,65 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
     runGridPipeline();
 }
 
+void RenderManager::renderColliders(const Scene& scene, int width, int height) {
+    viewMatrix = camera.getViewMatrix();
+    float aspect = float(width) / height;
+    aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
+                 !(aspect != aspect))
+        ? aspect
+        : 1.f;
+
+    projectionMatrix = glm::perspective(glm::radians(camera.fov / 2.f), aspect, .01f, 100.0f);
+
+    // cube colliders
+    glUseProgram(getPipeline(CubeColliderPipeline)->getProgram());
+    glUniformMatrix4fv(getPipeline(CubeColliderPipeline)->getViewID(), 1, false, &viewMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(CubeColliderPipeline)->getProjectionID(), 1, GL_FALSE,
+        &projectionMatrix[0][0]);
+
+    for (size_t i = 0; i < scene.entities.size(); i++) {
+        for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
+            const RigidBodyComponent& rigidBody =
+                scene.entities[i].components.vecRigidBodyComponent[j];
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            for (size_t k = 0; k < rigidBody.cubeColliders.size(); k++) {
+                modelMatrix = baseTransform * glm::translate(rigidBody.cubeColliders[k].position) *
+                    glm::mat4_cast(rigidBody.cubeColliders[k].rotation) *
+                    glm::scale(rigidBody.cubeColliders[k].extents);
+                glUniformMatrix4fv(getPipeline(CubeColliderPipeline)->getModelID(), 1, false,
+                    &modelMatrix[0][0]);
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_LINES, 0, 24);
+            }
+        }
+    }
+
+    // sphere colliders
+    glUseProgram(getPipeline(SphereColliderPipeline)->getProgram());
+    glUniformMatrix4fv(getPipeline(SphereColliderPipeline)->getViewID(), 1, false,
+        &viewMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(SphereColliderPipeline)->getProjectionID(), 1, GL_FALSE,
+        &projectionMatrix[0][0]);
+
+    for (size_t i = 0; i < scene.entities.size(); i++) {
+        for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
+            const RigidBodyComponent& rigidBody =
+                scene.entities[i].components.vecRigidBodyComponent[j];
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            for (size_t k = 0; k < rigidBody.sphereColliders.size(); k++) {
+                modelMatrix = baseTransform *
+                    glm::translate(rigidBody.sphereColliders[k].position) *
+                    glm::mat4_cast(rigidBody.sphereColliders[k].rotation) *
+                    glm::scale(glm::vec3(rigidBody.sphereColliders[k].radius));
+                glUniformMatrix4fv(getPipeline(SphereColliderPipeline)->getModelID(), 1, false,
+                    &modelMatrix[0][0]);
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_LINES, 0, 600);
+            }
+        }
+    }
+}
+
 void RenderManager::renderCamPreview(const Scene& scene, int width, int height) {
     // draw preview camera frustum
     if (scene.selectedEntity) {
@@ -886,6 +967,10 @@ void RenderManager::setupCubemapPipelineUniforms() {
 
 void RenderManager::setupIconPipelineUniforms() {
     getPipeline(IconPipeline)->setUniformLocations();
+    // can't be bothered to write another function,
+    // this should have probably gone in pipeline constructor anyways
+    getPipeline(CubeColliderPipeline)->setUniformLocations();
+    getPipeline(SphereColliderPipeline)->setUniformLocations();
 }
 
 void RenderManager::loadIcons() {

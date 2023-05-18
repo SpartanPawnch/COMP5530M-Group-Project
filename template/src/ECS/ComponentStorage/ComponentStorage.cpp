@@ -3,6 +3,7 @@
 void ComponentStorage::startAll(){
     start<BaseComponent>();
     start<PlayerControllerComponent>();
+    start<RigidBodyComponent>();
     start<ScriptComponent>();
     start<CameraComponent>();
     start<AudioSourceComponent>();
@@ -16,6 +17,7 @@ void ComponentStorage::startAll(){
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
     update<PlayerControllerComponent>(dt,state);
+    update<RigidBodyComponent>(dt,state);
     update<ScriptComponent>(dt,state);
     update<CameraComponent>(dt,state);
     update<AudioSourceComponent>(dt,state);
@@ -29,6 +31,7 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
     vecPlayerControllerComponent.clear();
+    vecRigidBodyComponent.clear();
     vecScriptComponent.clear();
     vecCameraComponent.clear();
     vecAudioSourceComponent.clear();
@@ -42,6 +45,7 @@ void ComponentStorage::clearAll(){
 void ComponentStorage::registerMetatables(){
     BaseComponent::registerLuaMetatable();
     PlayerControllerComponent::registerLuaMetatable();
+    RigidBodyComponent::registerLuaMetatable();
     ScriptComponent::registerLuaMetatable();
     CameraComponent::registerLuaMetatable();
     AudioSourceComponent::registerLuaMetatable();
@@ -62,6 +66,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecPlayerControllerComponent.size())
             return nullptr;
         return &vecPlayerControllerComponent[loc.componentIdx];
+    case ComponentLocation::RIGIDBODYCOMPONENT:
+        if(loc.componentIdx>=vecRigidBodyComponent.size())
+            return nullptr;
+        return &vecRigidBodyComponent[loc.componentIdx];
     case ComponentLocation::SCRIPTCOMPONENT:
         if(loc.componentIdx>=vecScriptComponent.size())
             return nullptr;
@@ -113,6 +121,11 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((PlayerControllerComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::RIGIDBODYCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((RigidBodyComponent*)ptr)->pushLuaTable(state);
         return;
     case ComponentLocation::SCRIPTCOMPONENT:
         if(ptr==nullptr)

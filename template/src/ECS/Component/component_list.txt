@@ -1,5 +1,6 @@
 BaseComponent
 PlayerControllerComponent
+RigidBodyComponent
 ScriptComponent
 CameraComponent
 AudioSourceComponent
