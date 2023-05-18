@@ -8,4 +8,6 @@
 /template/external/assimp
 /template/external/glfw-3.3.6
 /template/external/soloud
-
+/src/ECS/ComponentStorage/codegen.cache
+/template - Copy
+CMakeSettings.json

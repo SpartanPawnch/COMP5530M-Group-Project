@@ -18,6 +18,8 @@ struct ModelComponent : BaseComponent {
     void stop() override;
 
     void readMaterials();
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     // model info
     std::string modelUuid = std::string("");

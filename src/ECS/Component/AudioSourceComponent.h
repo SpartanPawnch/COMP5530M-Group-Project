@@ -17,6 +17,8 @@ struct AudioSourceComponent : BaseComponent {
     void update(float dt, EntityState& state) override;
     void stop() override;
     void startSound();
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     // internal
 

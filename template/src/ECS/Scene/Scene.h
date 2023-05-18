@@ -21,6 +21,7 @@ class Scene {
     void selectEntity(BaseEntity* entity);
     void setParent(int childIdx, int parentIdx);
     void fixDescriptors(int entityUuid, ComponentLocation::CompType deletedType, int deletedIdx);
+    void registerLuaTable();
 
     BaseEntity* selectedEntity;
     int selectedCameraIdx = 0;

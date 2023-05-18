@@ -1,7 +1,7 @@
 #include "SkeletalModelComponent.h"
 
 #include "../../model_import/model.h"
-
+#include "../../scripting.h"
 static int baseUuid = 0;
 
 SkeletalModelComponent::SkeletalModelComponent() {
@@ -72,7 +72,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
                 transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
-            else if (nextNode=="") {
+            else if (nextNode == "") {
                 nextNode = transition.transitionTo;
             }
         }
@@ -86,7 +86,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
                 transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
-            else if (nextNode=="") {
+            else if (nextNode == "") {
                 nextNode = transition.transitionTo;
             }
         }
@@ -100,7 +100,7 @@ void SkeletalModelComponent::update(float dt, EntityState& state) {
                 transitionToNode(transition.transitionTo, transition.blendTime);
                 return;
             }
-            else if (nextNode=="") {
+            else if (nextNode == "") {
                 nextNode = transition.transitionTo;
             }
         }
@@ -115,7 +115,7 @@ void SkeletalModelComponent::updateAnimation(float dt) {
     if (currentAnimation) {
         currentTime += currentAnimation->getTicksPerSecond() * dt;
         if (isBlending) {
-            currentBlendTime += currentAnimation->getTicksPerSecond() *  dt;
+            currentBlendTime += currentAnimation->getTicksPerSecond() * dt;
             blendFactor = currentBlendTime / blendTime;
             if (currentBlendTime >= blendTime) {
                 isBlending = false;
@@ -133,7 +133,8 @@ void SkeletalModelComponent::updateAnimation(float dt) {
         if (isBlending) {
             std::shared_ptr<animation::AnimationDescriptor> previousAnimation =
                 previousNode->animationDescriptor;
-            calculateBoneTransformBlended(currentAnimation->getRootBone(), previousAnimation->getRootBone(), glm::mat4(1.0f));
+            calculateBoneTransformBlended(currentAnimation->getRootBone(),
+                previousAnimation->getRootBone(), glm::mat4(1.0f));
         }
         else {
             calculateBoneTransform(currentAnimation->getRootBone(), glm::mat4(1.0f));
@@ -177,13 +178,15 @@ void SkeletalModelComponent::calculateBoneTransform(Bone* bone, glm::mat4 parent
     }
 }
 
-void SkeletalModelComponent::calculateBoneTransformBlended(Bone* bone, Bone* previousBone, glm::mat4 parentTransform) {
+void SkeletalModelComponent::calculateBoneTransformBlended(Bone* bone, Bone* previousBone,
+    glm::mat4 parentTransform) {
     std::shared_ptr<animation::AnimationDescriptor> currentAnimation =
         currentNode->animationDescriptor;
     std::shared_ptr<animation::AnimationDescriptor> previousAnimation =
         previousNode->animationDescriptor;
 
-    float currentBlendTime = fmod((currentAnimation->getDuration() * currentTime), previousAnimation->getDuration());
+    float currentBlendTime =
+        fmod((currentAnimation->getDuration() * currentTime), previousAnimation->getDuration());
 
     glm::vec3 position = bone->interpolatePositionDirectly(currentTime);
     glm::quat rotation = bone->interpolateRotationDirectly(currentTime);
@@ -208,12 +211,13 @@ void SkeletalModelComponent::calculateBoneTransformBlended(Bone* bone, Bone* pre
         transformMatrices[bone->id] = globalTransformation * bone->transform;
 
     for (unsigned int i = 0; i < bone->children.size(); i++) {
-        calculateBoneTransformBlended(&bone->children[i], &previousBone->children[i], globalTransformation);
+        calculateBoneTransformBlended(&bone->children[i], &previousBone->children[i],
+            globalTransformation);
     }
 }
 
 void SkeletalModelComponent::finalLoop() {
-    if (nextNode!="") {
+    if (nextNode != "") {
         transitionToNode(nextNode);
     }
     else {
@@ -378,4 +382,26 @@ AnimationControllerNode* SkeletalModelComponent::getNodeByName(std::string name)
         }
     }
     return nullptr;
+}
+
+// lua stuff
+static const char* componentMT = "ONO_SkeletalModelComponent";
+void SkeletalModelComponent::registerLuaMetatable() {
+    lua_State* state = scripting::getState();
+    luaL_newmetatable(state, componentMT);
+    // register index op - REQUIRED
+    lua_pushvalue(state, -1);
+    lua_setfield(state, -2, "__index");
+    lua_pop(state, 1);
+}
+
+void SkeletalModelComponent::pushLuaTable(lua_State* state) {
+    lua_createtable(state, 0, 0);
+    lua_pushstring(state, name.c_str());
+    lua_setfield(state, -2, "name");
+    lua_pushinteger(state, uuid);
+    lua_setfield(state, -2, "uuid");
+    lua_pushlightuserdata(state, this);
+    lua_setfield(state, -2, "ptr");
+    luaL_setmetatable(state, componentMT);
 }

@@ -10,6 +10,9 @@
 #include <rapidjson/document.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+// #include <PxPhysics.h>
+// #include <PxPhysicsAPI.h>
 
 #include "logging.h"
 #include "util.h"
@@ -26,6 +29,7 @@
 #include "ECS/Component/TransformComponent.h"
 #include "ECS/Component/AudioSourceComponent.h"
 #include "ECS/Component/ModelComponent.h"
+#include "ECS/Component/PlayerControllerComponent.h"
 #include "ECS/Component/SkyBoxComponent.h"
 
 static std::string currentLevelPath;
@@ -125,7 +129,7 @@ void loadLevel(const char* path, Scene& scene) {
             mat.alphaMap = jsonMaterials[i]["alphaMap"].GetString();
             mat.emissiveMap = jsonMaterials[i]["emissiveMap"].GetString();
             mat.occlusionMap = jsonMaterials[i]["occlusionMap"].GetString();
-            
+
             matInstance->createMaterialDirectly(mat);
         }
     }
@@ -150,7 +154,8 @@ void loadLevel(const char* path, Scene& scene) {
         for (unsigned int i = 0; i < jsonModels.Size(); i++) {
             animationPtrs.emplace_back(
                 animation::animationLoad((projRoot + jsonModels[i]["path"].GetString()).c_str(),
-                    jsonModels[i]["uuid"].GetString(),model::modelGetByUuid(jsonModels[i]["modelUuid"].GetString())));
+                    jsonModels[i]["uuid"].GetString(),
+                    model::modelGetByUuid(jsonModels[i]["modelUuid"].GetString())));
         }
     }
 
@@ -212,10 +217,12 @@ void loadLevel(const char* path, Scene& scene) {
 
                     model.modelUuid = std::string(jsonComponent["modelUuid"].GetString());
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
-                    
+
                     model.materials.resize(jsonComponent["materials"].Size());
-                    for (unsigned int material = 0; material < jsonComponent["materials"].Size(); material++) {
-                        model.materials[material] = matInstance->getActiveMaterial(jsonComponent["materials"][material].GetString());
+                    for (unsigned int material = 0; material < jsonComponent["materials"].Size();
+                         material++) {
+                        model.materials[material] = matInstance->getActiveMaterial(
+                            jsonComponent["materials"][material].GetString());
                     }
 
                     baseEntity.components.addComponent(model);
@@ -229,64 +236,136 @@ void loadLevel(const char* path, Scene& scene) {
                     model.modelDescriptor = model::modelGetByUuid(model.modelUuid);
 
                     model.materials.resize(jsonComponent["materials"].Size());
-                    for (unsigned int material = 0; material < jsonComponent["materials"].Size(); material++) {
-                        model.materials[material] = matInstance->getActiveMaterial(jsonComponent["materials"][material].GetString());
+                    for (unsigned int material = 0; material < jsonComponent["materials"].Size();
+                         material++) {
+                        model.materials[material] = matInstance->getActiveMaterial(
+                            jsonComponent["materials"][material].GetString());
                     }
 
                     model.nodes.resize(jsonComponent["nodes"].Size());
                     for (unsigned int node = 0; node < jsonComponent["nodes"].Size(); node++) {
-                        //read nodes without transitions
+                        // read nodes without transitions
                         AnimationControllerNode currNode;
                         currNode.name = jsonComponent["nodes"][node]["name"].GetString();
-                        currNode.animationUuid = jsonComponent["nodes"][node]["animationUuid"].GetString();
-                        currNode.animationDescriptor = animation::animationGetByUuid(currNode.animationUuid);
+                        currNode.animationUuid =
+                            jsonComponent["nodes"][node]["animationUuid"].GetString();
+                        currNode.animationDescriptor =
+                            animation::animationGetByUuid(currNode.animationUuid);
                         currNode.loopCount = jsonComponent["nodes"][node]["loopCount"].GetInt();
                         model.nodes[node] = currNode;
 
-                        model.nodes[node].noConditionTransitions.resize(jsonComponent["nodes"][node]["noconditiontransitions"].Size());
-                        for (unsigned int noCond = 0; noCond < jsonComponent["nodes"][node]["noconditiontransitions"].Size(); noCond++) {
+                        model.nodes[node].noConditionTransitions.resize(
+                            jsonComponent["nodes"][node]["noconditiontransitions"].Size());
+                        for (unsigned int noCond = 0;
+                             noCond < jsonComponent["nodes"][node]["noconditiontransitions"].Size();
+                             noCond++) {
                             NoConditionACTransition noCondTr;
-                            noCondTr.transitionTo = jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["transitionTo"].GetString();
-                            noCondTr.blendTime = jsonComponent["nodes"][node]["noconditiontransitions"][noCond]["blendTime"].GetDouble();
+                            noCondTr.transitionTo =
+                                jsonComponent["nodes"][node]["noconditiontransitions"][noCond]
+                                             ["transitionTo"]
+                                                 .GetString();
+                            noCondTr.blendTime =
+                                jsonComponent["nodes"][node]["noconditiontransitions"][noCond]
+                                             ["blendTime"]
+                                                 .GetDouble();
                             model.nodes[node].noConditionTransitions[noCond] = noCondTr;
                         }
 
-                        model.nodes[node].boolTransitions.resize(jsonComponent["nodes"][node]["booltransitions"].Size());
-                        for (unsigned int boolCond = 0; boolCond < jsonComponent["nodes"][node]["booltransitions"].Size(); boolCond++) {
+                        model.nodes[node].boolTransitions.resize(
+                            jsonComponent["nodes"][node]["booltransitions"].Size());
+                        for (unsigned int boolCond = 0;
+                             boolCond < jsonComponent["nodes"][node]["booltransitions"].Size();
+                             boolCond++) {
                             BoolACTransition boolCondTr;
-                            boolCondTr.transitionTo = jsonComponent["nodes"][node]["booltransitions"][boolCond]["transitionTo"].GetString();
-                            boolCondTr.blendTime = jsonComponent["nodes"][node]["booltransitions"][boolCond]["blendTime"].GetDouble();
-                            boolCondTr.immediate = jsonComponent["nodes"][node]["booltransitions"][boolCond]["immediate"].GetBool();
-                            boolCondTr.condition = jsonComponent["nodes"][node]["booltransitions"][boolCond]["condition"].GetBool();
-                            boolCondTr.desiredValue = jsonComponent["nodes"][node]["booltransitions"][boolCond]["desiredValue"].GetBool();
+                            boolCondTr.transitionTo =
+                                jsonComponent["nodes"][node]["booltransitions"][boolCond]
+                                             ["transitionTo"]
+                                                 .GetString();
+                            boolCondTr.blendTime = jsonComponent["nodes"][node]["booltransitions"]
+                                                                [boolCond]["blendTime"]
+                                                                    .GetDouble();
+                            boolCondTr.immediate = jsonComponent["nodes"][node]["booltransitions"]
+                                                                [boolCond]["immediate"]
+                                                                    .GetBool();
+                            boolCondTr.condition = jsonComponent["nodes"][node]["booltransitions"]
+                                                                [boolCond]["condition"]
+                                                                    .GetBool();
+                            boolCondTr.desiredValue =
+                                jsonComponent["nodes"][node]["booltransitions"][boolCond]
+                                             ["desiredValue"]
+                                                 .GetBool();
                             model.nodes[node].boolTransitions[boolCond] = boolCondTr;
                         }
 
-                        model.nodes[node].intTransitions.resize(jsonComponent["nodes"][node]["inttransitions"].Size());
-                        for (unsigned int intCond = 0; intCond < jsonComponent["nodes"][node]["inttransitions"].Size(); intCond++) {
+                        model.nodes[node].intTransitions.resize(
+                            jsonComponent["nodes"][node]["inttransitions"].Size());
+                        for (unsigned int intCond = 0;
+                             intCond < jsonComponent["nodes"][node]["inttransitions"].Size();
+                             intCond++) {
                             IntACTransition intCondTr;
-                            intCondTr.transitionTo = jsonComponent["nodes"][node]["inttransitions"][intCond]["transitionTo"].GetString();
-                            intCondTr.blendTime = jsonComponent["nodes"][node]["inttransitions"][intCond]["blendTime"].GetDouble();
-                            intCondTr.immediate = jsonComponent["nodes"][node]["inttransitions"][intCond]["immediate"].GetBool();
-                            intCondTr.condition = jsonComponent["nodes"][node]["inttransitions"][intCond]["condition"].GetInt();
-                            intCondTr.desiredValue = jsonComponent["nodes"][node]["inttransitions"][intCond]["desiredValue"].GetInt();
-                            intCondTr.shouldBeLower = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeLower"].GetBool();
-                            intCondTr.shouldBeEqual = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeEqual"].GetBool();
-                            intCondTr.shouldBeGreater = jsonComponent["nodes"][node]["inttransitions"][intCond]["shouldBeGreater"].GetBool();
+                            intCondTr.transitionTo = jsonComponent["nodes"][node]["inttransitions"]
+                                                                  [intCond]["transitionTo"]
+                                                                      .GetString();
+                            intCondTr.blendTime =
+                                jsonComponent["nodes"][node]["inttransitions"][intCond]["blendTime"]
+                                    .GetDouble();
+                            intCondTr.immediate =
+                                jsonComponent["nodes"][node]["inttransitions"][intCond]["immediate"]
+                                    .GetBool();
+                            intCondTr.condition =
+                                jsonComponent["nodes"][node]["inttransitions"][intCond]["condition"]
+                                    .GetInt();
+                            intCondTr.desiredValue = jsonComponent["nodes"][node]["inttransitions"]
+                                                                  [intCond]["desiredValue"]
+                                                                      .GetInt();
+                            intCondTr.shouldBeLower = jsonComponent["nodes"][node]["inttransitions"]
+                                                                   [intCond]["shouldBeLower"]
+                                                                       .GetBool();
+                            intCondTr.shouldBeEqual = jsonComponent["nodes"][node]["inttransitions"]
+                                                                   [intCond]["shouldBeEqual"]
+                                                                       .GetBool();
+                            intCondTr.shouldBeGreater =
+                                jsonComponent["nodes"][node]["inttransitions"][intCond]
+                                             ["shouldBeGreater"]
+                                                 .GetBool();
                             model.nodes[node].intTransitions[intCond] = intCondTr;
                         }
 
-                        model.nodes[node].floatTransitions.resize(jsonComponent["nodes"][node]["floattransitions"].Size());
-                        for (unsigned int floatCond = 0; floatCond < jsonComponent["nodes"][node]["floattransitions"].Size(); floatCond++) {
+                        model.nodes[node].floatTransitions.resize(
+                            jsonComponent["nodes"][node]["floattransitions"].Size());
+                        for (unsigned int floatCond = 0;
+                             floatCond < jsonComponent["nodes"][node]["floattransitions"].Size();
+                             floatCond++) {
                             FloatACTransition floatCondTr;
-                            floatCondTr.transitionTo = jsonComponent["nodes"][node]["floattransitions"][floatCond]["transitionTo"].GetString();
-                            floatCondTr.blendTime = jsonComponent["nodes"][node]["floattransitions"][floatCond]["blendTime"].GetDouble();
-                            floatCondTr.immediate = jsonComponent["nodes"][node]["floattransitions"][floatCond]["immediate"].GetBool();
-                            floatCondTr.condition = jsonComponent["nodes"][node]["floattransitions"][floatCond]["condition"].GetDouble();
-                            floatCondTr.desiredValue = jsonComponent["nodes"][node]["floattransitions"][floatCond]["desiredValue"].GetDouble();
-                            floatCondTr.shouldBeLower = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeLower"].GetBool();
-                            floatCondTr.shouldBeEqual = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeEqual"].GetBool();
-                            floatCondTr.shouldBeGreater = jsonComponent["nodes"][node]["floattransitions"][floatCond]["shouldBeGreater"].GetBool();
+                            floatCondTr.transitionTo =
+                                jsonComponent["nodes"][node]["floattransitions"][floatCond]
+                                             ["transitionTo"]
+                                                 .GetString();
+                            floatCondTr.blendTime = jsonComponent["nodes"][node]["floattransitions"]
+                                                                 [floatCond]["blendTime"]
+                                                                     .GetDouble();
+                            floatCondTr.immediate = jsonComponent["nodes"][node]["floattransitions"]
+                                                                 [floatCond]["immediate"]
+                                                                     .GetBool();
+                            floatCondTr.condition = jsonComponent["nodes"][node]["floattransitions"]
+                                                                 [floatCond]["condition"]
+                                                                     .GetDouble();
+                            floatCondTr.desiredValue =
+                                jsonComponent["nodes"][node]["floattransitions"][floatCond]
+                                             ["desiredValue"]
+                                                 .GetDouble();
+                            floatCondTr.shouldBeLower =
+                                jsonComponent["nodes"][node]["floattransitions"][floatCond]
+                                             ["shouldBeLower"]
+                                                 .GetBool();
+                            floatCondTr.shouldBeEqual =
+                                jsonComponent["nodes"][node]["floattransitions"][floatCond]
+                                             ["shouldBeEqual"]
+                                                 .GetBool();
+                            floatCondTr.shouldBeGreater =
+                                jsonComponent["nodes"][node]["floattransitions"][floatCond]
+                                             ["shouldBeGreater"]
+                                                 .GetBool();
                             model.nodes[node].floatTransitions[floatCond] = floatCondTr;
                         }
                     }
@@ -400,6 +479,21 @@ void loadLevel(const char* path, Scene& scene) {
 
                     baseEntity.components.addComponent(script);
                 }
+                // PlayerControllerComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "PlayerControllerComponent") ==
+                    0) {
+                    PlayerControllerComponent controls(name, uuid);
+                    auto const virtualKeys = jsonComponent["virtualKeys"].GetArray();
+                    for (int j = 0; j < virtualKeys.Size(); j++) {
+                        controls.addKey();
+                        controls.virtualKeys[j].name = virtualKeys[j]["name"].GetString();
+                        controls.virtualKeys[j].key = virtualKeys[j]["Key"].GetInt();
+                        controls.virtualKeys[j].scale = virtualKeys[j]["scale"].GetFloat();
+                        controls.virtualKeys[j].action =
+                            (VirtualKey::Action)virtualKeys[j]["action"].GetInt();
+                    }
+                    baseEntity.components.addComponent(controls);
+                }
                 // BaseComponent
                 else {
                     BaseComponent base(name, uuid);
@@ -424,6 +518,28 @@ void loadLevel(const char* path, Scene& scene) {
     currentScene = &scene;
     logging::logInfo("Opened level {}\n", path);
 }
+static std::string enqueuedLevel;
+static int luaEnqueueLevel(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1) {
+        return 0;
+    }
+    enqueuedLevel = std::string(luaL_tolstring(state, 1, nullptr));
+    return 0;
+}
+void registerLevelFunctionsLua() {
+    scripting::beginModule(1);
+    scripting::registerModuleFunction("enqueueLevel", &luaEnqueueLevel);
+    scripting::finalizeModule("levels");
+}
+
+void updateLevels(Scene& scene) {
+    if (!enqueuedLevel.empty()) {
+        loadLevel(enqueuedLevel.c_str(), scene);
+        enqueuedLevel = "";
+    }
+}
+
 #ifdef ONO_ENGINE_ONLY
 // --- Per-Component-Type serialization functions
 static void saveComponent(const TransformComponent& trComponent,
@@ -563,7 +679,6 @@ static void saveComponent(const ModelComponent& component,
         writer.String(component.materials[i]->name.c_str());
     }
     writer.EndArray();
-    
 
     writer.EndObject();
 }
@@ -714,7 +829,6 @@ static void saveComponent(const SkeletalModelComponent& component,
     }
     writer.EndArray();
 
-
     writer.EndObject();
 }
 
@@ -854,7 +968,40 @@ static void saveComponent(const ScriptComponent& component,
             break;
         default:;
         }
+        writer.EndObject();
+    }
+    writer.EndArray();
+    writer.EndObject();
+}
 
+static void saveComponent(const PlayerControllerComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("PlayerControllerComponent");
+
+    writer.Key("virtualKeys");
+    writer.StartArray();
+    for (auto const& vk : component.virtualKeys) {
+        writer.StartObject();
+        writer.Key("name");
+        writer.String(vk.name.c_str());
+
+        writer.Key("Key");
+        writer.Int(vk.key);
+
+        writer.Key("scale");
+        writer.Double(double(vk.scale));
+
+        writer.Key("action");
+        writer.Int(vk.action);
         writer.EndObject();
     }
     writer.EndArray();
@@ -873,7 +1020,7 @@ void saveLevel(const char* path, const Scene& scene) {
 
     char writeBuf[BUFSIZ];
     rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+    rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(osw);
 
     writer.StartObject();
 
@@ -999,6 +1146,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 saveComponent(baseComponents[j], writer);
             }
 
+            // PlayerControllerComponent
+            const std::vector<PlayerControllerComponent>& playerControllerComponents =
+                scene.entities[i].components.vecPlayerControllerComponent;
+            for (unsigned int j = 0; j < playerControllerComponents.size(); j++) {
+                saveComponent(playerControllerComponents[j], writer);
+            }
+
             writer.EndArray();
             writer.EndObject();
         }
@@ -1077,7 +1231,6 @@ void saveLevel(const char* path, const Scene& scene) {
             writer.EndObject();
         }
         writer.EndArray();
-
     }
 
     // TODO - save models
@@ -1102,7 +1255,7 @@ void saveLevel(const char* path, const Scene& scene) {
         writer.EndArray();
     }
 
-    //save animations
+    // save animations
     {
         writer.Key("animations");
         writer.StartArray();

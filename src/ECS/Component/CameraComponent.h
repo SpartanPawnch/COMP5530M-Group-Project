@@ -16,6 +16,8 @@ struct CameraComponent : BaseComponent {
     void stop() override;
     glm::mat4 getMatrix();
     void copyToCamera(Camera& camera, const glm::mat4& runtimeTransform);
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     static int activeUuid;
 

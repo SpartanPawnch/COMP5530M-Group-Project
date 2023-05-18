@@ -4,9 +4,18 @@
 
 static int baseUuid = 0;
 
+int BaseEntity::genUuid() {
+    return baseUuid++;
+}
+
 BaseEntity::BaseEntity() {
-    uuid = baseUuid++;
     name = "Base Entity";
+
+    // set speeds
+    this->defaultSpeed = 1.0f;
+    this->highSpeed = 10.0f;
+    this->lowSpeed = 0.3f;
+    this->movementSpeed = this->defaultSpeed;
 }
 
 BaseEntity::BaseEntity(const std::string& _name, const int _uuid) {
@@ -35,6 +44,7 @@ void BaseEntity::stop() {
 void BaseEntity::genTransform(const glm::mat4& parentMat) {
     state.runtimeTransform = parentMat * glm::translate(state.position) *
         glm::mat4_cast(state.rotation) * glm::scale(state.scale);
+    state.parent = parentMat;
 }
 // void BaseEntity::removeComponent(int uuid)
 // {

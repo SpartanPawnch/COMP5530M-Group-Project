@@ -32,15 +32,21 @@
 #include "model_import/model.h"
 #include "physics_engine/physicsEngine.h"
 #include "../render-engine/RenderManager.h"
+#include "ECS/System/InputSystem.h"
 
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
 PhysicsEngine* physicsEngine;
 
+InputSystem* inputSystem;
+
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
 PhysicsEngine* PhysicsEngine::instance = nullptr;
+
+// set InputSystem to nullptr intially
+InputSystem* InputSystem::instance = nullptr;
 
 int main() {
     // switch to correct working directory - platform specific
@@ -126,6 +132,10 @@ int main() {
     renderManager->loadScene();
     renderManager->loadIcons();
 
+    // Input System
+    inputSystem = InputSystem::getInstance();
+    inputSystem->start(window);
+
     // init shader
 
     // float lastQueryTime = float(glfwGetTime());
@@ -153,6 +163,9 @@ int main() {
 
     const float timeStep = 1.0f / 60.0f;
     long double accumulator = 0;
+    // register lua stuff
+    scene.registerLuaTable();
+    ComponentStorage::registerMetatables();
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -193,7 +206,7 @@ int main() {
 
         // update editor state
         scene.updatePositions();
-
+        updateLevels(scene);
         //--- Draw Results ---
         // draw scene to texture
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);

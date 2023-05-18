@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug|x64">
+      <Configuration>debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="checked|x64">
+      <Configuration>checked</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="profile|x64">
+      <Configuration>profile</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|x64">
+      <Configuration>release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{ACCFBC05-D5EF-31CC-9B0F-F1582DAAB301}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='checked|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='profile|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='checked|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='profile|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\marti\Documents\BuildSystemConcept\external\imgui;C:\Users\marti\Documents\BuildSystemConcept\external\imgui\backends;C:\Users\marti\Documents\BuildSystemConcept\BuildSys;C:\Users\marti\Documents\BuildSystemConcept\external\implot;C:\Users\marti\Documents\BuildSystemConcept\external\lua-5.4.4\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='checked|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\marti\Documents\BuildSystemConcept\external\imgui;C:\Users\marti\Documents\BuildSystemConcept\external\imgui\backends;C:\Users\marti\Documents\BuildSystemConcept\BuildSys;C:\Users\marti\Documents\BuildSystemConcept\external\implot;C:\Users\marti\Documents\BuildSystemConcept\external\lua-5.4.4\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='profile|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\marti\Documents\BuildSystemConcept\external\imgui;C:\Users\marti\Documents\BuildSystemConcept\external\imgui\backends;C:\Users\marti\Documents\BuildSystemConcept\BuildSys;C:\Users\marti\Documents\BuildSystemConcept\external\implot;C:\Users\marti\Documents\BuildSystemConcept\external\lua-5.4.4\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\marti\Documents\BuildSystemConcept\external\imgui;C:\Users\marti\Documents\BuildSystemConcept\external\imgui\backends;C:\Users\marti\Documents\BuildSystemConcept\BuildSys;C:\Users\marti\Documents\BuildSystemConcept\external\implot;C:\Users\marti\Documents\BuildSystemConcept\external\lua-5.4.4\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='debug|x64'">Building Custom Rule C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/marti/Documents/BuildSystemConcept -BC:/Users/marti/Documents/BuildSystemConcept --check-stamp-file C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='debug|x64'">C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Building Custom Rule C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='checked|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/marti/Documents/BuildSystemConcept -BC:/Users/marti/Documents/BuildSystemConcept --check-stamp-file C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='checked|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='checked|x64'">C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='checked|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='profile|x64'">Building Custom Rule C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='profile|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/marti/Documents/BuildSystemConcept -BC:/Users/marti/Documents/BuildSystemConcept --check-stamp-file C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='profile|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='profile|x64'">C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='profile|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='release|x64'">Building Custom Rule C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/marti/Documents/BuildSystemConcept -BC:/Users/marti/Documents/BuildSystemConcept --check-stamp-file C:/Users/marti/Documents/BuildSystemConcept/external/physx-4.1/physx/compiler/public/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='release|x64'">C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='release|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\ZERO_CHECK.vcxproj">
+      <Project>{6E502ABB-B774-3D33-BBE2-738B0BC704DD}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\FastXml.vcxproj">
+      <Project>{B20D979E-9199-37F9-951E-CE00C719CCAD}</Project>
+      <Name>FastXml</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\LowLevel.vcxproj">
+      <Project>{648B047D-34D7-367F-A60E-AD07C15E2CF3}</Project>
+      <Name>LowLevel</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\LowLevelAABB.vcxproj">
+      <Project>{8A6B2B91-FE34-3F64-854D-97B39D8E6B86}</Project>
+      <Name>LowLevelAABB</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\LowLevelDynamics.vcxproj">
+      <Project>{7E6C29F6-3F12-39D7-9B1C-EE220DAA6F4A}</Project>
+      <Name>LowLevelDynamics</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysX.vcxproj">
+      <Project>{C335423C-15DE-3CC8-970C-5F11A09433E5}</Project>
+      <Name>PhysX</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXCharacterKinematic.vcxproj">
+      <Project>{D726C789-8859-3171-8C7A-4850D4CF6443}</Project>
+      <Name>PhysXCharacterKinematic</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXCommon.vcxproj">
+      <Project>{226DC6F4-8633-3DB0-9EF2-401D00B54EB7}</Project>
+      <Name>PhysXCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXCooking.vcxproj">
+      <Project>{47CF53CD-1191-3A86-BFAA-A91FE3756D9C}</Project>
+      <Name>PhysXCooking</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXExtensions.vcxproj">
+      <Project>{462F17E2-61A6-3A4F-B500-F306FAF08F04}</Project>
+      <Name>PhysXExtensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXFoundation.vcxproj">
+      <Project>{D3E21E6C-BD3B-3AC3-BDD9-5C0D16635311}</Project>
+      <Name>PhysXFoundation</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXPvdSDK.vcxproj">
+      <Project>{A100B705-2CA6-3C62-B1E4-F00C327E4E7E}</Project>
+      <Name>PhysXPvdSDK</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXTask.vcxproj">
+      <Project>{05852236-DCEE-304A-9A55-31F918C803D0}</Project>
+      <Name>PhysXTask</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\PhysXVehicle.vcxproj">
+      <Project>{46CC4588-646A-3143-8B05-F34E9B47D94D}</Project>
+      <Name>PhysXVehicle</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\SceneQuery.vcxproj">
+      <Project>{B27B8A27-0086-3DD6-AAF8-1ABADC6D078F}</Project>
+      <Name>SceneQuery</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\marti\Documents\BuildSystemConcept\external\physx-4.1\physx\compiler\public\sdk_source_bin\SimulationController.vcxproj">
+      <Project>{46503EFB-82C0-3489-AFA8-25A457EEBCB5}</Project>
+      <Name>SimulationController</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

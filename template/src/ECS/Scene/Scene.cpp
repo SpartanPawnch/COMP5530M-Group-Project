@@ -2,6 +2,327 @@
 
 #include <glm/mat4x4.hpp>
 
+#include "../../scripting.h"
+
+static int luaCopyEntityByUuid(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:copyEntityByUuid() - wrong number of arguments; "
+            "Usage: var:copyEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:copyEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+
+    // check uuid validity
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:copyEntityByUuid() - entity not found", 0);
+        return 0;
+    }
+
+    BaseEntity copy = scene->entities[scene->uuidToIdx[uuid]];
+    copy.uuid = -1;
+
+    scene->addEntity(copy);
+
+    // return new uuid
+    lua_settop(state, 0);
+    lua_pushinteger(state, scene->entities.back().uuid);
+
+    return 1;
+}
+
+static int luaGetEntityStateByUuid(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:getEntityStateByUuid() - wrong number of arguments; "
+            "Usage: var:getEntityStateByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:getEntityStateByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+
+    // check uuid validity
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:getEntityState() - entity not found", 0);
+        return 0;
+    }
+
+    // return entity state
+    lua_settop(state, 0);
+    scene->entities[scene->uuidToIdx[uuid]].state.pushLuaTable(state);
+
+    return 1;
+}
+
+static int luaActivateEntityByUuid(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:activateEntityByUuid() - wrong number of arguments; "
+            "Usage: var:activateEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:activateEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:activateEntityByUuid() - entity not found", 0);
+        return 0;
+    }
+
+    scene->entities[scene->uuidToIdx[uuid]].active = true;
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaDeactivateEntityByUuid(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:deactivateEntityByUuid() - wrong number of arguments; "
+            "Usage: var:deactivateEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:deactivateEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:deactivateEntityByUuid() - entity not found", 0);
+        return 0;
+    }
+
+    scene->entities[scene->uuidToIdx[uuid]].active = false;
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaShowEntityByUuid(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:showEntityByUuid() - wrong number of arguments; "
+            "Usage: var:showEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:showEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:showEntityByUuid() - entity not found", 0);
+        return 0;
+    }
+
+    scene->entities[scene->uuidToIdx[uuid]].visible = true;
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaHideEntityByUuid(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:hideEntityByUuid() - wrong number of arguments; "
+            "Usage: var:hideEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:hideEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:CopyEntity() - entity not found", 0);
+        return 0;
+    }
+
+    scene->entities[scene->uuidToIdx[uuid]].visible = false;
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaRemoveEntityByUuid(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:removeEntityByUuid() - wrong number of arguments; "
+            "Usage: var:removeEntityByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state, "ONO_Scene:removeEntityByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:removeEntityByUuid() - entity not found", 0);
+        return 0;
+    }
+
+    scene->removeEntityByIdx(scene->uuidToIdx[uuid]);
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static const char* luaMetatable = "ONO_Scene";
+void Scene::registerLuaTable() {
+    // create metatable
+    lua_State* state = scripting::getState();
+    luaL_newmetatable(state, luaMetatable);
+    // register index op - REQUIRED
+    lua_pushvalue(state, -1);
+    lua_setfield(state, -2, "__index");
+    lua_pushcfunction(state, &luaCopyEntityByUuid);
+    lua_setfield(state, -2, "copyEntityByUuid");
+    lua_pushcfunction(state, &luaRemoveEntityByUuid);
+    lua_setfield(state, -2, "removeEntityByUuid");
+    lua_pushcfunction(state, &luaActivateEntityByUuid);
+    lua_setfield(state, -2, "activateEntityByUuid");
+    lua_pushcfunction(state, &luaDeactivateEntityByUuid);
+    lua_setfield(state, -2, "deactivateEntityByUuid");
+    lua_pushcfunction(state, &luaShowEntityByUuid);
+    lua_setfield(state, -2, "showEntityByUuid");
+    lua_pushcfunction(state, &luaHideEntityByUuid);
+    lua_setfield(state, -2, "hideEntityByUuid");
+    lua_pushcfunction(state, &luaGetEntityStateByUuid);
+    lua_setfield(state, -2, "getEntityStateByUuid");
+
+    lua_pop(state, 1);
+
+    // create global
+    lua_newuserdatauv(state, sizeof(void*), 1);
+    lua_pushlightuserdata(state, this);
+    lua_setiuservalue(state, -2, 1);
+    luaL_setmetatable(state, luaMetatable);
+    lua_setglobal(state, "ONO_currentScene");
+}
+
 Scene::Scene() {
     selectedEntity = nullptr;
 }
@@ -87,9 +408,11 @@ void Scene::stop() {
 }
 
 void Scene::addEntity(const BaseEntity& entity) {
-    // add uuid to entity
     entities.emplace_back(entity);
-    uuidToIdx[entity.uuid] = entities.size() - 1;
+    // add uuid to entity
+    if (entity.uuid == -1)
+        entities.back().uuid = BaseEntity::genUuid();
+    uuidToIdx[entities.back().uuid] = entities.size() - 1;
 }
 
 void Scene::addChild(const BaseEntity& entity, int parentIdx) {

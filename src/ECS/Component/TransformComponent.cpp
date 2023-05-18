@@ -1,5 +1,5 @@
 #include "TransformComponent.h"
-
+#include "../../scripting.h"
 static int baseUuid = 0;
 
 TransformComponent::TransformComponent() {
@@ -26,4 +26,32 @@ void TransformComponent::update(float dt, EntityState& state) {
 }
 
 void TransformComponent::stop() {
+}
+
+// lua stuff
+static const char* componentMT = "ONO_TransformComponent";
+void TransformComponent::registerLuaMetatable() {
+    lua_State* state = scripting::getState();
+    luaL_newmetatable(state, componentMT);
+    // register index op - REQUIRED
+    lua_pushvalue(state, -1);
+    lua_setfield(state, -2, "__index");
+    lua_pop(state, 1);
+}
+
+void TransformComponent::pushLuaTable(lua_State* state) {
+    lua_createtable(state, 0, 0);
+    lua_pushstring(state, name.c_str());
+    lua_setfield(state, -2, "name");
+    lua_pushinteger(state, uuid);
+    lua_setfield(state, -2, "uuid");
+    lua_pushlightuserdata(state, this);
+    lua_setfield(state, -2, "ptr");
+    scripting::pushVec3Ref(state, &position);
+    lua_setfield(state, -2, "position");
+    scripting::pushQuatRef(state, &rotation);
+    lua_setfield(state, -2, "rotation");
+    scripting::pushVec3Ref(state, &scale);
+    lua_setfield(state, -2, "scale");
+    luaL_setmetatable(state, componentMT);
 }

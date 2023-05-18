@@ -335,7 +335,8 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 
 #ifdef ONO_ENGINE_ONLY
         if (scene.entities[i].components.vecModelComponent.empty() &&
-            scene.entities[i].components.vecSkeletalModelComponent.empty()) {
+            scene.entities[i].components.vecSkeletalModelComponent.empty() &&
+            scene.entities[i].components.vecSkyBoxComponent.empty()) {
             if (!scene.entities[i].components.vecCameraComponent.empty() && cameraIconDescriptor) {
                 glUseProgram(getPipeline(IconPipeline)->getProgram());
 
@@ -438,9 +439,10 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                             lights[i].getSpecular().x, lights[i].getSpecular().y,
                             lights[i].getSpecular().z);
                     }
-                    std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecModelComponent[j].materials[k];
+                    std::shared_ptr<ActiveMaterial> meshMat =
+                        scene.entities[i].components.vecModelComponent[j].materials[k];
 
-                    //todo: send 1x1 white image on the elses of all
+                    // todo: send 1x1 white image on the elses of all
                     glActiveTexture(GL_TEXTURE0);
                     if (meshMat->baseColorMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
@@ -468,7 +470,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glActiveTexture(GL_TEXTURE6);
                     if (meshMat->occlusionMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
-                    
+
                     glActiveTexture(GL_TEXTURE0);
                 }
                 else {
@@ -556,9 +558,10 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                          .transformMatrices[0][0][0]);
 
                 // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
-                std::shared_ptr<ActiveMaterial> meshMat = scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
+                std::shared_ptr<ActiveMaterial> meshMat =
+                    scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
 
-                //todo: send 1x1 white image on the elses of all
+                // todo: send 1x1 white image on the elses of all
                 glActiveTexture(GL_TEXTURE0);
                 if (meshMat->baseColorMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
@@ -605,12 +608,6 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
     // glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
-
-
-
-
     // RENDERING
     // Go through all the Pipelines
     // TODO: Check if it is necessary to use the given pipeline and the call the following fn
@@ -624,7 +621,6 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
         int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
 
         glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
-
 
         if (scene.entities[i].components.vecModelComponent.empty() &&
             scene.entities[i].components.vecSkeletalModelComponent.empty()) {
@@ -699,8 +695,6 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
 
         glUseProgram(getPipeline(EntIDPipeline)->getProgram());
 
-        
-
         // bind model matrix
         glUniformMatrix4fv(getPipeline(EntIDPipeline)->getModelID(), 1, GL_FALSE,
             &modelMatrix[0][0]);
@@ -724,27 +718,28 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
 
         glUseProgram(getPipeline(AnimationIDPipeline)->getProgram());
 
-
         // bind model matrix
         glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getModelID(), 1, GL_FALSE,
             &modelMatrix[0][0]);
-        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getViewID(), 1, GL_FALSE, &viewMatrix[0][0]);
+        glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getViewID(), 1, GL_FALSE,
+            &viewMatrix[0][0]);
         glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getProjectionID(), 1, GL_FALSE,
             &projectionMatrix[0][0]);
         glUniform3f(getPipeline(AnimationIDPipeline)->getEntID(), reconstructed_color.x,
             reconstructed_color.y, reconstructed_color.z);
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
-            j++) {
+             j++) {
             auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
             if (!desc) {
                 continue;
             }
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
-                glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100, GL_FALSE,
+                glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100,
+                    GL_FALSE,
                     &scene.entities[i]
-                    .components.vecSkeletalModelComponent[j]
-                    .transformMatrices[0][0][0]);
+                         .components.vecSkeletalModelComponent[j]
+                         .transformMatrices[0][0][0]);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -783,6 +778,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
             glBindTexture(GL_TEXTURE_CUBE_MAP,
                 scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
             glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glDepthMask(GL_TRUE);
         }
     }

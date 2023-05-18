@@ -8,7 +8,7 @@
 #include "../ComponentLocation/ComponentLocation.h"
 
 #include "../Component/BaseComponent.h"
-#include "../Component/TransformComponent.h"
+#include "../Component/PlayerControllerComponent.h"
 #include "../Component/ScriptComponent.h"
 #include "../Component/CameraComponent.h"
 #include "../Component/AudioSourceComponent.h"
@@ -17,10 +17,12 @@
 #include "../Component/LightComponent.h"
 #include "../Component/SkyBoxComponent.h"
 #include "../Component/RigidBodyComponent.h"
+#include "../Component/ControllerComponent.h"
+#include "../Component/TransformComponent.h"
 
 struct ComponentStorage{
     std::vector<BaseComponent> vecBaseComponent;
-    std::vector<TransformComponent> vecTransformComponent;
+    std::vector<PlayerControllerComponent> vecPlayerControllerComponent;
     std::vector<ScriptComponent> vecScriptComponent;
     std::vector<CameraComponent> vecCameraComponent;
     std::vector<AudioSourceComponent> vecAudioSourceComponent;
@@ -29,6 +31,8 @@ struct ComponentStorage{
     std::vector<LightComponent> vecLightComponent;
     std::vector<SkyBoxComponent> vecSkyBoxComponent;
     std::vector<RigidBodyComponent> vecRigidBodyComponent;
+    std::vector<ControllerComponent> vecControllerComponent;
+    std::vector<TransformComponent> vecTransformComponent;
     //add component, type is inferred by compiler
     template<typename T>
     void addComponent(const T& component);
@@ -53,6 +57,9 @@ struct ComponentStorage{
     //get raw pointer using component loc
     void* getProtectedPtr(const ComponentLocation& loc);
 
+    //register metatables
+    static void registerMetatables();
+
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
@@ -67,8 +74,8 @@ struct ComponentStorage{
     }
 
     template<>
-    void addComponent<TransformComponent>(const TransformComponent& component){
-        vecTransformComponent.emplace_back(component);
+    void addComponent<PlayerControllerComponent>(const PlayerControllerComponent& component){
+        vecPlayerControllerComponent.emplace_back(component);
     }
 
     template<>
@@ -112,6 +119,16 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<ControllerComponent>(const ControllerComponent& component){
+        vecControllerComponent.emplace_back(component);
+    }
+
+    template<>
+    void addComponent<TransformComponent>(const TransformComponent& component){
+        vecTransformComponent.emplace_back(component);
+    }
+
+    template<>
     void start<BaseComponent>(){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].start();
@@ -119,9 +136,9 @@ struct ComponentStorage{
     }
 
     template<>
-    void start<TransformComponent>(){
-        for(unsigned int i=0;i<vecTransformComponent.size();i++){
-            vecTransformComponent[i].start();
+    void start<PlayerControllerComponent>(){
+        for(unsigned int i=0;i<vecPlayerControllerComponent.size();i++){
+            vecPlayerControllerComponent[i].start();
         }
     }
 
@@ -182,6 +199,20 @@ struct ComponentStorage{
     }
 
     template<>
+    void start<ControllerComponent>(){
+        for(unsigned int i=0;i<vecControllerComponent.size();i++){
+            vecControllerComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<TransformComponent>(){
+        for(unsigned int i=0;i<vecTransformComponent.size();i++){
+            vecTransformComponent[i].start();
+        }
+    }
+
+    template<>
     void update<BaseComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecBaseComponent.size();i++){
             vecBaseComponent[i].update(dt,state);
@@ -189,9 +220,9 @@ struct ComponentStorage{
     }
 
     template<>
-    void update<TransformComponent>(float dt,EntityState& state){
-        for(unsigned int i=0;i<vecTransformComponent.size();i++){
-            vecTransformComponent[i].update(dt,state);
+    void update<PlayerControllerComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecPlayerControllerComponent.size();i++){
+            vecPlayerControllerComponent[i].update(dt,state);
         }
     }
 
@@ -252,12 +283,26 @@ struct ComponentStorage{
     }
 
     template<>
+    void update<ControllerComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecControllerComponent.size();i++){
+            vecControllerComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
+    void update<TransformComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecTransformComponent.size();i++){
+            vecTransformComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
     static ComponentLocation::CompType typeToCompTypeEnum<BaseComponent>(){
         return ComponentLocation::BASECOMPONENT;
     }
     template<>
-    static ComponentLocation::CompType typeToCompTypeEnum<TransformComponent>(){
-        return ComponentLocation::TRANSFORMCOMPONENT;
+    static ComponentLocation::CompType typeToCompTypeEnum<PlayerControllerComponent>(){
+        return ComponentLocation::PLAYERCONTROLLERCOMPONENT;
     }
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<ScriptComponent>(){
@@ -290,5 +335,13 @@ struct ComponentStorage{
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<RigidBodyComponent>(){
         return ComponentLocation::RIGIDBODYCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<ControllerComponent>(){
+        return ComponentLocation::CONTROLLERCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<TransformComponent>(){
+        return ComponentLocation::TRANSFORMCOMPONENT;
     }
 };

@@ -40,14 +40,14 @@ aux_source_directory("${LUADIR}/" LUASRC)
 
 
 # Help CMake to find the installed library on Windows or Mac OS X 
-if(WIN32) 
-  list(APPEND CMAKE_PREFIX_PATH "C:\\Program Files (x86)\\ReactPhysics3D") 
-elseif(APPLE) 
-  list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake/ReactPhysics3D") 
-endif() 
- 
-# Import the ReactPhysics3D library 
-find_package(ReactPhysics3D REQUIRED) 
+# if(WIN32) 
+#   list(APPEND CMAKE_PREFIX_PATH "C:\\Program Files (x86)\\ReactPhysics3D") 
+# elseif(APPLE) 
+#   list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake/ReactPhysics3D") 
+# endif() 
+#  
+# # Import the ReactPhysics3D library 
+# find_package(ReactPhysics3D REQUIRED) 
 
 
 #setup icon on windows
@@ -67,9 +67,11 @@ add_executable(
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp
     src/ECS/Component/ModelComponent.cpp src/ECS/Component/SkyBoxComponent.cpp src/ECS/Component/LightComponent.cpp
+    src/ECS/Component/ControllerComponent.cpp src/ECS/Component/PlayerControllerComponent.cpp 
     src/ECS/Entity/BaseEntity.cpp src/ECS/Entity/CameraEntity.cpp
     src/ECS/Entity/ModelEntity.cpp src/ECS/Entity/SkeletalMeshEntity.cpp
-    src/ECS/EntityState/EntityState.cpp
+    src/ECS/EntityState/EntityState.cpp 
+    src/ECS/System/InputSystem.cpp
     src/ECS/Scene/Scene.cpp  src/ECS/ComponentStorage/ComponentStorage.cpp
     render-engine/RenderManager.cpp render-engine/RenderManager.h render-engine/RenderPipeline.h
     render-engine/RenderPipeline.cpp render-engine/Camera.h render-engine/Camera.cpp
@@ -79,7 +81,8 @@ add_executable(
 	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp
     src/model_import/bone.cpp src/asset_import/animation.cpp
     ${ICON_RESOURCE}
- "src/physics_engine/physicsEngine.cpp" "src/ECS/Component/RigidBodyComponent.cpp" "src/physics_engine/PhysicsEvents.cpp")
+    src/physics_engine/physicsEngine.cpp src/ECS/Component/RigidBodyComponent.cpp 
+    src/physics_engine/PhysicsEvents.cpp)
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -98,11 +101,70 @@ add_subdirectory("external/glm")
 #add spdlog
 add_subdirectory("external/spdlog")
 
+#add physx
+# adapted from https://github.com/NVIDIAGameWorks/PhysX/issues/249#issuecomment-722013539
+# set(PHYSX_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/physx-4.1/physx")
+# set(PXSHARED_PATH ${PHYSX_ROOT_DIR}/../pxshared)
+# set(TARGET_BUILD_PLATFORM "windows")
+# set(NV_USE_STATIC_WINCRT OFF CACHE BOOL "Use the statically linked windows CRT" FORCE)
+# set(NV_USE_DEBUG_WINCRT ON CACHE BOOL "Use the debug version of the CRT" FORCE)
+# set(PX_GENERATE_STATIC_LIBRARIES ON CACHE BOOL "Generate static libraries")
+# set(CMAKEMODULES_VERSION "1.27")
+# set(CMAKEMODULES_PATH ${PHYSX_ROOT_DIR}/../externals/cmakemodules)
+# set(PX_FLOAT_POINT_PRECISE_MATH OFF CACHE BOOL "Float point precise math")
+# set(PXSHARED_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+# set(PX_OUTPUT_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/externals/physx)
+# set(PX_OUTPUT_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR}/externals/physx)
+# set(PHYSX_LIBRARIES
+# 	PhysXExtensions
+# 	PhysX
+# 	PhysXPvdSDK
+# 	PhysXVehicle
+# 	PhysXCharacterKinematic
+# 	PhysXCooking
+# 	PhysXCommon
+# 	PhysXFoundation
+# )
+# set(CMAKE_BUILD_TYPE $<$<CONFIG:Debug>:Debug> $<$<CONFIG:Release>:Release>)
+# add_subdirectory("external/physx-4.1/physx/compiler/public")
+#
+# set(CMAKE_LINKER_FLAGS_CHECKED "/MD")
+# set(CMAKE_LINKER_FLAGS_PROFILE "/MD")
+# set(CMAKE_SHARED_LINKER_FLAGS_CHECKED "/MD")
+# set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "/MD")
+#
+# # References NvidiaBuildOptions.cmake to figure out if system is 32/64 bit
+# IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+# 	SET(LIBPATH_SUFFIX "64")
+# ELSE()
+# 	SET(LIBPATH_SUFFIX "32")
+# ENDIF()
+# GetPlatformBinName(PLATFORM_BIN_NAME ${LIBPATH_SUFFIX})
+# set(PhysxOutputPath ${PX_OUTPUT_LIB_DIR}/bin/${PLATFORM_BIN_NAME})
+
+# if (TARGET_BUILD_PLATFORM STREQUAL "windows")
+# 	message("Physx Output Path: " ${PhysxOutputPath})
+#
+# 	# copy PhysX dll's to build dir. Happens on every build.
+#     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy 
+#         ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCommon$<$<CONFIG:Debug>:d>.dll 
+#         ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysX$<$<CONFIG:Debug>:d>.dll
+#         ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXCooking$<$<CONFIG:Debug>:d>.dll
+#         ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/PhysXFoundation$<$<CONFIG:Debug>:d>.dll
+#         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+# endif()
+
+#add ReactPhysics3D
+add_subdirectory("external/reactphysics3d")
+
 #setup linker
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external/glew-2.1.0/include
     ${PROJECT_SOURCE_DIR}/external/soloud/include ${PROJECT_SOURCE_DIR}/external/rapidjson
+    #[[ ${PROJECT_SOURCE_DIR}/external/physx-4.1/physx/include ${PROJECT_SOURCE_DIR}/external/physx-4.1/pxshared/include ]]
+    ${PROJECT_SOURCE_DIR}/external/reactphysics3d/include
 )
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog ReactPhysics3D::ReactPhysics3D)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm assimp soloud spdlog reactphysics3d)
 
 #generate ComponentStorage code if necessary
 add_custom_target(ComponentStorageGen
@@ -143,6 +205,10 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/util.h
     ${CMAKE_CURRENT_SOURCE_DIR}/template/src
 
+    #shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders
+    ${CMAKE_CURRENT_SOURCE_DIR}/template/assets/shaders
+
     #install assimp
     COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/external/assimp-5.2.5
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
@@ -160,6 +226,11 @@ add_custom_command(
     --config $<$<CONFIG:Debug>:Debug> $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo> 
     $<$<CONFIG:Release>:Release>
     --prefix ${CMAKE_CURRENT_SOURCE_DIR}/template/external/soloud
+
+    #install physx
+    # COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    #     ${PhysxOutputPath}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+    #     ${CMAKE_CURRENT_SOURCE_DIR}/template/external/physx-4.1
 
     #copy template
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
