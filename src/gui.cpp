@@ -1840,6 +1840,16 @@ void drawComponentProps(RigidBodyComponent& component) {
     else if (component.bodyType == BodyType::STATIC) {
         previewStr = "Static";
     }
+    std::string aiType = "type undefined";
+    if (component.aiType == AI_STATES::SLEEP) {
+        previewStr = "Dynamic";
+    }
+    else if (component.aiType == AI_STATES::RANDOM) {
+        previewStr = "Kinematic";
+    }
+    else if (component.aiType == AI_STATES::PATROL) {
+        previewStr = "Static";
+    }
     if (ImGui::BeginCombo("RigidBody Type", previewStr.c_str())) {
         if (ImGui::Selectable("Dynamic", component.bodyType == BodyType::DYNAMIC)) {
             component.setType(BodyType::DYNAMIC);
@@ -1852,8 +1862,23 @@ void drawComponentProps(RigidBodyComponent& component) {
         }
         ImGui::EndCombo();
     }
+    if (ImGui::BeginCombo("AI state Type", previewStr.c_str())) {
+        if (ImGui::Selectable("RANDOM Movement")) {
+            component.setAIState(AI_STATES::RANDOM);
+        }
+        if (ImGui::Selectable("PATROL")) {
+            component.setAIState(AI_STATES::PATROL);
+        }
+        if (ImGui::Selectable("SLEEP")) {
+            component.setAIState(AI_STATES::SLEEP);
+        }
+        ImGui::EndCombo();
+    }
     if (ImGui::Checkbox("Gravity Enabled", &component.gravityEnabled)) {
         component.setGravityEnabled();
+    }
+    if (ImGui::Checkbox("AI Enabled", &component.aiEnabled)) {
+        component.setAIEnabled();
     }
     if (ImGui::Button("Add Cube Collider")) {
         component.createCubeCollider();

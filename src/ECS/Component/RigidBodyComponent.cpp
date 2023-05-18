@@ -267,11 +267,38 @@ void RigidBodyComponent::setCapsuleColliderRadiusHeight(int index, float radius,
     capsuleColliders[index].colliderShape->setHeight(height);
 }
 
+void RigidBodyComponent::setAIEnabled()
+{
+    if (rigidBody != nullptr)
+    {
+        aiEnabled = true;
+    }
+}
+
 void RigidBodyComponent::setType(BodyType type) {
     if (rigidBody != nullptr) {
         rigidBody->setType(type);
         bodyType = type;
     }
+}
+
+void RigidBodyComponent::setAIState(AI_STATES state) {
+	if (rigidBody != nullptr) {
+        //initialise with sleep.
+        StateMachine stateMachine;
+		switch (state) {
+		case(AI_STATES::RANDOM):
+			stateMachine.setState(new RandomWalk(&stateMachine));
+            break;
+        case(AI_STATES::PATROL):
+            stateMachine.setState(new Patrol(&stateMachine));
+            break;
+        case(AI_STATES::SLEEP):
+            stateMachine.setState(new Sleep(&stateMachine));
+            break;
+		}
+	}
+
 }
 
 void RigidBodyComponent::setPosition() {
@@ -294,4 +321,141 @@ void RigidBodyComponent::applyForce()
     }
 }
 
+Quaternion RigidBodyComponent::getRotationBasedOnForce()
+{
+    if (rigidBody != nullptr) {
+        Vector3 up(0.0f, 1.0f, 0.0f);
+        Vector3 f2 = Vector3(force.x, force.y, force.z);
+        Vector3 r = f2.cross(up);
+        reactphysics3d::decimal d = f2.dot(up);
+        Quaternion orientation(r, d);
+        return orientation;
+    }
+}
 
+void RigidBodyComponent::performRandomMovement()
+{
+    if (rigidBody != nullptr) {
+        //this is mainly to have bodies walking around randomly.
+        //randomly generate forces and directions to move around.
+        Transform transform = rigidBody->getTransform();
+        Vector3 position = transform.getPosition();
+        Quaternion orientation = transform.getOrientation();
+        //apply random forces in the x,y plane to have them move around. mainly for rigid bodies
+        //random x,y direction.
+        //random float: https://stackoverflow.com/questions/686353/random-float-number-generation
+        float x = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;
+        float y = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;
+        Vector3 force(x, y, 0.0);
+        rigidBody->applyLocalForceAtCenterOfMass(force);
+        //add here. add rotation manually.
+    }
+}
+
+void RigidBodyComponent::findClosestRigidBody(RigidBody* dst, decimal radius)
+{
+    //using a hack here.
+    //instead of testing overlap in physx, loop through the list of all object and find the global pos.
+    //then use distance formula to find the distance, if distance is under the radius. move to that entity.
+    //then use callbacks.
+    //this is for rigid bodies at the moment. Convert to all actors.
+    //o(n3) yikes.
+    if (rigidBody != nullptr) 
+    {
+        Vector3 closestPos;
+        float closestDistance = radius;
+        Transform t = rigidBody->getTransform();
+        Vector3 positionSrc = t.getPosition();
+        
+        for (auto i : instance->rigidBodies)
+        {
+            Transform transform = i->getTransform();
+            Vector3 position = transform.getPosition();
+            auto d = findDistanceBetweenTwoPoints(position, positionSrc);
+            if (d < closestDistance)
+            {
+                i = dst;
+                radius = d;
+            }
+        }
+    }
+}
+
+void RigidBodyComponent::goTowardsRigidBody()
+{
+    //only detect if rigid bodies are within the radius of 10f.
+    if (rigidBody)
+    {
+        decimal radius = 10.0;
+        RigidBody* dst;
+        findClosestRigidBody(dst, 10);
+        moveTowardsABodyForce(dst);
+        //till pathfinding is done, simply add linear movement.
+        //apply linear velocity in that position or force.
+    }
+}
+
+void RigidBodyComponent::moveTowardsABody(RigidBody* dst, decimal linearVelocity)
+{
+    if (rigidBody)
+    {
+        //src.
+        Transform transform = rigidBody->getTransform();
+        Vector3 position = transform.getPosition();
+
+        //dest
+        Transform transform2 = dst->getTransform();
+        Vector3 position2 = transform.getPosition();
+
+        Vector3 dir = findDirection(position2);
+        rigidBody->setLinearVelocity(dir);
+    }
+}
+
+Vector3 RigidBodyComponent::findDirection(Vector3 d)
+{
+    if (rigidBody)
+    {
+        Transform t = rigidBody->getTransform();
+        Vector3 positionSrc = t.getPosition();
+        Vector3 dir = d - positionSrc;
+        dir.normalize();
+        return dir;
+    }
+}
+
+void RigidBodyComponent::moveTowardsABodyForce(RigidBody* dst)
+{
+    if (rigidBody)
+    {
+        Transform transform2 = dst->getTransform();
+        Vector3 position2 = transform2.getPosition();
+
+        Vector3 dir = findDirection(position2);
+
+        decimal forceM = 100.0f;  // Example force magnitude
+
+        Vector3 force = forceM * dir;
+        rigidBody->applyLocalForceAtCenterOfMass(force);
+    }
+}
+
+void RigidBodyComponent::createExplosion(Vector3 pos, decimal radius, decimal force)
+{
+    //find all the objects within the radius and apply explosion.
+    //same logic as closest obj.
+    Vector3 closestPos;
+    for (auto i : instance->rigidBodies)
+    {
+        Transform transform = i->getTransform();
+        Vector3 position = transform.getPosition();
+        auto d = findDistanceBetweenTwoPoints(position, pos);
+        if (d < radius)
+        {
+            //we apply force in the 
+            Vector3 dir = findDirection(position);
+            i->applyLocalForceAtCenterOfMass(force * dir);
+        }
+
+    }
+}

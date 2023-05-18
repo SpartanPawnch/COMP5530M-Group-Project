@@ -3,6 +3,10 @@
 #include <reactphysics3d/reactphysics3d.h>
 #include "BaseComponent.h"
 #include "../../physics_engine/physicsEngine.h"
+#include "../../ai/ai.h"
+
+//enum type for the ai interaction
+
 
 struct RigidBodyComponent : BaseComponent {
     RigidBodyComponent();
@@ -31,12 +35,15 @@ struct RigidBodyComponent : BaseComponent {
     void setCubeColliderExtents(int index, glm::vec3 extents);
     void setSphereColliderRadius(int index, float radius);
     void setCapsuleColliderRadiusHeight(int index, float radius, float height);
+    void setAIEnabled();
 
 
     PhysicsEngine* instance;
     BodyType bodyType = BodyType::DYNAMIC;
+    AI_STATES aiType = AI_STATES::SLEEP;
 
     bool gravityEnabled = true;
+    bool aiEnabled = false;
 
     RigidBody* rigidBody=nullptr;
     glm::vec3 position=glm::vec3(0.0f);
@@ -48,4 +55,17 @@ struct RigidBodyComponent : BaseComponent {
     std::vector<CapsuleColliderObject> capsuleColliders;
     std::vector<MeshColliderObject> meshColliders;
 
+    //ai state.
+    //keep track of this state for ai interations.
+    StateMachine* stateMachine;
+    void setAIState(AI_STATES state);
+    //these functions are for the updateState of stateMachine.
+    void performRandomMovement();
+    Quaternion getRotationBasedOnForce();
+    void findClosestRigidBody(RigidBody* dst, decimal radius);
+    void goTowardsRigidBody();
+    void moveTowardsABody(RigidBody* dst, decimal linearVelocity);
+    Vector3 findDirection(Vector3 d);
+    void moveTowardsABodyForce(RigidBody* dst);
+    void createExplosion(Vector3 pos, decimal radius, decimal force);
 };
