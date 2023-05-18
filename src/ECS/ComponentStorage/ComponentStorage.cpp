@@ -3,6 +3,7 @@
 void ComponentStorage::startAll(){
     start<BaseComponent>();
     start<PlayerControllerComponent>();
+    start<RigidBodyComponent>();
     start<ScriptComponent>();
     start<CameraComponent>();
     start<AudioSourceComponent>();
@@ -10,13 +11,13 @@ void ComponentStorage::startAll(){
     start<SkeletalModelComponent>();
     start<LightComponent>();
     start<SkyBoxComponent>();
-    start<RigidBodyComponent>();
     start<ControllerComponent>();
     start<TransformComponent>();
 }
 void ComponentStorage::updateAll(float dt, EntityState& state){
     update<BaseComponent>(dt,state);
     update<PlayerControllerComponent>(dt,state);
+    update<RigidBodyComponent>(dt,state);
     update<ScriptComponent>(dt,state);
     update<CameraComponent>(dt,state);
     update<AudioSourceComponent>(dt,state);
@@ -24,13 +25,13 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<SkeletalModelComponent>(dt,state);
     update<LightComponent>(dt,state);
     update<SkyBoxComponent>(dt,state);
-    update<RigidBodyComponent>(dt,state);
     update<ControllerComponent>(dt,state);
     update<TransformComponent>(dt,state);
 }
 void ComponentStorage::clearAll(){
     vecBaseComponent.clear();
     vecPlayerControllerComponent.clear();
+    vecRigidBodyComponent.clear();
     vecScriptComponent.clear();
     vecCameraComponent.clear();
     vecAudioSourceComponent.clear();
@@ -38,13 +39,13 @@ void ComponentStorage::clearAll(){
     vecSkeletalModelComponent.clear();
     vecLightComponent.clear();
     vecSkyBoxComponent.clear();
-    vecRigidBodyComponent.clear();
     vecControllerComponent.clear();
     vecTransformComponent.clear();
 }
 void ComponentStorage::registerMetatables(){
     BaseComponent::registerLuaMetatable();
     PlayerControllerComponent::registerLuaMetatable();
+    RigidBodyComponent::registerLuaMetatable();
     ScriptComponent::registerLuaMetatable();
     CameraComponent::registerLuaMetatable();
     AudioSourceComponent::registerLuaMetatable();
@@ -52,7 +53,6 @@ void ComponentStorage::registerMetatables(){
     SkeletalModelComponent::registerLuaMetatable();
     LightComponent::registerLuaMetatable();
     SkyBoxComponent::registerLuaMetatable();
-    RigidBodyComponent::registerLuaMetatable();
     ControllerComponent::registerLuaMetatable();
     TransformComponent::registerLuaMetatable();
 }
@@ -66,6 +66,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecPlayerControllerComponent.size())
             return nullptr;
         return &vecPlayerControllerComponent[loc.componentIdx];
+    case ComponentLocation::RIGIDBODYCOMPONENT:
+        if(loc.componentIdx>=vecRigidBodyComponent.size())
+            return nullptr;
+        return &vecRigidBodyComponent[loc.componentIdx];
     case ComponentLocation::SCRIPTCOMPONENT:
         if(loc.componentIdx>=vecScriptComponent.size())
             return nullptr;
@@ -94,10 +98,6 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecSkyBoxComponent.size())
             return nullptr;
         return &vecSkyBoxComponent[loc.componentIdx];
-    case ComponentLocation::RIGIDBODYCOMPONENT:
-        if(loc.componentIdx>=vecRigidBodyComponent.size())
-            return nullptr;
-        return &vecRigidBodyComponent[loc.componentIdx];
     case ComponentLocation::CONTROLLERCOMPONENT:
         if(loc.componentIdx>=vecControllerComponent.size())
             return nullptr;
@@ -121,6 +121,11 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((PlayerControllerComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::RIGIDBODYCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((RigidBodyComponent*)ptr)->pushLuaTable(state);
         return;
     case ComponentLocation::SCRIPTCOMPONENT:
         if(ptr==nullptr)
@@ -156,11 +161,6 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((SkyBoxComponent*)ptr)->pushLuaTable(state);
-        return;
-    case ComponentLocation::RIGIDBODYCOMPONENT:
-        if(ptr==nullptr)
-            break;
-        ((RigidBodyComponent*)ptr)->pushLuaTable(state);
         return;
     case ComponentLocation::CONTROLLERCOMPONENT:
         if(ptr==nullptr)

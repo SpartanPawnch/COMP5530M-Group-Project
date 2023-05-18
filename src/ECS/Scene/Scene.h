@@ -26,6 +26,10 @@ class Scene {
     BaseEntity* selectedEntity;
     int selectedCameraIdx = 0;
 
+#ifdef ONO_ENGINE_ONLY
+    bool showColliders = false;
+#endif
+
     std::unordered_map<int, int> uuidToIdx;
     std::vector<BaseEntity> entities;
 };

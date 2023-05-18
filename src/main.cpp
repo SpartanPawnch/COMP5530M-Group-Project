@@ -161,11 +161,11 @@ int main() {
     renderManager->setupIconIDPipelineUniforms();
     renderManager->setupAnimationIDPipelineUniforms();
 
-    const float timeStep = 1.0f / 60.0f;
-    long double accumulator = 0;
     // register lua stuff
     scene.registerLuaTable();
     ComponentStorage::registerMetatables();
+    const float timeStep = 1.0f / 60.0f;
+    long double accumulator = 0;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
@@ -178,16 +178,16 @@ int main() {
 
         if (physicsEngine->isSimulating) {
 
-            // Add the time difference in the accumulator 
+            // Add the time difference in the accumulator
             accumulator += current_time - previous_time;
 
-            // While there is enough accumulated time to take 
-            // one or several physics steps 
+            // While there is enough accumulated time to take
+            // one or several physics steps
             while (accumulator >= timeStep) {
 
-                // Update the Dynamics world with a constant time step 
+                // Update the Dynamics world with a constant time step
                 physicsEngine->world->update(timeStep);
-                // Decrease the accumulated time 
+                // Decrease the accumulated time
                 accumulator -= timeStep;
             }
 
@@ -234,6 +234,9 @@ int main() {
         // draw scene
         renderManager->renderEntities(scene, &renderManager->camera, viewportTexWidth,
             viewportTexHeight);
+
+        if (scene.showColliders)
+            renderManager->renderColliders(scene, viewportTexWidth, viewportTexHeight);
 
         // draw cam preview frustum
         renderManager->renderCamPreview(scene, width, height);

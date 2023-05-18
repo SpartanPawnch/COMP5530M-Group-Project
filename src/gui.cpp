@@ -41,15 +41,15 @@
 #include "ECS/Component/ModelComponent.h"
 #include "ECS/Component/SkyBoxComponent.h"
 #include "ECS/Component/SkeletalModelComponent.h"
-#include "ECS/Component/RigidBodyComponent.h"
 #include "ECS/Component/PlayerControllerComponent.h"
+#include "ECS/Component/RigidBodyComponent.h"
 #include "ECS/Entity/CameraEntity.h"
 #include "ECS/Entity/ModelEntity.h"
 #include "ECS/Entity/SkeletalMeshEntity.h"
 #include "ECS/Scene/Scene.h"
 #include "../render-engine/RenderManager.h"
-#include "physics_engine/physicsEngine.h"
 #include "ECS/System/InputSystem.h"
+#include "physics_engine/physicsEngine.h"
 
 #include "../external/ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
@@ -225,10 +225,10 @@ GUIManager::GUIManager(GLFWwindow* window) {
     baseWindow = window;
     materialSystem = MaterialSystem::getInstance();
     renderManager = RenderManager::getInstance();
-    physicsEngine = PhysicsEngine::getInstance();
 
     inputSystem = InputSystem::getInstance();
     inputSystem->scene = &scene;
+    physicsEngine = PhysicsEngine::getInstance();
 }
 GUIManager::~GUIManager() {
     if (projectThread.joinable())
@@ -865,6 +865,8 @@ inline void drawViewport() {
         if (ImGui::Button(physicsEngine->isSimulating ? "Pause Simulation" : "Simulate")) {
             physicsEngine->isSimulating = !physicsEngine->isSimulating;
         }
+        ImGui::SameLine();
+        ImGui::Checkbox("Show Colliders", &scene.showColliders);
         ImGui::PopFont();
     }
     ImGui::PopStyleVar(2);
@@ -1462,63 +1464,63 @@ void drawComponentProps(SkeletalModelComponent& component) {
         ImGui::NextColumn();
         ImGui::Text("Transition Immediately?");
         ImGui::NextColumn();
-ImGui::Text("Current Value");
-ImGui::NextColumn();
-ImGui::Text("Desired Value");
-ImGui::NextColumn();
-ImGui::Text("Condition Lower?");
-ImGui::NextColumn();
-ImGui::Text("Condition Equal?");
-ImGui::NextColumn();
-ImGui::Text("Condition Greater?");
-ImGui::NextColumn();
-ImGui::Text("Blend Time");
-ImGui::NextColumn();
-ImGui::Text("Remove Transition");
-ImGui::NextColumn();
-ImGui::Separator();
-for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
-    ImGui::PushID(i);
-    if (ImGui::BeginCombo("##transition_to_float",
-        component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
-        for (unsigned int j = 0; j < component.nodes.size(); j++) {
-            if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                component.selectedNode->floatTransitions[i].transitionTo ==
-                component.nodes[j].name)) {
-                component.selectedNode->floatTransitions[i].transitionTo =
-                    component.nodes[j].name;
+        ImGui::Text("Current Value");
+        ImGui::NextColumn();
+        ImGui::Text("Desired Value");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Lower?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Equal?");
+        ImGui::NextColumn();
+        ImGui::Text("Condition Greater?");
+        ImGui::NextColumn();
+        ImGui::Text("Blend Time");
+        ImGui::NextColumn();
+        ImGui::Text("Remove Transition");
+        ImGui::NextColumn();
+        ImGui::Separator();
+        for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
+            ImGui::PushID(i);
+            if (ImGui::BeginCombo("##transition_to_float",
+                    component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
+                for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                            component.selectedNode->floatTransitions[i].transitionTo ==
+                                component.nodes[j].name)) {
+                        component.selectedNode->floatTransitions[i].transitionTo =
+                            component.nodes[j].name;
+                    }
+                }
+                ImGui::EndCombo();
             }
+            ImGui::NextColumn();
+            ImGui::Checkbox("##immediate_float",
+                &component.selectedNode->floatTransitions[i].immediate);
+            ImGui::NextColumn();
+            ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
+            ImGui::NextColumn();
+            ImGui::InputFloat("##desired_float",
+                &component.selectedNode->floatTransitions[i].desiredValue);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_lower_float",
+                &component.selectedNode->floatTransitions[i].shouldBeLower);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_equal_float",
+                &component.selectedNode->floatTransitions[i].shouldBeEqual);
+            ImGui::NextColumn();
+            ImGui::Checkbox("##should_greater_float",
+                &component.selectedNode->floatTransitions[i].shouldBeGreater);
+            ImGui::NextColumn();
+            ImGui::InputFloat("##float_blendtime",
+                &component.selectedNode->floatTransitions[i].blendTime);
+            ImGui::NextColumn();
+            if (ImGui::Button("Remove Transition")) {
+                component.removeFloatACTransition(i);
+            }
+            ImGui::NextColumn();
+            ImGui::PopID();
         }
-        ImGui::EndCombo();
-    }
-    ImGui::NextColumn();
-    ImGui::Checkbox("##immediate_float",
-        &component.selectedNode->floatTransitions[i].immediate);
-    ImGui::NextColumn();
-    ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
-    ImGui::NextColumn();
-    ImGui::InputFloat("##desired_float",
-        &component.selectedNode->floatTransitions[i].desiredValue);
-    ImGui::NextColumn();
-    ImGui::Checkbox("##should_lower_float",
-        &component.selectedNode->floatTransitions[i].shouldBeLower);
-    ImGui::NextColumn();
-    ImGui::Checkbox("##should_equal_float",
-        &component.selectedNode->floatTransitions[i].shouldBeEqual);
-    ImGui::NextColumn();
-    ImGui::Checkbox("##should_greater_float",
-        &component.selectedNode->floatTransitions[i].shouldBeGreater);
-    ImGui::NextColumn();
-    ImGui::InputFloat("##float_blendtime",
-        &component.selectedNode->floatTransitions[i].blendTime);
-    ImGui::NextColumn();
-    if (ImGui::Button("Remove Transition")) {
-        component.removeFloatACTransition(i);
-    }
-    ImGui::NextColumn();
-    ImGui::PopID();
-}
-ImGui::Columns(1);
+        ImGui::Columns(1);
     }
     else {
         ImGui::Text("Select a node to show it's transitions");
@@ -1526,7 +1528,7 @@ ImGui::Columns(1);
 }
 
 void drawComponentProps(SkyBoxComponent& component) {
-    std::string faceNames[6] = { "right", "left", "top", "bottom", "back", "front" };
+    std::string faceNames[6] = {"right", "left", "top", "bottom", "back", "front"};
 
     static std::vector<assetfolder::AssetDescriptor> textureFiles;
     assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::TEXTURE, textureFiles);
@@ -1550,7 +1552,7 @@ void drawComponentProps(SkyBoxComponent& component) {
                 if (ImGui::Selectable(textureFiles[j].name.c_str(), &isSelected)) {
                     component.updateTex(i, textureFiles[j].path);
                     std::cout << "set texture to "
-                        << component.skybox.faces[i].textureDescriptor->texId << std::endl;
+                              << component.skybox.faces[i].textureDescriptor->texId << std::endl;
                 }
             }
             ImGui::EndCombo();
@@ -1570,15 +1572,19 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
         }
         ImGui::Text("Bounciness:");
         float prevBounciness = component.cubeColliders[i].materialBounciness;
-        ImGui::InputFloat("##cube_material_bounciness", &component.cubeColliders[i].materialBounciness);
+        ImGui::InputFloat("##cube_material_bounciness",
+            &component.cubeColliders[i].materialBounciness);
         if (prevBounciness != component.cubeColliders[i].materialBounciness) {
-            component.setMaterialBounciness(ColliderTypes::CUBE, i, component.cubeColliders[i].materialBounciness);
+            component.setMaterialBounciness(ColliderTypes::CUBE, i,
+                component.cubeColliders[i].materialBounciness);
         }
         ImGui::Text("Friction:");
         float prevFriction = component.cubeColliders[i].materialFrictionCoefficient;
-        ImGui::InputFloat("##cube_material_friction", &component.cubeColliders[i].materialFrictionCoefficient);
+        ImGui::InputFloat("##cube_material_friction",
+            &component.cubeColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.cubeColliders[i].materialFrictionCoefficient) {
-            component.setMaterialFrictionCoefficient(ColliderTypes::CUBE, i, component.cubeColliders[i].materialFrictionCoefficient);
+            component.setMaterialFrictionCoefficient(ColliderTypes::CUBE, i,
+                component.cubeColliders[i].materialFrictionCoefficient);
         }
         ImGui::Text("Local Postion:");
         glm::vec3 prevPos = component.cubeColliders[i].position;
@@ -1604,13 +1610,16 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
             previewStrMask = "Category 3";
         }
         if (ImGui::BeginCombo("##cube_collider_type", previewStrMask.c_str())) {
-            if (ImGui::Selectable("Category 1", component.cubeColliders[i].category & CollisionCategories::CATEGORY1)) {
+            if (ImGui::Selectable("Category 1",
+                    component.cubeColliders[i].category & CollisionCategories::CATEGORY1)) {
                 component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY1);
             }
-            if (ImGui::Selectable("Category 2", component.cubeColliders[i].category & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.cubeColliders[i].category & CollisionCategories::CATEGORY2)) {
                 component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY2);
             }
-            if (ImGui::Selectable("Category 3", component.cubeColliders[i].category & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.cubeColliders[i].category & CollisionCategories::CATEGORY3)) {
                 component.setCollisionMask(ColliderTypes::CUBE, i, CollisionCategories::CATEGORY3);
             }
             ImGui::EndCombo();
@@ -1627,19 +1636,26 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
             previewStrMaskCollideWith = "Category 3";
         }
         if (ImGui::BeginCombo("##cube_collider_current_type", previewStrMaskCollideWith.c_str())) {
-            if (ImGui::Selectable("Category 1", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+            if (ImGui::Selectable("Category 1",
+                    component.cubeColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY1)) {
                 component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
             }
-            if (ImGui::Selectable("Category 2", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.cubeColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY2)) {
                 component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
             }
-            if (ImGui::Selectable("Category 3", component.cubeColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.cubeColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY3)) {
                 component.cubeColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
             }
             ImGui::EndCombo();
         }
         if (ImGui::Button("Add Collision Mask")) {
-            component.setCollisionCollideWithMask(ColliderTypes::CUBE, i, component.cubeColliders[i].currentCollideWith);
+            component.setCollisionCollideWithMask(ColliderTypes::CUBE, i,
+                component.cubeColliders[i].currentCollideWith);
         }
         for (unsigned int j = 0; j < component.cubeColliders[i].collidesWith.size(); j++) {
             if (component.cubeColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
@@ -1670,15 +1686,19 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
         }
         ImGui::Text("Bounciness:");
         float prevBounciness = component.sphereColliders[i].materialBounciness;
-        ImGui::InputFloat("##sphere_material_bounciness", &component.sphereColliders[i].materialBounciness);
+        ImGui::InputFloat("##sphere_material_bounciness",
+            &component.sphereColliders[i].materialBounciness);
         if (prevBounciness != component.sphereColliders[i].materialBounciness) {
-            component.setMaterialBounciness(ColliderTypes::SPHERE, i, component.sphereColliders[i].materialBounciness);
+            component.setMaterialBounciness(ColliderTypes::SPHERE, i,
+                component.sphereColliders[i].materialBounciness);
         }
         ImGui::Text("Friction:");
         float prevFriction = component.sphereColliders[i].materialFrictionCoefficient;
-        ImGui::InputFloat("##sphere_material_friction", &component.sphereColliders[i].materialFrictionCoefficient);
+        ImGui::InputFloat("##sphere_material_friction",
+            &component.sphereColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.sphereColliders[i].materialFrictionCoefficient) {
-            component.setMaterialFrictionCoefficient(ColliderTypes::SPHERE, i, component.sphereColliders[i].materialFrictionCoefficient);
+            component.setMaterialFrictionCoefficient(ColliderTypes::SPHERE, i,
+                component.sphereColliders[i].materialFrictionCoefficient);
         }
         ImGui::Text("Local Postion:");
         glm::vec3 prevPos = component.sphereColliders[i].position;
@@ -1703,14 +1723,20 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
             previewStrMask = "Category 3";
         }
         if (ImGui::BeginCombo("##sphere_collider_type", previewStrMask.c_str())) {
-            if (ImGui::Selectable("Category 1", component.sphereColliders[i].category & CollisionCategories::CATEGORY1)) {
-                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY1);
+            if (ImGui::Selectable("Category 1",
+                    component.sphereColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i,
+                    CollisionCategories::CATEGORY1);
             }
-            if (ImGui::Selectable("Category 2", component.sphereColliders[i].category & CollisionCategories::CATEGORY2)) {
-                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY2);
+            if (ImGui::Selectable("Category 2",
+                    component.sphereColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i,
+                    CollisionCategories::CATEGORY2);
             }
-            if (ImGui::Selectable("Category 3", component.sphereColliders[i].category & CollisionCategories::CATEGORY3)) {
-                component.setCollisionMask(ColliderTypes::SPHERE, i, CollisionCategories::CATEGORY3);
+            if (ImGui::Selectable("Category 3",
+                    component.sphereColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::SPHERE, i,
+                    CollisionCategories::CATEGORY3);
             }
             ImGui::EndCombo();
         }
@@ -1724,29 +1750,39 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
         else if (component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
             previewStrMaskCollideWith = "Category 3";
         }
-        if (ImGui::BeginCombo("##sphere_collider_current_type", previewStrMaskCollideWith.c_str())) {
-            if (ImGui::Selectable("Category 1", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+        if (ImGui::BeginCombo("##sphere_collider_current_type",
+                previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1",
+                    component.sphereColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY1)) {
                 component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
             }
-            if (ImGui::Selectable("Category 2", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.sphereColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY2)) {
                 component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
             }
-            if (ImGui::Selectable("Category 3", component.sphereColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.sphereColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY3)) {
                 component.sphereColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
             }
             ImGui::EndCombo();
         }
         if (ImGui::Button("Add Collision Mask")) {
-            component.setCollisionCollideWithMask(ColliderTypes::SPHERE, i, component.sphereColliders[i].currentCollideWith);
+            component.setCollisionCollideWithMask(ColliderTypes::SPHERE, i,
+                component.sphereColliders[i].currentCollideWith);
         }
         for (unsigned int j = 0; j < component.sphereColliders[i].collidesWith.size(); j++) {
             if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
                 ImGui::Text("Category 1");
             }
-            else if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+            else if (component.sphereColliders[i].collidesWith[j] &
+                CollisionCategories::CATEGORY2) {
                 ImGui::Text("Category 2");
             }
-            else if (component.sphereColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+            else if (component.sphereColliders[i].collidesWith[j] &
+                CollisionCategories::CATEGORY3) {
                 ImGui::Text("Category 3");
             }
             if (ImGui::Button("Delete")) {
@@ -1765,24 +1801,30 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
         ImGui::Text("Capsule Collider Radius:");
         ImGui::InputFloat("##capsule_radius", &component.capsuleColliders[i].radius);
         if (prevRadius != component.capsuleColliders[i].radius) {
-            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius, component.capsuleColliders[i].height);
+            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius,
+                component.capsuleColliders[i].height);
         }
         ImGui::Text("Capsule Collider Height:");
         ImGui::InputFloat("##capsule_height", &component.capsuleColliders[i].height);
         if (prevHeight != component.capsuleColliders[i].height) {
-            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius, component.capsuleColliders[i].height);
+            component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius,
+                component.capsuleColliders[i].height);
         }
         ImGui::Text("Bounciness:");
         float prevBounciness = component.capsuleColliders[i].materialBounciness;
-        ImGui::InputFloat("##capsule_material_bounciness", &component.capsuleColliders[i].materialBounciness);
+        ImGui::InputFloat("##capsule_material_bounciness",
+            &component.capsuleColliders[i].materialBounciness);
         if (prevBounciness != component.capsuleColliders[i].materialBounciness) {
-            component.setMaterialBounciness(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].materialBounciness);
+            component.setMaterialBounciness(ColliderTypes::CAPSULE, i,
+                component.capsuleColliders[i].materialBounciness);
         }
         ImGui::Text("Friction:");
         float prevFriction = component.capsuleColliders[i].materialFrictionCoefficient;
-        ImGui::InputFloat("##capsule_material_friction", &component.capsuleColliders[i].materialFrictionCoefficient);
+        ImGui::InputFloat("##capsule_material_friction",
+            &component.capsuleColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.capsuleColliders[i].materialFrictionCoefficient) {
-            component.setMaterialFrictionCoefficient(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].materialFrictionCoefficient);
+            component.setMaterialFrictionCoefficient(ColliderTypes::CAPSULE, i,
+                component.capsuleColliders[i].materialFrictionCoefficient);
         }
         ImGui::Text("Local Postion:");
         glm::vec3 prevPos = component.capsuleColliders[i].position;
@@ -1807,14 +1849,20 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
             previewStrMask = "Category 3";
         }
         if (ImGui::BeginCombo("##capsule_collider_type", previewStrMask.c_str())) {
-            if (ImGui::Selectable("Category 1", component.capsuleColliders[i].category & CollisionCategories::CATEGORY1)) {
-                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY1);
+            if (ImGui::Selectable("Category 1",
+                    component.capsuleColliders[i].category & CollisionCategories::CATEGORY1)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i,
+                    CollisionCategories::CATEGORY1);
             }
-            if (ImGui::Selectable("Category 2", component.capsuleColliders[i].category & CollisionCategories::CATEGORY2)) {
-                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY2);
+            if (ImGui::Selectable("Category 2",
+                    component.capsuleColliders[i].category & CollisionCategories::CATEGORY2)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i,
+                    CollisionCategories::CATEGORY2);
             }
-            if (ImGui::Selectable("Category 3", component.capsuleColliders[i].category & CollisionCategories::CATEGORY3)) {
-                component.setCollisionMask(ColliderTypes::CAPSULE, i, CollisionCategories::CATEGORY3);
+            if (ImGui::Selectable("Category 3",
+                    component.capsuleColliders[i].category & CollisionCategories::CATEGORY3)) {
+                component.setCollisionMask(ColliderTypes::CAPSULE, i,
+                    CollisionCategories::CATEGORY3);
             }
             ImGui::EndCombo();
         }
@@ -1822,35 +1870,47 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
         if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY1) {
             previewStrMaskCollideWith = "Category 1";
         }
-        else if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY2) {
+        else if (component.capsuleColliders[i].currentCollideWith &
+            CollisionCategories::CATEGORY2) {
             previewStrMaskCollideWith = "Category 2";
         }
-        else if (component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY3) {
+        else if (component.capsuleColliders[i].currentCollideWith &
+            CollisionCategories::CATEGORY3) {
             previewStrMaskCollideWith = "Category 3";
         }
-        if (ImGui::BeginCombo("##capsule_collider_current_type", previewStrMaskCollideWith.c_str())) {
-            if (ImGui::Selectable("Category 1", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+        if (ImGui::BeginCombo("##capsule_collider_current_type",
+                previewStrMaskCollideWith.c_str())) {
+            if (ImGui::Selectable("Category 1",
+                    component.capsuleColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY1)) {
                 component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
             }
-            if (ImGui::Selectable("Category 2", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.capsuleColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY2)) {
                 component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
             }
-            if (ImGui::Selectable("Category 3", component.capsuleColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.capsuleColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY3)) {
                 component.capsuleColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
             }
             ImGui::EndCombo();
         }
         if (ImGui::Button("Add Collision Mask")) {
-            component.setCollisionCollideWithMask(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].currentCollideWith);
+            component.setCollisionCollideWithMask(ColliderTypes::CAPSULE, i,
+                component.capsuleColliders[i].currentCollideWith);
         }
         for (unsigned int j = 0; j < component.capsuleColliders[i].collidesWith.size(); j++) {
             if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {
                 ImGui::Text("Category 1");
             }
-            else if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY2) {
+            else if (component.capsuleColliders[i].collidesWith[j] &
+                CollisionCategories::CATEGORY2) {
                 ImGui::Text("Category 2");
             }
-            else if (component.capsuleColliders[i].collidesWith[j] & CollisionCategories::CATEGORY3) {
+            else if (component.capsuleColliders[i].collidesWith[j] &
+                CollisionCategories::CATEGORY3) {
                 ImGui::Text("Category 3");
             }
             if (ImGui::Button("Delete")) {
@@ -1873,7 +1933,8 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
         if (ImGui::BeginCombo("Model File", previewStr.c_str())) {
             // get available audio clips
             static std::vector<assetfolder::AssetDescriptor> modelFiles;
-            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL, modelFiles);
+            assetfolder::findAssetsByType(assetfolder::AssetDescriptor::EFileType::MODEL,
+                modelFiles);
 
             // list available audio clips
             for (unsigned int j = 0; j < modelFiles.size(); j++) {
@@ -1891,7 +1952,8 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
                     }
 
                     std::swap(component.meshColliders[i].model, desc);
-                    component.meshColliders[i].modelUuid = component.meshColliders[i].model ? uuid : "";
+                    component.meshColliders[i].modelUuid =
+                        component.meshColliders[i].model ? uuid : "";
                     component.setMeshColliderModel(i);
                 }
                 ImGui::PopID();
@@ -1901,15 +1963,19 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
         }
         ImGui::Text("Bounciness:");
         float prevBounciness = component.meshColliders[i].materialBounciness;
-        ImGui::InputFloat("##mesh_material_bounciness", &component.meshColliders[i].materialBounciness);
+        ImGui::InputFloat("##mesh_material_bounciness",
+            &component.meshColliders[i].materialBounciness);
         if (prevBounciness != component.meshColliders[i].materialBounciness) {
-            component.setMaterialBounciness(ColliderTypes::MESH, i, component.meshColliders[i].materialBounciness);
+            component.setMaterialBounciness(ColliderTypes::MESH, i,
+                component.meshColliders[i].materialBounciness);
         }
         ImGui::Text("Friction:");
         float prevFriction = component.meshColliders[i].materialFrictionCoefficient;
-        ImGui::InputFloat("##mesh_material_friction", &component.meshColliders[i].materialFrictionCoefficient);
+        ImGui::InputFloat("##mesh_material_friction",
+            &component.meshColliders[i].materialFrictionCoefficient);
         if (prevBounciness != component.meshColliders[i].materialFrictionCoefficient) {
-            component.setMaterialFrictionCoefficient(ColliderTypes::MESH, i, component.meshColliders[i].materialFrictionCoefficient);
+            component.setMaterialFrictionCoefficient(ColliderTypes::MESH, i,
+                component.meshColliders[i].materialFrictionCoefficient);
         }
         ImGui::Text("Local Postion:");
         glm::vec3 prevPos = component.meshColliders[i].position;
@@ -1934,13 +2000,16 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
             previewStrMask = "Category 3";
         }
         if (ImGui::BeginCombo("##mesh_collider_type", previewStrMask.c_str())) {
-            if (ImGui::Selectable("Category 1", component.meshColliders[i].category & CollisionCategories::CATEGORY1)) {
+            if (ImGui::Selectable("Category 1",
+                    component.meshColliders[i].category & CollisionCategories::CATEGORY1)) {
                 component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY1);
             }
-            if (ImGui::Selectable("Category 2", component.meshColliders[i].category & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.meshColliders[i].category & CollisionCategories::CATEGORY2)) {
                 component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY2);
             }
-            if (ImGui::Selectable("Category 3", component.meshColliders[i].category & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.meshColliders[i].category & CollisionCategories::CATEGORY3)) {
                 component.setCollisionMask(ColliderTypes::MESH, i, CollisionCategories::CATEGORY3);
             }
             ImGui::EndCombo();
@@ -1956,19 +2025,26 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
             previewStrMaskCollideWith = "Category 3";
         }
         if (ImGui::BeginCombo("##mesh_collider_current_type", previewStrMaskCollideWith.c_str())) {
-            if (ImGui::Selectable("Category 1", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY1)) {
+            if (ImGui::Selectable("Category 1",
+                    component.meshColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY1)) {
                 component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY1;
             }
-            if (ImGui::Selectable("Category 2", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY2)) {
+            if (ImGui::Selectable("Category 2",
+                    component.meshColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY2)) {
                 component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY2;
             }
-            if (ImGui::Selectable("Category 3", component.meshColliders[i].currentCollideWith & CollisionCategories::CATEGORY3)) {
+            if (ImGui::Selectable("Category 3",
+                    component.meshColliders[i].currentCollideWith &
+                        CollisionCategories::CATEGORY3)) {
                 component.meshColliders[i].currentCollideWith = CollisionCategories::CATEGORY3;
             }
             ImGui::EndCombo();
         }
         if (ImGui::Button("Add Collision Mask")) {
-            component.setCollisionCollideWithMask(ColliderTypes::MESH, i, component.meshColliders[i].currentCollideWith);
+            component.setCollisionCollideWithMask(ColliderTypes::MESH, i,
+                component.meshColliders[i].currentCollideWith);
         }
         for (unsigned int j = 0; j < component.meshColliders[i].collidesWith.size(); j++) {
             if (component.meshColliders[i].collidesWith[j] & CollisionCategories::CATEGORY1) {

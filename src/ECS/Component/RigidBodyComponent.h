@@ -3,12 +3,12 @@
 #include <reactphysics3d/reactphysics3d.h>
 #include "BaseComponent.h"
 #include "../../physics_engine/physicsEngine.h"
+#include <lua.hpp>
 
 struct RigidBodyComponent : BaseComponent {
     RigidBodyComponent();
     RigidBodyComponent(const std::string& name, const int uuid);
     ~RigidBodyComponent() {
-        
     }
     void start() override;
     void update(float dt, EntityState& state) override;
@@ -35,17 +35,19 @@ struct RigidBodyComponent : BaseComponent {
     void setCapsuleColliderRadiusHeight(int index, float radius, float height);
     void setMeshColliderModel(int index);
 
+    void pushLuaTable(lua_State* state);
+    static void registerLuaMetatable();
 
     PhysicsEngine* instance;
     BodyType bodyType = BodyType::DYNAMIC;
 
     bool gravityEnabled = true;
 
-    RigidBody* rigidBody=nullptr;
-    glm::vec3 position=glm::vec3(0.0f);
+    RigidBody* rigidBody = nullptr;
+    glm::vec3 position = glm::vec3(0.0f);
     glm::quat rotation = glm::quat(1.f, .0f, .0f, .0f);
     glm::vec3 force = glm::vec3(0.0f);
-    
+
     std::vector<CubeColliderObject> cubeColliders;
     std::vector<SphereColliderObject> sphereColliders;
     std::vector<CapsuleColliderObject> capsuleColliders;

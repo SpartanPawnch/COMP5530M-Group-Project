@@ -4,6 +4,9 @@ case ComponentLocation::BASECOMPONENT:
 case ComponentLocation::PLAYERCONTROLLERCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecPlayerControllerComponent);
     break;
+case ComponentLocation::RIGIDBODYCOMPONENT:
+    drawComponentSelector(loc.componentIdx,storage.vecRigidBodyComponent);
+    break;
 case ComponentLocation::SCRIPTCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecScriptComponent);
     break;
@@ -24,9 +27,6 @@ case ComponentLocation::LIGHTCOMPONENT:
     break;
 case ComponentLocation::SKYBOXCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecSkyBoxComponent);
-    break;
-case ComponentLocation::RIGIDBODYCOMPONENT:
-    drawComponentSelector(loc.componentIdx,storage.vecRigidBodyComponent);
     break;
 case ComponentLocation::CONTROLLERCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecControllerComponent);
