@@ -4,6 +4,7 @@ project(BuildSys CXX C)
 
 #define as engine
 add_compile_definitions(ONO_ENGINE_ONLY)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 #common vars
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)

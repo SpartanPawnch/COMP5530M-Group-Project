@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include "ControllerComponent.h"
+#include "RigidBodyComponent.h"
 
 struct VirtualKey {
     enum Action {
@@ -30,6 +31,8 @@ struct PlayerControllerComponent : BaseComponent {
 
     bool listeningForKey = false;
     unsigned int listeningForKeyIndex;
+
+    std::vector<RigidBodyComponent>* rigidBodies;
 
     void addKey();
     void removeKey(int index);

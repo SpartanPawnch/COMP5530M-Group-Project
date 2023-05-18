@@ -494,6 +494,145 @@ void loadLevel(const char* path, Scene& scene) {
                     }
                     baseEntity.components.addComponent(controls);
                 }
+                // RigidBodyComponent
+                else if (strcmp(jsonComponent["type"].GetString(), "RigidBodyComponent") == 0) {
+                    RigidBodyComponent component(name, uuid);
+                    component.gravityEnabled = jsonComponent["gravityEnabled"].GetBool();
+                    component.setGravityEnabled();
+
+                    component.setType((BodyType)jsonComponent["bodyType"].GetInt());
+
+                    component.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
+                        jsonComponent["position"][1].GetFloat(),
+                        jsonComponent["position"][2].GetFloat());
+                    component.rotation = glm::quat(jsonComponent["rotation"][0].GetFloat(),
+                        jsonComponent["rotation"][1].GetFloat(),
+                        jsonComponent["rotation"][2].GetFloat(),
+                        jsonComponent["rotation"][3].GetFloat());
+                    component.setPosition();
+                    // cube colliders
+                    {
+                        auto const cubeColliders = jsonComponent["cubeColliders"].GetArray();
+                        for (size_t j = 0; j < cubeColliders.Size(); j++) {
+                            component.createCubeCollider();
+                            component.setMaterialFrictionCoefficient(CUBE, j,
+                                cubeColliders[j]["materialFrictionCoefficient"].GetFloat());
+                            component.setMaterialBounciness(CUBE, j,
+                                cubeColliders[j]["materialBounciness"].GetFloat());
+                            int colMask = cubeColliders[j]["colMask"].GetInt();
+                            for (int mask = 0x0001; mask < 0x0004; mask = (mask << 1)) {
+                                if (colMask & mask)
+                                    component.setCollisionCollideWithMask(CUBE, j,
+                                        (CollisionCategories)mask);
+                            }
+
+                            component.setCollisionMask(CUBE, j,
+                                (CollisionCategories)cubeColliders[j]["category"].GetInt());
+
+                            component.cubeColliders[j].position =
+                                glm::vec3(cubeColliders[j]["position"][0].GetFloat(),
+                                    cubeColliders[j]["position"][1].GetFloat(),
+                                    cubeColliders[j]["position"][2].GetFloat());
+                            component.setLocalColliderPosition(CUBE, j);
+
+                            component.cubeColliders[j].rotation =
+                                glm::quat(cubeColliders[j]["rotation"][0].GetFloat(),
+                                    cubeColliders[j]["rotation"][1].GetFloat(),
+                                    cubeColliders[j]["rotation"][2].GetFloat(),
+                                    cubeColliders[j]["rotation"][3].GetFloat());
+                            component.setLocalColliderRotation(CUBE, j);
+
+                            component.cubeColliders[j].extents =
+                                glm::vec3(cubeColliders[j]["extents"][0].GetFloat(),
+                                    cubeColliders[j]["extents"][1].GetFloat(),
+                                    cubeColliders[j]["extents"][2].GetFloat());
+                            component.setCubeColliderExtents(j, component.cubeColliders[j].extents);
+                        }
+                    }
+
+                    // sphere colliders
+                    {
+                        auto const sphereColliders = jsonComponent["sphereColliders"].GetArray();
+                        for (size_t j = 0; j < sphereColliders.Size(); j++) {
+                            component.createSphereCollider();
+                            component.setMaterialFrictionCoefficient(SPHERE, j,
+                                sphereColliders[j]["materialFrictionCoefficient"].GetFloat());
+                            component.setMaterialBounciness(SPHERE, j,
+                                sphereColliders[j]["materialBounciness"].GetFloat());
+                            int colMask = sphereColliders[j]["colMask"].GetInt();
+                            for (int mask = 0x0001; mask < 0x0004; mask = (mask << 1)) {
+                                if (colMask & mask)
+                                    component.setCollisionCollideWithMask(SPHERE, j,
+                                        (CollisionCategories)mask);
+                            }
+
+                            component.setCollisionMask(SPHERE, j,
+                                (CollisionCategories)sphereColliders[j]["category"].GetInt());
+
+                            component.sphereColliders[j].position =
+                                glm::vec3(sphereColliders[j]["position"][0].GetFloat(),
+                                    sphereColliders[j]["position"][1].GetFloat(),
+                                    sphereColliders[j]["position"][2].GetFloat());
+                            component.setLocalColliderPosition(SPHERE, j);
+
+                            component.sphereColliders[j].rotation =
+                                glm::quat(sphereColliders[j]["rotation"][0].GetFloat(),
+                                    sphereColliders[j]["rotation"][1].GetFloat(),
+                                    sphereColliders[j]["rotation"][2].GetFloat(),
+                                    sphereColliders[j]["rotation"][3].GetFloat());
+                            component.setLocalColliderRotation(SPHERE, j);
+
+                            component.sphereColliders[j].radius =
+                                sphereColliders[j]["radius"].GetFloat();
+                            component.setSphereColliderRadius(j,
+                                component.sphereColliders[j].radius);
+                        }
+                    }
+
+                    // capsule colliders
+                    {
+                        auto const capsuleColliders = jsonComponent["capsuleColliders"].GetArray();
+                        for (size_t j = 0; j < capsuleColliders.Size(); j++) {
+                            component.createCapsuleCollider();
+                            component.setMaterialFrictionCoefficient(CAPSULE, j,
+                                capsuleColliders[j]["materialFrictionCoefficient"].GetFloat());
+                            component.setMaterialBounciness(CAPSULE, j,
+                                capsuleColliders[j]["materialBounciness"].GetFloat());
+                            int colMask = capsuleColliders[j]["colMask"].GetInt();
+                            for (int mask = 0x0001; mask < 0x0004; mask = (mask << 1)) {
+                                if (colMask & mask)
+                                    component.setCollisionCollideWithMask(CAPSULE, j,
+                                        (CollisionCategories)mask);
+                            }
+
+                            component.setCollisionMask(CAPSULE, j,
+                                (CollisionCategories)capsuleColliders[j]["category"].GetInt());
+
+                            component.capsuleColliders[j].position =
+                                glm::vec3(capsuleColliders[j]["position"][0].GetFloat(),
+                                    capsuleColliders[j]["position"][1].GetFloat(),
+                                    capsuleColliders[j]["position"][2].GetFloat());
+                            component.setLocalColliderPosition(CAPSULE, j);
+
+                            component.capsuleColliders[j].rotation =
+                                glm::quat(capsuleColliders[j]["rotation"][0].GetFloat(),
+                                    capsuleColliders[j]["rotation"][1].GetFloat(),
+                                    capsuleColliders[j]["rotation"][2].GetFloat(),
+                                    capsuleColliders[j]["rotation"][3].GetFloat());
+                            component.setLocalColliderRotation(CAPSULE, j);
+
+                            component.capsuleColliders[j].radius =
+                                capsuleColliders[j]["radius"].GetFloat();
+                            component.capsuleColliders[j].height =
+                                capsuleColliders[j]["height"].GetFloat();
+                            component.setCapsuleColliderRadiusHeight(j,
+                                component.capsuleColliders[j].radius,
+                                component.capsuleColliders[j].height);
+                        }
+                    }
+                    baseEntity.components.addComponent(component);
+                }
+
                 // BaseComponent
                 else {
                     BaseComponent base(name, uuid);
@@ -1008,6 +1147,178 @@ static void saveComponent(const PlayerControllerComponent& component,
     writer.EndObject();
 }
 
+static void saveComponent(const RigidBodyComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(component.name.c_str());
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+    writer.Key("type");
+    writer.String("RigidBodyComponent");
+    writer.Key("gravityEnabled");
+    writer.Bool(component.gravityEnabled);
+    writer.Key("bodyType");
+    writer.Int(int(component.bodyType));
+
+    // position
+    writer.Key("position");
+    writer.StartArray();
+    writer.Double(float(component.position[0]));
+    writer.Double(float(component.position[1]));
+    writer.Double(float(component.position[2]));
+    writer.EndArray();
+
+    // rotation
+    writer.Key("rotation");
+    writer.StartArray();
+    writer.Double(component.rotation[0]);
+    writer.Double(component.rotation[1]);
+    writer.Double(component.rotation[2]);
+    writer.Double(component.rotation[3]);
+    writer.EndArray();
+
+    // cube colliders
+    writer.Key("cubeColliders");
+    writer.StartArray();
+    for (size_t i = 0; i < component.cubeColliders.size(); i++) {
+        writer.StartObject();
+        writer.Key("extents");
+        writer.StartArray();
+        writer.Double(float(component.cubeColliders[i].extents[0]));
+        writer.Double(float(component.cubeColliders[i].extents[1]));
+        writer.Double(float(component.cubeColliders[i].extents[2]));
+        writer.EndArray();
+
+        writer.Key("category");
+        writer.Int(int(component.cubeColliders[i].category));
+
+        writer.Key("colMask");
+        int combinedMask = 0;
+        for (auto m : component.cubeColliders[i].collidesWith) {
+            combinedMask |= m;
+        }
+        writer.Int(combinedMask);
+
+        writer.Key("materialBounciness");
+        writer.Double(component.cubeColliders[i].materialBounciness);
+        writer.Key("materialFrictionCoefficient");
+        writer.Double(component.cubeColliders[i].materialFrictionCoefficient);
+
+        // position
+        writer.Key("position");
+        writer.StartArray();
+        writer.Double(float(component.cubeColliders[i].position[0]));
+        writer.Double(float(component.cubeColliders[i].position[1]));
+        writer.Double(float(component.cubeColliders[i].position[2]));
+        writer.EndArray();
+
+        // rotation
+        writer.Key("rotation");
+        writer.StartArray();
+        writer.Double(component.cubeColliders[i].rotation[0]);
+        writer.Double(component.cubeColliders[i].rotation[1]);
+        writer.Double(component.cubeColliders[i].rotation[2]);
+        writer.Double(component.cubeColliders[i].rotation[3]);
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+
+    // sphere colliders
+    writer.Key("sphereColliders");
+    writer.StartArray();
+    for (size_t i = 0; i < component.sphereColliders.size(); i++) {
+        writer.StartObject();
+        writer.Key("radius");
+        writer.Double(double(component.sphereColliders[i].radius));
+
+        writer.Key("category");
+        writer.Int(int(component.sphereColliders[i].category));
+
+        writer.Key("colMask");
+        int combinedMask = 0;
+        for (auto m : component.sphereColliders[i].collidesWith) {
+            combinedMask |= m;
+        }
+        writer.Int(combinedMask);
+
+        writer.Key("materialBounciness");
+        writer.Double(component.sphereColliders[i].materialBounciness);
+        writer.Key("materialFrictionCoefficient");
+        writer.Double(component.sphereColliders[i].materialFrictionCoefficient);
+
+        // position
+        writer.Key("position");
+        writer.StartArray();
+        writer.Double(float(component.sphereColliders[i].position[0]));
+        writer.Double(float(component.sphereColliders[i].position[1]));
+        writer.Double(float(component.sphereColliders[i].position[2]));
+        writer.EndArray();
+
+        // rotation
+        writer.Key("rotation");
+        writer.StartArray();
+        writer.Double(component.sphereColliders[i].rotation[0]);
+        writer.Double(component.sphereColliders[i].rotation[1]);
+        writer.Double(component.sphereColliders[i].rotation[2]);
+        writer.Double(component.sphereColliders[i].rotation[3]);
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+
+    // capsule colliders
+    writer.Key("capsuleColliders");
+    writer.StartArray();
+    for (size_t i = 0; i < component.capsuleColliders.size(); i++) {
+        writer.StartObject();
+        writer.Key("radius");
+        writer.Double(double(component.capsuleColliders[i].radius));
+        writer.Key("height");
+        writer.Double(double(component.capsuleColliders[i].height));
+
+        writer.Key("category");
+        writer.Int(int(component.capsuleColliders[i].category));
+
+        writer.Key("colMask");
+        int combinedMask = 0;
+        for (auto m : component.capsuleColliders[i].collidesWith) {
+            combinedMask |= m;
+        }
+        writer.Int(combinedMask);
+
+        writer.Key("materialBounciness");
+        writer.Double(component.capsuleColliders[i].materialBounciness);
+        writer.Key("materialFrictionCoefficient");
+        writer.Double(component.capsuleColliders[i].materialFrictionCoefficient);
+
+        // position
+        writer.Key("position");
+        writer.StartArray();
+        writer.Double(float(component.capsuleColliders[i].position[0]));
+        writer.Double(float(component.capsuleColliders[i].position[1]));
+        writer.Double(float(component.capsuleColliders[i].position[2]));
+        writer.EndArray();
+
+        // rotation
+        writer.Key("rotation");
+        writer.StartArray();
+        writer.Double(component.capsuleColliders[i].rotation[0]);
+        writer.Double(component.capsuleColliders[i].rotation[1]);
+        writer.Double(component.capsuleColliders[i].rotation[2]);
+        writer.Double(component.capsuleColliders[i].rotation[3]);
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+    writer.EndArray();
+
+    writer.EndObject();
+}
+
 // save level to manifest in path
 void saveLevel(const char* path, const Scene& scene) {
     // open document for writing
@@ -1151,6 +1462,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecPlayerControllerComponent;
             for (unsigned int j = 0; j < playerControllerComponents.size(); j++) {
                 saveComponent(playerControllerComponents[j], writer);
+            }
+
+            // RigidBodyComponent
+            const std::vector<RigidBodyComponent>& rigidBodyComponents =
+                scene.entities[i].components.vecRigidBodyComponent;
+            for (unsigned int j = 0; j < rigidBodyComponents.size(); j++) {
+                saveComponent(rigidBodyComponents[j], writer);
             }
 
             writer.EndArray();
