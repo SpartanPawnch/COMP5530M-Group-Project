@@ -1531,6 +1531,18 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
         if (prevExtents != component.cubeColliders[i].extents) {
             component.setCubeColliderExtents(i, component.cubeColliders[i].extents);
         }
+        ImGui::Text("Bounciness:");
+        float prevBounciness = component.cubeColliders[i].materialBounciness;
+        ImGui::InputFloat("##cube_material_bounciness", &component.cubeColliders[i].materialBounciness);
+        if (prevBounciness != component.cubeColliders[i].materialBounciness) {
+            component.setMaterialBounciness(ColliderTypes::CUBE, i, component.cubeColliders[i].materialBounciness);
+        }
+        ImGui::Text("Friction:");
+        float prevFriction = component.cubeColliders[i].materialFrictionCoefficient;
+        ImGui::InputFloat("##cube_material_friction", &component.cubeColliders[i].materialFrictionCoefficient);
+        if (prevBounciness != component.cubeColliders[i].materialFrictionCoefficient) {
+            component.setMaterialFrictionCoefficient(ColliderTypes::CUBE, i, component.cubeColliders[i].materialFrictionCoefficient);
+        }
         ImGui::Text("Cube Collider Category:");
         std::string previewStrMask = "type undefined";
         if (component.cubeColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1606,6 +1618,18 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
         ImGui::InputFloat("##sphere_radius", &component.sphereColliders[i].radius);
         if (prevExtents != component.sphereColliders[i].radius) {
             component.setSphereColliderRadius(i, component.sphereColliders[i].radius);
+        }
+        ImGui::Text("Bounciness:");
+        float prevBounciness = component.sphereColliders[i].materialBounciness;
+        ImGui::InputFloat("##sphere_material_bounciness", &component.sphereColliders[i].materialBounciness);
+        if (prevBounciness != component.sphereColliders[i].materialBounciness) {
+            component.setMaterialBounciness(ColliderTypes::SPHERE, i, component.sphereColliders[i].materialBounciness);
+        }
+        ImGui::Text("Friction:");
+        float prevFriction = component.sphereColliders[i].materialFrictionCoefficient;
+        ImGui::InputFloat("##sphere_material_friction", &component.sphereColliders[i].materialFrictionCoefficient);
+        if (prevBounciness != component.sphereColliders[i].materialFrictionCoefficient) {
+            component.setMaterialFrictionCoefficient(ColliderTypes::SPHERE, i, component.sphereColliders[i].materialFrictionCoefficient);
         }
         std::string previewStrMask = "type undefined";
         if (component.sphereColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1686,6 +1710,18 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
         ImGui::InputFloat("##capsule_height", &component.capsuleColliders[i].height);
         if (prevHeight != component.capsuleColliders[i].height) {
             component.setCapsuleColliderRadiusHeight(i, component.capsuleColliders[i].radius, component.capsuleColliders[i].height);
+        }
+        ImGui::Text("Bounciness:");
+        float prevBounciness = component.capsuleColliders[i].materialBounciness;
+        ImGui::InputFloat("##capsule_material_bounciness", &component.capsuleColliders[i].materialBounciness);
+        if (prevBounciness != component.capsuleColliders[i].materialBounciness) {
+            component.setMaterialBounciness(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].materialBounciness);
+        }
+        ImGui::Text("Friction:");
+        float prevFriction = component.capsuleColliders[i].materialFrictionCoefficient;
+        ImGui::InputFloat("##capsule_material_friction", &component.capsuleColliders[i].materialFrictionCoefficient);
+        if (prevBounciness != component.capsuleColliders[i].materialFrictionCoefficient) {
+            component.setMaterialFrictionCoefficient(ColliderTypes::CAPSULE, i, component.capsuleColliders[i].materialFrictionCoefficient);
         }
         std::string previewStrMask = "type undefined";
         if (component.capsuleColliders[i].category & CollisionCategories::CATEGORY1) {
@@ -1789,6 +1825,18 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
             }
 
             ImGui::EndCombo();
+        }
+        ImGui::Text("Bounciness:");
+        float prevBounciness = component.meshColliders[i].materialBounciness;
+        ImGui::InputFloat("##mesh_material_bounciness", &component.meshColliders[i].materialBounciness);
+        if (prevBounciness != component.meshColliders[i].materialBounciness) {
+            component.setMaterialBounciness(ColliderTypes::MESH, i, component.meshColliders[i].materialBounciness);
+        }
+        ImGui::Text("Friction:");
+        float prevFriction = component.meshColliders[i].materialFrictionCoefficient;
+        ImGui::InputFloat("##mesh_material_friction", &component.meshColliders[i].materialFrictionCoefficient);
+        if (prevBounciness != component.meshColliders[i].materialFrictionCoefficient) {
+            component.setMaterialFrictionCoefficient(ColliderTypes::MESH, i, component.meshColliders[i].materialFrictionCoefficient);
         }
         std::string previewStrMask = "type undefined";
         if (component.meshColliders[i].category & CollisionCategories::CATEGORY1) {
