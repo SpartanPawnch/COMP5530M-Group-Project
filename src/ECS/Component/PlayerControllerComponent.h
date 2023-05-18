@@ -31,6 +31,7 @@ struct PlayerControllerComponent : BaseComponent {
 
     bool listeningForKey = false;
     unsigned int listeningForKeyIndex;
+    bool keepUpright = true;
 
     std::vector<RigidBodyComponent>* rigidBodies;
 

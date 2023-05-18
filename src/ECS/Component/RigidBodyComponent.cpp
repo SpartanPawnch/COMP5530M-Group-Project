@@ -280,6 +280,13 @@ void RigidBodyComponent::setPosition() {
     rigidBody->setAngularVelocity(Vector3(0, 0, 0));
 }
 
+void RigidBodyComponent::updateRotation() {
+    Transform transform = rigidBody->getTransform();
+    transform.setOrientation(Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+    rigidBody->setTransform(transform);
+    rigidBody->setAngularVelocity(Vector3(.0f, .0f, .0f));
+}
+
 void RigidBodyComponent::setLocalColliderPosition(ColliderTypes type, int index) {
     switch (type) {
     case CUBE: {

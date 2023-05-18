@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.9)
 set(CXX_STANDARD 11)
 project(BuildTest CXX C)
 
+if(MSVC)
+add_definitions(/W0)
+else()
+add_definitions(-w)
+endif()
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 #setup SoLoud
@@ -32,6 +38,8 @@ set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
 aux_source_directory("${LUADIR}/" LUASRC)
 
+find_package(ReactPhysics3D CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/external/reactphysics3d/lib/cmake/ReactPhysics3D)
+
 #setup executables
 add_executable(
     ${PROJECT_NAME} src/main.cpp 
@@ -58,6 +66,8 @@ add_executable(
 	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp 
 	src/model_import/bone.cpp src/asset_import/animation.cpp
     src/asset_import/materials.cpp src/asset_import/materials.h
+    src/physics_engine/physicsEngine.cpp src/ECS/Component/RigidBodyComponent.cpp 
+    src/physics_engine/PhysicsEvents.cpp
 )
 
 #add glfw
@@ -85,7 +95,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/external
 	${ASSIMP_INCLUDE_DIRS} glfw
 )
 
-target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm ${ASSIMP_LIBRARIES} soloud spdlog)
+target_link_libraries(${PROJECT_NAME} glfw opengl32 glew_s glm ${ASSIMP_LIBRARIES} soloud spdlog 
+    ReactPhysics3D::ReactPhysics3D)
 
 #generate ComponentStorage code if necessary
 add_custom_target(ComponentStorageGen
