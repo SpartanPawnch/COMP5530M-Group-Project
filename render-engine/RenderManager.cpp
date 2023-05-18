@@ -187,6 +187,7 @@ void RenderManager::loadScene() {
     const char* iconIDFragPath = "assets/shaders/iconID.frag";
     const char* cubeColliderVertexPath = "assets/shaders/cubewire.vert";
     const char* sphereColliderVertexPath = "assets/shaders/spherewire.vert";
+    const char* capsuleColliderVertexPath = "assets/shaders/capsulewire.vert";
     const char* colliderFragPath = "assets/shaders/collider.frag";
 
     // TODO: Should probably be called in the Constructor
@@ -225,7 +226,7 @@ void RenderManager::loadScene() {
     addPipeline(AnimationIDPipeline, AnimatedVertexPath, entIDFragPath);
     addPipeline(CubeColliderPipeline, cubeColliderVertexPath, colliderFragPath);
     addPipeline(SphereColliderPipeline, sphereColliderVertexPath, colliderFragPath);
-
+    addPipeline(CapsuleColliderPipeline, capsuleColliderVertexPath, colliderFragPath);
     // TODO: (Not sure how to manage the below)
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -855,6 +856,31 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
             }
         }
     }
+
+    // capsule colliders
+    glUseProgram(getPipeline(CapsuleColliderPipeline)->getProgram());
+    glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getViewID(), 1, false,
+        &viewMatrix[0][0]);
+    glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getProjectionID(), 1, GL_FALSE,
+        &projectionMatrix[0][0]);
+
+    for (size_t i = 0; i < scene.entities.size(); i++) {
+        for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
+            const RigidBodyComponent& rigidBody =
+                scene.entities[i].components.vecRigidBodyComponent[j];
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            for (size_t k = 0; k < rigidBody.capsuleColliders.size(); k++) {
+                modelMatrix = baseTransform *
+                    glm::translate(rigidBody.capsuleColliders[k].position) *
+                    glm::mat4_cast(rigidBody.capsuleColliders[k].rotation) *
+                    glm::scale(glm::vec3(rigidBody.capsuleColliders[k].radius));
+                glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getModelID(), 1, false,
+                    &modelMatrix[0][0]);
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_LINES, 0, 1208);
+            }
+        }
+    }
 }
 
 void RenderManager::renderCamPreview(const Scene& scene, int width, int height) {
@@ -971,6 +997,7 @@ void RenderManager::setupIconPipelineUniforms() {
     // this should have probably gone in pipeline constructor anyways
     getPipeline(CubeColliderPipeline)->setUniformLocations();
     getPipeline(SphereColliderPipeline)->setUniformLocations();
+    getPipeline(CapsuleColliderPipeline)->setUniformLocations();
 }
 
 void RenderManager::loadIcons() {

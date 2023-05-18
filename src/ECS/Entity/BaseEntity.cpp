@@ -35,6 +35,12 @@ void BaseEntity::start() {
 
 void BaseEntity::update(const glm::mat4& parentMat, float dt) {
     genTransform(parentMat);
+
+    // pass rigid body pointer to player controllers
+    for (size_t i = 0; i < components.vecPlayerControllerComponent.size(); i++) {
+        components.vecPlayerControllerComponent[i].rigidBodies = &components.vecRigidBodyComponent;
+    }
+
     components.updateAll(dt, state);
 }
 

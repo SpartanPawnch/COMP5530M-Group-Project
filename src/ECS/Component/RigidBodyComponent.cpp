@@ -14,6 +14,10 @@ RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid
     name = _name;
     uuid = _uuid;
     baseUuid = std::max(baseUuid, _uuid + 1);
+    instance = PhysicsEngine::getInstance();
+    assert(rigidBody == nullptr);
+    rigidBody = instance->createRigidBody();
+    rigidBody->setUserData(this);
 }
 void RigidBodyComponent::start() {
     /* PhysicsEngine* instance = PhysicsEngine::getInstance();
@@ -204,17 +208,17 @@ void RigidBodyComponent::setMaterialBounciness(ColliderTypes type, int index, fl
     } break;
     case SPHERE: {
         sphereColliders[index].materialBounciness = bounciness;
-        Material& material = cubeColliders[index].collider->getMaterial();
+        Material& material = sphereColliders[index].collider->getMaterial();
         material.setBounciness(bounciness);
     } break;
     case CAPSULE: {
         capsuleColliders[index].materialBounciness = bounciness;
-        Material& material = cubeColliders[index].collider->getMaterial();
+        Material& material = capsuleColliders[index].collider->getMaterial();
         material.setBounciness(bounciness);
     } break;
     case MESH: {
         meshColliders[index].materialBounciness = bounciness;
-        Material& material = cubeColliders[index].collider->getMaterial();
+        Material& material = meshColliders[index].collider->getMaterial();
         material.setBounciness(bounciness);
     } break;
     default:
@@ -237,12 +241,12 @@ void RigidBodyComponent::setMaterialFrictionCoefficient(ColliderTypes type, int 
     } break;
     case CAPSULE: {
         capsuleColliders[index].materialFrictionCoefficient = frictionCoefficient;
-        Material& material = cubeColliders[index].collider->getMaterial();
+        Material& material = capsuleColliders[index].collider->getMaterial();
         material.setFrictionCoefficient(frictionCoefficient);
     } break;
     case MESH: {
         meshColliders[index].materialFrictionCoefficient = frictionCoefficient;
-        Material& material = cubeColliders[index].collider->getMaterial();
+        Material& material = meshColliders[index].collider->getMaterial();
         material.setFrictionCoefficient(frictionCoefficient);
     } break;
     default:

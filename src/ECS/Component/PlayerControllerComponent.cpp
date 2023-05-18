@@ -42,12 +42,24 @@ void PlayerControllerComponent::update(float dt, EntityState& state) {
             iSys->isDown[virtualKeys[i].key] ? virtualKeys[i].scale : .0f);
     }
 
-    // update position
-    state.position = state.position +
-        dt *
-            glm::vec3(actions[VirtualKey::LEFT] - actions[VirtualKey::RIGHT],
-                actions[VirtualKey::UP] - actions[VirtualKey::DOWN],
-                actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
+    if (!rigidBodies || rigidBodies->empty()) {
+        // update position directly
+        state.position = state.position +
+            dt *
+                glm::vec3(actions[VirtualKey::LEFT] - actions[VirtualKey::RIGHT],
+                    actions[VirtualKey::UP] - actions[VirtualKey::DOWN],
+                    actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
+    }
+    else {
+        // apply force to rigid bodies
+        for (size_t i = 0; i < rigidBodies->size(); i++) {
+            (*rigidBodies)[i].force =
+                glm::vec3(actions[VirtualKey::LEFT] - actions[VirtualKey::RIGHT],
+                    actions[VirtualKey::UP] - actions[VirtualKey::DOWN],
+                    actions[VirtualKey::FORWARD] - actions[VirtualKey::BACK]);
+            (*rigidBodies)[i].applyForce();
+        }
+    }
 }
 
 // lua stuff

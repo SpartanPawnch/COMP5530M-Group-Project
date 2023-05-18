@@ -36,6 +36,7 @@ enum Pipeline {
     AnimationIDPipeline = 14,
     CubeColliderPipeline = 15,
     SphereColliderPipeline = 16,
+    CapsuleColliderPipeline,
     Pipeline_MAX
 };
 
