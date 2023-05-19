@@ -108,31 +108,6 @@ vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){
     return Lambient + frValue * clight * max(0,dot(n,l));
 }
 
-vec3 computeNormalColor()
-{
-    vec3 normal;
-    if(vsNormal.x < 0.0)
-    {
-        normal.x = -vsNormal.x; 
-    }
-    else{ normal.x = vsNormal.x;
-    }
-
-    if(vsNormal.y < 0.0)
-    {
-        normal.y = -vsNormal.y; 
-    }
-    else{ normal.y = vsNormal.y;
-    }
-
-    if(vsNormal.z < 0.0)
-    {
-        normal.z = -vsNormal.z; 
-    }
-    else{ normal.z = vsNormal.z;
-    }
-    return normal;
-}
 
 
 void main()
