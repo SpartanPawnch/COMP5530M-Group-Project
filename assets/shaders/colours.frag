@@ -52,32 +52,6 @@ vec3 computeBlinnPhongLighting(int lightIndex)
     return (ambient+diffuse+specular);
 }
 
-vec3 computeNormalColor()
-{
-    vec3 normal;
-    if(vsNormal.x < 0.0)
-    {
-        normal.x = -vsNormal.x; 
-    }
-    else{ normal.x = vsNormal.x;
-    }
-
-    if(vsNormal.y < 0.0)
-    {
-        normal.y = -vsNormal.y; 
-    }
-    else{ normal.y = vsNormal.y;
-    }
-
-    if(vsNormal.z < 0.0)
-    {
-        normal.z = -vsNormal.z; 
-    }
-    else{ normal.z = vsNormal.z;
-    }
-    return normal;
-}
-
 
 void main()
 {
