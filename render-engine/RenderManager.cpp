@@ -872,10 +872,15 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
             for (size_t k = 0; k < rigidBody.capsuleColliders.size(); k++) {
                 modelMatrix = baseTransform *
                     glm::translate(rigidBody.capsuleColliders[k].position) *
-                    glm::mat4_cast(rigidBody.capsuleColliders[k].rotation) *
-                    glm::scale(glm::vec3(rigidBody.capsuleColliders[k].radius));
+                    glm::mat4_cast(rigidBody.capsuleColliders[k].rotation);
                 glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getModelID(), 1, false,
                     &modelMatrix[0][0]);
+                glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
+                                "radius"),
+                    rigidBody.capsuleColliders[k].radius);
+                glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
+                                "height"),
+                    rigidBody.capsuleColliders[k].height);
                 glBindVertexArray(dummyVAO);
                 glDrawArrays(GL_LINES, 0, 1208);
             }
