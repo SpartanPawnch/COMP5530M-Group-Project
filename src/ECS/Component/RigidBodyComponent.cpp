@@ -8,7 +8,8 @@ RigidBodyComponent::RigidBodyComponent() {
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
-    rigidBody->setUserData(this);
+    collisionInfo = new CollisionInfo{};
+    rigidBody->setUserData(collisionInfo);
 }
 RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid) {
     name = _name;
@@ -17,7 +18,8 @@ RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
-    rigidBody->setUserData(this);
+    collisionInfo = new CollisionInfo{};
+    rigidBody->setUserData(collisionInfo);
 }
 void RigidBodyComponent::start() {
     /* PhysicsEngine* instance = PhysicsEngine::getInstance();
@@ -43,6 +45,7 @@ void RigidBodyComponent::createCubeCollider() {
     collider.colliderShape = boxShape;
     collider.collider = rigidBody->addCollider(boxShape, transform);
     collider.collider->getLocalToBodyTransform();
+    collider.collider->setUserData(rigidBody);
 
     cubeColliders.push_back(collider);
 }
@@ -55,6 +58,7 @@ void RigidBodyComponent::createSphereCollider() {
     collider.colliderShape = sphereShape;
     collider.shape = ColliderTypes::SPHERE;
     collider.collider = rigidBody->addCollider(sphereShape, transform);
+    collider.collider->setUserData(rigidBody);
 
     sphereColliders.push_back(collider);
 }
@@ -67,6 +71,7 @@ void RigidBodyComponent::createCapsuleCollider() {
     collider.colliderShape = capsuleShape;
     collider.shape = ColliderTypes::CAPSULE;
     collider.collider = rigidBody->addCollider(capsuleShape, transform);
+    collider.collider->setUserData(rigidBody);
 
     capsuleColliders.push_back(collider);
 }
@@ -435,12 +440,12 @@ static int luaHandleCollision(lua_State* state) {
         return 0;
     }
 
-    int res = int(c->collidedAsBody1 || c->collidedAsBody2);
+    int res = int(c->collisionInfo->collidedAsBody1 || c->collisionInfo->collidedAsBody2);
 
     lua_settop(state, 0);
     lua_pushboolean(state, res);
-    c->collidedAsBody1 = false;
-    c->collidedAsBody2 = false;
+    c->collisionInfo->collidedAsBody1 = false;
+    c->collisionInfo->collidedAsBody2 = false;
     return 1;
 }
 

@@ -5,6 +5,11 @@
 #include "../../physics_engine/physicsEngine.h"
 #include <lua.hpp>
 
+struct CollisionInfo {
+    bool collidedAsBody1 = false;
+    bool collidedAsBody2 = false;
+};
+
 struct RigidBodyComponent : BaseComponent {
     RigidBodyComponent();
     RigidBodyComponent(const std::string& name, const int uuid);
@@ -55,6 +60,5 @@ struct RigidBodyComponent : BaseComponent {
     std::vector<CapsuleColliderObject> capsuleColliders;
     std::vector<MeshColliderObject> meshColliders;
 
-    bool collidedAsBody1 = false;
-    bool collidedAsBody2 = false;
+    CollisionInfo* collisionInfo;
 };
