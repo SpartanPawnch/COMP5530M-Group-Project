@@ -124,6 +124,24 @@ bool UIEditor = false;
 bool CharacterEditor = false;
 bool WorldEditor = false;
 
+// --- UI editor
+float newUIWidth = 300.f;
+float newUIHeight = 180.f;
+
+struct
+{
+    int windowStyle;
+    std::vector<const char*> buttons;
+    std::vector<const char*> texts;
+    std::vector<std::vector<float>> slidersFloat;
+    std::vector<std::vector<int>> slidersInt;
+    
+    std::vector<const char*> checkBox;
+    std::vector<int> index1; 
+    std::vector<int> index2;
+}uiElement;
+
+
 GUIManager::GUIManager(GLFWwindow* window) {
     // Init ImGui
     IMGUI_CHECKVERSION();
@@ -2338,12 +2356,7 @@ void drawStats() {
     // ImGui::End();
 }
 
-float newUIWidth = 300.f;
-float newUIHeight = 180.f;
-
-int windowStyle=0;
-
-inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize, std::vector<const char*> uiElement) {
+inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
     static float transparency = 0.5f;
 
     static ImGuiID normal = 0;
@@ -2358,12 +2371,6 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize, std::vector<const
     if (ImGui::Begin("Set Properties", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus)) {
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
-
-
-        if (ImGui::Combo("Selected Element", &selectedItem, uiElement.data(), static_cast<int>(uiElement.size())))
-        {
-
-        }
 
         ImGui::SliderFloat("transparency", &transparency, 0.0f, 1.0f);
 
@@ -2402,7 +2409,7 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize, std::vector<const
                 if (ImGui::Button("Button", buttonSize))
                 {
                     // Button action
-                    windowStyle = (i * numColumns) + j;
+                    uiElement.windowStyle = (i * numColumns) + j;
                 }
 
                 ImGui::SameLine(0, spacing);   // Align buttons horizontally with spacing
@@ -2420,49 +2427,48 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize, std::vector<const
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
 
         buttonSize = ImVec2(150.0f,25.0f);
+        static char addbutton[256] = "";
         static char addText[256] = "";
         static char addCheck[256] = "";
+        static std::vector<float> minmaxf;minmaxf.push_back(0.0f);minmaxf.push_back(100.0f);
+        static std::vector<int> minmaxi;minmaxi.push_back(0.0f);minmaxi.push_back(100.0f);
 
-        static float minf = 0.0f;
-        static float maxf = 100.0f;
-        static int mini = 0;
-        static int maxi = 100;
-
-        
-        if (ImGui::Button("Add text box",buttonSize))
+        if (ImGui::Button("Add button",buttonSize)&&std::strcmp(addbutton,""))
         {
-            uiElement.push_back(addText);
+            uiElement.buttons.push_back(addbutton);
+            uiElement.index1.push_back(1);
+        }
+
+        ImGui::SameLine();
+
+        ImGui::InputText("##addButton", addbutton, sizeof(addbutton));
+        
+        if (ImGui::Button("Add text box",buttonSize)&&std::strcmp(addText,""))
+        {
+            uiElement.texts.push_back(addText);
+            uiElement.index1.push_back(2);
         }
 
         ImGui::SameLine();
 
         ImGui::InputText("##addText", addText, sizeof(addText));
 
-        if (ImGui::Button("Add check box",buttonSize))
-        {
-            uiElement.push_back(addCheck);
-
-        }
-        
-        ImGui::SameLine();
-
-        ImGui::InputText("##addCheck", addCheck, sizeof(addCheck));
-
         if (ImGui::Button("Add slider Float",buttonSize))
         {
-            uiElement.push_back("sliderFloat");
+            uiElement.slidersFloat.push_back(minmaxf);
+            uiElement.index1.push_back(3);
         }
         
         ImGui::SameLine();
 
         const float inputWidthf = ImGui::GetContentRegionAvail().x / 2.0f;
         ImGui::PushItemWidth(inputWidthf);
-        if (ImGui::InputFloat("##minf", &minf))
+        if (ImGui::InputFloat("##minf", &minmaxf[0]))
         {
 
         }
         ImGui::SameLine();
-        if (ImGui::InputFloat("##maxf", &maxf))
+        if (ImGui::InputFloat("##maxf", &minmaxf[1]))
         {
 
         }
@@ -2470,26 +2476,81 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize, std::vector<const
 
         if (ImGui::Button("Add slider Integer",buttonSize))
         {
-            uiElement.push_back("sliderInteger");
+            uiElement.slidersInt.push_back(minmaxi);
+            uiElement.index1.push_back(4);
         }
         
         ImGui::SameLine();
 
         const int inputWidthi = ImGui::GetContentRegionAvail().x / 2.0f;
         ImGui::PushItemWidth(inputWidthi);
-        if (ImGui::InputInt("##mini", &mini))
+        if (ImGui::InputInt("##mini", &minmaxi[0]))
         {
 
         }
         ImGui::SameLine();
-        if (ImGui::InputInt("##maxi", &maxi))
+        if (ImGui::InputInt("##maxi", &minmaxi[0]))
         {
 
         }
         ImGui::PopItemWidth();
 
+        if (ImGui::Button("Add check box",buttonSize)&&std::strcmp(addCheck,""))
+        {
+            uiElement.checkBox.push_back(addCheck);
+            uiElement.index1.push_back(5);
+
+        }
+        
+        ImGui::SameLine();
+
+        ImGui::InputText("##addCheck", addCheck, sizeof(addCheck));
+
+
     }
     ImGui::End();
+}
+
+inline void showElements()
+{
+    ImVec2 buttonSize = ImVec2(150.0f,25.0f);
+    int ele1=0;
+    int ele2=0;
+    int ele3=0;
+    int ele4=0;
+    int ele5=0;
+    
+    for(int i=0;i<uiElement.index1.size();i++)
+    {
+        if(uiElement.index1[i]==1)
+        {
+            ImGui::Button(uiElement.buttons[ele1],buttonSize);ele1++;
+        }
+        else if(uiElement.index1[i]==2)
+        {
+            ImGui::Text(uiElement.texts[ele2]);ele2++;
+        }
+        else if(uiElement.index1[i]==3)
+        {
+            float *fVale;fVale=0;
+            std::string label = "##sliderF";
+            label += std::to_string(ele3);
+            ImGui::SliderFloat(label.c_str(),fVale,uiElement.slidersFloat[ele3][0],uiElement.slidersFloat[ele3][1]);ele3++;
+        }
+        else if(uiElement.index1[i]==4)
+        {
+            int *iVale;iVale=0;
+            std::string label = "##sliderI";
+            label += std::to_string(ele4);
+            ImGui::SliderInt(label.c_str(),iVale,uiElement.slidersInt[ele4][0],uiElement.slidersInt[ele4][1]);ele4++;
+        }
+        else if(uiElement.index1[i]==5)
+        {
+            std::string label = "##checkBox";
+            label += std::to_string(ele5);
+            ImGui::Checkbox(label.c_str(),false);ele5++;
+        }
+    }
 }
 
 inline void drawUIPreview() {
@@ -2504,7 +2565,7 @@ inline void drawUIPreview() {
 
         ImGui::SetNextWindowPos(newPos);
 
-        if(windowStyle==0)
+        if(uiElement.windowStyle==0)
         {
             if (ImGui::BeginChild("normal", ImVec2(newUIWidth, newUIHeight),true)) {
                 // Get the width of the text
@@ -2521,10 +2582,11 @@ inline void drawUIPreview() {
 
                 // Draw the text
                 ImGui::Text("normal");
+                showElements();
             }
             ImGui::EndChild();
         }
-        else if(windowStyle==1)
+        else if(uiElement.windowStyle==1)
         {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
             ImGui::SetNextWindowSize(ImVec2(300, 180));
@@ -2543,11 +2605,12 @@ inline void drawUIPreview() {
 
                 // Draw the text
                 ImGui::Text("rounded");
+                showElements();
             }
             ImGui::EndChild();
             ImGui::PopStyleVar();
         }
-        else if(windowStyle==2)
+        else if(uiElement.windowStyle==2)
         {
             ImGui::PushStyleColor(ImGuiCol_WindowBg,
             ImVec4(style.Colors[ImGuiCol_WindowBg].x, style.Colors[ImGuiCol_WindowBg].y,
@@ -2568,6 +2631,7 @@ inline void drawUIPreview() {
 
                 // Draw the text
                 ImGui::Text("translucent");
+                showElements();
             }
             ImGui::EndChild();
             ImGui::PopStyleColor();
@@ -2579,6 +2643,8 @@ inline void drawUIPreview() {
     }
     ImGui::End();
 }
+
+
 
 void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
     static ImGuiID dockCenter = 0;
@@ -2659,7 +2725,6 @@ void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
 void uiEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
     static ImGuiID dockRight;
     static ImGuiID dockCenter = 0;
-    std::vector<const char*> uiElement;
     // TODO save and load dock state
     // create layout if not present already
     ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
@@ -2693,7 +2758,7 @@ void uiEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
     drawUIPreview();
 
     ImGui::SetNextWindowDockID(dockRight, ImGuiCond_Once);
-    drawAddUI(mainMenuHeight, windowSize, uiElement);
+    drawAddUI(mainMenuHeight, windowSize);
 }
 
 void characterEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
