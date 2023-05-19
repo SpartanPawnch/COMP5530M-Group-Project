@@ -1726,6 +1726,9 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
                 component.removeCollisionCollideWithMask(ColliderTypes::CUBE, i, j);
             }
         }
+        if (ImGui::Button("Delete Cube Collider")) {
+            component.removeCollisionShape(ColliderTypes::CUBE, i);
+        }
         ImGui::PopID();
     }
 }
@@ -1843,6 +1846,9 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
             if (ImGui::Button("Delete")) {
                 component.removeCollisionCollideWithMask(ColliderTypes::SPHERE, i, j);
             }
+        }
+        if (ImGui::Button("Delete Sphere Collider")) {
+            component.removeCollisionShape(ColliderTypes::SPHERE, i);
         }
         ImGui::PopID();
     }
@@ -1971,6 +1977,9 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
             if (ImGui::Button("Delete")) {
                 component.removeCollisionCollideWithMask(ColliderTypes::CAPSULE, i, j);
             }
+        }
+        if (ImGui::Button("Delete Capsule Collider")) {
+            component.removeCollisionShape(ColliderTypes::CAPSULE, i);
         }
         ImGui::PopID();
     }
@@ -2114,6 +2123,9 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
             if (ImGui::Button("Delete")) {
                 component.removeCollisionCollideWithMask(ColliderTypes::MESH, i, j);
             }
+        }
+        if (ImGui::Button("Delete Mesh Collider")) {
+            component.removeCollisionShape(ColliderTypes::MESH, i);
         }
         ImGui::PopID();
     }

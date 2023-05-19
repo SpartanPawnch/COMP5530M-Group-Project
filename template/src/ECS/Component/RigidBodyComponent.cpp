@@ -679,3 +679,26 @@ void RigidBodyComponent::pushLuaTable(lua_State* state) {
     lua_setfield(state, -2, "ptr");
     luaL_setmetatable(state, componentMT);
 }
+
+void RigidBodyComponent::removeCollisionShape(ColliderTypes type, int index) {
+    switch (type) {
+    case CUBE: {
+        rigidBody->removeCollider(cubeColliders[index].collider);
+        cubeColliders.erase(cubeColliders.begin() + index);
+    } break;
+    case SPHERE: {
+        rigidBody->removeCollider(sphereColliders[index].collider);
+        sphereColliders.erase(sphereColliders.begin() + index);
+    } break;
+    case CAPSULE: {
+        rigidBody->removeCollider(capsuleColliders[index].collider);
+        capsuleColliders.erase(capsuleColliders.begin() + index);
+    } break;
+    case MESH: {
+        rigidBody->removeCollider(meshColliders[index].collider);
+        meshColliders.erase(meshColliders.begin() + index);
+    } break;
+    default:
+        break;
+    }
+}
