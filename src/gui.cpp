@@ -416,7 +416,8 @@ static void handleMouseInput(GLFWwindow* window) {
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    // disable mouse picking for now to implement raycast in editor
+    /*if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         if (ImGuizmo::IsUsing())
             return;
         glBindFramebuffer(GL_FRAMEBUFFER, entIDFramebuffer);
@@ -440,6 +441,60 @@ static void handleMouseInput(GLFWwindow* window) {
                 return;
             scene.selectedEntity = &scene.entities[entityIndex - 1];
         }
+    }*/
+
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        //reference https://antongerdelan.net/opengl/raycasting.html
+        if (ImGuizmo::IsUsing())
+            return;
+        float mouseX = renderManager->xPos - ImGui::GetWindowPos().x;
+        float mouseY = renderManager->yPos - ImGui::GetWindowPos().y;
+
+        //convert to NDC
+        glm::vec3 rayNDC = glm::vec3(0.0f);
+
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        rayNDC.x = (2.0f * mouseX) / width - 1.0f;
+        rayNDC.y = 1.0f - (2.0f * mouseY) / height;
+
+        //convert to Homogeneous Coordinates
+
+        glm::vec4 rayHomogeneous = glm::vec4(rayNDC.x, rayNDC.y, -1.0, 1.0);
+
+        //convert to camera coordinates
+        
+        glm::vec4 rayCamera = glm::inverse(renderManager->projectionMatrix) * rayHomogeneous;
+        rayCamera = glm::vec4(rayCamera.x, rayCamera.y, -1.0, 0.0);
+
+        //convert to world coordinates
+        
+        glm::vec3 rayWorld = glm::vec3(glm::inverse(renderManager->camera.getViewMatrix()) * rayCamera);
+        rayWorld = glm::normalize(rayWorld);
+
+        //get x and z it hits on y=0 with ray vs plane 
+        glm::vec3 intersectionPoint = glm::vec3(0.0f);
+
+        //reference 4 - Geometric Intersections for Raytracing lecture of Foundations of Modelling and Rendering
+
+        glm::vec3 u = glm::vec3(1.0f, .0f, .0f);
+        glm::vec3 w = glm::vec3(.0f, .0f, 1.0f);
+        glm::vec3 n = glm::vec3(.0f, 1.0f, .0f);
+        glm::vec3 p = glm::vec3(.0f, .0f, .0f);
+
+        glm::vec3 s = renderManager->camera.getPosition();
+        glm::vec3 l = rayWorld;
+
+        glm::vec3 sLine = p - s;
+        glm::vec3 lLine = glm::vec3(glm::dot(l, u), glm::dot(l, w), glm::dot(l, n));
+
+
+        float t = (glm::dot((p-s),n)) / (glm::dot(l,n));
+
+        intersectionPoint = s + l * t;
+
+        std::cout << "hit y" << intersectionPoint.y << " on x=" << intersectionPoint.x << " and z=" << intersectionPoint.z << std::endl;
     }
 }
 
