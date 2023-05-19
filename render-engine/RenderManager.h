@@ -106,6 +106,7 @@ class RenderManager {
     std::shared_ptr<TextureDescriptor> ligthIconDescriptor;
     std::shared_ptr<TextureDescriptor> cameraIconDescriptor;
     std::shared_ptr<TextureDescriptor> soundIconDescriptor;
+    std::shared_ptr<TextureDescriptor> pixelImageDescriptor;
 
     double deltaTime;
     // Gamma value for gamma correction

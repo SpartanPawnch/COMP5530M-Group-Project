@@ -447,30 +447,44 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glActiveTexture(GL_TEXTURE0);
                     if (meshMat->baseColorMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE1);
                     if (meshMat->roughnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE2);
                     if (meshMat->metalnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE3);
                     if (meshMat->normalMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE4);
                     if (meshMat->alphaMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE5);
                     if (meshMat->emissiveMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE6);
                     if (meshMat->occlusionMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE0);
                 }
@@ -566,30 +580,44 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glActiveTexture(GL_TEXTURE0);
                 if (meshMat->baseColorMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE1);
                 if (meshMat->roughnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE2);
                 if (meshMat->metalnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE3);
                 if (meshMat->normalMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE4);
                 if (meshMat->alphaMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE5);
                 if (meshMat->emissiveMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE6);
                 if (meshMat->occlusionMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE0);
 
@@ -1013,6 +1041,7 @@ void RenderManager::loadIcons() {
     ligthIconDescriptor = loadTexture("assets/lightico.png", "assets/lightico.png");
     cameraIconDescriptor = loadTexture("assets/cameraico.png", "assets/cameraico.png");
     soundIconDescriptor = loadTexture("assets/soundico.png", "assets/soundico.png");
+    pixelImageDescriptor = loadTexture("assets/pixel.png", "assets/pixel.png");
 }
 
 void RenderManager::runTexturePipeline() {
