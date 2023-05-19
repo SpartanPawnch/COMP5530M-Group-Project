@@ -46,11 +46,13 @@ void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackDat
             CollisionInfo* body2 =
                 static_cast<CollisionInfo*>(rigidBody2->getUserData());
 
-            if (body1 != nullptr)
+            if (body1 != nullptr && body2 != nullptr) {
                 body1->collidedAsBody1 = true;
-            if (body2 != nullptr)
-                body2->collidedAsBody2 = true;
+                body1->otherUuid1 = body2->ownUuid;
 
+                body2->collidedAsBody2 = true;
+                body2->otherUuid2 = body1->ownUuid;
+            }
 
             /*body1->collidedAsBody1 = true;
             body2->collidedAsBody2 = true;*/

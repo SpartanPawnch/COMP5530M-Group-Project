@@ -9,6 +9,7 @@ RigidBodyComponent::RigidBodyComponent() {
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
     collisionInfo = new CollisionInfo{};
+    collisionInfo->ownUuid = uuid;
     rigidBody->setUserData(collisionInfo);
 }
 RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid) {
@@ -19,6 +20,7 @@ RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
     collisionInfo = new CollisionInfo{};
+    collisionInfo->ownUuid = uuid;
     rigidBody->setUserData(collisionInfo);
 }
 void RigidBodyComponent::start() {

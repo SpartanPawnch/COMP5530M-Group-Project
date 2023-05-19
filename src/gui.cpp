@@ -2133,10 +2133,14 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
 
 void drawComponentProps(RigidBodyComponent& component) {
     ImGui::Text("Collided as Body 1: %s", component.collisionInfo->collidedAsBody1 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 1: %d", component.collisionInfo->otherUuid1);
     ImGui::Text("Collided as Body 2: %s", component.collisionInfo->collidedAsBody2 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 2: %d", component.collisionInfo->otherUuid2);
     if (ImGui::Button("Reset Collision Status")) {
         component.collisionInfo->collidedAsBody1 = false;
+        component.collisionInfo->otherUuid1 = -1;
         component.collisionInfo->collidedAsBody2 = false;
+        component.collisionInfo->otherUuid2 = -1;
     }
     ImGui::InputFloat3("Position", &component.position[0]);
     ImGui::InputFloat4("Rotation", &component.rotation[0]);

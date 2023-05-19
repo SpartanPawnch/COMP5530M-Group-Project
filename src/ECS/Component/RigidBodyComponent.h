@@ -8,6 +8,9 @@
 struct CollisionInfo {
     bool collidedAsBody1 = false;
     bool collidedAsBody2 = false;
+    int ownUuid = -1;
+    int otherUuid1 = -1;
+    int otherUuid2 = -1;
 };
 
 struct RigidBodyComponent : BaseComponent {
