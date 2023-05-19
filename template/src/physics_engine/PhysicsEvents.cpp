@@ -3,7 +3,7 @@
 #include <iostream>
 
 void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackData) {
-    std::cout << "contact detected" << std::endl;
+    // std::cout << "contact detected" << std::endl;
     for (uint p = 0; p < callbackData.getNbContactPairs(); p++) {
 
         CollisionCallback::ContactPair contactPair = callbackData.getContactPair(p);
@@ -12,10 +12,13 @@ void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackDat
 
             CollisionCallback::ContactPoint contactPoint = contactPair.getContactPoint(c);
 
-            Vector3 worldPoint = contactPair.getCollider1()->getLocalToWorldTransform() * contactPoint.getLocalPointOnCollider1();
+            Vector3 worldPoint = contactPair.getCollider1()->getLocalToWorldTransform() *
+                contactPoint.getLocalPointOnCollider1();
 
-            RigidBodyComponent* body1 = static_cast<RigidBodyComponent*>(contactPair.getBody1()->getUserData());
-            RigidBodyComponent* body2 = static_cast<RigidBodyComponent*>(contactPair.getBody2()->getUserData());
+            RigidBodyComponent* body1 =
+                static_cast<RigidBodyComponent*>(contactPair.getBody1()->getUserData());
+            RigidBodyComponent* body2 =
+                static_cast<RigidBodyComponent*>(contactPair.getBody2()->getUserData());
 
             body1->collidedAsBody1 = true;
             body2->collidedAsBody2 = true;

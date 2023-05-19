@@ -1,6 +1,7 @@
 #include "InputSystem.h"
 
 #include <iostream>
+#include "../../scripting.h"
 
 InputSystem::InputSystem(GLFWwindow* window) {
     start(window);
@@ -15,11 +16,6 @@ InputSystem::~InputSystem() {
 InputSystem* InputSystem::getInstance() {
     if (instance == nullptr) {
         instance = new InputSystem();
-        std::cout << "InputSystem created now." << std::endl;
-    }
-    else {
-        std::cout << "InputSystem has been created previously. Returning previous instance."
-                  << std::endl;
     }
     return instance;
 }
@@ -59,4 +55,52 @@ void InputSystem::glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aSc
 void InputSystem::start(GLFWwindow* window) {
     glfwSetWindowUserPointer(window, this);
     glfwSetKeyCallback(window, glfw_callback_wrapper);
+}
+
+// lua stuff
+static const char* inputSystemModule = "ONO_Input";
+static int luaGetRawKey(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1 || !lua_isinteger(state, 1)) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Input.getRawKey() - wrong number of arguments; "
+            "Usage: ONO_Input.getRawKey(key:int)");
+        lua_error(state);
+        return 0;
+    }
+    int idx = lua_tointeger(state, 1);
+
+    if (idx < 0 || idx > GLFW_KEY_LAST) {
+        lua_settop(state, 0);
+        lua_pushliteral(state, "ONO_Input.getRawKey() - key value is out of bounds");
+        lua_error(state);
+        return 0;
+    }
+
+    InputSystem* iSys = InputSystem::getInstance();
+
+    lua_settop(state, 0);
+    lua_pushboolean(state, int(iSys->isDown[idx]));
+    return 1;
+}
+
+void InputSystem::registerLuaFunctions() {
+    scripting::beginModule(2);
+    scripting::registerModuleFunction("getRawKey", &luaGetRawKey);
+    lua_State* state = scripting::getState();
+    lua_createtable(state, 0, GLFW_KEY_LAST);
+    for (int i = 0; i <= GLFW_KEY_LAST; i++) {
+        const char* keyName = glfwGetKeyName(i, 0);
+        if (!keyName)
+            continue;
+
+        lua_pushinteger(state, i);
+        lua_setfield(state, -2, keyName);
+    }
+    lua_setfield(state, -2, "keyIDS");
+    scripting::finalizeModule(inputSystemModule);
 }
