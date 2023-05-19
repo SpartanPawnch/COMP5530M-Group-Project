@@ -164,6 +164,9 @@ int main() {
     // register lua stuff
     scene.registerLuaTable();
     ComponentStorage::registerMetatables();
+    InputSystem::registerLuaFunctions();
+
+    // init physics variables
     const float timeStep = 1.0f / 60.0f;
     long double accumulator = 0;
 

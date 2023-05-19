@@ -22,6 +22,8 @@ class InputSystem {
     static void glfw_callback_wrapper(GLFWwindow* window, int key, int scancode, int action,
         int mods);
 
+    static void registerLuaFunctions();
+
     void glfw_callback_key_press(GLFWwindow* aWindow, int aKey, int aScanCode, int aAction,
         int /*aModifierFlags*/);
     std::array<bool, GLFW_KEY_LAST + 1> isDown{false};

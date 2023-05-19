@@ -478,6 +478,76 @@ static int luaGetVelocity(lua_State* state) {
     return 1;
 }
 
+static int luaGetPosition(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:getPosition() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent:getPosition(var) or var:getPosition()");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Vector3 res = c->rigidBody->getTransform().getPosition();
+
+    lua_settop(state, 0);
+    lua_createtable(state, 0, 0);
+    lua_pushnumber(state, res.x);
+    lua_setfield(state, -2, "x");
+    lua_pushnumber(state, res.y);
+    lua_setfield(state, -2, "y");
+    lua_pushnumber(state, res.z);
+    lua_setfield(state, -2, "z");
+    return 1;
+}
+
+static int luaGetRotation(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 1) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:getRotation() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent.getRotation(var) or var:getRotation()");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Quaternion res = c->rigidBody->getTransform().getOrientation();
+
+    lua_settop(state, 0);
+    lua_createtable(state, 0, 0);
+    lua_pushnumber(state, res.x);
+    lua_setfield(state, -2, "x");
+    lua_pushnumber(state, res.y);
+    lua_setfield(state, -2, "y");
+    lua_pushnumber(state, res.z);
+    lua_setfield(state, -2, "z");
+    lua_pushnumber(state, res.w);
+    lua_setfield(state, -2, "w");
+    return 1;
+}
+
 static int luaSetVelocity(lua_State* state) {
     int argc = lua_gettop(state);
     if (argc != 4) {
@@ -508,6 +578,74 @@ static int luaSetVelocity(lua_State* state) {
     return 0;
 }
 
+static int luaSetPosition(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 4) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:setPosition() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent.setPosition(var,x,y,z) or var:setPosition(x,y,z)");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Vector3 position =
+        Vector3(lua_tonumber(state, 2), lua_tonumber(state, 3), lua_tonumber(state, 4));
+
+    Transform tr = c->rigidBody->getTransform();
+    tr.setPosition(position);
+
+    c->rigidBody->setTransform(tr);
+
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaSetRotation(lua_State* state) {
+    int argc = lua_gettop(state);
+    if (argc != 5) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_RigidBodyComponent:setRotation() - wrong number of arguments; "
+            "Usage: ONO_RigidBodyComponent.setRotation(var,w,x,y,z) or var:setRotation(w,x,y,z)");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    RigidBodyComponent* c = (RigidBodyComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_RigidBodyComponent - ptr is null", 0);
+        return 0;
+    }
+
+    Quaternion rotation = Quaternion(lua_tonumber(state, 3), lua_tonumber(state, 4),
+        lua_tonumber(state, 5), lua_tonumber(state, 2));
+
+    Transform tr = c->rigidBody->getTransform();
+    tr.setOrientation(rotation);
+
+    c->rigidBody->setTransform(tr);
+    // TODO don't do automatically, separate function
+    c->rigidBody->setAngularVelocity(Vector3(.0f, .0f, .0f));
+
+    lua_settop(state, 0);
+    return 0;
+}
+
 void RigidBodyComponent::registerLuaMetatable() {
     lua_State* state = scripting::getState();
     luaL_newmetatable(state, componentMT);
@@ -520,6 +658,14 @@ void RigidBodyComponent::registerLuaMetatable() {
     lua_setfield(state, -2, "getVelocity");
     lua_pushcfunction(state, &luaSetVelocity);
     lua_setfield(state, -2, "setVelocity");
+    lua_pushcfunction(state, &luaGetPosition);
+    lua_setfield(state, -2, "getPosition");
+    lua_pushcfunction(state, &luaSetPosition);
+    lua_setfield(state, -2, "setPosition");
+    lua_pushcfunction(state, &luaGetRotation);
+    lua_setfield(state, -2, "getRotation");
+    lua_pushcfunction(state, &luaSetRotation);
+    lua_setfield(state, -2, "setRotation");
     lua_pop(state, 1);
 }
 

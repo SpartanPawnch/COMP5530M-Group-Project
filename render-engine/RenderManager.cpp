@@ -4,12 +4,12 @@
 RenderManager* RenderManager::getInstance() {
     if (instance == nullptr) {
         instance = new RenderManager();
-        std::cout << "Render Instance created now." << std::endl;
+        // std::cout << "Render Instance created now." << std::endl;
     }
-    else {
-        std::cout << "Render instance has been created previously. Returning previous instance."
-                  << std::endl;
-    }
+    // else {
+    //     std::cout << "Render instance has been created previously. Returning previous instance."
+    //               << std::endl;
+    // }
     return instance;
 }
 
@@ -819,7 +819,8 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
         for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
             const RigidBodyComponent& rigidBody =
                 scene.entities[i].components.vecRigidBodyComponent[j];
-            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform *
+                glm::scale(glm::vec3(1.f) / scene.entities[i].state.scale);
             for (size_t k = 0; k < rigidBody.cubeColliders.size(); k++) {
                 modelMatrix = baseTransform * glm::translate(rigidBody.cubeColliders[k].position) *
                     glm::mat4_cast(rigidBody.cubeColliders[k].rotation) *
@@ -843,7 +844,8 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
         for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
             const RigidBodyComponent& rigidBody =
                 scene.entities[i].components.vecRigidBodyComponent[j];
-            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform *
+                glm::scale(glm::vec3(1.f) / scene.entities[i].state.scale);
             for (size_t k = 0; k < rigidBody.sphereColliders.size(); k++) {
                 modelMatrix = baseTransform *
                     glm::translate(rigidBody.sphereColliders[k].position) *
@@ -868,14 +870,20 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
         for (size_t j = 0; j < scene.entities[i].components.vecRigidBodyComponent.size(); j++) {
             const RigidBodyComponent& rigidBody =
                 scene.entities[i].components.vecRigidBodyComponent[j];
-            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform;
+            glm::mat4 baseTransform = scene.entities[i].state.runtimeTransform *
+                glm::scale(glm::vec3(1.f) / scene.entities[i].state.scale);
             for (size_t k = 0; k < rigidBody.capsuleColliders.size(); k++) {
                 modelMatrix = baseTransform *
                     glm::translate(rigidBody.capsuleColliders[k].position) *
-                    glm::mat4_cast(rigidBody.capsuleColliders[k].rotation) *
-                    glm::scale(glm::vec3(rigidBody.capsuleColliders[k].radius));
+                    glm::mat4_cast(rigidBody.capsuleColliders[k].rotation);
                 glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getModelID(), 1, false,
                     &modelMatrix[0][0]);
+                glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
+                                "radius"),
+                    rigidBody.capsuleColliders[k].radius);
+                glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
+                                "height"),
+                    rigidBody.capsuleColliders[k].height);
                 glBindVertexArray(dummyVAO);
                 glDrawArrays(GL_LINES, 0, 1208);
             }
