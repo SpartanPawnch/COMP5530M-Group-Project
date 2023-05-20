@@ -7,7 +7,6 @@
 #include "../ComponentStorage/ComponentStorage.h"
 #include "../EntityState/EntityState.h"
 
-// Requires Change!!
 class BaseEntity {
   public:
     BaseEntity();
@@ -18,6 +17,8 @@ class BaseEntity {
     virtual void update(const glm::mat4& parentMat, float dt);
     virtual void stop();
     static int genUuid();
+    // for runtime copies - get the uuid of the next entity to be copied
+    static int getNextUuid();
 
     EntityState state;
 

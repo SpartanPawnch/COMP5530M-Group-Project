@@ -3,9 +3,15 @@
 #include <glm/gtx/transform.hpp>
 
 static int baseUuid = 0;
+static int nextUuid = 0;
 
 int BaseEntity::genUuid() {
+    nextUuid = std::max(nextUuid, baseUuid + 1);
     return baseUuid++;
+}
+
+int BaseEntity::getNextUuid() {
+    return nextUuid++;
 }
 
 BaseEntity::BaseEntity() {
@@ -22,6 +28,7 @@ BaseEntity::BaseEntity(const std::string& _name, const int _uuid) {
     name = _name;
     uuid = _uuid;
     baseUuid = std::max(baseUuid, _uuid + 1);
+    nextUuid = std::max(baseUuid, nextUuid);
 }
 
 BaseEntity::~BaseEntity() {

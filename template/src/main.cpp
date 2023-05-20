@@ -156,8 +156,20 @@ int main() {
 
     physicsEngine->isSimulating = true;
 
+    bool lastf12 = false;
+
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
+        if (!lastf12 && glfwGetKey(window, GLFW_KEY_F12)) {
+            std::cout << logging::getLogString();
+            lastf12 = true;
+        }
+        else {
+            lastf12 = false;
+        }
+
+        scene.processQueues();
+
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);

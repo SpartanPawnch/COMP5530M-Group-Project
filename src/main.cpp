@@ -172,6 +172,8 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
+        scene.processQueues();
+
         // get window dimensions
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -209,7 +211,7 @@ int main() {
 
         // update editor state
         scene.updatePositions();
-        updateLevels(scene);
+        // updateLevels(scene);
         //--- Draw Results ---
         // draw scene to texture
         glBindFramebuffer(GL_FRAMEBUFFER, viewportMultisampleFramebuffer);

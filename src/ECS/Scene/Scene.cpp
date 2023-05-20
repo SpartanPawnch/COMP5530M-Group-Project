@@ -36,19 +36,21 @@ static int luaCopyEntityByUuid(lua_State* state) {
     int uuid = lua_tointeger(state, 2);
     if (scene->uuidToIdx.count(uuid) == 0) {
         lua_settop(state, 0);
-        lua_warning(state, "WARNING: ONO_Scene:copyEntityByUuid() - entity not found", 0);
+        lua_warning(state,
+            (std::string("WARNING: ONO_Scene:copyEntityByUuid() - entity #") +
+                std::to_string(uuid) + " not found")
+                .c_str(),
+            0);
         return 0;
     }
 
-    BaseEntity copy = scene->entities[scene->uuidToIdx[uuid]];
-    copy.uuid = -1;
-
-    scene->addEntity(copy);
+    int idx = scene->uuidToIdx[uuid];
+    scene->copyQueue.push(idx);
 
     // return new uuid
     lua_settop(state, 0);
-    lua_pushinteger(state, scene->entities.back().uuid);
-
+    // lua_pushinteger(state, scene->entities.back().uuid);
+    lua_pushinteger(state, BaseEntity::getNextUuid());
     return 1;
 }
 
@@ -84,7 +86,11 @@ static int luaGetEntityStateByUuid(lua_State* state) {
     int uuid = lua_tointeger(state, 2);
     if (scene->uuidToIdx.count(uuid) == 0) {
         lua_settop(state, 0);
-        lua_warning(state, "WARNING: ONO_Scene:getEntityState() - entity not found", 0);
+        lua_warning(state,
+            (std::string("WARNING: ONO_Scene:getEntityState() - entity #") + std::to_string(uuid) +
+                " not found")
+                .c_str(),
+            0);
         return 0;
     }
 
@@ -284,8 +290,59 @@ static int luaRemoveEntityByUuid(lua_State* state) {
         return 0;
     }
 
-    scene->removeEntityByIdx(scene->uuidToIdx[uuid]);
+    scene->deleteQueue.push(uuid);
 
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaUpdateEntityRigidbodiesByUuid(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:updateEntityRigidbodiesByUuid() - wrong number of arguments; "
+            "Usage: var:updateEntityRigidbodiesByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:updateEntityRigidbodiesByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+
+    // check uuid validity
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:updateEntityRigidbodiesByUuid() - entity not found",
+            0);
+        return 0;
+    }
+
+    int idx = scene->uuidToIdx[uuid];
+    for (size_t i = 0; i < scene->entities[idx].components.vecRigidBodyComponent.size(); i++) {
+        RigidBodyComponent& c = scene->entities[idx].components.vecRigidBodyComponent[i];
+        c.rotation = scene->entities[idx].state.rotation;
+        c.position = scene->entities[idx].state.position;
+        c.setPosition();
+    }
+
+    // return new uuid
     lua_settop(state, 0);
     return 0;
 }
@@ -312,6 +369,8 @@ void Scene::registerLuaTable() {
     lua_setfield(state, -2, "hideEntityByUuid");
     lua_pushcfunction(state, &luaGetEntityStateByUuid);
     lua_setfield(state, -2, "getEntityStateByUuid");
+    lua_pushcfunction(state, &luaUpdateEntityRigidbodiesByUuid);
+    lua_setfield(state, -2, "updateEntityRigidbodiesByUuid");
 
     lua_pop(state, 1);
 
@@ -347,6 +406,8 @@ void Scene::updatePositions() {
 
 void Scene::updateReferences() {
     for (unsigned int i = 0; i < entities.size(); i++) {
+        entities[i].state.uuid = entities[i].uuid;
+
         std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
         for (unsigned int j = 0; j < scripts.size(); j++) {
             for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
@@ -485,5 +546,23 @@ void Scene::setParent(int childIdx, int parentIdx) {
         for (int i = childIdx + 1; i < entities.size() && entities[i].parent == childIdx; i++) {
             setParent(i, newIdx);
         }
+    }
+}
+
+void Scene::processQueues() {
+    // process copies
+    while (copyQueue.size() > 0) {
+        int idx = copyQueue.front();
+        BaseEntity copy = entities[idx];
+        copy.uuid = -1;
+        addEntity(copy);
+        copyQueue.pop();
+    }
+
+    // process deletion
+    while (deleteQueue.size() > 0) {
+        int uuid = deleteQueue.front();
+        removeEntityByIdx(uuidToIdx[uuid]);
+        deleteQueue.pop();
     }
 }

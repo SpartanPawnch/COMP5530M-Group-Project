@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <queue>
 
 #include "../Entity/BaseEntity.h"
 #include "../Component/BaseComponent.h"
@@ -22,6 +23,7 @@ class Scene {
     void setParent(int childIdx, int parentIdx);
     void fixDescriptors(int entityUuid, ComponentLocation::CompType deletedType, int deletedIdx);
     void registerLuaTable();
+    void processQueues();
 
     BaseEntity* selectedEntity;
     int selectedCameraIdx = 0;
@@ -32,4 +34,6 @@ class Scene {
 
     std::unordered_map<int, int> uuidToIdx;
     std::vector<BaseEntity> entities;
+    std::queue<int> copyQueue;
+    std::queue<int> deleteQueue;
 };

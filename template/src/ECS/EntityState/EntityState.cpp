@@ -15,4 +15,7 @@ void EntityState::pushLuaTable(lua_State* luaState) {
     // scale
     scripting::pushVec3Ref(luaState, &scale);
     lua_setfield(luaState, -2, "scale");
+
+    lua_pushinteger(luaState, uuid);
+    lua_setfield(luaState, -2, "uuid");
 }
