@@ -40,6 +40,11 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->xOffset = 0.0f;
     this->yOffset = 0.0f;
 
+    std::string whiteTexturePath = "assets/white.png";
+    const std::string whiteTexUUID;
+    this->whiteTexture = loadTexture(whiteTexturePath.c_str(), whiteTexUUID);
+
+
     // function to set gamma correction - value sent to all pipelines
     setGammaCorrection(2.2f);
 
@@ -447,30 +452,45 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glActiveTexture(GL_TEXTURE0);
                     if (meshMat->baseColorMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE1);
                     if (meshMat->roughnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE2);
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
                     if (meshMat->metalnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE3);
                     if (meshMat->normalMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE4);
                     if (meshMat->alphaMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE5);
                     if (meshMat->emissiveMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE6);
                     if (meshMat->occlusionMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                     glActiveTexture(GL_TEXTURE0);
                 }
@@ -566,30 +586,44 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glActiveTexture(GL_TEXTURE0);
                 if (meshMat->baseColorMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE1);
                 if (meshMat->roughnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE2);
                 if (meshMat->metalnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE3);
                 if (meshMat->normalMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE4);
                 if (meshMat->alphaMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
-                glActiveTexture(GL_TEXTURE5);
+                glActiveTexture(GL_TEXTURE5);   
                 if (meshMat->emissiveMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE6);
                 if (meshMat->occlusionMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, whiteTexture->texId);
 
                 glActiveTexture(GL_TEXTURE0);
 
