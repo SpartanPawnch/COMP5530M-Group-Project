@@ -18,7 +18,8 @@ bool MaterialSystem::createMaterial(std::string name) {
 }
 
 bool MaterialSystem::createMaterialDirectly(MATSYS::Material mat) {
-    if (materials.count(mat.name) > 0) return false;
+    if (materials.count(mat.name) > 0)
+        return false;
 
     materials[mat.name] = mat;
     return true;
@@ -58,7 +59,8 @@ void MaterialSystem::setTextureFromPath(std::string path,
 }
 
 std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::string& name) {
-    if (materials.count(name) > 0 && (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
+    if (materials.count(name) > 0 &&
+        (activeMaterials.count(name) == 0 || activeMaterials[name].expired())) {
         MATSYS::Material mat = materials[name];
         ActiveMaterial activeMat;
 
@@ -70,14 +72,24 @@ std::shared_ptr<ActiveMaterial> MaterialSystem::createActiveMaterial(const std::
         activeMat.roughness = mat.roughness;
         activeMat.metalness = mat.metalness;
         activeMat.occlusion = mat.occlusion;
-
-        setTextureFromPath(mat.baseColorMap, activeMat.baseColorMap, activeMat.baseColorMapUuid);
-        setTextureFromPath(mat.roughnessMap, activeMat.roughnessMap, activeMat.roughnessMapUuid);
-        setTextureFromPath(mat.metalnessMap, activeMat.metalnessMap, activeMat.metalnessMapUuid);
-        setTextureFromPath(mat.normalMap, activeMat.normalMap, activeMat.normalMapUuid);
-        setTextureFromPath(mat.alphaMap, activeMat.alphaMap, activeMat.alphaMapUuid);
-        setTextureFromPath(mat.emissiveMap, activeMat.emissiveMap, activeMat.emissiveMapUuid);
-        setTextureFromPath(mat.occlusionMap, activeMat.occlusionMap, activeMat.occlusionMapUuid);
+        if (!mat.baseColorMap.empty())
+            setTextureFromPath(mat.baseColorMap, activeMat.baseColorMap,
+                activeMat.baseColorMapUuid);
+        if (!mat.roughnessMap.empty())
+            setTextureFromPath(mat.roughnessMap, activeMat.roughnessMap,
+                activeMat.roughnessMapUuid);
+        if (!mat.metalnessMap.empty())
+            setTextureFromPath(mat.metalnessMap, activeMat.metalnessMap,
+                activeMat.metalnessMapUuid);
+        if (!mat.normalMap.empty())
+            setTextureFromPath(mat.normalMap, activeMat.normalMap, activeMat.normalMapUuid);
+        if (!mat.alphaMap.empty())
+            setTextureFromPath(mat.alphaMap, activeMat.alphaMap, activeMat.alphaMapUuid);
+        if (!mat.emissiveMap.empty())
+            setTextureFromPath(mat.emissiveMap, activeMat.emissiveMap, activeMat.emissiveMapUuid);
+        if (!mat.occlusionMap.empty())
+            setTextureFromPath(mat.occlusionMap, activeMat.occlusionMap,
+                activeMat.occlusionMapUuid);
 
         std::shared_ptr<ActiveMaterial> activeMatPtr = std::make_shared<ActiveMaterial>(activeMat);
         activeMaterials[name] = activeMatPtr;

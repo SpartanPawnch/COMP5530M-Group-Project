@@ -555,6 +555,17 @@ void Scene::processQueues() {
         int idx = copyQueue.front();
         BaseEntity copy = entities[idx];
         copy.uuid = -1;
+
+        // create new colliders
+        for (size_t i = 0; i < copy.components.vecRigidBodyComponent.size(); i++) {
+            copy.components.vecRigidBodyComponent[i].rigidBody =
+                copy.components.vecRigidBodyComponent[i].instance->createRigidBody();
+            // copy colliders
+
+            copy.components.vecRigidBodyComponent[i].rigidBody->setUserData(
+                &copy.components.vecRigidBodyComponent[i]);
+        }
+
         addEntity(copy);
         copyQueue.pop();
     }

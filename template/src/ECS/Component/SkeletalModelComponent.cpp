@@ -396,12 +396,88 @@ AnimationControllerNode* SkeletalModelComponent::getNodeByName(std::string name)
 
 // lua stuff
 static const char* componentMT = "ONO_SkeletalModelComponent";
+enum class TransitionType {
+    BOOL = 0,
+    INT = 1,
+    FLOAT = 2,
+    TRANSITION_TYPE_MAX
+};
+
+static int luaSetCondition(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 5) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_SkeletalModelComponent:setCondition() - wrong number of arguments; "
+            "Usage: var:setCondition(nodeIdx, type, index, value)");
+        lua_error(state);
+        return 0;
+    }
+    lua_getfield(state, 1, "ptr");
+    SkeletalModelComponent* c = (SkeletalModelComponent*)lua_touserdata(state, -1);
+    if (!c) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_SkeletalModelComponent - ptr is null", 0);
+        return 0;
+    }
+
+    int nodeIdx = lua_tointeger(state, 2);
+    if (nodeIdx < 0 || nodeIdx > c->nodes.size()) {
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_SkeletalModelComponent.setCondition() - node index out of range",
+            0);
+        return 0;
+    }
+
+    TransitionType type = (TransitionType)lua_tointeger(state, 3);
+    if (int(type) < 0 || type >= TransitionType::TRANSITION_TYPE_MAX) {
+        lua_settop(state, 0);
+    }
+
+    int idx = lua_tointeger(state, 4);
+
+    switch (type) {
+    case TransitionType::BOOL: {
+        bool condition = (bool)lua_toboolean(state, 5);
+        if (idx >= 0 && idx < c->nodes[nodeIdx].boolTransitions.size()) {
+            c->nodes[nodeIdx].boolTransitions[idx].condition = condition;
+        }
+    } break;
+    case TransitionType::INT: {
+        int condition = lua_tointeger(state, 5);
+        if (idx >= 0 && idx < c->nodes[nodeIdx].intTransitions.size()) {
+            c->nodes[nodeIdx].intTransitions[idx].condition = condition;
+        }
+    } break;
+    case TransitionType::FLOAT: {
+        float condition = lua_tonumber(state, 5);
+        if (idx >= 0 && idx < c->nodes[nodeIdx].floatTransitions.size()) {
+            c->nodes[nodeIdx].floatTransitions[idx].condition = condition;
+        }
+    } break;
+    default:
+        lua_settop(state, 0);
+        lua_warning(state, "ONO_SkeletalModelComponent.setCondition() - invalid transition type",
+            0);
+        return 0;
+    }
+
+    lua_settop(state, 0);
+    return 0;
+}
+
 void SkeletalModelComponent::registerLuaMetatable() {
     lua_State* state = scripting::getState();
     luaL_newmetatable(state, componentMT);
     // register index op - REQUIRED
     lua_pushvalue(state, -1);
     lua_setfield(state, -2, "__index");
+    lua_pushcfunction(state, &luaSetCondition);
+    lua_setfield(state, -2, "setCondition");
     lua_pop(state, 1);
 }
 
