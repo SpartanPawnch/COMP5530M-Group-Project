@@ -1,0 +1,237 @@
+# Material file
+
+newmtl Material_0
+	Kd 0.588000 0.588000 0.588000
+	Pm 0.000000
+	Pr 1.000000
+	map_d C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/white.png
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/white.png
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/white.png
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/white.png
+
+newmtl Material_1
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/11490520546946913238.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-3455394979645218238.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-3455394979645218238.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/3628158980083700836.jpg
+
+newmtl Material_2
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/6047387724914829168.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-8051790464816141987.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-8051790464816141987.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/15722799267630235092.jpg
+
+newmtl Material_3
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/15295713303328085182.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-9916269861720640319.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-9916269861720640319.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/10388182081421875623.jpg
+
+newmtl Material_4
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/5792855332885324923.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-11968150294050148237.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-11968150294050148237.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/16299174074766089871.jpg
+
+newmtl Material_5
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/6151467286084645207.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-8783994986360286082.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-8783994986360286082.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/7645212358685992005.jpg
+
+newmtl Material_6
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/14650633544276105767.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-4871783166746854860.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-4871783166746854860.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2051777328469649772.jpg
+
+newmtl Material_7
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/11474523244911310074.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-466164707995436622.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-466164707995436622.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/4601176305987539675.jpg
+
+newmtl Material_8
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/9288698199695299068.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-466164707995436622.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-466164707995436622.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/4910669866631290573.jpg
+
+newmtl Material_9
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_d C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/16275776544635328252.png
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/16275776544635328252.png
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-1219024358953944284.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-1219024358953944284.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/14170708867020035030.jpg
+
+newmtl Material_10
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/8750083169368950601.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-16885566240357350108.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-16885566240357350108.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/13982482287905699490.jpg
+
+newmtl Material_11
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/4675343432951571524.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-7815564343179553343.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-7815564343179553343.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/7056944414013900257.jpg
+
+newmtl Material_12
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2969916736137545357.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-8747919177698443163.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-8747919177698443163.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/14118779221266351425.jpg
+
+newmtl Material_13
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/6772804448157695701.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-13196865903111448057.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-13196865903111448057.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/759203620573749278.jpg
+
+newmtl Material_14
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/7441062115984513793.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-8114461559286000061.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-8114461559286000061.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/6667038893015345571.jpg
+
+newmtl Material_15
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/8481240838833932244.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-17556969131407844942.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-17556969131407844942.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/10381718147657362067.jpg
+
+newmtl Material_16
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/5823059166183034438.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-13824894030729245199.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-13824894030729245199.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/14267839433702832875.jpg
+
+newmtl Material_17
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/755318871556304029.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-2411100444841994089.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-2411100444841994089.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/3827035219084910048.jpg
+
+newmtl Material_18
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/17876391417123941155.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-466164707995436622.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-466164707995436622.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/6593109234861095314.jpg
+
+newmtl Material_19
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2185409758123873465.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-7815564343179553343.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-7815564343179553343.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/332936164838540657.jpg
+
+newmtl Material_20
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_d C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/8006627369776289000.png
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/8006627369776289000.png
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-715093869573992647.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-715093869573992647.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/12501374198249454378.jpg
+
+newmtl Material_21
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2775690330959970771.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-7815564343179553343.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-7815564343179553343.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2374361008830720677.jpg
+
+newmtl Material_22
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/4975155472559461469.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-3371964815757888145.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-3371964815757888145.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/2299742237651021498.jpg
+
+newmtl Material_23
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_d C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/5061699253647017043.png
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/5061699253647017043.png
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-11872827283454512094.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-11872827283454512094.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/8773302468495022225.jpg
+
+newmtl Material_24
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/7268504077753552595.jpg
+	map_Pr C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/r-8503262930880235456.jpg
+	map_Pm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/m-8503262930880235456.jpg
+	norm C:/Users/jjpgn/Desktop/groupproject/ProjectsFolder/proj/assets/tex/4477655471536070370.jpg
+
+/assets/tex/8773302468495022225.jpg
+
+newmtl Material_24
+	Kd 0.588000 0.588000 0.588000
+	Pm 1.000000
+	Pr 1.000000
+	map_Kd C:/Users/jjpgn/Desktop/groupproje

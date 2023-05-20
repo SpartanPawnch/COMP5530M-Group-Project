@@ -445,6 +445,25 @@ void loadLevel(const char* path, Scene& scene) {
                     baseEntity.components.addComponent(light);
                 }
 
+                // Directional Light Component
+                else if (strcmp(jsonComponent["type"].GetString(), "DirectionalLightComponent") == 0) {
+                    DirectionalLightComponent light(name, uuid);
+
+                    light.direction = glm::vec3(jsonComponent["direction"][0].GetFloat(),
+                        jsonComponent["direction"][1].GetFloat(),
+                        jsonComponent["direction"][2].GetFloat());
+                    light.ambient = glm::vec3(jsonComponent["ambient"][0].GetFloat(),
+                        jsonComponent["ambient"][1].GetFloat(),
+                        jsonComponent["ambient"][2].GetFloat());
+                    light.diffuse = glm::vec3(jsonComponent["diffuse"][0].GetFloat(),
+                        jsonComponent["diffuse"][1].GetFloat(),
+                        jsonComponent["diffuse"][2].GetFloat());
+                    light.specular = glm::vec3(jsonComponent["specular"][0].GetFloat(),
+                        jsonComponent["specular"][1].GetFloat(),
+                        jsonComponent["specular"][2].GetFloat());
+                    baseEntity.components.addComponent(light);
+                }
+
                 // ScriptComponent
                 else if (strcmp(jsonComponent["type"].GetString(), "ScriptComponent") == 0) {
                     ScriptComponent script(name, uuid);
@@ -660,6 +679,11 @@ void loadLevel(const char* path, Scene& scene) {
     for (size_t i = 0; i < scene.entities.size(); i++) {
         for (size_t j = 0; j < scene.entities[i].components.vecLightComponent.size(); j++) {
             scene.entities[i].components.vecLightComponent[j].update(.0f, scene.entities[i].state);
+        }
+    }
+    for (size_t i = 0; i < scene.entities.size(); i++) {
+        for (size_t j = 0; j < scene.entities[i].components.vecDirectionalLightComponent.size(); j++) {
+            scene.entities[i].components.vecDirectionalLightComponent[j].update(.0f, scene.entities[i].state);
         }
     }
 
@@ -1071,6 +1095,50 @@ static void saveComponent(const LightComponent& component,
     writer.EndObject();
 }
 
+static void saveComponent(const DirectionalLightComponent& component,
+    rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
+    writer.StartObject();
+
+    writer.Key("name");
+    writer.String(component.name.c_str());
+
+    writer.Key("uuid");
+    writer.Int(component.uuid);
+
+    writer.Key("type");
+    writer.String("DirectionalLightComponent");
+
+    writer.Key("direction");
+    writer.StartArray();
+    writer.Double(float(component.direction[0]));
+    writer.Double(float(component.direction[1]));
+    writer.Double(float(component.direction[2]));
+    writer.EndArray();
+
+    writer.Key("ambient");
+    writer.StartArray();
+    writer.Double(float(component.ambient[0]));
+    writer.Double(float(component.ambient[1]));
+    writer.Double(float(component.ambient[2]));
+    writer.EndArray();
+
+    writer.Key("diffuse");
+    writer.StartArray();
+    writer.Double(float(component.diffuse[0]));
+    writer.Double(float(component.diffuse[1]));
+    writer.Double(float(component.diffuse[2]));
+    writer.EndArray();
+
+    writer.Key("specular");
+    writer.StartArray();
+    writer.Double(float(component.specular[0]));
+    writer.Double(float(component.specular[1]));
+    writer.Double(float(component.specular[2]));
+    writer.EndArray();
+
+    writer.EndObject();
+}
+
 static void saveComponent(const ScriptComponent& component,
     rapidjson::Writer<rapidjson::FileWriteStream>& writer) {
     writer.StartObject();
@@ -1440,6 +1508,13 @@ void saveLevel(const char* path, const Scene& scene) {
                 scene.entities[i].components.vecLightComponent;
             for (unsigned int j = 0; j < lightComponents.size(); j++) {
                 saveComponent(lightComponents[j], writer);
+            }
+
+            // DirectionalLightComponent
+            const std::vector<DirectionalLightComponent>& directionalLightComponents =
+                scene.entities[i].components.vecDirectionalLightComponent;
+            for (unsigned int j = 0; j < directionalLightComponents.size(); j++) {
+                saveComponent(directionalLightComponents[j], writer);
             }
 
             // ModelComponent

@@ -1,6 +1,6 @@
-prefix=C:/Program Files (x86)/BuildSys
+prefix=D:/_Year4/_COMP5530M Group Project/COMP5530M-Group-Project/out/install/x64-Debug
 exec_prefix=${prefix}
-libdir=C:/Program Files (x86)/BuildSys/lib
+libdir=D:/_Year4/_COMP5530M Group Project/COMP5530M-Group-Project/out/install/x64-Debug/lib
 includedir=${prefix}/include
 
 Name: glew

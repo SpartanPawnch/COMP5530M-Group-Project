@@ -16,6 +16,7 @@
 #include "../Component/ModelComponent.h"
 #include "../Component/SkeletalModelComponent.h"
 #include "../Component/LightComponent.h"
+#include "../Component/DirectionalLightComponent.h"
 #include "../Component/SkyBoxComponent.h"
 #include "../Component/ControllerComponent.h"
 #include "../Component/TransformComponent.h"
@@ -30,6 +31,7 @@ struct ComponentStorage{
     std::vector<ModelComponent> vecModelComponent;
     std::vector<SkeletalModelComponent> vecSkeletalModelComponent;
     std::vector<LightComponent> vecLightComponent;
+    std::vector<DirectionalLightComponent> vecDirectionalLightComponent;
     std::vector<SkyBoxComponent> vecSkyBoxComponent;
     std::vector<ControllerComponent> vecControllerComponent;
     std::vector<TransformComponent> vecTransformComponent;
@@ -114,6 +116,11 @@ struct ComponentStorage{
     }
 
     template<>
+    void addComponent<DirectionalLightComponent>(const DirectionalLightComponent& component){
+        vecDirectionalLightComponent.emplace_back(component);
+    }
+
+    template<>
     void addComponent<SkyBoxComponent>(const SkyBoxComponent& component){
         vecSkyBoxComponent.emplace_back(component);
     }
@@ -188,6 +195,13 @@ struct ComponentStorage{
     void start<LightComponent>(){
         for(unsigned int i=0;i<vecLightComponent.size();i++){
             vecLightComponent[i].start();
+        }
+    }
+
+    template<>
+    void start<DirectionalLightComponent>(){
+        for(unsigned int i=0;i<vecDirectionalLightComponent.size();i++){
+            vecDirectionalLightComponent[i].start();
         }
     }
 
@@ -276,6 +290,13 @@ struct ComponentStorage{
     }
 
     template<>
+    void update<DirectionalLightComponent>(float dt,EntityState& state){
+        for(unsigned int i=0;i<vecDirectionalLightComponent.size();i++){
+            vecDirectionalLightComponent[i].update(dt,state);
+        }
+    }
+
+    template<>
     void update<SkyBoxComponent>(float dt,EntityState& state){
         for(unsigned int i=0;i<vecSkyBoxComponent.size();i++){
             vecSkyBoxComponent[i].update(dt,state);
@@ -331,6 +352,10 @@ struct ComponentStorage{
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<LightComponent>(){
         return ComponentLocation::LIGHTCOMPONENT;
+    }
+    template<>
+    static ComponentLocation::CompType typeToCompTypeEnum<DirectionalLightComponent>(){
+        return ComponentLocation::DIRECTIONALLIGHTCOMPONENT;
     }
     template<>
     static ComponentLocation::CompType typeToCompTypeEnum<SkyBoxComponent>(){

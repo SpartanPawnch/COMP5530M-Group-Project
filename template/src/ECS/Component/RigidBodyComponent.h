@@ -5,6 +5,14 @@
 #include "../../physics_engine/physicsEngine.h"
 #include <lua.hpp>
 
+struct CollisionInfo {
+    bool collidedAsBody1 = false;
+    bool collidedAsBody2 = false;
+    int ownUuid = -1;
+    int otherUuid1 = -1;
+    int otherUuid2 = -1;
+};
+
 struct RigidBodyComponent : BaseComponent {
     RigidBodyComponent();
     RigidBodyComponent(const std::string& name, const int uuid);
@@ -30,6 +38,7 @@ struct RigidBodyComponent : BaseComponent {
     void setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient);
     void setLocalColliderPosition(ColliderTypes type, int index);
     void setLocalColliderRotation(ColliderTypes type, int index);
+    void removeCollisionShape(ColliderTypes type, int index);
 
     void setCubeColliderExtents(int index, glm::vec3 extents);
     void setSphereColliderRadius(int index, float radius);
@@ -54,6 +63,5 @@ struct RigidBodyComponent : BaseComponent {
     std::vector<CapsuleColliderObject> capsuleColliders;
     std::vector<MeshColliderObject> meshColliders;
 
-    bool collidedAsBody1 = false;
-    bool collidedAsBody2 = false;
+    CollisionInfo* collisionInfo;
 };

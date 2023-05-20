@@ -416,6 +416,7 @@ static void handleMouseInput(GLFWwindow* window) {
         glfwSetCursorPos(window, renderManager->xPosLast, renderManager->yPosLast);
     }
 
+    // disable mouse picking for now to implement raycast in editor
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         if (ImGuizmo::IsUsing())
             return;
@@ -441,6 +442,60 @@ static void handleMouseInput(GLFWwindow* window) {
             scene.selectedEntity = &scene.entities[entityIndex - 1];
         }
     }
+
+    //if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    //    //reference https://antongerdelan.net/opengl/raycasting.html
+    //    if (ImGuizmo::IsUsing())
+    //        return;
+    //    float mouseX = renderManager->xPos - ImGui::GetWindowPos().x;
+    //    float mouseY = renderManager->yPos - ImGui::GetWindowPos().y;
+
+    //    //convert to NDC
+    //    glm::vec3 rayNDC = glm::vec3(0.0f);
+
+    //    int width, height;
+    //    glfwGetWindowSize(window, &width, &height);
+
+    //    rayNDC.x = (2.0f * mouseX) / width - 1.0f;
+    //    rayNDC.y = 1.0f - (2.0f * mouseY) / height;
+
+    //    //convert to Homogeneous Coordinates
+
+    //    glm::vec4 rayHomogeneous = glm::vec4(rayNDC.x, rayNDC.y, -1.0, 1.0);
+
+    //    //convert to camera coordinates
+    //    
+    //    glm::vec4 rayCamera = glm::inverse(renderManager->projectionMatrix) * rayHomogeneous;
+    //    rayCamera = glm::vec4(rayCamera.x, rayCamera.y, -1.0, 0.0);
+
+    //    //convert to world coordinates
+    //    
+    //    glm::vec3 rayWorld = glm::vec3(glm::inverse(renderManager->camera.getViewMatrix()) * rayCamera);
+    //    rayWorld = glm::normalize(rayWorld);
+
+    //    //get x and z it hits on y=0 with ray vs plane 
+    //    glm::vec3 intersectionPoint = glm::vec3(0.0f);
+
+    //    //reference 4 - Geometric Intersections for Raytracing lecture of Foundations of Modelling and Rendering
+
+    //    glm::vec3 u = glm::vec3(1.0f, .0f, .0f);
+    //    glm::vec3 w = glm::vec3(.0f, .0f, 1.0f);
+    //    glm::vec3 n = glm::vec3(.0f, 1.0f, .0f);
+    //    glm::vec3 p = glm::vec3(.0f, .0f, .0f);
+
+    //    glm::vec3 s = renderManager->camera.getPosition();
+    //    glm::vec3 l = rayWorld;
+
+    //    glm::vec3 sLine = p - s;
+    //    glm::vec3 lLine = glm::vec3(glm::dot(l, u), glm::dot(l, w), glm::dot(l, n));
+
+
+    //    float t = (glm::dot((p-s),n)) / (glm::dot(l,n));
+
+    //    intersectionPoint = s + l * t;
+
+    //    std::cout << "hit y" << intersectionPoint.y << " on x=" << intersectionPoint.x << " and z=" << intersectionPoint.z << std::endl;
+    //}
 }
 
 // --- GUI Widgets ---
@@ -1683,6 +1738,9 @@ void drawCubeCollidersList(RigidBodyComponent& component) {
                 component.removeCollisionCollideWithMask(ColliderTypes::CUBE, i, j);
             }
         }
+        if (ImGui::Button("Delete Cube Collider")) {
+            component.removeCollisionShape(ColliderTypes::CUBE, i);
+        }
         ImGui::PopID();
     }
 }
@@ -1800,6 +1858,9 @@ void drawSphereCollidersList(RigidBodyComponent& component) {
             if (ImGui::Button("Delete")) {
                 component.removeCollisionCollideWithMask(ColliderTypes::SPHERE, i, j);
             }
+        }
+        if (ImGui::Button("Delete Sphere Collider")) {
+            component.removeCollisionShape(ColliderTypes::SPHERE, i);
         }
         ImGui::PopID();
     }
@@ -1928,6 +1989,9 @@ void drawCapsuleCollidersList(RigidBodyComponent& component) {
             if (ImGui::Button("Delete")) {
                 component.removeCollisionCollideWithMask(ColliderTypes::CAPSULE, i, j);
             }
+        }
+        if (ImGui::Button("Delete Capsule Collider")) {
+            component.removeCollisionShape(ColliderTypes::CAPSULE, i);
         }
         ImGui::PopID();
     }
@@ -2072,13 +2136,24 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
                 component.removeCollisionCollideWithMask(ColliderTypes::MESH, i, j);
             }
         }
+        if (ImGui::Button("Delete Mesh Collider")) {
+            component.removeCollisionShape(ColliderTypes::MESH, i);
+        }
         ImGui::PopID();
     }
 }
 
 void drawComponentProps(RigidBodyComponent& component) {
-    ImGui::Text("Collided as Body 1: %s", component.collidedAsBody1 ? "true" : "false");
-    ImGui::Text("Collided as Body 2: %s", component.collidedAsBody2 ? "true" : "false");
+    ImGui::Text("Collided as Body 1: %s", component.collisionInfo->collidedAsBody1 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 1: %d", component.collisionInfo->otherUuid1);
+    ImGui::Text("Collided as Body 2: %s", component.collisionInfo->collidedAsBody2 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 2: %d", component.collisionInfo->otherUuid2);
+    if (ImGui::Button("Reset Collision Status")) {
+        component.collisionInfo->collidedAsBody1 = false;
+        component.collisionInfo->otherUuid1 = -1;
+        component.collisionInfo->collidedAsBody2 = false;
+        component.collisionInfo->otherUuid2 = -1;
+    }
     ImGui::InputFloat3("Position", &component.position[0]);
     ImGui::InputFloat4("Rotation", &component.rotation[0]);
     ImGui::InputFloat3("Force", &component.force[0]);
@@ -2412,6 +2487,14 @@ void drawComponentProps(LightComponent& component) {
     ImGui::InputFloat3("Diffuse", &component.diffuse[0]);
     ImGui::InputFloat3("Specular", &component.specular[0]);
 }
+
+void drawComponentProps(DirectionalLightComponent& component) {
+    ImGui::InputFloat3("Direction", &component.direction[0]);
+    ImGui::InputFloat3("Ambient", &component.ambient[0]);
+    ImGui::InputFloat3("Diffuse", &component.diffuse[0]);
+    ImGui::InputFloat3("Specular", &component.specular[0]);
+}
+
 void drawComponentProps(PlayerControllerComponent& component) {
     if (ImGui::Button("Add Key")) {
         component.addKey();
@@ -2454,6 +2537,9 @@ void drawComponentContextMenu(int i, int& componentToDelete) {
         }
         if (ImGui::MenuItem("Add Point Light Component")) {
             scene.selectedEntity->components.addComponent(LightComponent());
+        }
+        if (ImGui::MenuItem("Add Directional Light Component")) {
+            scene.selectedEntity->components.addComponent(DirectionalLightComponent());
         }
         if (ImGui::MenuItem("Add Script Component")) {
             scene.selectedEntity->components.addComponent(ScriptComponent());
@@ -2572,6 +2658,11 @@ inline void drawProperties() {
             scene.selectedEntity->components.update<LightComponent>(.0f,
                 scene.selectedEntity->state);
 
+            // LightComponent
+            drawComponentList(scene.selectedEntity->components.vecDirectionalLightComponent);
+            scene.selectedEntity->components.update<DirectionalLightComponent>(.0f,
+                scene.selectedEntity->state);
+
             // ModelComponent
             drawComponentList(scene.selectedEntity->components.vecModelComponent);
 
@@ -2613,6 +2704,9 @@ inline void drawProperties() {
                 }
                 if (ImGui::MenuItem("Add Point Light Component")) {
                     scene.selectedEntity->components.addComponent(LightComponent());
+                }
+                if (ImGui::MenuItem("Add Directional Light Component")) {
+                    scene.selectedEntity->components.addComponent(DirectionalLightComponent());
                 }
                 if (ImGui::MenuItem("Add Model Component")) {
                     scene.selectedEntity->components.addComponent(ModelComponent());
@@ -2864,7 +2958,12 @@ inline void drawMaterials() {
                 textureFiles);
 
             ImGui::Text("Name %s", mat->name.c_str());
+            glm::vec3 baseColorBefore = mat->baseColor;
             ImGui::ColorEdit3("Base Color", &mat->baseColor[0]);
+            if (baseColorBefore != mat->baseColor)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             // texture for base color combo box from textures
             std::string previewStrBaseColor = "Select a texture";
             if (mat->baseColorMap.size() > 0) {
@@ -2880,7 +2979,12 @@ inline void drawMaterials() {
                 }
                 ImGui::EndCombo();
             }
+            glm::vec3 emissiveBefore = mat->emissiveColor;
             ImGui::ColorEdit3("Emissive Color", &mat->emissiveColor[0]);
+            if (emissiveBefore != mat->emissiveColor)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             std::string previewStrEmissive = "Select a texture";
             if (mat->emissiveMap.size() > 0) {
                 previewStrEmissive = mat->emissiveMap;
@@ -2890,11 +2994,18 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrEmissive == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->emissiveMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
             }
+
+            float roughnessBefore = mat->roughness;
             ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
+            if (roughnessBefore != mat->roughness)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             std::string previewStrRoughness = "Select a texture";
             if (mat->roughnessMap.size() > 0) {
                 previewStrRoughness = mat->roughnessMap;
@@ -2904,11 +3015,19 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrRoughness == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->roughnessMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
             }
+
+            float metalnessBefore = mat->metalness;
             ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
+            if (metalnessBefore != mat->metalness)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
+            
             std::string previewStrMetalness = "Select a texture";
             if (mat->metalnessMap.size() > 0) {
                 previewStrMetalness = mat->metalnessMap;
@@ -2918,11 +3037,19 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrMetalness == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->metalnessMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
             }
+
+            float occlusionBefore = mat->occlusion;
             ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
+            if (occlusionBefore != mat->occlusion)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
+            
             std::string previewStrOcclusion = "Select a texture";
             if (mat->occlusionMap.size() > 0) {
                 previewStrOcclusion = mat->occlusionMap;
@@ -2932,6 +3059,7 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrOcclusion == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->occlusionMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
@@ -2945,6 +3073,7 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrNormal == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->normalMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();
@@ -2958,6 +3087,7 @@ inline void drawMaterials() {
                     bool isSelected = (previewStrAlpha == textureFiles[i].path);
                     if (ImGui::Selectable(textureFiles[i].path.c_str(), &isSelected)) {
                         mat->alphaMap = textureFiles[i].path;
+                        materialSystem->reloadActiveMaterial(mat->name);
                     }
                 }
                 ImGui::EndCombo();

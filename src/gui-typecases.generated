@@ -25,6 +25,9 @@ case ComponentLocation::SKELETALMODELCOMPONENT:
 case ComponentLocation::LIGHTCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecLightComponent);
     break;
+case ComponentLocation::DIRECTIONALLIGHTCOMPONENT:
+    drawComponentSelector(loc.componentIdx,storage.vecDirectionalLightComponent);
+    break;
 case ComponentLocation::SKYBOXCOMPONENT:
     drawComponentSelector(loc.componentIdx,storage.vecSkyBoxComponent);
     break;

@@ -69,6 +69,11 @@ class RenderManager {
     std::vector<std::weak_ptr<LightDescriptor>> lightsMetadata;
     std::vector<LightSource> lights;
 
+    std::vector<std::weak_ptr<LightDescriptor>> directionalLightsMetadata;
+    std::vector<LightSource> directionalLights;
+
+    GLuint skyBoxTexID=0;
+
     // considering windows
     // std::vector <GLFWwindow*> windows;
 
@@ -106,6 +111,7 @@ class RenderManager {
     std::shared_ptr<TextureDescriptor> ligthIconDescriptor;
     std::shared_ptr<TextureDescriptor> cameraIconDescriptor;
     std::shared_ptr<TextureDescriptor> soundIconDescriptor;
+    std::shared_ptr<TextureDescriptor> pixelImageDescriptor;
 
     double deltaTime;
     // Gamma value for gamma correction
@@ -134,7 +140,11 @@ class RenderManager {
     std::shared_ptr<LightDescriptor> addLightSource(glm::vec3& position, glm::vec3& ambient,
         glm::vec3& diffuse, glm::vec3& specular);
 
+    std::shared_ptr<LightDescriptor> addDirectionalLightSource(glm::vec3& direction, glm::vec3& ambient,
+        glm::vec3& diffuse, glm::vec3& specular);
+
     void removeLightSource(size_t idx);
+    void removeDirectionalLightSource(size_t idx);
 
     // TODO: Should probably be called in the Constructor - Now in loadScene()
     void addPipeline(Pipeline pipe, const char* vertexPath, const char* fragmentPath,
@@ -163,8 +173,13 @@ class RenderManager {
     RenderPipeline* getPipeline(Pipeline pipe);
 
     LightSource* getLightSource(std::size_t index);
+    LightSource* getDirectionalLightSource(std::size_t index);
     size_t getLightCount() {
         return lights.size();
+    }
+
+    size_t getDirectionalLightCount() {
+        return directionalLights.size();
     }
 
     void setupColourPipelineUniforms();

@@ -149,6 +149,18 @@ GLuint RenderPipeline::getLightDiffuseID(int index) {
 GLuint RenderPipeline::getLightSpecularID(int index) {
     return this->lightUniforms[index].lightSpecularID;
 }
+GLuint RenderPipeline::getDirectionalLightPosID(int index) {
+    return this->directionalLightUniforms[index].lightPosID;
+}
+GLuint RenderPipeline::getDirectionalLightAmbientID(int index) {
+    return this->directionalLightUniforms[index].lightAmbientID;
+}
+GLuint RenderPipeline::getDirectionalLightDiffuseID(int index) {
+    return this->directionalLightUniforms[index].lightDiffuseID;
+}
+GLuint RenderPipeline::getDirectionalLightSpecularID(int index) {
+    return this->directionalLightUniforms[index].lightSpecularID;
+}
 GLuint RenderPipeline::getViewPosID() {
     return this->viewPosID;
 }
@@ -158,6 +170,51 @@ GLuint RenderPipeline::getGammaID() {
 GLuint RenderPipeline::getNumLightsID() {
     return this->numLightsID;
 }
+GLuint RenderPipeline::getNumDirectionalLightsID() {
+    return this->numDirectionalLightsID;
+}
+GLuint RenderPipeline::getBaseColorID() {
+    return this->baseColorID;
+}
+GLuint RenderPipeline::getEmissiveColorID() {
+    return this->emissiveColorID;
+}
+GLuint RenderPipeline::getRoughnessID() {
+    return this->roughnessID;
+}
+GLuint RenderPipeline::getMetalnessID() {
+    return this->metalnessID;
+}
+GLuint RenderPipeline::getOcclusionID() {
+    return this->occlusionID;
+}
+GLuint RenderPipeline::getbaseColorSamplerLocationID() {
+    return this->baseColorSamplerLocation;
+}
+GLuint RenderPipeline::getroughnessSamplerLocationID() {
+    return this->roughnessSamplerLocation;
+}
+
+GLuint RenderPipeline::getmetalnessSamplerLocationID() {
+    return this->metalnessSamplerLocation;
+}
+
+GLuint RenderPipeline::getnormalSamplerLocationID() {
+    return this->normalSamplerLocation;
+}
+
+GLuint RenderPipeline::getalphaSamplerLocationID() {
+    return this->alphaSamplerLocation;
+}
+
+GLuint RenderPipeline::getemissiveSamplerLocationID() {
+    return this->emissiveSamplerLocation;
+}
+
+GLuint RenderPipeline::getocclusionSamplerLocationID() {
+    return this->occlusionSamplerLocation;
+}
+
 GLuint RenderPipeline::getBonesMatrix() {
     return this->bonesMatrix;
 }
@@ -213,6 +270,23 @@ void RenderPipeline::setTextureUniformLocations() {
     this->viewPosID = glGetUniformLocation(this->shaderProgram, "viewPos");
     this->gammaID = glGetUniformLocation(this->shaderProgram, "gamma");
     this->numLightsID = glGetUniformLocation(this->shaderProgram, "numLights");
+    this->numDirectionalLightsID = glGetUniformLocation(this->shaderProgram, "numDirectionalLights");
+    this->baseColorSamplerLocation = glGetUniformLocation(this->shaderProgram, "baseColorSampler");
+    this->roughnessSamplerLocation = glGetUniformLocation(this->shaderProgram, "roughnessSampler");
+    this->metalnessSamplerLocation = glGetUniformLocation(this->shaderProgram, "metalnessSampler");
+    this->normalSamplerLocation = glGetUniformLocation(this->shaderProgram, "normalSampler");
+    this->alphaSamplerLocation = glGetUniformLocation(this->shaderProgram, "alphaSampler");
+    this->emissiveSamplerLocation = glGetUniformLocation(this->shaderProgram, "emissiveSampler");
+    this->occlusionSamplerLocation = glGetUniformLocation(this->shaderProgram, "occlusionSampler");
+
+    this->baseColorID = glGetUniformLocation(this->shaderProgram, "baseColor");
+    this->emissiveColorID = glGetUniformLocation(this->shaderProgram, "emissiveColor");
+    
+    this->roughnessID = glGetUniformLocation(this->shaderProgram, "roughness");
+    this->metalnessID = glGetUniformLocation(this->shaderProgram, "metalness");
+    this->occlusionID = glGetUniformLocation(this->shaderProgram, "occlusion");
+
+    this->baseColorSamplerLocation;
 
     // light vector
     for (int i = 0; i < MAX_LIGHTS; i++) {
@@ -224,6 +298,19 @@ void RenderPipeline::setTextureUniformLocations() {
         this->lightUniforms[i].lightDiffuseID =
             glGetUniformLocation(this->shaderProgram, (base + "diffuse").c_str());
         this->lightUniforms[i].lightSpecularID =
+            glGetUniformLocation(this->shaderProgram, (base + "specular").c_str());
+    }
+
+    // directional lights vector
+    for (int i = 0; i < MAX_LIGHTS; i++) {
+        std::string base = "directionalLights[" + std::to_string(i) + "].";
+        this->directionalLightUniforms[i].lightPosID =
+            glGetUniformLocation(this->shaderProgram, (base + "position").c_str());
+        this->directionalLightUniforms[i].lightAmbientID =
+            glGetUniformLocation(this->shaderProgram, (base + "ambient").c_str());
+        this->directionalLightUniforms[i].lightDiffuseID =
+            glGetUniformLocation(this->shaderProgram, (base + "diffuse").c_str());
+        this->directionalLightUniforms[i].lightSpecularID =
             glGetUniformLocation(this->shaderProgram, (base + "specular").c_str());
     }
 }

@@ -31,6 +31,7 @@ void RenderManager::startUp(GLFWwindow* aWindow) {
     this->pipelines.clear();
     this->pipelines.resize(Pipeline_MAX);
     this->lights.clear();
+    this->directionalLights.clear();
     this->deltaTime = 0.0f;
     this->xPos = 0.0f;
     this->yPos = 0.0f;
@@ -89,7 +90,7 @@ void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuff
     IndexBuffer iBuffer, GLuint VAO) {
     for (unsigned int i = 0; i < pipeline.size(); i++) {
         if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end()) {
-            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{Buffer(vBuffer, iBuffer)};
+            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{ Buffer(vBuffer, iBuffer) };
         }
         else {
             PipelineMeshBufferMap[pipeline[i]].push_back(Buffer(vBuffer, iBuffer));
@@ -320,7 +321,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -358,6 +359,25 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
             else if (!scene.entities[i].components.vecLightComponent.empty() &&
+                ligthIconDescriptor) {
+                glUseProgram(getPipeline(IconPipeline)->getProgram());
+
+                // bind texture
+                glBindTexture(GL_TEXTURE_2D, ligthIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecDirectionalLightComponent.empty() &&
                 ligthIconDescriptor) {
                 glUseProgram(getPipeline(IconPipeline)->getProgram());
 
@@ -445,37 +465,90 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                             lights[i].getSpecular().x, lights[i].getSpecular().y,
                             lights[i].getSpecular().z);
                     }
+
+                    glUniform1i(getPipeline(TexturePipeline)->getNumDirectionalLightsID(),
+                        static_cast<int>(this->directionalLights.size()));
+                    // set per-light uniforms
+                    for (std::size_t i = 0; i < directionalLights.size(); i++) {
+                        glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightPosID(i),
+                            directionalLights[i].getPosition().x, directionalLights[i].getPosition().y,
+                            directionalLights[i].getPosition().z);
+                        glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightAmbientID(i),
+                            directionalLights[i].getAmbient().x, directionalLights[i].getAmbient().y,
+                            directionalLights[i].getAmbient().z);
+                        glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightDiffuseID(i),
+                            directionalLights[i].getDiffuse().x, directionalLights[i].getDiffuse().y,
+                            directionalLights[i].getDiffuse().z);
+                        glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightSpecularID(i),
+                            directionalLights[i].getSpecular().x, directionalLights[i].getSpecular().y,
+                            directionalLights[i].getSpecular().z);
+                    }
+
                     std::shared_ptr<ActiveMaterial> meshMat =
                         scene.entities[i].components.vecModelComponent[j].materials[k];
+
+                    glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(), meshMat->baseColor.x, meshMat->baseColor.y, meshMat->baseColor.z);
+                    glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(), meshMat->emissiveColor.x, meshMat->emissiveColor.y, meshMat->emissiveColor.z);
+
+                    glUniform1f(getPipeline(TexturePipeline)->getRoughnessID(), meshMat->roughness);
+                    glUniform1f(getPipeline(TexturePipeline)->getMetalnessID(), meshMat->metalness);
+                    glUniform1f(getPipeline(TexturePipeline)->getOcclusionID(), meshMat->occlusion);
+
+                    glUniform1i(getPipeline(TexturePipeline)->getbaseColorSamplerLocationID(), 0);
+                    glUniform1i(getPipeline(TexturePipeline)->getroughnessSamplerLocationID(), 1);
+                    glUniform1i(getPipeline(TexturePipeline)->getmetalnessSamplerLocationID(), 2);
+                    glUniform1i(getPipeline(TexturePipeline)->getnormalSamplerLocationID(), 3);
+                    glUniform1i(getPipeline(TexturePipeline)->getalphaSamplerLocationID(), 4);
+                    glUniform1i(getPipeline(TexturePipeline)->getemissiveSamplerLocationID(), 5);
+                    glUniform1i(getPipeline(TexturePipeline)->getocclusionSamplerLocationID(), 6);
+
 
                     // todo: send 1x1 white image on the elses of all
                     glActiveTexture(GL_TEXTURE0);
                     if (meshMat->baseColorMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE1);
                     if (meshMat->roughnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE2);
                     if (meshMat->metalnessMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE3);
                     if (meshMat->normalMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE4);
                     if (meshMat->alphaMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE5);
                     if (meshMat->emissiveMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE6);
                     if (meshMat->occlusionMap)
                         glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                    else
+                        glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
+
+                    glActiveTexture(GL_TEXTURE7);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP,
+                        skyBoxTexID);
 
                     glActiveTexture(GL_TEXTURE0);
                 }
@@ -551,8 +624,26 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                 lights[k].getSpecular().x, lights[k].getSpecular().y, lights[k].getSpecular().z);
         }
 
+        glUniform1i(getPipeline(AnimatedPipeline)->getNumDirectionalLightsID(),
+            static_cast<int>(this->directionalLights.size()));
+        // set per-light uniforms
+        for (std::size_t i = 0; i < directionalLights.size(); i++) {
+            glUniform3f(getPipeline(AnimatedPipeline)->getDirectionalLightPosID(i),
+                directionalLights[i].getPosition().x, directionalLights[i].getPosition().y,
+                directionalLights[i].getPosition().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getDirectionalLightAmbientID(i),
+                directionalLights[i].getAmbient().x, directionalLights[i].getAmbient().y,
+                directionalLights[i].getAmbient().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getDirectionalLightDiffuseID(i),
+                directionalLights[i].getDiffuse().x, directionalLights[i].getDiffuse().y,
+                directionalLights[i].getDiffuse().z);
+            glUniform3f(getPipeline(AnimatedPipeline)->getDirectionalLightSpecularID(i),
+                directionalLights[i].getSpecular().x, directionalLights[i].getSpecular().y,
+                directionalLights[i].getSpecular().z);
+        }
+
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
-             j++) {
+            j++) {
             auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
             if (!desc) {
                 continue;
@@ -560,41 +651,74 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
                 glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getBonesMatrix(), 100, GL_FALSE,
                     &scene.entities[i]
-                         .components.vecSkeletalModelComponent[j]
-                         .transformMatrices[0][0][0]);
+                    .components.vecSkeletalModelComponent[j]
+                    .transformMatrices[0][0][0]);
 
                 // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
                 std::shared_ptr<ActiveMaterial> meshMat =
                     scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
 
+                glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(), meshMat->baseColor.x, meshMat->baseColor.y, meshMat->baseColor.z);
+                glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(), meshMat->emissiveColor.x, meshMat->emissiveColor.y, meshMat->emissiveColor.z);
+
+                glUniform1f(getPipeline(TexturePipeline)->getRoughnessID(), meshMat->roughness);
+                glUniform1f(getPipeline(TexturePipeline)->getMetalnessID(), meshMat->metalness);
+                glUniform1f(getPipeline(TexturePipeline)->getOcclusionID(), meshMat->occlusion);
+
+                glUniform1i(getPipeline(TexturePipeline)->getbaseColorSamplerLocationID(), 0);
+                glUniform1i(getPipeline(TexturePipeline)->getroughnessSamplerLocationID(), 1);
+                glUniform1i(getPipeline(TexturePipeline)->getmetalnessSamplerLocationID(), 2);
+                glUniform1i(getPipeline(TexturePipeline)->getnormalSamplerLocationID(), 3);
+                glUniform1i(getPipeline(TexturePipeline)->getalphaSamplerLocationID(), 4);
+                glUniform1i(getPipeline(TexturePipeline)->getemissiveSamplerLocationID(), 5);
+                glUniform1i(getPipeline(TexturePipeline)->getocclusionSamplerLocationID(), 6);
+
                 // todo: send 1x1 white image on the elses of all
                 glActiveTexture(GL_TEXTURE0);
                 if (meshMat->baseColorMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->baseColorMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE1);
                 if (meshMat->roughnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->roughnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE2);
                 if (meshMat->metalnessMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->metalnessMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE3);
                 if (meshMat->normalMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->normalMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE4);
                 if (meshMat->alphaMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->alphaMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE5);
                 if (meshMat->emissiveMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->emissiveMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE6);
                 if (meshMat->occlusionMap)
                     glBindTexture(GL_TEXTURE_2D, meshMat->occlusionMap->texId);
+                else
+                    glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
+
+                glActiveTexture(GL_TEXTURE7);
+                glBindTexture(GL_TEXTURE_CUBE_MAP,
+                    skyBoxTexID);
 
                 glActiveTexture(GL_TEXTURE0);
 
@@ -651,6 +775,28 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
             else if (!scene.entities[i].components.vecLightComponent.empty() &&
+                ligthIconDescriptor) {
+                glUseProgram(getPipeline(IconIDPipeline)->getProgram());
+
+                glUniform3f(getPipeline(IconIDPipeline)->getEntID(), reconstructed_color.x,
+                    reconstructed_color.y, reconstructed_color.z);
+
+                // bind texture
+                glBindTexture(GL_TEXTURE_2D, ligthIconDescriptor->texId);
+
+                // bind matrices
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getModelID(), 1, GL_FALSE,
+                    &modelMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getViewID(), 1, GL_FALSE,
+                    &viewMatrix[0][0]);
+                glUniformMatrix4fv(getPipeline(IconIDPipeline)->getProjectionID(), 1, GL_FALSE,
+                    &projectionMatrix[0][0]);
+
+                // render square with icon texture
+                glBindVertexArray(dummyVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            else if (!scene.entities[i].components.vecDirectionalLightComponent.empty() &&
                 ligthIconDescriptor) {
                 glUseProgram(getPipeline(IconIDPipeline)->getProgram());
 
@@ -735,7 +881,7 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
             reconstructed_color.y, reconstructed_color.z);
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
-             j++) {
+            j++) {
             auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
             if (!desc) {
                 continue;
@@ -744,8 +890,8 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
                 glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100,
                     GL_FALSE,
                     &scene.entities[i]
-                         .components.vecSkeletalModelComponent[j]
-                         .transformMatrices[0][0][0]);
+                    .components.vecSkeletalModelComponent[j]
+                    .transformMatrices[0][0][0]);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -760,7 +906,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -783,7 +929,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
             glDepthMask(GL_FALSE);
             glBindTexture(GL_TEXTURE_CUBE_MAP,
                 scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
-            skyboxID = scene.entities[i].components.vecSkyBoxComponent[j].skybox.id;
+            skyBoxTexID = scene.entities[i].components.vecSkyBoxComponent[j].skybox.id;
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glDepthMask(GL_TRUE);
@@ -796,7 +942,7 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -809,7 +955,7 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
     viewMatrix = camera.getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-                 !(aspect != aspect))
+        !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -885,10 +1031,10 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
                 glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getModelID(), 1, false,
                     &modelMatrix[0][0]);
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
-                                "radius"),
+                    "radius"),
                     rigidBody.capsuleColliders[k].colliderShape->getRadius());
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
-                                "height"),
+                    "height"),
                     rigidBody.capsuleColliders[k].colliderShape->getHeight());
                 glBindVertexArray(dummyVAO);
                 glDrawArrays(GL_LINES, 0, 1208);
@@ -902,7 +1048,7 @@ void RenderManager::renderCamPreview(const Scene& scene, int width, int height) 
     if (scene.selectedEntity) {
         modelMatrix = scene.selectedEntity->state.runtimeTransform;
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
-             i++) {
+            i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
             float aspect = float(width) / height;
             aspect =
@@ -1019,6 +1165,7 @@ void RenderManager::loadIcons() {
     ligthIconDescriptor = loadTexture("assets/lightico.png", "assets/lightico.png");
     cameraIconDescriptor = loadTexture("assets/cameraico.png", "assets/cameraico.png");
     soundIconDescriptor = loadTexture("assets/soundico.png", "assets/soundico.png");
+    pixelImageDescriptor = loadTexture("assets/pixel.png", "assets/pixel.png");
 }
 
 void RenderManager::runTexturePipeline() {
@@ -1075,12 +1222,40 @@ void RenderManager::removeLightSource(size_t idx) {
     lights.pop_back();
 }
 
+std::shared_ptr<LightDescriptor> RenderManager::addDirectionalLightSource(glm::vec3& direction,
+    glm::vec3& ambient, glm::vec3& diffuse, glm::vec3& specular) {
+    directionalLights.emplace_back(direction, ambient, diffuse, specular);
+    std::shared_ptr<LightDescriptor> ptr = std::make_shared<LightDescriptor>();
+    directionalLightsMetadata.emplace_back(std::weak_ptr<LightDescriptor>(ptr));
+    ptr->idx = directionalLights.size() - 1;
+    return ptr;
+}
+
+void RenderManager::removeDirectionalLightSource(size_t idx) {
+    if (directionalLights.size() < idx)
+        return;
+    // swap with back
+    std::swap(directionalLights[idx], directionalLights.back());
+    std::swap(directionalLightsMetadata[idx], directionalLightsMetadata.back());
+
+    // fix index
+    directionalLightsMetadata[idx].lock()->idx = idx;
+
+    // delete
+    directionalLightsMetadata.pop_back();
+    directionalLights.pop_back();
+}
+
 RenderPipeline* RenderManager::getPipeline(Pipeline pipe) {
     return &this->pipelines[pipe];
 }
 
 LightSource* RenderManager::getLightSource(std::size_t index) {
     return &this->lights[index];
+}
+
+LightSource* RenderManager::getDirectionalLightSource(std::size_t index) {
+    return &this->directionalLights[index];
 }
 
 void RenderManager::runShadowPipeline() {
