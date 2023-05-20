@@ -2491,6 +2491,10 @@ void drawComponentList(std::vector<T>& components) {
         */
         if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             drawComponentContextMenu(i, componentToDelete);
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", components[i].uuid);
+            ImGui::PopStyleColor();
             drawComponentProps(components[i]);
         }
         ImGui::PopID();
@@ -2512,17 +2516,17 @@ void drawComponentList(std::vector<CameraComponent>& components) {
     // draw list
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
-        if (ImGui::TreeNodeEx(components[i].name.c_str(),
-                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                    ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             // update selected camera
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
                 scene.selectedCameraIdx = i;
 
             drawComponentContextMenu(i, componentToDelete);
-
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", components[i].uuid);
+            ImGui::PopStyleColor();
             drawComponentProps(components[i]);
-            ImGui::TreePop();
         }
         ImGui::PopID();
     }

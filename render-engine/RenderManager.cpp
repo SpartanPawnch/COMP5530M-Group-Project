@@ -313,6 +313,8 @@ void RenderManager::movePhysicsEntities(Scene& scene, Camera* camera, int width,
     }
 }
 
+static GLuint skyboxID;
+
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
@@ -781,6 +783,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
             glDepthMask(GL_FALSE);
             glBindTexture(GL_TEXTURE_CUBE_MAP,
                 scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
+            skyboxID = scene.entities[i].components.vecSkyBoxComponent[j].skybox.id;
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glDepthMask(GL_TRUE);
