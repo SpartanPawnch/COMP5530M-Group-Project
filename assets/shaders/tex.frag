@@ -280,8 +280,8 @@ void main()
         lighting += computeDirectionalPBR(i,n,v);
     }
 
-    //fsColour = vec4(pow(lighting, vec3(1.0/gamma)),1);
-    fsColour = vec4(lighting,1);
+    fsColour = vec4(pow(lighting, vec3(1.0/gamma)),1);
+    //fsColour = vec4(lighting,1);
     //fsColour = vec4(texture( normalSampler, vsTex ).xyz,1);
     //fsColour = vec4( texture(roughnessSampler, vsTex).r * roughness, texture(metalnessSampler, vsTex).r * metalness, texture(occlusionSampler, vsTex).r * occlusion, 1.0);
     //fsColour = vec4( texture(roughnessSampler, vsTex).rgb , 1.0);

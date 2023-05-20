@@ -184,6 +184,12 @@ void loadLevel(const char* path, Scene& scene) {
             baseEntity.state.scale = glm::vec3(entity["scale"][0].GetFloat(),
                 entity["scale"][1].GetFloat(), entity["scale"][2].GetFloat());
 
+            if (entity.HasMember("visible"))
+                baseEntity.visible = entity["visible"].GetBool();
+
+            if (entity.HasMember("active"))
+                baseEntity.active = entity["active"].GetBool();
+
             // add components
             auto jsonComponents = entity["components"].GetArray();
             for (unsigned int j = 0; j < jsonComponents.Size(); j++) {
@@ -532,6 +538,8 @@ void loadLevel(const char* path, Scene& scene) {
                         jsonComponent["rotation"][2].GetFloat(),
                         jsonComponent["rotation"][3].GetFloat());
                     component.setPosition();
+                    // component.rigidBody->setIsActive(baseEntity.active);
+
                     // cube colliders
                     {
                         auto const cubeColliders = jsonComponent["cubeColliders"].GetArray();
@@ -1432,6 +1440,12 @@ void saveLevel(const char* path, const Scene& scene) {
 
             writer.Key("parent");
             writer.Int(scene.entities[i].parent);
+
+            writer.Key("visible");
+            writer.Bool(scene.entities[i].visible);
+
+            writer.Key("active");
+            writer.Bool(scene.entities[i].active);
 
             // position
             writer.Key("position");

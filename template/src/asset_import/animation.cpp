@@ -19,8 +19,9 @@ namespace animation {
         std::weak_ptr<AnimationDescriptor> ref;
 
         // brace init constructor
-        AnimationInfo(const std::string& _uuid, const std::string& _path, const std::string& _modelUuid,
-            std::shared_ptr<Animation> _animation, std::weak_ptr<AnimationDescriptor> _ref)
+        AnimationInfo(const std::string& _uuid, const std::string& _path,
+            const std::string& _modelUuid, std::shared_ptr<Animation> _animation,
+            std::weak_ptr<AnimationDescriptor> _ref)
             : uuid(_uuid), path(_path), modelUuid(_modelUuid), animation(_animation), ref(_ref) {
         }
 
@@ -85,9 +86,9 @@ namespace animation {
     };
     static std::vector<AnimationInfo> loadedAnimations;
 
-
     // --- AudioDescriptor Methods ---
-    AnimationDescriptor::AnimationDescriptor(int _idx, std::string* _path) : idx(_idx), path(_path) {
+    AnimationDescriptor::AnimationDescriptor(int _idx, std::string* _path)
+        : idx(_idx), path(_path) {
     }
 
     AnimationDescriptor::~AnimationDescriptor() {
@@ -111,15 +112,19 @@ namespace animation {
 
     // --- Module Functions ---
 
-    std::shared_ptr<AnimationDescriptor> animationLoad(const char* path, const std::string& uuid, std::shared_ptr<model::ModelDescriptor> model) {
+    std::shared_ptr<AnimationDescriptor> animationLoad(const char* path, const std::string& uuid,
+        std::shared_ptr<model::ModelDescriptor> model) {
+        if (!model)
+            return std::shared_ptr<AnimationDescriptor>();
         // try to add new model
         if (uuidToIdx.count(uuid) == 0) {
             // construct new info element
-            loadedAnimations.emplace_back(AnimationInfo{ uuid, std::string(path), std::string(model->getUuid()),
-                std::make_shared<Animation>(), std::weak_ptr<AnimationDescriptor>() });
+            loadedAnimations.emplace_back(
+                AnimationInfo{uuid, std::string(path), std::string(model->getUuid()),
+                    std::make_shared<Animation>(), std::weak_ptr<AnimationDescriptor>()});
 
             // try to load clip
-            bool loaded = loadedAnimations.back().animation->loadAnimation(path,model);
+            bool loaded = loadedAnimations.back().animation->loadAnimation(path, model);
 
             if (loaded) {
                 // loading succeeded
@@ -141,7 +146,7 @@ namespace animation {
 
         // replace old clip otherwise
         int idx = uuidToIdx[uuid];
-        loadedAnimations[idx].animation->loadAnimation(path,model);
+        loadedAnimations[idx].animation->loadAnimation(path, model);
         loadedAnimations[idx].path = std::string(path);
         loadedAnimations[idx].modelUuid = std::string(model->getUuid());
         return std::shared_ptr<AnimationDescriptor>(loadedAnimations[idx].ref);

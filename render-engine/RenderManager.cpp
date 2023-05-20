@@ -314,6 +314,8 @@ void RenderManager::movePhysicsEntities(Scene& scene, Camera* camera, int width,
     }
 }
 
+static GLuint skyboxID;
+
 void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width, int height) {
     // updateMatrices(&width, &height);
     viewMatrix = camera->getViewMatrix();
@@ -418,6 +420,9 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             continue;
         }
 #endif
+
+        if (!scene.entities[i].visible)
+            continue;
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
             auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
@@ -543,7 +548,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 
                     glActiveTexture(GL_TEXTURE7);
                     glBindTexture(GL_TEXTURE_CUBE_MAP,
-                        skyBoxTexID);
+                        skyboxID);
 
                     glActiveTexture(GL_TEXTURE0);
                 }
@@ -713,7 +718,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
 
                 glActiveTexture(GL_TEXTURE7);
                 glBindTexture(GL_TEXTURE_CUBE_MAP,
-                    skyBoxTexID);
+                    skyboxID);
 
                 glActiveTexture(GL_TEXTURE0);
 
@@ -924,7 +929,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
             glDepthMask(GL_FALSE);
             glBindTexture(GL_TEXTURE_CUBE_MAP,
                 scene.entities[i].components.vecSkyBoxComponent[j].skybox.id);
-            skyBoxTexID = scene.entities[i].components.vecSkyBoxComponent[j].skybox.id;
+            skyboxID = scene.entities[i].components.vecSkyBoxComponent[j].skybox.id;
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glDepthMask(GL_TRUE);
@@ -997,7 +1002,7 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
                 modelMatrix = baseTransform *
                     glm::translate(rigidBody.sphereColliders[k].position) *
                     glm::mat4_cast(rigidBody.sphereColliders[k].rotation) *
-                    glm::scale(glm::vec3(rigidBody.sphereColliders[k].radius));
+                    glm::scale(glm::vec3(rigidBody.sphereColliders[k].colliderShape->getRadius()));
                 glUniformMatrix4fv(getPipeline(SphereColliderPipeline)->getModelID(), 1, false,
                     &modelMatrix[0][0]);
                 glBindVertexArray(dummyVAO);
@@ -1027,10 +1032,10 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
                     &modelMatrix[0][0]);
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
                                 "radius"),
-                    rigidBody.capsuleColliders[k].radius);
+                    rigidBody.capsuleColliders[k].colliderShape->getRadius());
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
                                 "height"),
-                    rigidBody.capsuleColliders[k].height);
+                    rigidBody.capsuleColliders[k].colliderShape->getHeight());
                 glBindVertexArray(dummyVAO);
                 glDrawArrays(GL_LINES, 0, 1208);
             }

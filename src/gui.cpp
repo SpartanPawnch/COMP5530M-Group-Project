@@ -1369,213 +1369,225 @@ void drawComponentProps(SkeletalModelComponent& component) {
     }
     ImGui::Text("Transitions:");
     if (component.selectedNode) {
-        ImGui::Columns(3);
-        ImGui::Separator();
-        ImGui::Text("Destination Node");
-        ImGui::NextColumn();
-        ImGui::Text("Blend Time");
-        ImGui::NextColumn();
-        ImGui::Text("Remove Transition");
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size(); i++) {
-            ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_nocond",
-                    component.selectedNode->noConditionTransitions[i].transitionTo.c_str())) {
-                for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    bool isSelected =
-                        component.selectedNode->noConditionTransitions[i].transitionTo ==
-                        component.nodes[j].name;
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
-                        component.selectedNode->noConditionTransitions[i].transitionTo =
+        if (!component.selectedNode->noConditionTransitions.empty()) {
+            ImGui::Columns(3);
+            ImGui::Separator();
+            ImGui::Text("Destination Node");
+            ImGui::NextColumn();
+            ImGui::Text("Blend Time");
+            ImGui::NextColumn();
+            ImGui::Text("Remove Transition");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < component.selectedNode->noConditionTransitions.size();
+                 i++) {
+                ImGui::PushID(i);
+                if (ImGui::BeginCombo("##transition_to_nocond",
+                        component.selectedNode->noConditionTransitions[i].transitionTo.c_str())) {
+                    for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                        bool isSelected =
+                            component.selectedNode->noConditionTransitions[i].transitionTo ==
                             component.nodes[j].name;
+                        if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
+                            component.selectedNode->noConditionTransitions[i].transitionTo =
+                                component.nodes[j].name;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
+                ImGui::NextColumn();
+                ImGui::InputFloat("##nocond_blendtime",
+                    &component.selectedNode->noConditionTransitions[i].blendTime);
+                ImGui::NextColumn();
+                if (ImGui::Button("Remove Transition")) {
+                    component.removeNoConditionTransition(i);
+                }
+                ImGui::NextColumn();
+                ImGui::PopID();
             }
-            ImGui::NextColumn();
-            ImGui::InputFloat("##nocond_blendtime",
-                &component.selectedNode->noConditionTransitions[i].blendTime);
-            ImGui::NextColumn();
-            if (ImGui::Button("Remove Transition")) {
-                component.removeNoConditionTransition(i);
-            }
-            ImGui::NextColumn();
-            ImGui::PopID();
         }
-        ImGui::Columns(6);
-        ImGui::Separator();
-        ImGui::Text("Destination Node");
-        ImGui::NextColumn();
-        ImGui::Text("Transition Immediately?");
-        ImGui::NextColumn();
-        ImGui::Text("Current Value");
-        ImGui::NextColumn();
-        ImGui::Text("Desired Value");
-        ImGui::NextColumn();
-        ImGui::Text("Blend Time");
-        ImGui::NextColumn();
-        ImGui::Text("Remove Transition");
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
-            ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_bool",
-                    component.selectedNode->boolTransitions[i].transitionTo.c_str())) {
-                for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    bool isSelected = component.selectedNode->boolTransitions[i].transitionTo ==
-                        component.nodes[j].name;
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
-                        component.selectedNode->boolTransitions[i].transitionTo =
+
+        if (!component.selectedNode->boolTransitions.empty()) {
+            ImGui::Columns(6);
+            ImGui::Separator();
+            ImGui::Text("Destination Node");
+            ImGui::NextColumn();
+            ImGui::Text("Transition Immediately?");
+            ImGui::NextColumn();
+            ImGui::Text("Current Value");
+            ImGui::NextColumn();
+            ImGui::Text("Desired Value");
+            ImGui::NextColumn();
+            ImGui::Text("Blend Time");
+            ImGui::NextColumn();
+            ImGui::Text("Remove Transition");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < component.selectedNode->boolTransitions.size(); i++) {
+                ImGui::PushID(i);
+                if (ImGui::BeginCombo("##transition_to_bool",
+                        component.selectedNode->boolTransitions[i].transitionTo.c_str())) {
+                    for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                        bool isSelected = component.selectedNode->boolTransitions[i].transitionTo ==
                             component.nodes[j].name;
+                        if (ImGui::Selectable(component.nodes[j].name.c_str(), &isSelected)) {
+                            component.selectedNode->boolTransitions[i].transitionTo =
+                                component.nodes[j].name;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
+                ImGui::NextColumn();
+                ImGui::Checkbox("##immediate_bool",
+                    &component.selectedNode->boolTransitions[i].immediate);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##condition_bool",
+                    &component.selectedNode->boolTransitions[i].condition);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##desired_bool",
+                    &component.selectedNode->boolTransitions[i].desiredValue);
+                ImGui::NextColumn();
+                ImGui::InputFloat("##bool_blendtime",
+                    &component.selectedNode->boolTransitions[i].blendTime);
+                ImGui::NextColumn();
+                if (ImGui::Button("Remove Transition")) {
+                    component.removeBoolACTransition(i);
+                }
+                ImGui::NextColumn();
+                ImGui::PopID();
             }
-            ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_bool",
-                &component.selectedNode->boolTransitions[i].immediate);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##condition_bool",
-                &component.selectedNode->boolTransitions[i].condition);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##desired_bool",
-                &component.selectedNode->boolTransitions[i].desiredValue);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##bool_blendtime",
-                &component.selectedNode->boolTransitions[i].blendTime);
-            ImGui::NextColumn();
-            if (ImGui::Button("Remove Transition")) {
-                component.removeBoolACTransition(i);
-            }
-            ImGui::NextColumn();
-            ImGui::PopID();
         }
-        ImGui::Columns(9);
-        ImGui::Separator();
-        ImGui::Text("Destination Node");
-        ImGui::NextColumn();
-        ImGui::Text("Transition Immediately?");
-        ImGui::NextColumn();
-        ImGui::Text("Current Value");
-        ImGui::NextColumn();
-        ImGui::Text("Desired Value");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Lower?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Equal?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Greater?");
-        ImGui::NextColumn();
-        ImGui::Text("Blend Time");
-        ImGui::NextColumn();
-        ImGui::Text("Remove Transition");
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
-            ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_int",
-                    component.selectedNode->intTransitions[i].transitionTo.c_str())) {
-                for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                            component.selectedNode->intTransitions[i].transitionTo ==
-                                component.nodes[j].name)) {
-                        component.selectedNode->intTransitions[i].transitionTo =
-                            component.nodes[j].name;
+
+        if (!component.selectedNode->intTransitions.empty()) {
+            ImGui::Columns(9);
+            ImGui::Separator();
+            ImGui::Text("Destination Node");
+            ImGui::NextColumn();
+            ImGui::Text("Transition Immediately?");
+            ImGui::NextColumn();
+            ImGui::Text("Current Value");
+            ImGui::NextColumn();
+            ImGui::Text("Desired Value");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Lower?");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Equal?");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Greater?");
+            ImGui::NextColumn();
+            ImGui::Text("Blend Time");
+            ImGui::NextColumn();
+            ImGui::Text("Remove Transition");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < component.selectedNode->intTransitions.size(); i++) {
+                ImGui::PushID(i);
+                if (ImGui::BeginCombo("##transition_to_int",
+                        component.selectedNode->intTransitions[i].transitionTo.c_str())) {
+                    for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                        if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                                component.selectedNode->intTransitions[i].transitionTo ==
+                                    component.nodes[j].name)) {
+                            component.selectedNode->intTransitions[i].transitionTo =
+                                component.nodes[j].name;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
+                ImGui::NextColumn();
+                ImGui::Checkbox("##immediate_int",
+                    &component.selectedNode->intTransitions[i].immediate);
+                ImGui::NextColumn();
+                ImGui::Text("%d", component.selectedNode->intTransitions[i].condition);
+                ImGui::NextColumn();
+                ImGui::InputInt("##desired_int",
+                    &component.selectedNode->intTransitions[i].desiredValue);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_lower_int",
+                    &component.selectedNode->intTransitions[i].shouldBeLower);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_equal_int",
+                    &component.selectedNode->intTransitions[i].shouldBeEqual);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_greater_int",
+                    &component.selectedNode->intTransitions[i].shouldBeGreater);
+                ImGui::NextColumn();
+                ImGui::InputFloat("##int_blendtime",
+                    &component.selectedNode->intTransitions[i].blendTime);
+                ImGui::NextColumn();
+                if (ImGui::Button("Remove Transition")) {
+                    component.removeIntACTransition(i);
+                }
+                ImGui::NextColumn();
+                ImGui::PopID();
             }
-            ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_int",
-                &component.selectedNode->intTransitions[i].immediate);
-            ImGui::NextColumn();
-            ImGui::Text("%d", component.selectedNode->intTransitions[i].condition);
-            ImGui::NextColumn();
-            ImGui::InputInt("##desired_int",
-                &component.selectedNode->intTransitions[i].desiredValue);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_lower_int",
-                &component.selectedNode->intTransitions[i].shouldBeLower);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_equal_int",
-                &component.selectedNode->intTransitions[i].shouldBeEqual);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_greater_int",
-                &component.selectedNode->intTransitions[i].shouldBeGreater);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##int_blendtime",
-                &component.selectedNode->intTransitions[i].blendTime);
-            ImGui::NextColumn();
-            if (ImGui::Button("Remove Transition")) {
-                component.removeIntACTransition(i);
-            }
-            ImGui::NextColumn();
-            ImGui::PopID();
         }
-        ImGui::Columns(9);
-        ImGui::Separator();
-        ImGui::Text("Destination Node");
-        ImGui::NextColumn();
-        ImGui::Text("Transition Immediately?");
-        ImGui::NextColumn();
-        ImGui::Text("Current Value");
-        ImGui::NextColumn();
-        ImGui::Text("Desired Value");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Lower?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Equal?");
-        ImGui::NextColumn();
-        ImGui::Text("Condition Greater?");
-        ImGui::NextColumn();
-        ImGui::Text("Blend Time");
-        ImGui::NextColumn();
-        ImGui::Text("Remove Transition");
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
-            ImGui::PushID(i);
-            if (ImGui::BeginCombo("##transition_to_float",
-                    component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
-                for (unsigned int j = 0; j < component.nodes.size(); j++) {
-                    if (ImGui::Selectable(component.nodes[j].name.c_str(),
-                            component.selectedNode->floatTransitions[i].transitionTo ==
-                                component.nodes[j].name)) {
-                        component.selectedNode->floatTransitions[i].transitionTo =
-                            component.nodes[j].name;
+
+        if (!component.selectedNode->floatTransitions.empty()) {
+            ImGui::Columns(9);
+            ImGui::Separator();
+            ImGui::Text("Destination Node");
+            ImGui::NextColumn();
+            ImGui::Text("Transition Immediately?");
+            ImGui::NextColumn();
+            ImGui::Text("Current Value");
+            ImGui::NextColumn();
+            ImGui::Text("Desired Value");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Lower?");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Equal?");
+            ImGui::NextColumn();
+            ImGui::Text("Condition Greater?");
+            ImGui::NextColumn();
+            ImGui::Text("Blend Time");
+            ImGui::NextColumn();
+            ImGui::Text("Remove Transition");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            for (unsigned int i = 0; i < component.selectedNode->floatTransitions.size(); i++) {
+                ImGui::PushID(i);
+                if (ImGui::BeginCombo("##transition_to_float",
+                        component.selectedNode->floatTransitions[i].transitionTo.c_str())) {
+                    for (unsigned int j = 0; j < component.nodes.size(); j++) {
+                        if (ImGui::Selectable(component.nodes[j].name.c_str(),
+                                component.selectedNode->floatTransitions[i].transitionTo ==
+                                    component.nodes[j].name)) {
+                            component.selectedNode->floatTransitions[i].transitionTo =
+                                component.nodes[j].name;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
+                ImGui::NextColumn();
+                ImGui::Checkbox("##immediate_float",
+                    &component.selectedNode->floatTransitions[i].immediate);
+                ImGui::NextColumn();
+                ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
+                ImGui::NextColumn();
+                ImGui::InputFloat("##desired_float",
+                    &component.selectedNode->floatTransitions[i].desiredValue);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_lower_float",
+                    &component.selectedNode->floatTransitions[i].shouldBeLower);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_equal_float",
+                    &component.selectedNode->floatTransitions[i].shouldBeEqual);
+                ImGui::NextColumn();
+                ImGui::Checkbox("##should_greater_float",
+                    &component.selectedNode->floatTransitions[i].shouldBeGreater);
+                ImGui::NextColumn();
+                ImGui::InputFloat("##float_blendtime",
+                    &component.selectedNode->floatTransitions[i].blendTime);
+                ImGui::NextColumn();
+                if (ImGui::Button("Remove Transition")) {
+                    component.removeFloatACTransition(i);
+                }
+                ImGui::NextColumn();
+                ImGui::PopID();
             }
-            ImGui::NextColumn();
-            ImGui::Checkbox("##immediate_float",
-                &component.selectedNode->floatTransitions[i].immediate);
-            ImGui::NextColumn();
-            ImGui::Text("%f", component.selectedNode->floatTransitions[i].condition);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##desired_float",
-                &component.selectedNode->floatTransitions[i].desiredValue);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_lower_float",
-                &component.selectedNode->floatTransitions[i].shouldBeLower);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_equal_float",
-                &component.selectedNode->floatTransitions[i].shouldBeEqual);
-            ImGui::NextColumn();
-            ImGui::Checkbox("##should_greater_float",
-                &component.selectedNode->floatTransitions[i].shouldBeGreater);
-            ImGui::NextColumn();
-            ImGui::InputFloat("##float_blendtime",
-                &component.selectedNode->floatTransitions[i].blendTime);
-            ImGui::NextColumn();
-            if (ImGui::Button("Remove Transition")) {
-                component.removeFloatACTransition(i);
-            }
-            ImGui::NextColumn();
-            ImGui::PopID();
         }
-        ImGui::Columns(1);
+        // ImGui::Columns(1);
     }
     else {
         ImGui::Text("Select a node to show it's transitions");
@@ -2565,6 +2577,10 @@ void drawComponentList(std::vector<T>& components) {
         */
         if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             drawComponentContextMenu(i, componentToDelete);
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", components[i].uuid);
+            ImGui::PopStyleColor();
             drawComponentProps(components[i]);
         }
         ImGui::PopID();
@@ -2586,17 +2602,17 @@ void drawComponentList(std::vector<CameraComponent>& components) {
     // draw list
     for (int i = 0; i < components.size(); i++) {
         ImGui::PushID(i);
-        if (ImGui::TreeNodeEx(components[i].name.c_str(),
-                ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                    ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader(components[i].name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             // update selected camera
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
                 scene.selectedCameraIdx = i;
 
             drawComponentContextMenu(i, componentToDelete);
-
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", components[i].uuid);
+            ImGui::PopStyleColor();
             drawComponentProps(components[i]);
-            ImGui::TreePop();
         }
         ImGui::PopID();
     }
@@ -2624,6 +2640,10 @@ inline void drawProperties() {
             ImGui::InputFloat3("Position", &scene.selectedEntity->state.position[0]);
             ImGui::InputFloat4("Rotation", &scene.selectedEntity->state.rotation[0]);
             ImGui::InputFloat3("Scale", &scene.selectedEntity->state.scale[0]);
+
+            ImGui::Checkbox("Visible", &scene.selectedEntity->visible);
+
+            ImGui::Checkbox("Active", &scene.selectedEntity->active);
 
             ImGui::Separator();
             // component lists

@@ -123,12 +123,21 @@ TextureDescriptor::~TextureDescriptor() {
 
 // --- Module Functions ---
 
-std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::string& uuid) {
+std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::string& uuid,
+    bool padAlignment) {
 
     int width, height, channels;
 
+    int ok = stbi_info(filename, &width, &height, &channels);
+    if (!ok) {
+        logging::logErr("Failed to load texture {}\n", filename);
+        return std::shared_ptr<TextureDescriptor>();
+    }
+
+    channels = (channels == 3 && padAlignment) ? 4 : channels;
+
     // try to load data
-    unsigned char* data = stbi_load(filename, &width, &height, &channels, 4);
+    unsigned char* data = stbi_load(filename, &width, &height, &channels, channels);
     if (data == NULL) {
         logging::logErr("Failed to load texture {}\n", filename);
         return std::shared_ptr<TextureDescriptor>();
@@ -138,7 +147,7 @@ std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::
     GLint format;
     switch (channels) {
     case 1:
-        format = GL_R;
+        format = GL_RED;
         break;
     case 2:
         format = GL_RG;
@@ -155,7 +164,7 @@ std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

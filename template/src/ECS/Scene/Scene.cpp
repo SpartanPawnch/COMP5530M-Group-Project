@@ -36,19 +36,21 @@ static int luaCopyEntityByUuid(lua_State* state) {
     int uuid = lua_tointeger(state, 2);
     if (scene->uuidToIdx.count(uuid) == 0) {
         lua_settop(state, 0);
-        lua_warning(state, "WARNING: ONO_Scene:copyEntityByUuid() - entity not found", 0);
+        lua_warning(state,
+            (std::string("WARNING: ONO_Scene:copyEntityByUuid() - entity #") +
+                std::to_string(uuid) + " not found")
+                .c_str(),
+            0);
         return 0;
     }
 
-    BaseEntity copy = scene->entities[scene->uuidToIdx[uuid]];
-    copy.uuid = -1;
-
-    scene->addEntity(copy);
+    int idx = scene->uuidToIdx[uuid];
+    scene->copyQueue.push(idx);
 
     // return new uuid
     lua_settop(state, 0);
-    lua_pushinteger(state, scene->entities.back().uuid);
-
+    // lua_pushinteger(state, scene->entities.back().uuid);
+    lua_pushinteger(state, BaseEntity::getNextUuid());
     return 1;
 }
 
@@ -84,7 +86,11 @@ static int luaGetEntityStateByUuid(lua_State* state) {
     int uuid = lua_tointeger(state, 2);
     if (scene->uuidToIdx.count(uuid) == 0) {
         lua_settop(state, 0);
-        lua_warning(state, "WARNING: ONO_Scene:getEntityState() - entity not found", 0);
+        lua_warning(state,
+            (std::string("WARNING: ONO_Scene:getEntityState() - entity #") + std::to_string(uuid) +
+                " not found")
+                .c_str(),
+            0);
         return 0;
     }
 
@@ -284,8 +290,59 @@ static int luaRemoveEntityByUuid(lua_State* state) {
         return 0;
     }
 
-    scene->removeEntityByIdx(scene->uuidToIdx[uuid]);
+    scene->deleteQueue.push(uuid);
 
+    lua_settop(state, 0);
+    return 0;
+}
+
+static int luaUpdateEntityRigidbodiesByUuid(lua_State* state) {
+    // check argument count
+    int argc = lua_gettop(state);
+    if (argc != 2) {
+        // clear stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:updateEntityRigidbodiesByUuid() - wrong number of arguments; "
+            "Usage: var:updateEntityRigidbodiesByUuid(uuid)");
+        lua_error(state);
+        return 0;
+    }
+
+    int res = lua_getiuservalue(state, 1, 1);
+    if (!res) {
+        // get rid of nil on stack
+        lua_settop(state, 0);
+
+        // send error
+        lua_pushliteral(state,
+            "ONO_Scene:updateEntityRigidbodiesByUuid() - missing user value in table");
+        lua_error(state);
+        return 0;
+    }
+
+    Scene* scene = (Scene*)lua_touserdata(state, -1);
+
+    // check uuid validity
+    int uuid = lua_tointeger(state, 2);
+    if (scene->uuidToIdx.count(uuid) == 0) {
+        lua_settop(state, 0);
+        lua_warning(state, "WARNING: ONO_Scene:updateEntityRigidbodiesByUuid() - entity not found",
+            0);
+        return 0;
+    }
+
+    int idx = scene->uuidToIdx[uuid];
+    for (size_t i = 0; i < scene->entities[idx].components.vecRigidBodyComponent.size(); i++) {
+        RigidBodyComponent& c = scene->entities[idx].components.vecRigidBodyComponent[i];
+        c.rotation = scene->entities[idx].state.rotation;
+        c.position = scene->entities[idx].state.position;
+        c.setPosition();
+    }
+
+    // return new uuid
     lua_settop(state, 0);
     return 0;
 }
@@ -312,6 +369,8 @@ void Scene::registerLuaTable() {
     lua_setfield(state, -2, "hideEntityByUuid");
     lua_pushcfunction(state, &luaGetEntityStateByUuid);
     lua_setfield(state, -2, "getEntityStateByUuid");
+    lua_pushcfunction(state, &luaUpdateEntityRigidbodiesByUuid);
+    lua_setfield(state, -2, "updateEntityRigidbodiesByUuid");
 
     lua_pop(state, 1);
 
@@ -347,6 +406,8 @@ void Scene::updatePositions() {
 
 void Scene::updateReferences() {
     for (unsigned int i = 0; i < entities.size(); i++) {
+        entities[i].state.uuid = entities[i].uuid;
+
         std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
         for (unsigned int j = 0; j < scripts.size(); j++) {
             for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
@@ -401,7 +462,8 @@ void Scene::update(float dt) {
         glm::mat4 parentTransform = entities[i].parent < 0
             ? glm::mat4(1.0f)
             : entities[entities[i].parent].state.runtimeTransform;
-        entities[i].update(parentTransform, dt);
+        if (entities[i].active)
+            entities[i].update(parentTransform, dt);
     }
 }
 
@@ -485,5 +547,109 @@ void Scene::setParent(int childIdx, int parentIdx) {
         for (int i = childIdx + 1; i < entities.size() && entities[i].parent == childIdx; i++) {
             setParent(i, newIdx);
         }
+    }
+}
+
+void Scene::processQueues() {
+    // process copies
+    while (copyQueue.size() > 0) {
+        int idx = copyQueue.front();
+        BaseEntity copy = entities[idx];
+        copy.uuid = -1;
+
+        // create new colliders
+        for (size_t i = 0; i < copy.components.vecRigidBodyComponent.size(); i++) {
+            copy.components.vecRigidBodyComponent[i].rigidBody =
+                copy.components.vecRigidBodyComponent[i].instance->createRigidBody();
+            copy.components.vecRigidBodyComponent[i].rigidBody->setUserData(
+                &copy.components.vecRigidBodyComponent[i]);
+
+            // copy colliders
+            RigidBodyComponent& component = copy.components.vecRigidBodyComponent[i];
+            const RigidBodyComponent& src = entities[idx].components.vecRigidBodyComponent[i];
+            component.setGravityEnabled();
+            component.setType(src.bodyType);
+
+            component.cubeColliders.clear();
+            for (size_t j = 0; j < src.cubeColliders.size(); j++) {
+                component.createCubeCollider();
+
+                component.setMaterialFrictionCoefficient(CUBE, j,
+                    src.cubeColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(CUBE, j, src.cubeColliders[j].materialBounciness);
+
+                for (auto m : src.cubeColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(CUBE, j, m);
+                }
+
+                component.setCollisionMask(CUBE, j, src.cubeColliders[j].category);
+
+                component.cubeColliders[j].position = src.cubeColliders[j].position;
+                component.cubeColliders[j].rotation = src.cubeColliders[j].rotation;
+                component.setLocalColliderPosition(CUBE, j);
+                component.setLocalColliderRotation(CUBE, j);
+
+                component.cubeColliders[j].extents = src.cubeColliders[j].extents;
+                component.setCubeColliderExtents(j, src.cubeColliders[j].extents);
+            }
+
+            component.sphereColliders.clear();
+            for (size_t j = 0; j < src.sphereColliders.size(); j++) {
+                component.createSphereCollider();
+                component.setMaterialFrictionCoefficient(SPHERE, j,
+                    src.sphereColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(SPHERE, j,
+                    src.sphereColliders[j].materialBounciness);
+
+                for (auto m : src.sphereColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(SPHERE, j, m);
+                }
+
+                component.setCollisionMask(SPHERE, j, src.sphereColliders[j].category);
+
+                component.sphereColliders[j].position = src.sphereColliders[j].position;
+                component.sphereColliders[j].rotation = src.sphereColliders[j].rotation;
+                component.setLocalColliderPosition(SPHERE, j);
+                component.setLocalColliderRotation(SPHERE, j);
+
+                component.sphereColliders[j].radius = src.sphereColliders[j].radius;
+                component.setSphereColliderRadius(j, src.sphereColliders[j].radius);
+            }
+
+            component.capsuleColliders.clear();
+            for (size_t j = 0; j < src.capsuleColliders.size(); j++) {
+                component.createCapsuleCollider();
+                component.setMaterialFrictionCoefficient(CAPSULE, j,
+                    src.capsuleColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(CAPSULE, j,
+                    src.capsuleColliders[j].materialBounciness);
+
+                for (auto m : src.capsuleColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(CAPSULE, j, m);
+                }
+
+                component.setCollisionMask(CAPSULE, j, src.capsuleColliders[j].category);
+
+                component.capsuleColliders[j].position = src.capsuleColliders[j].position;
+                component.capsuleColliders[j].rotation = src.capsuleColliders[j].rotation;
+                component.setLocalColliderPosition(CAPSULE, j);
+                component.setLocalColliderRotation(CAPSULE, j);
+
+                component.capsuleColliders[j].radius = src.capsuleColliders[j].radius;
+                component.capsuleColliders[j].height = src.capsuleColliders[j].height;
+                component.setCapsuleColliderRadiusHeight(j, src.capsuleColliders[j].radius,
+                    src.capsuleColliders[j].height);
+            }
+        }
+
+        addEntity(copy);
+        copyQueue.pop();
+    }
+
+    // process deletion
+    while (deleteQueue.size() > 0) {
+        int uuid = deleteQueue.front();
+        removeEntityByIdx(uuidToIdx[uuid]);
+        deleteQueue.pop();
     }
 }

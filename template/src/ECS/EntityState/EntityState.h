@@ -15,5 +15,7 @@ struct EntityState {
     glm::mat4 runtimeTransform = glm::mat4(1.0f);
     glm::mat4 parent = glm::mat4(1.f);
 
+    int uuid;
+
     void pushLuaTable(lua_State* luaState);
 };
