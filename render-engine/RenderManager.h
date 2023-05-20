@@ -69,8 +69,7 @@ class RenderManager {
     std::vector<std::weak_ptr<LightDescriptor>> lightsMetadata;
     std::vector<LightSource> lights;
 
-    // considering windows
-    // std::vector <GLFWwindow*> windows;
+    std::shared_ptr<TextureDescriptor> whiteTexture;
 
     // default constructor does nothing
     RenderManager() {
