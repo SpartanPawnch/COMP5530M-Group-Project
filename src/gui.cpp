@@ -2938,7 +2938,12 @@ inline void drawMaterials() {
                 textureFiles);
 
             ImGui::Text("Name %s", mat->name.c_str());
+            glm::vec3 baseColorBefore = mat->baseColor;
             ImGui::ColorEdit3("Base Color", &mat->baseColor[0]);
+            if (baseColorBefore != mat->baseColor)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             // texture for base color combo box from textures
             std::string previewStrBaseColor = "Select a texture";
             if (mat->baseColorMap.size() > 0) {
@@ -2954,7 +2959,12 @@ inline void drawMaterials() {
                 }
                 ImGui::EndCombo();
             }
+            glm::vec3 emissiveBefore = mat->emissiveColor;
             ImGui::ColorEdit3("Emissive Color", &mat->emissiveColor[0]);
+            if (emissiveBefore != mat->emissiveColor)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             std::string previewStrEmissive = "Select a texture";
             if (mat->emissiveMap.size() > 0) {
                 previewStrEmissive = mat->emissiveMap;
@@ -2969,7 +2979,13 @@ inline void drawMaterials() {
                 }
                 ImGui::EndCombo();
             }
+
+            float roughnessBefore = mat->roughness;
             ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
+            if (roughnessBefore != mat->roughness)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
             std::string previewStrRoughness = "Select a texture";
             if (mat->roughnessMap.size() > 0) {
                 previewStrRoughness = mat->roughnessMap;
@@ -2984,7 +3000,14 @@ inline void drawMaterials() {
                 }
                 ImGui::EndCombo();
             }
+
+            float metalnessBefore = mat->metalness;
             ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
+            if (metalnessBefore != mat->metalness)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
+            
             std::string previewStrMetalness = "Select a texture";
             if (mat->metalnessMap.size() > 0) {
                 previewStrMetalness = mat->metalnessMap;
@@ -2999,7 +3022,14 @@ inline void drawMaterials() {
                 }
                 ImGui::EndCombo();
             }
+
+            float occlusionBefore = mat->occlusion;
             ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
+            if (occlusionBefore != mat->occlusion)
+            {
+                materialSystem->reloadActiveMaterial(mat->name);
+            }
+            
             std::string previewStrOcclusion = "Select a texture";
             if (mat->occlusionMap.size() > 0) {
                 previewStrOcclusion = mat->occlusionMap;

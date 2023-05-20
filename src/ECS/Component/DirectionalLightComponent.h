@@ -4,7 +4,7 @@
 #include "../../../render-engine/LightSource.h"
 struct DirectionalLightComponent : BaseComponent {
     std::shared_ptr<LightDescriptor> desc;
-    glm::vec3 direction = glm::vec3(.0f);
+    glm::vec3 direction = glm::vec3(1.0f);
     glm::vec3 ambient = glm::vec3(.2f);
     glm::vec3 diffuse = glm::vec3(.8f);
     glm::vec3 specular = glm::vec3(1.f);
