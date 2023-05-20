@@ -561,10 +561,85 @@ void Scene::processQueues() {
         for (size_t i = 0; i < copy.components.vecRigidBodyComponent.size(); i++) {
             copy.components.vecRigidBodyComponent[i].rigidBody =
                 copy.components.vecRigidBodyComponent[i].instance->createRigidBody();
-            // copy colliders
-
             copy.components.vecRigidBodyComponent[i].rigidBody->setUserData(
                 &copy.components.vecRigidBodyComponent[i]);
+
+            // copy colliders
+            RigidBodyComponent& component = copy.components.vecRigidBodyComponent[i];
+            const RigidBodyComponent& src = entities[idx].components.vecRigidBodyComponent[i];
+            component.setGravityEnabled();
+            component.setType(src.bodyType);
+
+            component.cubeColliders.clear();
+            for (size_t j = 0; j < src.cubeColliders.size(); j++) {
+                component.createCubeCollider();
+
+                component.setMaterialFrictionCoefficient(CUBE, j,
+                    src.cubeColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(CUBE, j, src.cubeColliders[j].materialBounciness);
+
+                for (auto m : src.cubeColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(CUBE, j, m);
+                }
+
+                component.setCollisionMask(CUBE, j, src.cubeColliders[j].category);
+
+                component.cubeColliders[j].position = src.cubeColliders[j].position;
+                component.cubeColliders[j].rotation = src.cubeColliders[j].rotation;
+                component.setLocalColliderPosition(CUBE, j);
+                component.setLocalColliderRotation(CUBE, j);
+
+                component.cubeColliders[j].extents = src.cubeColliders[j].extents;
+                component.setCubeColliderExtents(j, src.cubeColliders[j].extents);
+            }
+
+            component.sphereColliders.clear();
+            for (size_t j = 0; j < src.sphereColliders.size(); j++) {
+                component.createSphereCollider();
+                component.setMaterialFrictionCoefficient(SPHERE, j,
+                    src.sphereColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(SPHERE, j,
+                    src.sphereColliders[j].materialBounciness);
+
+                for (auto m : src.sphereColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(SPHERE, j, m);
+                }
+
+                component.setCollisionMask(SPHERE, j, src.sphereColliders[j].category);
+
+                component.sphereColliders[j].position = src.sphereColliders[j].position;
+                component.sphereColliders[j].rotation = src.sphereColliders[j].rotation;
+                component.setLocalColliderPosition(SPHERE, j);
+                component.setLocalColliderRotation(SPHERE, j);
+
+                component.sphereColliders[j].radius = src.sphereColliders[j].radius;
+                component.setSphereColliderRadius(j, src.sphereColliders[j].radius);
+            }
+
+            component.capsuleColliders.clear();
+            for (size_t j = 0; j < src.capsuleColliders.size(); j++) {
+                component.createCapsuleCollider();
+                component.setMaterialFrictionCoefficient(CAPSULE, j,
+                    src.capsuleColliders[j].materialFrictionCoefficient);
+                component.setMaterialBounciness(CAPSULE, j,
+                    src.capsuleColliders[j].materialBounciness);
+
+                for (auto m : src.capsuleColliders[j].collidesWith) {
+                    component.setCollisionCollideWithMask(CAPSULE, j, m);
+                }
+
+                component.setCollisionMask(CAPSULE, j, src.capsuleColliders[j].category);
+
+                component.capsuleColliders[j].position = src.capsuleColliders[j].position;
+                component.capsuleColliders[j].rotation = src.capsuleColliders[j].rotation;
+                component.setLocalColliderPosition(CAPSULE, j);
+                component.setLocalColliderRotation(CAPSULE, j);
+
+                component.capsuleColliders[j].radius = src.capsuleColliders[j].radius;
+                component.capsuleColliders[j].height = src.capsuleColliders[j].height;
+                component.setCapsuleColliderRadiusHeight(j, src.capsuleColliders[j].radius,
+                    src.capsuleColliders[j].height);
+            }
         }
 
         addEntity(copy);

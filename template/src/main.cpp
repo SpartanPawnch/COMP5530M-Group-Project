@@ -157,15 +157,26 @@ int main() {
     physicsEngine->isSimulating = true;
 
     bool lastf12 = false;
+    bool lastf11 = false;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
-        if (!lastf12 && glfwGetKey(window, GLFW_KEY_F12)) {
-            std::cout << logging::getLogString();
+        if (glfwGetKey(window, GLFW_KEY_F12)) {
+            if (!lastf12)
+                std::cout << logging::getLogString();
             lastf12 = true;
         }
         else {
             lastf12 = false;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_F11)) {
+            if (!lastf11)
+                scene.showColliders = !scene.showColliders;
+            lastf11 = true;
+        }
+        else {
+            lastf11 = false;
         }
 
         scene.processQueues();
@@ -215,6 +226,9 @@ int main() {
         renderManager->renderSkybox(scene, &renderManager->camera, width, height);
 
         renderManager->renderEntities(scene, &renderManager->camera, width, height);
+
+        if (scene.showColliders)
+            renderManager->renderColliders(scene, width, height);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
