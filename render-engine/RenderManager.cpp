@@ -399,6 +399,9 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         }
 #endif
 
+        if (!scene.entities[i].visible)
+            continue;
+
         for (unsigned int j = 0; j < scene.entities[i].components.vecModelComponent.size(); j++) {
             auto desc = scene.entities[i].components.vecModelComponent[j].modelDescriptor;
             if (!desc) {

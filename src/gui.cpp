@@ -2551,6 +2551,10 @@ inline void drawProperties() {
             ImGui::InputFloat4("Rotation", &scene.selectedEntity->state.rotation[0]);
             ImGui::InputFloat3("Scale", &scene.selectedEntity->state.scale[0]);
 
+            ImGui::Checkbox("Visible", &scene.selectedEntity->visible);
+
+            ImGui::Checkbox("Active", &scene.selectedEntity->active);
+
             ImGui::Separator();
             // component lists
             // AudioSourceComponent

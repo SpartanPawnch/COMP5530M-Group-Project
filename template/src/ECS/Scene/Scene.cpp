@@ -462,7 +462,8 @@ void Scene::update(float dt) {
         glm::mat4 parentTransform = entities[i].parent < 0
             ? glm::mat4(1.0f)
             : entities[entities[i].parent].state.runtimeTransform;
-        entities[i].update(parentTransform, dt);
+        if (entities[i].active)
+            entities[i].update(parentTransform, dt);
     }
 }
 
