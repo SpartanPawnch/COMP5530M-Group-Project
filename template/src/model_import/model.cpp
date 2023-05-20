@@ -86,7 +86,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         mat.emissiveColor = glm::vec3(color.r, color.g, color.b);
 
         material->Get(AI_MATKEY_SHININESS, mat.roughness);
-        material->Get(AI_MATKEY_REFLECTIVITY, mat.metalness);
+        material->Get(AI_MATKEY_METALLIC_FACTOR, mat.metalness);
         material->Get(AI_MATKEY_OPACITY, mat.occlusion);
         aiString texturePath;
         if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
@@ -95,7 +95,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         if (material->GetTexture(aiTextureType_SHININESS, 0, &texturePath) == AI_SUCCESS) {
             mat.roughnessMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
-        if (material->GetTexture(aiTextureType_REFLECTION, 0, &texturePath) == AI_SUCCESS) {
+        if (material->GetTexture(aiTextureType_METALNESS, 0, &texturePath) == AI_SUCCESS) {
             mat.metalnessMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));
         }
         if (material->GetTexture(aiTextureType_NORMALS, 0, &texturePath) == AI_SUCCESS) {
