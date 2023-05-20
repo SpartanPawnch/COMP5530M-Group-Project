@@ -10,6 +10,7 @@ void ComponentStorage::startAll(){
     start<ModelComponent>();
     start<SkeletalModelComponent>();
     start<LightComponent>();
+    start<DirectionalLightComponent>();
     start<SkyBoxComponent>();
     start<ControllerComponent>();
     start<TransformComponent>();
@@ -24,6 +25,7 @@ void ComponentStorage::updateAll(float dt, EntityState& state){
     update<ModelComponent>(dt,state);
     update<SkeletalModelComponent>(dt,state);
     update<LightComponent>(dt,state);
+    update<DirectionalLightComponent>(dt,state);
     update<SkyBoxComponent>(dt,state);
     update<ControllerComponent>(dt,state);
     update<TransformComponent>(dt,state);
@@ -38,6 +40,7 @@ void ComponentStorage::clearAll(){
     vecModelComponent.clear();
     vecSkeletalModelComponent.clear();
     vecLightComponent.clear();
+    vecDirectionalLightComponent.clear();
     vecSkyBoxComponent.clear();
     vecControllerComponent.clear();
     vecTransformComponent.clear();
@@ -52,6 +55,7 @@ void ComponentStorage::registerMetatables(){
     ModelComponent::registerLuaMetatable();
     SkeletalModelComponent::registerLuaMetatable();
     LightComponent::registerLuaMetatable();
+    DirectionalLightComponent::registerLuaMetatable();
     SkyBoxComponent::registerLuaMetatable();
     ControllerComponent::registerLuaMetatable();
     TransformComponent::registerLuaMetatable();
@@ -94,6 +98,10 @@ void* ComponentStorage::getProtectedPtr(const ComponentLocation& loc){
         if(loc.componentIdx>=vecLightComponent.size())
             return nullptr;
         return &vecLightComponent[loc.componentIdx];
+    case ComponentLocation::DIRECTIONALLIGHTCOMPONENT:
+        if(loc.componentIdx>=vecDirectionalLightComponent.size())
+            return nullptr;
+        return &vecDirectionalLightComponent[loc.componentIdx];
     case ComponentLocation::SKYBOXCOMPONENT:
         if(loc.componentIdx>=vecSkyBoxComponent.size())
             return nullptr;
@@ -156,6 +164,11 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
         if(ptr==nullptr)
             break;
         ((LightComponent*)ptr)->pushLuaTable(state);
+        return;
+    case ComponentLocation::DIRECTIONALLIGHTCOMPONENT:
+        if(ptr==nullptr)
+            break;
+        ((DirectionalLightComponent*)ptr)->pushLuaTable(state);
         return;
     case ComponentLocation::SKYBOXCOMPONENT:
         if(ptr==nullptr)

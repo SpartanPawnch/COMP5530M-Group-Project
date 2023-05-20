@@ -75,7 +75,7 @@ add_executable(
     src/model_import/bone.cpp src/asset_import/animation.cpp
     ${ICON_RESOURCE}
     src/physics_engine/physicsEngine.cpp src/ECS/Component/RigidBodyComponent.cpp 
-    src/physics_engine/PhysicsEvents.cpp)
+    src/physics_engine/PhysicsEvents.cpp "src/ECS/Component/DirectionalLightComponent.cpp")
 
 #add glfw
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

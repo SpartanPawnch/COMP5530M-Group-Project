@@ -1,4 +1,4 @@
-#version 330 core
+#version 450
 
 in vec3 vsPos;
 in vec3 vsNormal;
@@ -29,20 +29,30 @@ Material material;
 
 const int MAX_LIGHTS = 20;
 uniform int numLights;
+uniform int numDirectionalLights;
 uniform Light lights[MAX_LIGHTS];
+uniform Light directionalLights[MAX_LIGHTS];
 
 uniform float gamma;
 uniform vec3 viewPos;
 
-uniform sampler2D baseColorSampler;
-uniform sampler2D roughnessSampler;
-uniform sampler2D metalnessSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D alphaSampler;
-uniform sampler2D emissiveSampler;
-uniform sampler2D occlusionSampler;
+uniform vec3 baseColor;
+uniform vec3 emissiveColor;
+
+uniform float roughness;
+uniform float metalness;
+uniform float occlusion;
 
 uniform samplerCube skybox;
+
+layout(location=0) uniform sampler2D baseColorSampler;
+layout(location=1) uniform sampler2D roughnessSampler;
+layout(location=2) uniform sampler2D metalnessSampler;
+layout(location=3) uniform sampler2D normalSampler;
+layout(location=4) uniform sampler2D alphaSampler;
+layout(location=5) uniform sampler2D emissiveSampler;
+layout(location=6) uniform sampler2D occlusionSampler;
+
 
 vec3 computeBlinnPhongLighting(int lightIndex)
 {
@@ -96,7 +106,7 @@ vec3 fr(vec3 h,vec3 l,vec3 v,vec3 n){
 }
 
 vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){
-    vec3 l = normalize(lights[lightIndex].position-vsPos);
+    vec3 l = normalize(lights[lightIndex].position);
 	vec3 h = normalize(l+v);
     vec3 reflection = reflect(-v, n);
     vec3 reflectionColor = texture(skybox, reflection).rgb;
@@ -108,30 +118,17 @@ vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){
     return Lambient + frValue * clight * max(0,dot(n,l));
 }
 
-vec3 computeNormalColor()
-{
-    vec3 normal;
-    if(vsNormal.x < 0.0)
-    {
-        normal.x = -vsNormal.x; 
-    }
-    else{ normal.x = vsNormal.x;
-    }
+vec3 computeDirectionalPBRLighting(int lightIndex, vec3 n, vec3 v){
+    vec3 l = normalize(-directionalLights[lightIndex].position);
+	vec3 h = normalize(l+v);
+    vec3 reflection = reflect(-v, n);
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
 
-    if(vsNormal.y < 0.0)
-    {
-        normal.y = -vsNormal.y; 
-    }
-    else{ normal.y = vsNormal.y;
-    }
-
-    if(vsNormal.z < 0.0)
-    {
-        normal.z = -vsNormal.z; 
-    }
-    else{ normal.z = vsNormal.z;
-    }
-    return normal;
+    vec3 clight = directionalLights[lightIndex].diffuse;
+    vec3 frValue = fr(h,l,v,n);
+    frValue += reflectionColor * max(0.0, dot(n, reflection));
+    vec3 Lambient =directionalLights[lightIndex].ambient * texture(baseColorSampler,vsTex).rgb * texture(occlusionSampler,vsTex).rgb;
+    return Lambient + frValue * clight * max(0,dot(n,l));
 }
 
 
@@ -174,5 +171,10 @@ void main()
     for(int i = 0; i<numLights; i++){
         lighting += computePBRLighting(i,n,v);
     }
+    for(int i = 0; i<numDirectionalLights; i++){
+        lighting += computeDirectionalPBRLighting(i,n,v);
+    }
+
     fsColour = vec4(pow(lighting, vec3(1.0/gamma)),1);
+    //fsColour = vec4(texture( normalSampler, vsTex ).xyz,1);
 }

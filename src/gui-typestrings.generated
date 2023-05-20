@@ -1,1 +1,1 @@
-"BaseComponent","PlayerControllerComponent","RigidBodyComponent","ScriptComponent","CameraComponent","AudioSourceComponent","ModelComponent","SkeletalModelComponent","LightComponent","SkyBoxComponent","ControllerComponent","TransformComponent"
+"BaseComponent","PlayerControllerComponent","RigidBodyComponent","ScriptComponent","CameraComponent","AudioSourceComponent","ModelComponent","SkeletalModelComponent","LightComponent","DirectionalLightComponent","SkyBoxComponent","ControllerComponent","TransformComponent"
