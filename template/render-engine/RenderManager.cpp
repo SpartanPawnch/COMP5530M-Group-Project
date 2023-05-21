@@ -746,9 +746,9 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
 
         int entityIndex = i + 1;
 
-        int colorX = std::floor(entityIndex / 1000000);
-        int colorY = std::floor((entityIndex - colorX * 1000000) / 1000);
-        int colorZ = entityIndex - (colorX * 1000000 + colorY * 1000);
+        int colorX = (entityIndex & 0x000000FF) >> 0;
+        int colorY = (entityIndex & 0x0000FF00) >> 8;
+        int colorZ = (entityIndex & 0x00FF0000) >> 16;
 
         glm::vec3 reconstructed_color = glm::vec3(colorX / 255.0, colorY / 255.0, colorZ / 255.0);
 

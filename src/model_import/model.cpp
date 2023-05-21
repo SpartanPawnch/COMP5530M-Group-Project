@@ -88,6 +88,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         material->Get(AI_MATKEY_SHININESS, mat.roughness);
         material->Get(AI_MATKEY_REFLECTIVITY, mat.metalness);
         material->Get(AI_MATKEY_OPACITY, mat.occlusion);
+
+        mat.roughness = std::min(mat.roughness, 1.0f);
+        mat.metalness = std::min(mat.metalness, 1.0f);
+        mat.occlusion = std::min(mat.occlusion, 1.0f);
+
         aiString texturePath;
         if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
             mat.baseColorMap = std::string(assetfolder::resolveExternalDependency(texturePath.C_Str(), directory.c_str()));

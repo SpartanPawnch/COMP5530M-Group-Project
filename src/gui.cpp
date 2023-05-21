@@ -429,10 +429,11 @@ static void handleMouseInput(GLFWwindow* window) {
             height - (renderManager->yPos - ImGui::GetWindowPos().y), 1, 1, GL_RGBA,
             GL_UNSIGNED_BYTE, pixel);
 
-        glm::vec4 color = glm::vec4(pixel[0], pixel[1], pixel[2], pixel[3]);
+        uint32_t entityIndex = 
+            pixel[0] +
+            pixel[1] * 256 +
+            pixel[2] * 256 * 256;
 
-        uint32_t entityIndex =
-            std::floor(color.x) * 1000000 + std::floor(color.y) * 1000 + std::floor(color.z);
         if (entityIndex == 0) {
             scene.selectedEntity = nullptr;
         }

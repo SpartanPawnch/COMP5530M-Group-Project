@@ -173,9 +173,9 @@ vec3 computePointPBR(int lightIndex, vec3 n, vec3 v)
 	float shininess = (2.0 / (pow(roughnessF, 4.0) + eps)) - 2.0;
 
 	//Lambertian diffuse
-	vec3 F0 = ( 1.0 - metalnessF) * vec3(0.04) + metalnessF * baseColorF * occlusionF;
+	vec3 F0 = ( 1.0 - metalnessF) * vec3(0.04) + metalnessF * baseColorF;
 	vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(h, v), 5.0);
-	vec3 lambertianDiffuse = (baseColorF / pi) * (vec3(1.0) - F)*(1.0 - metalnessF); 
+	vec3 lambertianDiffuse = (baseColorF / pi) * (vec3(1.0) - F*texture(skybox, reflection).rgb)*(1.0 - metalnessF); 
 
 	//normal distribution function D
 	float D = computeD(n, h, shininess);
@@ -186,11 +186,11 @@ vec3 computePointPBR(int lightIndex, vec3 n, vec3 v)
 	vec3 ambientTerm = baseColorF * lights[lightIndex].ambient;
 
 	vec3 pbrSpecular = (D * F * G) /
-	(4.0 * max(dot(n, v), 0.0) * max(dot(n, l), 0.0));
+	(4.0 * max(dot(n, v), 0.0) * max(dot(n, l), 0.0)+eps);
 	vec3 fr = lambertianDiffuse + pbrSpecular;
 
 	//emitted light is 0
-	vec3 Lo = emissiveF + ambientTerm + fr * lights[lightIndex].diffuse * max(dot(n, l), 0.0);
+	vec3 Lo = emissiveF + ambientTerm + fr * lights[lightIndex].diffuse * max(dot(n, l), 0.0) * occlusionF;
 
     return Lo;
 }
