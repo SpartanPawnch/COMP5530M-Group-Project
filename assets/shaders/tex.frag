@@ -1,0 +1,288 @@
+#version 450
+
+in vec3 vsPos;
+in vec3 vsNormal;
+in vec2 vsTex;
+in vec3 vsTangent;
+in vec3 vsBitangent;
+
+out vec4 fsColour;
+
+struct Light 
+{
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct Material
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
+Material material;
+
+const int MAX_LIGHTS = 20;
+uniform int numLights;
+uniform int numDirectionalLights;
+uniform Light lights[MAX_LIGHTS];
+uniform Light directionalLights[MAX_LIGHTS];
+
+uniform float gamma;
+uniform vec3 viewPos;
+
+uniform vec3 baseColor;
+uniform vec3 emissiveColor;
+
+uniform float roughness;
+uniform float metalness;
+uniform float occlusion;
+
+uniform samplerCube skybox;
+
+layout(location=0) uniform sampler2D baseColorSampler;
+layout(location=1) uniform sampler2D roughnessSampler;
+layout(location=2) uniform sampler2D metalnessSampler;
+layout(location=3) uniform sampler2D normalSampler;
+layout(location=4) uniform sampler2D alphaSampler;
+layout(location=5) uniform sampler2D emissiveSampler;
+layout(location=6) uniform sampler2D occlusionSampler;
+
+const float eps = 0.0001;
+const float pi = 3.141592;
+
+
+vec3 computeBlinnPhongLighting(int lightIndex)
+{
+    vec3 ambient = lights[lightIndex].ambient * material.ambient;
+
+    //diffuse
+    vec3 lightDir = normalize(lights[lightIndex].position - vsPos);
+    vec3 normal = normalize(vsNormal);
+    float diff = clamp(dot(lightDir, vsNormal), 0, 1);
+    vec3 diffuse = lights[lightIndex].diffuse * diff *  material.diffuse;
+
+    //specular
+    vec3 viewDir = normalize(viewPos - vsPos);
+    float spec = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
+    vec3 specular = spec * lights[lightIndex].specular * material.specular; 
+
+    return (ambient+diffuse+specular);
+}
+
+ float computeD( vec3 normal, vec3 halfVec, float shininess)
+ {
+	// using the Blinn-Phong distribution - similar to specular
+	float nh = max(dot(normal, halfVec), 0.0);
+	float D = (shininess + 2.0) * pow(nh, shininess) /
+	(2.0 * pi);
+	return D;
+ }
+
+ float computeG(vec3 normal, vec3 viewDir, vec3 lightDir, vec3 halfVec, float roughness)
+ {
+	float nhClamped = max(dot(normal, halfVec), 0.0);
+	float nvClamped = max(dot(normal, viewDir), 0.0); 
+	float nlClamped = max(dot(normal, lightDir), 0.0);
+
+	float A = 2 * nhClamped * nvClamped / dot(viewDir, halfVec);
+	float B = 2 * nhClamped * nlClamped / dot(viewDir, halfVec);
+	float G = min(min(A,B),1.0);
+	return G;
+ }
+
+vec3 F0(){
+	return (1.0-texture( metalnessSampler, vsTex ).r)*vec3(0.04,0.04,0.04)+texture( metalnessSampler, vsTex ).r*texture( baseColorSampler, vsTex ).rgb;
+}
+
+vec3 F(vec3 h,vec3 v){
+	return F0()+(1.0-F0())*pow((1.0-dot(h,v)),5.0);
+}
+
+vec3 Ldiffuse(vec3 h,vec3 v){
+	float pi = 3.14159265359;
+	return vec3(texture( baseColorSampler, vsTex ).rgb/pi*(vec3(1.0,1.0,1.0)-F(h,v))*(1.0-texture( metalnessSampler, vsTex ).r));
+}
+
+float ap(){
+	return 2.0/(pow(texture( roughnessSampler, vsTex ).r,4.0)+0.001)-2.0;
+}
+
+float D(vec3 n,vec3 h){
+	float pi = 3.14159265359;
+	return (ap()+2.0)/(2.0*pi)*pow(max(0.0,dot(n,h)),ap());
+}
+
+float G(vec3 n, vec3 l,vec3 v,vec3 h){
+	return min(1.0,min(2.0*((max(0.0,dot(n,h))*max(0.0,dot(n,v)))/dot(v,h)),2.0*((max(0.0,dot(n,h))*max(0.0,dot(n,l)))/dot(v,h))));
+}
+
+vec3 fr(vec3 h,vec3 l,vec3 v,vec3 n){
+	//fr = Ldiffuse + (D(n,h)F(l,h)G(n,l,v))/(4(n*v)clamped (n*l)clamped)
+	return  vec3(Ldiffuse(h,v) + (D(n,h)*F(h,v)*G(n,l,v,h))/(4.0*max(0.0,dot(n,v))* max(0.0,dot(n,l))+0.0001));
+}
+
+vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){
+    vec3 l = normalize(lights[lightIndex].position);
+	vec3 h = normalize(l+v);
+    vec3 reflection = reflect(-v, n);
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
+
+    vec3 clight = lights[lightIndex].diffuse;
+    vec3 frValue = fr(h,l,v,n);
+    frValue += reflectionColor * max(0.0, dot(n, reflection));
+    vec3 Lambient =lights[lightIndex].ambient * texture(baseColorSampler,vsTex).rgb * texture(occlusionSampler,vsTex).rgb;
+    return Lambient + frValue * clight * max(0,dot(n,l));
+}
+
+vec3 computeDirectionalPBRLighting(int lightIndex, vec3 n, vec3 v){
+    vec3 l = normalize(-directionalLights[lightIndex].position);
+	vec3 h = normalize(l+v);
+    vec3 reflection = reflect(-v, n);
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
+
+    vec3 clight = directionalLights[lightIndex].diffuse;
+    vec3 frValue = fr(h,l,v,n);
+    frValue += reflectionColor * max(0.0, dot(n, reflection));
+    vec3 Lambient =directionalLights[lightIndex].ambient * texture(baseColorSampler,vsTex).rgb * texture(occlusionSampler,vsTex).rgb;
+    return Lambient + frValue * clight * max(0,dot(n,l));
+}
+
+vec3 computePointPBR(int lightIndex, vec3 n, vec3 v)
+{
+
+    vec3 l = normalize(lights[lightIndex].position - vsPos);
+	vec3 h = normalize(l+v);
+    vec3 reflection = reflect(-v, n);
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
+
+    vec3 baseColorF = texture(baseColorSampler,vsTex).rgb * baseColor;
+    float roughnessF = texture(roughnessSampler, vsTex).r * roughness;
+    float metalnessF = texture(metalnessSampler, vsTex).r * metalness;
+    vec3 emissiveF = texture(emissiveSampler, vsTex).rgb * emissiveColor;
+    float occlusionF = texture(occlusionSampler, vsTex).r * occlusion;
+
+    //calculating shininess
+	float shininess = (2.0 / (pow(roughnessF, 4.0) + eps)) - 2.0;
+
+	//Lambertian diffuse
+	vec3 F0 = ( 1.0 - metalnessF) * vec3(0.04) + metalnessF * baseColorF;
+	vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(h, v), 5.0);
+	vec3 lambertianDiffuse = (baseColorF / pi) * (vec3(1.0) - F*texture(skybox, reflection).rgb)*(1.0 - metalnessF); 
+
+	//normal distribution function D
+	float D = computeD(n, h, shininess);
+
+	float G = computeG(n, v, l, h, roughnessF);
+
+	// assume ambient illumination
+	vec3 ambientTerm = baseColorF * lights[lightIndex].ambient;
+
+	vec3 pbrSpecular = (D * F * G) /
+	(4.0 * max(dot(n, v), 0.0) * max(dot(n, l), 0.0)+eps);
+	vec3 fr = lambertianDiffuse + pbrSpecular;
+
+	//emitted light is 0
+	vec3 Lo = emissiveF + ambientTerm + fr * lights[lightIndex].diffuse * max(dot(n, l), 0.0) * occlusionF;
+
+    return Lo;
+}
+
+vec3 computeDirectionalPBR(int lightIndex, vec3 n, vec3 v)
+{
+
+    vec3 l = normalize(-directionalLights[lightIndex].position);
+	vec3 h = normalize(l+v);
+    vec3 reflection = reflect(-v, n);
+    vec3 reflectionColor = texture(skybox, reflection).rgb;
+
+    vec3 baseColorF = texture(baseColorSampler,vsTex).rgb * baseColor;
+    float roughnessF = texture(roughnessSampler, vsTex).r * roughness;
+    float metalnessF = texture(metalnessSampler, vsTex).r * metalness;
+    vec3 emissiveF = texture(emissiveSampler, vsTex).rgb * emissiveColor;
+    float occlusionF = texture(occlusionSampler, vsTex).r * occlusion;
+
+    //calculating shininess
+	float shininess = (2.0 / (pow(roughnessF, 4.0) + eps)) - 2.0;
+
+	//Lambertian diffuse
+	vec3 F0 = ( 1.0 - metalnessF) * vec3(0.04) + metalnessF * baseColorF * occlusionF;
+	vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(h, v), 5.0);
+	vec3 lambertianDiffuse = (baseColorF / pi) * (vec3(1.0) - F)*(1.0 - metalnessF); 
+
+	//normal distribution function D
+	float D = computeD(n, h, shininess);
+
+	float G = computeG(n, v, l, h, roughnessF);
+
+	// assume ambient illumination
+	vec3 ambientTerm = baseColorF * directionalLights[lightIndex].ambient;
+
+	vec3 pbrSpecular = (D * F * G) /
+	(4.0 * max(dot(n, v), 0.0) * max(dot(n, l), 0.0));
+	vec3 fr = lambertianDiffuse + pbrSpecular;
+
+	//emitted light is 0
+	vec3 Lo = emissiveF + ambientTerm + fr * directionalLights[lightIndex].diffuse * max(dot(n, l), 0.0);
+
+    return Lo;
+}
+
+
+void main()
+{
+    
+//    material.ambient = vec3(0.2, 0.2, 0.2);
+//    material.diffuse = vec3(0.8, 0.8, 0.8);
+//    material.specular = vec3(0.2, 0.2, 0.2);
+//    material.shininess = 16.0;
+//   
+//    vec3 colour = texture(baseColorSampler,vsTex).rgb;
+//    
+//    vec3 lighting = vec3(0.0);
+//    for(int i = 0; i < numLights; i++)
+//    {
+//        lighting += computeBlinnPhongLighting(i);
+//    }
+//    if(numLights>0){
+//        fsColour.rgb = colour * lighting;
+//        fsColour.rgb = pow(fsColour.rgb, vec3(1.0/gamma));
+//        fsColour.a=1.f;
+//    } else {
+//        fsColour = vec4(colour,1);
+//    }
+
+    if(texture( alphaSampler, vsTex ).a<0.5){
+		discard;
+	}
+
+    vec3 v = normalize(viewPos.rgb-vsPos);
+
+    mat3 TBN = mat3(vsTangent,vsBitangent,vsNormal);
+
+    vec3 n = texture(normalSampler, vsTex).rgb;
+	n = n * 2.0 - 1.0;   
+	n = normalize(TBN * n);
+
+    vec3 lighting = vec3(0);
+    for(int i = 0; i<numLights; i++){
+        lighting += computePointPBR(i, n, v);
+    }
+    
+    for(int i = 0; i<numDirectionalLights; i++){
+        lighting += computeDirectionalPBR(i,n,v);
+    }
+
+    fsColour = vec4(pow(lighting, vec3(1.0/gamma)),1);
+    //fsColour = vec4(lighting,1);
+    //fsColour = vec4(texture( normalSampler, vsTex ).xyz,1);
+    //fsColour = vec4( texture(roughnessSampler, vsTex).r * roughness, texture(metalnessSampler, vsTex).r * metalness, texture(occlusionSampler, vsTex).r * occlusion, 1.0);
+    //fsColour = vec4( texture(roughnessSampler, vsTex).rgb , 1.0);
+}

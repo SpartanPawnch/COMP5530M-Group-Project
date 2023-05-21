@@ -1,0 +1,51 @@
+#include "PhysicsEvents.h"
+#include "../ECS/Component/RigidBodyComponent.h"
+#include <iostream>
+
+void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackData) {
+    for (uint p = 0; p < callbackData.getNbContactPairs(); p++) {
+
+        CollisionCallback::ContactPair contactPair = callbackData.getContactPair(p);
+
+        for (uint c = 0; c < contactPair.getNbContactPoints(); c++) {
+
+            CollisionCallback::ContactPoint contactPoint = contactPair.getContactPoint(c);
+
+            Vector3 worldPoint = contactPair.getCollider1()->getLocalToWorldTransform() *
+                contactPoint.getLocalPointOnCollider1();
+
+            RigidBody* rigidBody1 =
+                static_cast<RigidBody*>(contactPair.getCollider1()->getUserData());
+            RigidBody* rigidBody2 =
+                static_cast<RigidBody*>(contactPair.getCollider2()->getUserData());
+
+            BodyType type1 = rigidBody1->getType();
+            BodyType type2 = rigidBody2->getType();
+
+            CollisionInfo* body1 = static_cast<CollisionInfo*>(rigidBody1->getUserData());
+            CollisionInfo* body2 = static_cast<CollisionInfo*>(rigidBody2->getUserData());
+
+            if (body1 != nullptr && body2 != nullptr) {
+                body1->collidedAsBody1 = true;
+                body1->otherUuid1 = body2->ownUuid;
+
+                body1->collidedUuids[body1->collisionCount % CollisionInfo::MAX_COLLISIONS] =
+                    body2->ownUuid;
+                body1->collidedTags[body1->collisionCount % CollisionInfo::MAX_COLLISIONS] =
+                    body2->ownTag;
+
+                body1->collisionCount++;
+
+                body2->collidedUuids[body2->collisionCount % CollisionInfo::MAX_COLLISIONS] =
+                    body1->ownUuid;
+                body2->collidedTags[body2->collisionCount % CollisionInfo::MAX_COLLISIONS] =
+                    body1->ownTag;
+
+                body2->collisionCount++;
+            }
+
+            /*body1->collidedAsBody1 = true;
+            body2->collidedAsBody2 = true;*/
+        }
+    }
+}

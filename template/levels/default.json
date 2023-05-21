@@ -1,8 +1,730 @@
 {
+    "entities": [
+        {
+            "name": "Base Entity",
+            "uuid": 2,
+            "parent": -1,
+            "position": [
+                0.0,
+                0.0,
+                -5.237367153167725
+            ],
+            "rotation": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "components": [{"name":"Model Component","uuid":1,"type":"ModelComponent","modelUuid":"assets/assets/pilot-avatar/source/Pilot_LP_Animated.fbx","materials":["PILOT"]}
+            ]
+        },
+        {
+            "name": "Base Entity",
+            "uuid": 3,
+            "parent": -1,
+            "position": [
+                0.3669015169143677,
+                3.2482810020446777,
+                -0.10834848880767822
+            ],
+            "rotation": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "components": [{"name":"Directional Light Component","uuid":0,"type":"DirectionalLightComponent","direction":[0.0,0.0,-1.0],"ambient":[0.20000000298023224,0.20000000298023224,0.20000000298023224],"diffuse":[10.0,10.0,10.0],"specular":[1.0,1.0,1.0]}
+            ]
+        }
+    ],
     "audio": [],
-    "models": [],
+    "materials": [
+        {
+            "name": "DefaultMaterial",
+            "baseColor": [
+                0.6000000238418579,
+                0.6000000238418579,
+                0.6000000238418579
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material.002",
+            "baseColor": [
+                0.6000000238418579,
+                0.6000000238418579,
+                0.6000000238418579
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 250.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "assets/colorgrid.png",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_0",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/white.png",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "",
+            "alphaMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/white.png",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_1",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/11490520546946913238.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/3628158980083700836.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_10",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/8750083169368950601.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/13982482287905699490.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_11",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/4675343432951571524.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/7056944414013900257.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_12",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2969916736137545357.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/14118779221266351425.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_13",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/6772804448157695701.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/759203620573749278.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_14",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/7441062115984513793.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/6667038893015345571.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_15",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/8481240838833932244.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/10381718147657362067.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_16",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/5823059166183034438.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/14267839433702832875.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_17",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/755318871556304029.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/3827035219084910048.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_18",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/17876391417123941155.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/6593109234861095314.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_19",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2185409758123873465.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/332936164838540657.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_2",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/6047387724914829168.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/15722799267630235092.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_20",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/8006627369776289000.png",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/12501374198249454378.jpg",
+            "alphaMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/8006627369776289000.png",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_21",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2775690330959970771.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2374361008830720677.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_22",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/4975155472559461469.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2299742237651021498.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_23",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/5061699253647017043.png",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/8773302468495022225.jpg",
+            "alphaMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/5061699253647017043.png",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_24",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "C:/Users/jjpgn/Desktop/groupproje",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/4477655471536070370.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_3",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/15295713303328085182.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/10388182081421875623.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_4",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/5792855332885324923.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/16299174074766089871.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_5",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/6151467286084645207.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/7645212358685992005.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_6",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/14650633544276105767.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/2051777328469649772.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_7",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/11474523244911310074.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/4601176305987539675.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_8",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/9288698199695299068.jpg",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/4910669866631290573.jpg",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "Material_9",
+            "baseColor": [
+                0.5879999995231628,
+                0.5879999995231628,
+                0.5879999995231628
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.0,
+            "metalness": 0.0,
+            "occlusion": 1.0,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/16275776544635328252.png",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/14170708867020035030.jpg",
+            "alphaMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/tex/16275776544635328252.png",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        },
+        {
+            "name": "PILOT",
+            "baseColor": [
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 0.6589999794960022,
+            "metalness": 0.04500000178813934,
+            "occlusion": 0.07800000160932541,
+            "baseColorMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Base_Color.png",
+            "roughnessMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Roughness.png",
+            "metalnessMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Metallic.png",
+            "normalMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Normal_OpenGL.png",
+            "alphaMap": "",
+            "emissiveMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Base_Color.png",
+            "occlusionMap": "D:\\_Year4\\_COMP5530M Group Project\\COMP5530M-Group-Project\\template/assets/assets/pilot-avatar/textures/Material.002_Mixed_AO.png"
+        },
+        {
+            "name": "test",
+            "baseColor": [
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224
+            ],
+            "emissiveColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "roughness": 1.0,
+            "metalness": 0.0,
+            "occlusion": 0.5,
+            "baseColorMap": "",
+            "roughnessMap": "",
+            "metalnessMap": "",
+            "normalMap": "",
+            "alphaMap": "",
+            "emissiveMap": "",
+            "occlusionMap": ""
+        }
+    ],
+    "models": [
+        {
+            "uuid": "assets/assets/pilot-avatar/source/Pilot_LP_Animated.fbx",
+            "path": "assets/assets/pilot-avatar/source/Pilot_LP_Animated.fbx"
+        }
+    ],
+    "animations": [],
     "textures": [],
     "scripts": [],
-    "misc": [],
-    "entities": []
+    "misc": []
 }

@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['quaternion_763',['Quaternion',['../structreactphysics3d_1_1_quaternion.html',1,'reactphysics3d::Quaternion'],['../structreactphysics3d_1_1_quaternion.html#ade457c1c7101672d140bb20378aec810',1,'reactphysics3d::Quaternion::Quaternion()'],['../structreactphysics3d_1_1_quaternion.html#ad4eca6360237a1db6450e58514f8b864',1,'reactphysics3d::Quaternion::Quaternion(decimal newX, decimal newY, decimal newZ, decimal newW)'],['../structreactphysics3d_1_1_quaternion.html#ae74e9eb822999b1a4004dc6b26bc8a9d',1,'reactphysics3d::Quaternion::Quaternion(decimal newW, const Vector3 &amp;v)'],['../structreactphysics3d_1_1_quaternion.html#af1b3523799769eaeb89458edb7513bc4',1,'reactphysics3d::Quaternion::Quaternion(const Vector3 &amp;v, decimal newW)'],['../structreactphysics3d_1_1_quaternion.html#a6bdd0d9e131b6f3b8faed8ab25b534c0',1,'reactphysics3d::Quaternion::Quaternion(const Matrix3x3 &amp;matrix)']]]
+];

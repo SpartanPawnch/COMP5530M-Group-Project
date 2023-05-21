@@ -1,0 +1,61 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-51a85ba1528bd611c1bd.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ReactPhysics3D",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "reactphysics3d::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-reactphysics3d-Debug-2a1a8517bb1f6ff4b384.json",
+					"name" : "reactphysics3d",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/jjpgn/Desktop/groupproject/Project/COMP5530M-Group-Project/external/reactphysics3d/out/build/x64-debug",
+		"source" : "C:/Users/jjpgn/Desktop/groupproject/Project/COMP5530M-Group-Project/external/reactphysics3d"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
