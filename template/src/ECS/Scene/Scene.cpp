@@ -580,6 +580,7 @@ void Scene::processQueues() {
             const RigidBodyComponent& src = entities[idx].components.vecRigidBodyComponent[i];
             component.setGravityEnabled();
             component.setType(src.bodyType);
+            component.setTag(src.tag.c_str());
 
             component.cubeColliders.clear();
             for (size_t j = 0; j < src.cubeColliders.size(); j++) {

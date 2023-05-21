@@ -2190,6 +2190,9 @@ void drawComponentProps(RigidBodyComponent& component) {
         }
         ImGui::EndCombo();
     }
+    if (ImGui::InputText("Tag", &component.tag)) {
+        component.setTag(component.tag.c_str());
+    }
     if (ImGui::Checkbox("Gravity Enabled", &component.gravityEnabled)) {
         component.setGravityEnabled();
     }

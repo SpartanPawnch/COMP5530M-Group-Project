@@ -54,6 +54,7 @@ struct RigidBodyComponent : BaseComponent {
     void setMaterialFrictionCoefficient(ColliderTypes type, int index, float frictionCoefficient);
     void setLocalColliderPosition(ColliderTypes type, int index);
     void setLocalColliderRotation(ColliderTypes type, int index);
+    void setTag(const char* str);
     void removeCollisionShape(ColliderTypes type, int index);
 
     void setCubeColliderExtents(int index, glm::vec3 extents);

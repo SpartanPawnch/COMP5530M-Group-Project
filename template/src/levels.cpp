@@ -528,7 +528,8 @@ void loadLevel(const char* path, Scene& scene) {
                     RigidBodyComponent component(name, uuid);
                     component.gravityEnabled = jsonComponent["gravityEnabled"].GetBool();
                     component.setGravityEnabled();
-
+                    if (jsonComponent.HasMember("tag"))
+                        component.setTag(jsonComponent["tag"].GetString());
                     component.setType((BodyType)jsonComponent["bodyType"].GetInt());
 
                     component.position = glm::vec3(jsonComponent["position"][0].GetFloat(),
@@ -1250,6 +1251,8 @@ static void saveComponent(const RigidBodyComponent& component,
     writer.Bool(component.gravityEnabled);
     writer.Key("bodyType");
     writer.Int(int(component.bodyType));
+    writer.Key("tag");
+    writer.String(component.tag.c_str());
 
     // position
     writer.Key("position");

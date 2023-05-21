@@ -94,6 +94,11 @@ void RigidBodyComponent::createMeshCollider() {
     meshColliders.push_back(collider);
 }
 
+void RigidBodyComponent::setTag(const char* str) {
+    tag = str;
+    collisionInfo->ownTag = str;
+}
+
 void RigidBodyComponent::setCollisionMask(ColliderTypes type, int index, CollisionCategories mask) {
     switch (type) {
     case CUBE:
