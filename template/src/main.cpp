@@ -23,12 +23,14 @@
 #include "logging.h"
 #include "levels.h"
 #include "scripting.h"
+#include "metrics.h"
 #include "asset_import/audio.h"
 #include "asset_import/images.h"
 #include "asset_import/folders.h"
 #include "model_import/model.h"
 #include "../render-engine/RenderManager.h"
 #include "ECS/System/InputSystem.h"
+#include "hud.h"
 
 // set renderEngine instance to nullptr initially
 RenderManager* renderManager;
@@ -86,6 +88,8 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
+    metrics::MetricsTracker metricsTracker;
+
     // init scripting
     scripting::ScriptManager scriptMgr;
 
@@ -134,6 +138,8 @@ int main() {
     inputSystem->scene = &scene;
     inputSystem->start(window);
 
+    GUIManager guiInstance(window);
+
     double previous_time = glfwGetTime();
 
     // ------------- UNIFORMS --------------------------
@@ -157,26 +163,17 @@ int main() {
     physicsEngine->isSimulating = true;
 
     bool lastf12 = false;
-    bool lastf11 = false;
 
     while (!glfwWindowShouldClose(window)) {
         currTime = float(glfwGetTime());
         if (glfwGetKey(window, GLFW_KEY_F12)) {
             if (!lastf12)
-                std::cout << logging::getLogString();
+                scene.showColliders = !scene.showColliders;
+
             lastf12 = true;
         }
         else {
             lastf12 = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_F11)) {
-            if (!lastf11)
-                scene.showColliders = !scene.showColliders;
-            lastf11 = true;
-        }
-        else {
-            lastf11 = false;
         }
 
         scene.processQueues();
@@ -209,6 +206,9 @@ int main() {
         // handle inputs
         previous_time = current_time;
 
+        if (scene.showColliders)
+            prepUI(width, height);
+
         // update matrices
         // renderManager->updateMatrices(&width, &height);
 
@@ -227,8 +227,10 @@ int main() {
 
         renderManager->renderEntities(scene, &renderManager->camera, width, height);
 
-        if (scene.showColliders)
+        if (scene.showColliders) {
             renderManager->renderColliders(scene, width, height);
+            drawUI();
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

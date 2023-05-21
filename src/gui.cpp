@@ -3143,81 +3143,85 @@ inline void drawScriptDemo() {
 }
 
 void drawStats() {
-    // if (ImGui::Begin("Statistics")) {
-    //     ImGui::PushFont(guicfg::regularFont);
+    if (ImGui::Begin("Statistics")) {
+        ImGui::PushFont(guicfg::regularFont);
 
-    //    // CPU
-    //    ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
-    //        metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
+        // FPS
+        ImGui::Text("FPS: %.3f | Frametime: %.3f ms", ImGui::GetIO().Framerate,
+            renderManager->deltaTime * 1000.f);
 
-    //    // draw plot
-    //    if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
-    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-    //        // setup y
-    //        ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
-    //        // hide x axis ticks
-    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
-    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-    //        ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
-    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-    //    }
-    //    ImPlot::EndPlot();
+        // CPU
+        ImGui::Text("CPU Usage | Curr: %.3f%%, Min: %.3f%%, Max: %.3f%%",
+            metrics::getCurrentCPUUsage(), metrics::getMinCPUUsage(), metrics::getMaxCPUUsage());
 
-    //    // Physical Mem
-    //    float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
-    //    float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
-    //    float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
-    //    ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
-    //        minPhysMemMB, maxPhysMemMB);
+        // draw plot
+        if (ImPlot::BeginPlot("CPU Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "%", ImPlotAxisFlags_AutoFit);
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("CPU Usage", &metrics::getCPUSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+            ImPlot::EndPlot();
+        }
 
-    //    // draw plot
-    //    if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
-    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+        // Physical Mem
+        float physMemMB = float(metrics::getCurrentPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        float minPhysMemMB = float(metrics::getMinPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        float maxPhysMemMB = float(metrics::getMaxPhysicalMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Physical Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", physMemMB,
+            minPhysMemMB, maxPhysMemMB);
 
-    //        // setup y
-    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+        // draw plot
+        if (ImPlot::BeginPlot("Phys Mem Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
 
-    //        // hide x axis ticks
-    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
-    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-    //        ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
-    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-    //    }
-    //    ImPlot::EndPlot();
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
 
-    //    // Virtual Mem
-    //    float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
-    //    float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
-    //    float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
-    //    ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
-    //        minVirtMemMB, maxVirtMemMB);
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("Phys Mem Usage", &metrics::getPhysMemSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+            ImPlot::EndPlot();
+        }
 
-    //    // draw plot
-    //    if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
-    //            ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
-    //                ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
-    //        // setup y
-    //        ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
-    //        // hide x axis ticks
-    //        ImPlot::SetupAxis(ImAxis_X1, nullptr,
-    //            ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
-    //        ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
-    //            metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
-    //    }
-    //    ImPlot::EndPlot();
+        // Virtual Mem
+        float virtMemMB = float(metrics::getCurrentVirtualMemoryUsage()) / (1024.f * 1024.f);
+        float minVirtMemMB = float(metrics::getMinVirtualMemoryUsage()) / (1024.f * 1024.f);
+        float maxVirtMemMB = float(metrics::getMaxVirtualMemoryUsage()) / (1024.f * 1024.f);
+        ImGui::Text("Virtual Memory Used | Curr: %.3f MB, Min: %.3f MB, Max: %.3f MB", virtMemMB,
+            minVirtMemMB, maxVirtMemMB);
 
-    //    // Audio stuff
-    //    ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
+        // draw plot
+        if (ImPlot::BeginPlot("Virt Mem Usage", ImVec2(400.f, 120.f),
+                ImPlotFlags_NoMenus | ImPlotFlags_NoChild | ImPlotFlags_NoInputs |
+                    ImPlotFlags_CanvasOnly | ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
+            // setup y
+            ImPlot::SetupAxis(ImAxis_Y1, "MB", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_LockMin);
+            // hide x axis ticks
+            ImPlot::SetupAxis(ImAxis_X1, nullptr,
+                ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_AutoFit);
+            ImPlot::PlotLineG("Virt Mem Usage", &metrics::getVirtMemSample, nullptr,
+                metrics::getMaxSampleCount(), ImPlotLineFlags_SkipNaN | ImPlotLineFlags_Shaded);
+            ImPlot::EndPlot();
+        }
 
-    //    // Texture stuff
-    //    ImGui::Text("TEXTURES %i loaded", getTextureCount());
-    //      ImGui::Text("Point lights: %zu", renderManager->getLightCount());
+        // Audio stuff
+        ImGui::Text("AUDIO: %i clips loaded", audio::getAudioClipCount());
 
-    //    ImGui::PopFont();
-    //}
-    // ImGui::End();
+        // Texture stuff
+        ImGui::Text("TEXTURES %i loaded", getTextureCount());
+        ImGui::Text("Point lights: %zu", renderManager->getLightCount());
+
+        ImGui::PopFont();
+    }
+    ImGui::End();
 }
 
 float newUIWidth = 300.f;

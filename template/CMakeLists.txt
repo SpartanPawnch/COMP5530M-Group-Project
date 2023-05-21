@@ -33,6 +33,11 @@ set(IMGUIBACKENDS "${IMGUIDIR}/backends/imgui_impl_opengl3.cpp"
   "${IMGUIDIR}/misc/cpp/imgui_stdlib.cpp"
 )
 
+#setup ImPlot
+include_directories(${PROJECT_NAME} "external/implot")
+set(IMPLOTSRC "external/implot/implot.cpp" 
+    "external/implot/implot_items.cpp" "external/implot/implot_demo.cpp")
+
 #setup lua interpreter
 set(LUADIR "external/lua-5.4.4/src")
 include_directories(${LUADIR})
@@ -44,10 +49,10 @@ find_package(ReactPhysics3D CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ex
 add_executable(
     ${PROJECT_NAME} src/main.cpp 
     external/tinyfiledialogs/tinyfiledialogs.c ${IMGUICORE} ${IMGUIBACKENDS}
-    ${LUASRC} src/asset_import/audio.cpp src/asset_import/images.cpp
+    ${LUASRC} ${IMPLOTSRC} src/asset_import/audio.cpp src/asset_import/images.cpp
     src/asset_import/folders.cpp src/fdutil.cpp src/levels.cpp
     src/model_import/model.cpp src/model_import/mesh.cpp
-    src/logging.cpp src/scripting.cpp
+    src/logging.cpp src/scripting.cpp src/metrics.cpp src/hud.cpp
     src/ECS/Component/BaseComponent.cpp
     src/ECS/Component/AudioSourceComponent.cpp src/ECS/Component/CameraComponent.cpp
     src/ECS/Component/TransformComponent.cpp src/ECS/Component/ScriptComponent.cpp src/ECS/Component/ModelComponent.cpp
