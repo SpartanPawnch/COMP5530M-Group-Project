@@ -25,12 +25,14 @@ ScriptComponent::ScriptComponent(const std::string& _name, const int _uuid) {
 }
 
 ScriptComponent::~ScriptComponent() {
-    stop();
+    // stop();
 }
 
 void ScriptComponent::start() {
     lua_State* state = scripting::getState();
 
+    int stacksize = lua_gettop(state);
+    // logging::logInfo("SCRIPTING: Core stack size: {}\n", stacksize);
     lua_getglobal(state, "ScriptComponents");
 
     // run script to get functions
@@ -38,13 +40,22 @@ void ScriptComponent::start() {
 
     // check for errors
     if (!valid) {
-        lua_pop(state, 1);
+        lua_settop(state, stacksize);
+        return;
+    }
+
+    if (!lua_istable(state, -1)) {
+        lua_settop(state, stacksize);
+        logging::logErr("SCRIPTING: Failed to register component #{}, return value is nil\n", uuid);
+        valid = false;
         return;
     }
 
     // add states to global components struct
     lua_setfield(state, -2, std::to_string(uuid).c_str());
     lua_setglobal(state, "ScriptComponents");
+    // logging::logInfo("SCRIPTING: Registered ScriptComponent #{}\n", uuid);
+    lua_settop(state, stacksize);
 }
 
 static void pushArgs(lua_State* state, std::vector<ScriptArgument>& args) {
@@ -95,6 +106,13 @@ void ScriptComponent::update(float dt, EntityState& state) {
     // get update func
     lua_getglobal(luaState, "ScriptComponents");
     lua_getfield(luaState, -1, std::to_string(uuid).c_str());
+    if (lua_isnil(luaState, -1)) {
+        lua_settop(luaState, stacksize);
+        logging::logErr("SCRIPTING: ScriptComponent #{} not found in table, but should exist\n",
+            uuid);
+        return;
+    }
+
     lua_getfield(luaState, -1, "update");
 
     // push arguments
