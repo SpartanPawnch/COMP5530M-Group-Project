@@ -22,6 +22,9 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <rapidjson/document.h>
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/writer.h>
 
 #include "fdutil.h"
 #include "logging.h"
@@ -132,6 +135,24 @@ bool GameEditor = true;
 bool UIEditor = false;
 bool CharacterEditor = false;
 bool WorldEditor = false;
+
+// --- UI editor
+float newUIWidth = 300.f;
+float newUIHeight = 180.f;
+
+struct
+{
+    int windowStyle;
+    std::vector<const char*> buttons;
+    std::vector<const char*> texts;
+    std::vector<std::vector<float>> slidersFloat;
+    std::vector<std::vector<int>> slidersInt;
+    
+    std::vector<const char*> checkBox;
+    std::vector<int> index1; 
+    std::vector<int> index2;
+}uiElement;
+
 
 GUIManager::GUIManager(GLFWwindow* window) {
     // Init ImGui
@@ -3225,8 +3246,43 @@ void drawStats() {
     ImGui::End();
 }
 
-float newUIWidth = 300.f;
-float newUIHeight = 180.f;
+void saveUI(){
+        static assetfolder::AssetDescriptor currUIDir = {"", "",
+        assetfolder::AssetDescriptor::EFileType::INVALID};
+    currUIDir = assetfolder::getUIRootDir();
+    std::string dir = (currUIDir.path+"/Uiname.json").c_str();
+    FILE* file = fopen(dir.c_str(), "wb");
+    if (file == NULL) {
+        logging::logErr("Failed to open file {} for writing\n", dir);
+        return;
+    }
+
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+
+    writer.StartObject();
+    {
+        writer.Key("buttons");
+        writer.StartArray();
+        for (unsigned int i = 0; i < uiElement.buttons.size(); i++)
+        {
+            writer.StartObject();
+
+            // encode entity properties
+            writer.Key("name");
+            writer.String(uiElement.buttons[i]);
+        }
+        writer.EndArray();
+        writer.EndObject();
+        writer.Flush();
+        osw.Flush();
+        fclose(file);
+
+        logging::logInfo("Saved ui {}\n", dir);
+    }
+}
+
 inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
     static float transparency = 0.5f;
 
@@ -3234,6 +3290,10 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
     static ImGuiID rounded;
     static ImGuiID translucent;
     static ImGuiID image;
+    ImVec2 buttonSize = ImVec2(150.0f,25.0f);
+    const float spacing = 10.0f;
+    int selectedItem = 0;
+    
 
     if (ImGui::Begin("Set Properties", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus)) {
         ImVec2 window_pos = ImGui::GetWindowPos();
@@ -3245,150 +3305,272 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
 
         ImGui::SliderFloat("height", &newUIHeight, 0.0f, 1000.0f);
 
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
+
         if (ImGui::Button("Add Image")) {
             // const char* file_path = OpenFileDialog();
             // ImTextureID image_id = LoadImage(file_path);
             // ImGui::Image(image_id, ImVec2(100, 100));
         }
 
-        static ImVec2 padding = ImVec2(15.f, 15.f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
 
         // TODO save and load dock state
         // create layout if not present already
 
-        window_size = ImVec2(window_size.x - padding.x, window_size.x - padding.x);
+        const int numColumns = 3;  // Number of columns in the grid
+        const int numRows = 3;  // Number of rows in the grid
+        buttonSize = ImVec2((window_size.x-(ImGui::GetStyle().ItemSpacing.x*7))/numColumns, (window_size.x*0.5625f)/numColumns);  // Size of each button
+        const ImVec2 gird_size = ImVec2( window_size.x-(ImGui::GetStyle().ItemSpacing.x), window_size.x*0.5625f);
+        
+        ImGui::BeginChild("ScrollableWindow", gird_size, true);
 
-        if (ImGui::BeginChild("##TemplateGrid", window_size,
-                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking |
-                    ImGuiWindowFlags_NoTitleBar)) {
 
-            ImGuiID dockId = ImGui::GetID("DockspaceTemplateGrid");
-            ImGui::DockSpace(dockId);
-            static bool dockSpaceInit = false;
-            if (!dockSpaceInit) {
-                ImVec2 dockspaceSize = ImGui::GetWindowContentRegionMax();
-                dockspaceSize.x -= ImGui::GetWindowContentRegionMin().x;
-                dockspaceSize.y -= ImGui::GetWindowContentRegionMin().y;
-                // create initial empty node
-                ImGui::DockBuilderRemoveNode(dockId);
-                normal = ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
-                ImGui::DockBuilderSetNodeSize(normal, dockspaceSize);
-                ImGui::DockBuilderSetNodePos(normal, ImGui::GetMainViewport()->Pos);
+        for (int i = 0; i < numRows; i++)
+        {
+            ImGui::BeginGroup(); // Begin a group to enable positioning
 
-                // split horizontally
-                rounded = ImGui::DockBuilderSplitNode(normal, ImGuiDir_Right, .5f, NULL, &normal);
+            for (int j = 0; j < numColumns; j++)
+            {
+                // Create button with specified size
+                if (ImGui::Button("Button", buttonSize))
+                {
+                    // Button action
+                    uiElement.windowStyle = (i * numColumns) + j;
+                }
 
-                translucent =
-                    ImGui::DockBuilderSplitNode(normal, ImGuiDir_Down, .5f, NULL, &normal);
+                ImGui::SameLine(0, spacing);   // Align buttons horizontally with spacing
+            }
+                    ImGui::EndGroup(); // End the group
 
-                image = ImGui::DockBuilderSplitNode(rounded, ImGuiDir_Down, .5f, NULL, &rounded);
-
-                ImGui::DockBuilderFinish(dockId);
-                dockSpaceInit = true;
+            if (i < numRows - 1)
+            {
+                // Add vertical padding between rows
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
             }
         }
-
         ImGui::EndChild();
-    }
-    ImGui::End();
 
-    ImGui::SetNextWindowDockID(normal, ImGuiCond_Once);
-    if (ImGui::Begin("normal##addui")) {
-    }
-    ImGui::End();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
 
-    ImGui::SetNextWindowDockID(rounded, ImGuiCond_Once);
-    if (ImGui::Begin("rounded##addui")) {
-    }
-    ImGui::End();
+        buttonSize = ImVec2(150.0f,25.0f);
+        static char addbutton[256] = "";
+        static char addText[256] = "";
+        static char addCheck[256] = "";
+        static std::vector<float> minmaxf;minmaxf.push_back(0.0f);minmaxf.push_back(100.0f);
+        static std::vector<int> minmaxi;minmaxi.push_back(0.0f);minmaxi.push_back(100.0f);
 
-    ImGui::SetNextWindowDockID(translucent, ImGuiCond_Once);
-    if (ImGui::Begin("translucent##addui")) {
-    }
-    ImGui::End();
+        if (ImGui::Button("Add button",buttonSize)&&std::strcmp(addbutton,""))
+        {
+            uiElement.buttons.push_back(addbutton);
+            uiElement.index1.push_back(1);
+        }
 
-    ImGui::SetNextWindowDockID(image, ImGuiCond_Once);
-    if (ImGui::Begin("Image##addui")) {
+        ImGui::SameLine();
+
+        ImGui::InputText("##addButton", addbutton, sizeof(addbutton));
+        
+        if (ImGui::Button("Add text box",buttonSize)&&std::strcmp(addText,""))
+        {
+            uiElement.texts.push_back(addText);
+            uiElement.index1.push_back(2);
+        }
+
+        ImGui::SameLine();
+
+        ImGui::InputText("##addText", addText, sizeof(addText));
+
+        if (ImGui::Button("Add slider Float",buttonSize))
+        {
+            uiElement.slidersFloat.push_back(minmaxf);
+            uiElement.index1.push_back(3);
+        }
+        
+        ImGui::SameLine();
+
+        const float inputWidthf = ImGui::GetContentRegionAvail().x / 2.0f;
+        ImGui::PushItemWidth(inputWidthf);
+        if (ImGui::InputFloat("##minf", &minmaxf[0]))
+        {
+
+        }
+        ImGui::SameLine();
+        if (ImGui::InputFloat("##maxf", &minmaxf[1]))
+        {
+
+        }
+        ImGui::PopItemWidth();
+
+        if (ImGui::Button("Add slider Integer",buttonSize))
+        {
+            uiElement.slidersInt.push_back(minmaxi);
+            uiElement.index1.push_back(4);
+        }
+        
+        ImGui::SameLine();
+
+        const int inputWidthi = ImGui::GetContentRegionAvail().x / 2.0f;
+        ImGui::PushItemWidth(inputWidthi);
+        if (ImGui::InputInt("##mini", &minmaxi[0]))
+        {
+
+        }
+        ImGui::SameLine();
+        if (ImGui::InputInt("##maxi", &minmaxi[0]))
+        {
+
+        }
+        ImGui::PopItemWidth();
+
+        if (ImGui::Button("Add check box",buttonSize)&&std::strcmp(addCheck,""))
+        {
+            uiElement.checkBox.push_back(addCheck);
+            uiElement.index1.push_back(5);
+
+        }
+        
+        ImGui::SameLine();
+
+        ImGui::InputText("##addCheck", addCheck, sizeof(addCheck));
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
+
+        if (ImGui::Button("Save UI")) {
+            saveUI();
+        }
     }
     ImGui::End();
 }
 
+inline void showElements()
+{
+    ImVec2 buttonSize = ImVec2(150.0f,25.0f);
+    int ele1=0;
+    int ele2=0;
+    int ele3=0;
+    int ele4=0;
+    int ele5=0;
+    
+    for(int i=0;i<uiElement.index1.size();i++)
+    {
+        if(uiElement.index1[i]==1)
+        {
+            ImGui::Button(uiElement.buttons[ele1],buttonSize);ele1++;
+        }
+        else if(uiElement.index1[i]==2)
+        {
+            ImGui::Text(uiElement.texts[ele2]);ele2++;
+        }
+        else if(uiElement.index1[i]==3)
+        {
+            float *fVale;fVale=0;
+            std::string label = "##sliderF";
+            label += std::to_string(ele3);
+            ImGui::SliderFloat(label.c_str(),fVale,uiElement.slidersFloat[ele3][0],uiElement.slidersFloat[ele3][1]);ele3++;
+        }
+        else if(uiElement.index1[i]==4)
+        {
+            int *iVale;iVale=0;
+            std::string label = "##sliderI";
+            label += std::to_string(ele4);
+            ImGui::SliderInt(label.c_str(),iVale,uiElement.slidersInt[ele4][0],uiElement.slidersInt[ele4][1]);ele4++;
+        }
+        else if(uiElement.index1[i]==5)
+        {
+            std::string label = "##checkBox";
+            label += std::to_string(ele5);
+            ImGui::Checkbox(label.c_str(),false);ele5++;
+        }
+    }
+}
+
 inline void drawUIPreview() {
-    if (ImGui::Begin("UI Preview", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus)) {
+    if (ImGui::Begin("UI Preview")) {
+
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
-        ImVec2 newPos = ImVec2((window_size.x / 2.f) + window_pos.x - (newUIWidth / 2),
-            (window_size.y / 2.f) + window_pos.y - (newUIHeight / 2));
+        ImVec2 workArea = ImVec2( window_size.x-(ImGui::GetStyle().ItemSpacing.x*4), window_size.y-(ImGui::GetStyle().ItemSpacing.y*4));
+        ImVec2 newPos = ImVec2((window_size.x/2.f)+window_pos.x-(newUIWidth/2),
+                                (window_size.y/2.f)+window_pos.y-(newUIHeight/2));
         ImGuiStyle& style = ImGui::GetStyle();
 
-        ImGui::SetNextWindowSize(ImVec2(newUIWidth, newUIHeight));
-        ImGui::SetNextWindowPos(newPos, ImGuiCond_Once);
+        ImGui::SetNextWindowPos(newPos);
 
-        if (ImGui::Begin("normal", nullptr, ImGuiWindowFlags_NoTitleBar)) {
-            // Get the width of the text
-            float textWidth = ImGui::CalcTextSize("normal").x;
-            float textHeight = ImGui::CalcTextSize("normal").y;
+        if(uiElement.windowStyle==0)
+        {
+            if (ImGui::BeginChild("normal", ImVec2(newUIWidth, newUIHeight),true)) {
+                // Get the width of the text
+                float textWidth = ImGui::CalcTextSize("normal").x;
+                float textHeight = ImGui::CalcTextSize("normal").y;
 
-            // Calculate the position of the text
-            float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
-            float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
+                // Calculate the position of the text
+                float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
+                float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
 
-            // Set the cursor position to the calculated position
-            ImGui::SetCursorPosX(xPos);
-            ImGui::SetCursorPosY(yPos);
+                // Set the cursor position to the calculated position
+                ImGui::SetCursorPosX(xPos);
+                ImGui::SetCursorPosY(yPos);
 
-            // Draw the text
-            ImGui::Text("normal");
+                // Draw the text
+                ImGui::Text("normal");
+                showElements();
+            }
+            ImGui::EndChild();
         }
-        ImGui::End();
+        else if(uiElement.windowStyle==1)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
+            ImGui::SetNextWindowSize(ImVec2(300, 180));
+            if (ImGui::BeginChild("rounded", ImVec2(newUIWidth, newUIHeight), true)) {
+                // Get the width of the text
+                float textWidth = ImGui::CalcTextSize("rounded").x;
+                float textHeight = ImGui::CalcTextSize("rounded").y;
 
-        // style.WindowRounding = 10.0f;
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
-        ImGui::SetNextWindowSize(ImVec2(300, 180));
-        if (ImGui::Begin("rounded", nullptr, ImGuiWindowFlags_NoTitleBar)) {
-            // Get the width of the text
-            float textWidth = ImGui::CalcTextSize("rounded").x;
-            float textHeight = ImGui::CalcTextSize("rounded").y;
+                // Calculate the position of the text
+                float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
+                float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
 
-            // Calculate the position of the text
-            float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
-            float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
+                // Set the cursor position to the calculated position
+                ImGui::SetCursorPosX(xPos);
+                ImGui::SetCursorPosY(yPos);
 
-            // Set the cursor position to the calculated position
-            ImGui::SetCursorPosX(xPos);
-            ImGui::SetCursorPosY(yPos);
-
-            // Draw the text
-            ImGui::Text("rounded");
+                // Draw the text
+                ImGui::Text("rounded");
+                showElements();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
         }
-        ImGui::End();
-        // style.WindowRounding = 0.0f;
-        ImGui::PopStyleVar();
-
-        // style.Colors[ImGuiCol_WindowBg].w = 0.5f;
-        ImGui::PushStyleColor(ImGuiCol_WindowBg,
+        else if(uiElement.windowStyle==2)
+        {
+            ImGui::PushStyleColor(ImGuiCol_WindowBg,
             ImVec4(style.Colors[ImGuiCol_WindowBg].x, style.Colors[ImGuiCol_WindowBg].y,
                 style.Colors[ImGuiCol_WindowBg].z, .5f));
-        ImGui::SetNextWindowSize(ImVec2(300, 180));
-        if (ImGui::Begin("translucent", nullptr, ImGuiWindowFlags_NoTitleBar)) {
-            // Get the width of the text
-            float textWidth = ImGui::CalcTextSize("translucent").x;
-            float textHeight = ImGui::CalcTextSize("translucent").y;
+            ImGui::SetNextWindowSize(ImVec2(300, 180));
+            if (ImGui::BeginChild("translucent", ImVec2(newUIWidth, newUIHeight), true)) {
+                // Get the width of the text
+                float textWidth = ImGui::CalcTextSize("translucent").x;
+                float textHeight = ImGui::CalcTextSize("translucent").y;
 
-            // Calculate the position of the text
-            float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
-            float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
+                // Calculate the position of the text
+                float xPos = ImGui::GetWindowWidth() / 2 - textWidth / 2;
+                float yPos = ImGui::GetWindowHeight() / 2 - textHeight / 2;
 
-            // Set the cursor position to the calculated position
-            ImGui::SetCursorPosX(xPos);
-            ImGui::SetCursorPosY(yPos);
+                // Set the cursor position to the calculated position
+                ImGui::SetCursorPosX(xPos);
+                ImGui::SetCursorPosY(yPos);
 
-            // Draw the text
-            ImGui::Text("translucent");
+                // Draw the text
+                ImGui::Text("translucent");
+                showElements();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
         }
-        ImGui::End();
-        // style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-        ImGui::PopStyleColor();
+
+
+        
+        
     }
     ImGui::End();
 }
@@ -3472,7 +3654,6 @@ void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
 void uiEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
     static ImGuiID dockRight;
     static ImGuiID dockCenter = 0;
-
     // TODO save and load dock state
     // create layout if not present already
     ImGui::SetNextWindowPos(ImVec2(.0f, mainMenuHeight));
