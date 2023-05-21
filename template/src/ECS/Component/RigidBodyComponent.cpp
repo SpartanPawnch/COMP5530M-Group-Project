@@ -11,9 +11,12 @@ RigidBodyComponent::RigidBodyComponent() {
     uuid = baseUuid++;
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
+    // TODO obvious memory leak, fix if time available
     rigidBody = instance->createRigidBody();
-    collisionInfo = new CollisionInfo{};
+    collisionInfo = new CollisionInfo();
     collisionInfo->ownUuid = uuid;
+    collisionInfo->ownTag = tag;
+    collisionInfo->collisionCount = 0;
     rigidBody->setUserData(collisionInfo);
 }
 RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid) {
@@ -23,22 +26,18 @@ RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
-    collisionInfo = new CollisionInfo{};
+    collisionInfo = new CollisionInfo();
     collisionInfo->ownUuid = uuid;
+    collisionInfo->ownTag = tag;
+    collisionInfo->collisionCount = 0;
     rigidBody->setUserData(collisionInfo);
 }
 void RigidBodyComponent::start() {
-    /* PhysicsEngine* instance = PhysicsEngine::getInstance();
-     assert(rigidBody == nullptr);
-     rigidBody = instance->createRigidBody();*/
 }
 void RigidBodyComponent::update(float dt, EntityState& state) {
 }
 
 void RigidBodyComponent::stop() {
-    /* instance->deleteRidigBody(rigidBody);
-     delete rigidBody;
-     rigidBody = nullptr;*/
 }
 
 void RigidBodyComponent::createCubeCollider() {
@@ -446,12 +445,31 @@ static int luaHandleCollision(lua_State* state) {
         return 0;
     }
 
-    int res = int(c->collisionInfo->collidedAsBody1 || c->collisionInfo->collidedAsBody2);
-
+    // return results
     lua_settop(state, 0);
-    lua_pushboolean(state, res);
-    c->collisionInfo->collidedAsBody1 = false;
-    c->collisionInfo->collidedAsBody2 = false;
+    lua_createtable(state, 0, 3);
+    lua_createtable(state,
+        std::min(c->collisionInfo->collisionCount, CollisionInfo::MAX_COLLISIONS), 0);
+    for (unsigned int i = 0;
+         i < c->collisionInfo->collisionCount && i < CollisionInfo::MAX_COLLISIONS; i++) {
+        lua_pushinteger(state, c->collisionInfo->collidedUuids[i]);
+        lua_seti(state, -2, i + 1);
+    }
+    lua_setfield(state, -2, "collidedUuids");
+
+    lua_createtable(state,
+        std::min(c->collisionInfo->collisionCount, CollisionInfo::MAX_COLLISIONS), 0);
+    for (unsigned int i = 0;
+         i < c->collisionInfo->collisionCount && i < CollisionInfo::MAX_COLLISIONS; i++) {
+        lua_pushstring(state, c->collisionInfo->collidedTags[i].c_str());
+        lua_seti(state, -2, i + 1);
+    }
+    lua_setfield(state, -2, "collidedTags");
+
+    lua_pushinteger(state, int(c->collisionInfo->collisionCount));
+    lua_setfield(state, -2, "count");
+
+    c->collisionInfo->collisionCount = 0;
     return 1;
 }
 

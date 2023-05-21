@@ -4,13 +4,29 @@
 #include "BaseComponent.h"
 #include "../../physics_engine/physicsEngine.h"
 #include <lua.hpp>
+#include <memory>
+
+struct RigidBodyWrapper {
+    RigidBody* ptr;
+    PhysicsEngine* instance;
+    RigidBodyWrapper(RigidBody* _ptr, PhysicsEngine* _instance) : ptr(_ptr), instance(_instance) {
+    }
+    ~RigidBodyWrapper() {
+        instance->deleteRidigBody(ptr);
+    }
+};
 
 struct CollisionInfo {
+    static constexpr unsigned int MAX_COLLISIONS = 32;
     bool collidedAsBody1 = false;
     bool collidedAsBody2 = false;
     int ownUuid = -1;
+    std::string ownTag;
     int otherUuid1 = -1;
     int otherUuid2 = -1;
+    std::string collidedTags[MAX_COLLISIONS];
+    int collidedUuids[MAX_COLLISIONS];
+    unsigned int collisionCount = 0;
 };
 
 struct RigidBodyComponent : BaseComponent {
@@ -64,5 +80,6 @@ struct RigidBodyComponent : BaseComponent {
     std::vector<CapsuleColliderObject> capsuleColliders;
     std::vector<MeshColliderObject> meshColliders;
 
+    std::string tag;
     CollisionInfo* collisionInfo;
 };

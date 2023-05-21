@@ -662,6 +662,7 @@ void Scene::processQueues() {
     // process deletion
     while (deleteQueue.size() > 0) {
         int uuid = deleteQueue.front();
+        entities[uuidToIdx[uuid]].components.clearAll();
         removeEntityByIdx(uuidToIdx[uuid]);
         deleteQueue.pop();
     }
