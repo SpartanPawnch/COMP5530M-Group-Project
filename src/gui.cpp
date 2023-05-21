@@ -22,6 +22,9 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <rapidjson/document.h>
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/writer.h>
 
 #include "fdutil.h"
 #include "logging.h"
@@ -2356,6 +2359,43 @@ void drawStats() {
     // ImGui::End();
 }
 
+void saveUI(){
+        static assetfolder::AssetDescriptor currUIDir = {"", "",
+        assetfolder::AssetDescriptor::EFileType::INVALID};
+    currUIDir = assetfolder::getUIRootDir();
+    std::string dir = (currUIDir.path+"/Uiname.json").c_str();
+    FILE* file = fopen(dir.c_str(), "wb");
+    if (file == NULL) {
+        logging::logErr("Failed to open file {} for writing\n", dir);
+        return;
+    }
+
+    char writeBuf[BUFSIZ];
+    rapidjson::FileWriteStream osw(file, writeBuf, BUFSIZ);
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(osw);
+
+    writer.StartObject();
+    {
+        writer.Key("buttons");
+        writer.StartArray();
+        for (unsigned int i = 0; i < uiElement.buttons.size(); i++)
+        {
+            writer.StartObject();
+
+            // encode entity properties
+            writer.Key("name");
+            writer.String(uiElement.buttons[i]);
+        }
+        writer.EndArray();
+        writer.EndObject();
+        writer.Flush();
+        osw.Flush();
+        fclose(file);
+
+        logging::logInfo("Saved ui {}\n", dir);
+    }
+}
+
 inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
     static float transparency = 0.5f;
 
@@ -2506,7 +2546,11 @@ inline void drawAddUI(float mainMenuHeight, ImVec2 windowSize) {
 
         ImGui::InputText("##addCheck", addCheck, sizeof(addCheck));
 
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing);
 
+        if (ImGui::Button("Save UI")) {
+            saveUI();
+        }
     }
     ImGui::End();
 }
@@ -2643,8 +2687,6 @@ inline void drawUIPreview() {
     }
     ImGui::End();
 }
-
-
 
 void gameEditor(float mainMenuHeight, ImVec2 windowSize, GLFWwindow* window) {
     static ImGuiID dockCenter = 0;

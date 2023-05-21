@@ -98,6 +98,15 @@ namespace assetfolder {
             return AssetDescriptor{std::string(""), std::string(""),
                 AssetDescriptor::EFileType::INVALID};
 
+        return AssetDescriptor{std::string(activeDirectory) + "/ui-layouts", std::string("Uiname"),
+            AssetDescriptor::EFileType::FOLDER};
+    }
+
+        AssetDescriptor getUIRootDir() {
+        if (activeDirectory.empty())
+            return AssetDescriptor{std::string(""), std::string(""),
+                AssetDescriptor::EFileType::INVALID};
+
         return AssetDescriptor{std::string(activeDirectory) + "/levels", std::string("levels"),
             AssetDescriptor::EFileType::FOLDER};
     }
