@@ -6,6 +6,10 @@ static int baseUuid = 0;
 
 #include "../../scripting.h"
 
+int AudioSourceComponent::genUuid() {
+    return baseUuid++;
+}
+
 AudioSourceComponent::AudioSourceComponent() {
     name = "Audio Source Component";
     uuid = baseUuid++;

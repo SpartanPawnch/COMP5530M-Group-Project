@@ -4,6 +4,10 @@
 #include "../../scripting.h"
 static int baseUuid = 0;
 
+int SkeletalModelComponent::genUuid() {
+    return baseUuid++;
+}
+
 SkeletalModelComponent::SkeletalModelComponent() {
     name = "Skeletal Model Component";
     uuid = baseUuid++;

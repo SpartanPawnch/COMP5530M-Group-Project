@@ -10,6 +10,10 @@ static int baseUuid = 0;
 
 static RenderManager* renderMgr;
 
+int LightComponent::genUuid() {
+    return baseUuid++;
+}
+
 LightComponent::LightComponent() {
     uuid = baseUuid++;
     name = "Point Light Component";

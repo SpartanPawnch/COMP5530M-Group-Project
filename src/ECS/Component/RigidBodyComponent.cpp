@@ -2,6 +2,10 @@
 #include "../../scripting.h"
 static int baseUuid = 0;
 
+int RigidBodyComponent::genUuid() {
+    return baseUuid++;
+}
+
 RigidBodyComponent::RigidBodyComponent() {
     name = "RigidBody Component";
     uuid = baseUuid++;

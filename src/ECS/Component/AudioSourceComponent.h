@@ -19,6 +19,7 @@ struct AudioSourceComponent : BaseComponent {
     void startSound();
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 
     // internal
 

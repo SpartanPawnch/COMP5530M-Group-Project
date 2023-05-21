@@ -2,6 +2,10 @@
 #include "../../scripting.h"
 static int baseUuid = 0;
 
+int TransformComponent::genUuid() {
+    return baseUuid++;
+}
+
 TransformComponent::TransformComponent() {
     uuid = baseUuid++;
     name = "Transform Component";

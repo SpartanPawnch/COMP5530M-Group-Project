@@ -40,6 +40,7 @@ struct ScriptComponent : BaseComponent {
     virtual void stop() override;
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 
     std::string scriptPath;
     std::vector<ScriptArgument> args;

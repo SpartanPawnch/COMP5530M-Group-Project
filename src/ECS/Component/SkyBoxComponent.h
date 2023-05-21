@@ -29,6 +29,7 @@ struct SkyBoxComponent : BaseComponent {
     void updateTex(unsigned int side, std::string path);
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 
     SkyBoxTexture skybox;
 };

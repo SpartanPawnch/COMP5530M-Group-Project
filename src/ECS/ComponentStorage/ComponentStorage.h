@@ -65,6 +65,9 @@ struct ComponentStorage{
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
+    //generate new unique ids for components
+    void regenerateUuids();
+
     //get CompType enum based on type
     template<typename T>
     static ComponentLocation::CompType typeToCompTypeEnum();

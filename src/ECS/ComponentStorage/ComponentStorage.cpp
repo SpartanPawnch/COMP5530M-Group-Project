@@ -190,3 +190,44 @@ void ComponentStorage::pushLuaTable(void* ptr,const ComponentLocation& loc,lua_S
     lua_pushnil(state);
     return;
 }
+void ComponentStorage::regenerateUuids(){
+    for(size_t i=0;i<vecBaseComponent.size();i++){
+        vecBaseComponent[i].uuid=BaseComponent::genUuid();
+    }
+    for(size_t i=0;i<vecPlayerControllerComponent.size();i++){
+        vecPlayerControllerComponent[i].uuid=PlayerControllerComponent::genUuid();
+    }
+    for(size_t i=0;i<vecRigidBodyComponent.size();i++){
+        vecRigidBodyComponent[i].uuid=RigidBodyComponent::genUuid();
+    }
+    for(size_t i=0;i<vecScriptComponent.size();i++){
+        vecScriptComponent[i].uuid=ScriptComponent::genUuid();
+    }
+    for(size_t i=0;i<vecCameraComponent.size();i++){
+        vecCameraComponent[i].uuid=CameraComponent::genUuid();
+    }
+    for(size_t i=0;i<vecAudioSourceComponent.size();i++){
+        vecAudioSourceComponent[i].uuid=AudioSourceComponent::genUuid();
+    }
+    for(size_t i=0;i<vecModelComponent.size();i++){
+        vecModelComponent[i].uuid=ModelComponent::genUuid();
+    }
+    for(size_t i=0;i<vecSkeletalModelComponent.size();i++){
+        vecSkeletalModelComponent[i].uuid=SkeletalModelComponent::genUuid();
+    }
+    for(size_t i=0;i<vecLightComponent.size();i++){
+        vecLightComponent[i].uuid=LightComponent::genUuid();
+    }
+    for(size_t i=0;i<vecDirectionalLightComponent.size();i++){
+        vecDirectionalLightComponent[i].uuid=DirectionalLightComponent::genUuid();
+    }
+    for(size_t i=0;i<vecSkyBoxComponent.size();i++){
+        vecSkyBoxComponent[i].uuid=SkyBoxComponent::genUuid();
+    }
+    for(size_t i=0;i<vecControllerComponent.size();i++){
+        vecControllerComponent[i].uuid=ControllerComponent::genUuid();
+    }
+    for(size_t i=0;i<vecTransformComponent.size();i++){
+        vecTransformComponent[i].uuid=TransformComponent::genUuid();
+    }
+}

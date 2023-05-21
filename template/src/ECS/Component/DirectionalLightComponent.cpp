@@ -10,6 +10,10 @@ static int baseUuid = 0;
 
 static RenderManager* renderMgr;
 
+int DirectionalLightComponent::genUuid() {
+    return baseUuid++;
+}
+
 DirectionalLightComponent::DirectionalLightComponent() {
     uuid = baseUuid++;
     name = "Directional Light Component";

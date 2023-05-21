@@ -94,6 +94,7 @@ struct SkeletalModelComponent : BaseComponent {
     void readMaterials();
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 
     std::vector<std::shared_ptr<ActiveMaterial>> materials;
 

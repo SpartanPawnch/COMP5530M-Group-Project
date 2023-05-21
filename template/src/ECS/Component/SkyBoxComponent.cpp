@@ -5,6 +5,10 @@
 
 static int baseUuid = 0;
 
+int SkyBoxComponent::genUuid() {
+    return baseUuid++;
+}
+
 SkyBoxComponent::SkyBoxComponent() {
     name = "Skybox Component";
     uuid = baseUuid++;

@@ -17,4 +17,5 @@ struct LightComponent : BaseComponent {
     virtual void stop() override;
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 };

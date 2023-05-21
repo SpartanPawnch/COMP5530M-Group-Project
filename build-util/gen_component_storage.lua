@@ -106,6 +106,9 @@ headerFile:write([[
     //push lua table
     static void pushLuaTable(void* ptr, const ComponentLocation& loc, lua_State* state);
 
+    //generate new unique ids for components
+    void regenerateUuids();
+
     //get CompType enum based on type
     template<typename T>
     static ComponentLocation::CompType typeToCompTypeEnum();
@@ -269,6 +272,19 @@ sourceFile:write([[
     return;
 }
 ]])
+
+--create regenerateUuids method
+sourceFile:write([[
+void ComponentStorage::regenerateUuids(){
+]])
+for _, type in ipairs(types) do
+	sourceFile:write([[
+    for(size_t i=0;i<vec]] .. type .. [[.size();i++){
+        vec]] .. type .. "[i].uuid=" .. type .. [[::genUuid();
+    }
+]])
+end
+sourceFile:write("}\n")
 
 sourceFile:close()
 

@@ -41,4 +41,5 @@ struct PlayerControllerComponent : BaseComponent {
     void addAction();
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 };

@@ -443,12 +443,12 @@ static void handleMouseInput(GLFWwindow* window) {
         }
     }
 
-    //if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-    //    //reference https://antongerdelan.net/opengl/raycasting.html
-    //    if (ImGuizmo::IsUsing())
-    //        return;
-    //    float mouseX = renderManager->xPos - ImGui::GetWindowPos().x;
-    //    float mouseY = renderManager->yPos - ImGui::GetWindowPos().y;
+    // if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    //     //reference https://antongerdelan.net/opengl/raycasting.html
+    //     if (ImGuizmo::IsUsing())
+    //         return;
+    //     float mouseX = renderManager->xPos - ImGui::GetWindowPos().x;
+    //     float mouseY = renderManager->yPos - ImGui::GetWindowPos().y;
 
     //    //convert to NDC
     //    glm::vec3 rayNDC = glm::vec3(0.0f);
@@ -464,19 +464,20 @@ static void handleMouseInput(GLFWwindow* window) {
     //    glm::vec4 rayHomogeneous = glm::vec4(rayNDC.x, rayNDC.y, -1.0, 1.0);
 
     //    //convert to camera coordinates
-    //    
+    //
     //    glm::vec4 rayCamera = glm::inverse(renderManager->projectionMatrix) * rayHomogeneous;
     //    rayCamera = glm::vec4(rayCamera.x, rayCamera.y, -1.0, 0.0);
 
     //    //convert to world coordinates
-    //    
-    //    glm::vec3 rayWorld = glm::vec3(glm::inverse(renderManager->camera.getViewMatrix()) * rayCamera);
-    //    rayWorld = glm::normalize(rayWorld);
+    //
+    //    glm::vec3 rayWorld = glm::vec3(glm::inverse(renderManager->camera.getViewMatrix()) *
+    //    rayCamera); rayWorld = glm::normalize(rayWorld);
 
-    //    //get x and z it hits on y=0 with ray vs plane 
+    //    //get x and z it hits on y=0 with ray vs plane
     //    glm::vec3 intersectionPoint = glm::vec3(0.0f);
 
-    //    //reference 4 - Geometric Intersections for Raytracing lecture of Foundations of Modelling and Rendering
+    //    //reference 4 - Geometric Intersections for Raytracing lecture of Foundations of Modelling
+    //    and Rendering
 
     //    glm::vec3 u = glm::vec3(1.0f, .0f, .0f);
     //    glm::vec3 w = glm::vec3(.0f, .0f, 1.0f);
@@ -489,12 +490,12 @@ static void handleMouseInput(GLFWwindow* window) {
     //    glm::vec3 sLine = p - s;
     //    glm::vec3 lLine = glm::vec3(glm::dot(l, u), glm::dot(l, w), glm::dot(l, n));
 
-
     //    float t = (glm::dot((p-s),n)) / (glm::dot(l,n));
 
     //    intersectionPoint = s + l * t;
 
-    //    std::cout << "hit y" << intersectionPoint.y << " on x=" << intersectionPoint.x << " and z=" << intersectionPoint.z << std::endl;
+    //    std::cout << "hit y" << intersectionPoint.y << " on x=" << intersectionPoint.x << " and
+    //    z=" << intersectionPoint.z << std::endl;
     //}
 }
 
@@ -2144,10 +2145,14 @@ void drawMeshCollidersList(RigidBodyComponent& component) {
 }
 
 void drawComponentProps(RigidBodyComponent& component) {
-    ImGui::Text("Collided as Body 1: %s", component.collisionInfo->collidedAsBody1 ? "true" : "false");
-    ImGui::Text("Uuid of rigidbody that collided with as body 1: %d", component.collisionInfo->otherUuid1);
-    ImGui::Text("Collided as Body 2: %s", component.collisionInfo->collidedAsBody2 ? "true" : "false");
-    ImGui::Text("Uuid of rigidbody that collided with as body 2: %d", component.collisionInfo->otherUuid2);
+    ImGui::Text("Collided as Body 1: %s",
+        component.collisionInfo->collidedAsBody1 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 1: %d",
+        component.collisionInfo->otherUuid1);
+    ImGui::Text("Collided as Body 2: %s",
+        component.collisionInfo->collidedAsBody2 ? "true" : "false");
+    ImGui::Text("Uuid of rigidbody that collided with as body 2: %d",
+        component.collisionInfo->otherUuid2);
     if (ImGui::Button("Reset Collision Status")) {
         component.collisionInfo->collidedAsBody1 = false;
         component.collisionInfo->otherUuid1 = -1;
@@ -2291,7 +2296,9 @@ static void drawEntitySelector(ScriptComponent& component, int i) {
 }
 
 template <typename T> void drawComponentSelector(int& idx, const std::vector<T>& components) {
-    std::string previewStr = (idx >= 0 && idx < components.size()) ? components[idx].name : "None";
+    std::string previewStr = (idx >= 0 && idx < components.size())
+        ? components[idx].name + " #" + std::to_string(components[idx].uuid)
+        : "None";
     if (ImGui::BeginCombo("##compselector", previewStr.c_str())) {
         for (unsigned int i = 0; i < components.size(); i++) {
             ImGui::PushID(i);
@@ -2299,6 +2306,11 @@ template <typename T> void drawComponentSelector(int& idx, const std::vector<T>&
             if (ImGui::Selectable(components[i].name.c_str(), &isSelected)) {
                 idx = i;
             }
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", components[i].uuid);
+            ImGui::PopStyleColor();
+
             ImGui::PopID();
         }
         ImGui::EndCombo();
@@ -2309,8 +2321,9 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     ComponentLocation& loc = component.args[i].arg._loc;
     int idx = scene.uuidToIdx.count(loc.entityUuid) > 0 ? scene.uuidToIdx[loc.entityUuid] : -1;
     // entity selector
-    std::string previewStr =
-        (idx >= 0 && idx < scene.entities.size()) ? scene.entities[idx].name : "None";
+    std::string previewStr = (idx >= 0 && idx < scene.entities.size())
+        ? scene.entities[idx].name + " #" + std::to_string(scene.entities[idx].uuid)
+        : "None";
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
@@ -2319,6 +2332,11 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
                 loc.entityUuid = scene.entities[j].uuid;
                 idx = scene.uuidToIdx[loc.entityUuid];
             }
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, .5f, .5f, 1.f));
+            ImGui::Text(" #%i", scene.entities[j].uuid);
+            ImGui::PopStyleColor();
+
             ImGui::PopID();
         }
         ImGui::EndCombo();
@@ -2960,8 +2978,7 @@ inline void drawMaterials() {
             ImGui::Text("Name %s", mat->name.c_str());
             glm::vec3 baseColorBefore = mat->baseColor;
             ImGui::ColorEdit3("Base Color", &mat->baseColor[0]);
-            if (baseColorBefore != mat->baseColor)
-            {
+            if (baseColorBefore != mat->baseColor) {
                 materialSystem->reloadActiveMaterial(mat->name);
             }
             // texture for base color combo box from textures
@@ -2981,8 +2998,7 @@ inline void drawMaterials() {
             }
             glm::vec3 emissiveBefore = mat->emissiveColor;
             ImGui::ColorEdit3("Emissive Color", &mat->emissiveColor[0]);
-            if (emissiveBefore != mat->emissiveColor)
-            {
+            if (emissiveBefore != mat->emissiveColor) {
                 materialSystem->reloadActiveMaterial(mat->name);
             }
             std::string previewStrEmissive = "Select a texture";
@@ -3002,8 +3018,7 @@ inline void drawMaterials() {
 
             float roughnessBefore = mat->roughness;
             ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
-            if (roughnessBefore != mat->roughness)
-            {
+            if (roughnessBefore != mat->roughness) {
                 materialSystem->reloadActiveMaterial(mat->name);
             }
             std::string previewStrRoughness = "Select a texture";
@@ -3023,11 +3038,10 @@ inline void drawMaterials() {
 
             float metalnessBefore = mat->metalness;
             ImGui::SliderFloat("Metalness", &mat->metalness, 0.0f, 1.0f);
-            if (metalnessBefore != mat->metalness)
-            {
+            if (metalnessBefore != mat->metalness) {
                 materialSystem->reloadActiveMaterial(mat->name);
             }
-            
+
             std::string previewStrMetalness = "Select a texture";
             if (mat->metalnessMap.size() > 0) {
                 previewStrMetalness = mat->metalnessMap;
@@ -3045,11 +3059,10 @@ inline void drawMaterials() {
 
             float occlusionBefore = mat->occlusion;
             ImGui::SliderFloat("Occlusion", &mat->occlusion, 0.0f, 1.0f);
-            if (occlusionBefore != mat->occlusion)
-            {
+            if (occlusionBefore != mat->occlusion) {
                 materialSystem->reloadActiveMaterial(mat->name);
             }
-            
+
             std::string previewStrOcclusion = "Select a texture";
             if (mat->occlusionMap.size() > 0) {
                 previewStrOcclusion = mat->occlusionMap;

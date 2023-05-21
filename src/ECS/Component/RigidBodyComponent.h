@@ -47,6 +47,7 @@ struct RigidBodyComponent : BaseComponent {
 
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable();
+    static int genUuid();
 
     PhysicsEngine* instance;
     BodyType bodyType = BodyType::DYNAMIC;

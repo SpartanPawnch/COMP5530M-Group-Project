@@ -5,6 +5,11 @@
 #include "../../scripting.h"
 
 static int baseUuid = 0;
+
+int PlayerControllerComponent::genUuid() {
+    return baseUuid++;
+}
+
 PlayerControllerComponent::PlayerControllerComponent()
     : listeningForKey(false), listeningForKeyIndex(0) {
 

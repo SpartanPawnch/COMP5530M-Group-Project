@@ -14,6 +14,7 @@ class BaseComponent {
     virtual void start();
     virtual void update(float dt, EntityState& state);
     virtual void stop();
+    static int genUuid();
     void pushLuaTable(lua_State* state);
     static void registerLuaMetatable() {
     }

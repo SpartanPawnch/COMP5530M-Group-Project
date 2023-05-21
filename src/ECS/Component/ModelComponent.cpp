@@ -3,6 +3,10 @@
 
 static int baseUuid = 0;
 
+int ModelComponent::genUuid() {
+    return baseUuid++;
+}
+
 ModelComponent::ModelComponent() {
     name = "Model Component";
     uuid = baseUuid++;

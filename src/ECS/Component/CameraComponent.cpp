@@ -14,6 +14,10 @@ int CameraComponent::activeUuid = -1;
 
 static RenderManager* renderMgr;
 
+int CameraComponent::genUuid() {
+    return baseUuid++;
+}
+
 CameraComponent::CameraComponent() {
     name = "Camera Component";
     uuid = baseUuid++;

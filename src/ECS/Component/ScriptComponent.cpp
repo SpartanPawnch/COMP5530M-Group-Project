@@ -9,6 +9,10 @@
 
 static int baseUuid = 0;
 
+int ScriptComponent::genUuid() {
+    return baseUuid++;
+}
+
 ScriptComponent::ScriptComponent() {
     name = "Script Component";
     uuid = baseUuid++;
