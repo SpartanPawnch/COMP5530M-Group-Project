@@ -92,8 +92,8 @@ vec3 computeBlinnPhongLighting(int lightIndex)
 	float nvClamped = max(dot(normal, viewDir), 0.0); 
 	float nlClamped = max(dot(normal, lightDir), 0.0);
 
-	float A = 2 * nhClamped * nvClamped /clamp(dot(viewDir, halfVec),1e-9,1.f);
-	float B = 2 * nhClamped * nlClamped /clamp(dot(viewDir, halfVec),1e-9,1.f);
+	float A = 2 * nhClamped * nvClamped / dot(viewDir, halfVec);
+	float B = 2 * nhClamped * nlClamped / dot(viewDir, halfVec);
 	float G = min(min(A,B),1.0);
 	return G;
  }
@@ -126,7 +126,7 @@ float G(vec3 n, vec3 l,vec3 v,vec3 h){
 
 vec3 fr(vec3 h,vec3 l,vec3 v,vec3 n){
 	//fr = Ldiffuse + (D(n,h)F(l,h)G(n,l,v))/(4(n*v)clamped (n*l)clamped)
-	return  vec3(Ldiffuse(h,v) + (D(n,h)*F(h,v)*G(n,l,v,h))/(4.0*max(0.0,clamp(dot(n,v),1e-9,1.f))* max(0.0,clamp(dot(n,l),1e-9,1.f))+0.0001));
+	return  vec3(Ldiffuse(h,v) + (D(n,h)*F(h,v)*G(n,l,v,h))/(4.0*max(0.0,dot(n,v))* max(0.0,dot(n,l))+0.0001));
 }
 
 vec3 computePBRLighting(int lightIndex, vec3 n, vec3 v){

@@ -17,7 +17,6 @@ extern GLuint entIDFramebuffer;
 extern int viewportTexWidth;
 extern int viewportTexHeight;
 extern Scene scene;
-
 // define UI structure
 void prepUI(GLFWwindow* window, const char* executablePath, float dt, int viewportWidth,
     int viewportHeight);

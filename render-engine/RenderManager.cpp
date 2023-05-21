@@ -90,7 +90,7 @@ void RenderManager::addMeshToPipeline(std::vector<Pipeline> pipeline, VertexBuff
     IndexBuffer iBuffer, GLuint VAO) {
     for (unsigned int i = 0; i < pipeline.size(); i++) {
         if (PipelineMeshBufferMap.find(pipeline[i]) == PipelineMeshBufferMap.end()) {
-            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{ Buffer(vBuffer, iBuffer) };
+            PipelineMeshBufferMap[pipeline[i]] = std::vector<Buffer>{Buffer(vBuffer, iBuffer)};
         }
         else {
             PipelineMeshBufferMap[pipeline[i]].push_back(Buffer(vBuffer, iBuffer));
@@ -232,6 +232,13 @@ void RenderManager::loadScene() {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // load the dummy texture for runtime only.
+    // Why do we have like 10 different init functions for RenderManager?
+
+#ifndef ONO_ENGINE_ONLY
+    pixelImageDescriptor = loadTexture("assets/pixel.png", "assets/pixel.png");
+#endif
 }
 
 void RenderManager::renderScene(Camera* camera, GLFWwindow* window) {
@@ -321,7 +328,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-        !(aspect != aspect))
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -471,24 +478,31 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     // set per-light uniforms
                     for (std::size_t i = 0; i < directionalLights.size(); i++) {
                         glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightPosID(i),
-                            directionalLights[i].getPosition().x, directionalLights[i].getPosition().y,
+                            directionalLights[i].getPosition().x,
+                            directionalLights[i].getPosition().y,
                             directionalLights[i].getPosition().z);
                         glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightAmbientID(i),
-                            directionalLights[i].getAmbient().x, directionalLights[i].getAmbient().y,
+                            directionalLights[i].getAmbient().x,
+                            directionalLights[i].getAmbient().y,
                             directionalLights[i].getAmbient().z);
                         glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightDiffuseID(i),
-                            directionalLights[i].getDiffuse().x, directionalLights[i].getDiffuse().y,
+                            directionalLights[i].getDiffuse().x,
+                            directionalLights[i].getDiffuse().y,
                             directionalLights[i].getDiffuse().z);
                         glUniform3f(getPipeline(TexturePipeline)->getDirectionalLightSpecularID(i),
-                            directionalLights[i].getSpecular().x, directionalLights[i].getSpecular().y,
+                            directionalLights[i].getSpecular().x,
+                            directionalLights[i].getSpecular().y,
                             directionalLights[i].getSpecular().z);
                     }
 
                     std::shared_ptr<ActiveMaterial> meshMat =
                         scene.entities[i].components.vecModelComponent[j].materials[k];
 
-                    glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(), meshMat->baseColor.x, meshMat->baseColor.y, meshMat->baseColor.z);
-                    glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(), meshMat->emissiveColor.x, meshMat->emissiveColor.y, meshMat->emissiveColor.z);
+                    glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(),
+                        meshMat->baseColor.x, meshMat->baseColor.y, meshMat->baseColor.z);
+                    glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(),
+                        meshMat->emissiveColor.x, meshMat->emissiveColor.y,
+                        meshMat->emissiveColor.z);
 
                     glUniform1f(getPipeline(TexturePipeline)->getRoughnessID(), meshMat->roughness);
                     glUniform1f(getPipeline(TexturePipeline)->getMetalnessID(), meshMat->metalness);
@@ -501,7 +515,6 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glUniform1i(getPipeline(TexturePipeline)->getalphaSamplerLocationID(), 4);
                     glUniform1i(getPipeline(TexturePipeline)->getemissiveSamplerLocationID(), 5);
                     glUniform1i(getPipeline(TexturePipeline)->getocclusionSamplerLocationID(), 6);
-
 
                     // todo: send 1x1 white image on the elses of all
                     glActiveTexture(GL_TEXTURE0);
@@ -547,8 +560,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                         glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                     glActiveTexture(GL_TEXTURE7);
-                    glBindTexture(GL_TEXTURE_CUBE_MAP,
-                        skyBoxTexID);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexID);
 
                     glActiveTexture(GL_TEXTURE0);
                 }
@@ -643,7 +655,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
         }
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
-            j++) {
+             j++) {
             auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
             if (!desc) {
                 continue;
@@ -651,15 +663,17 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
             for (unsigned int k = 0; k < desc->getMeshCount(); k++) {
                 glUniformMatrix4fv(getPipeline(AnimatedPipeline)->getBonesMatrix(), 100, GL_FALSE,
                     &scene.entities[i]
-                    .components.vecSkeletalModelComponent[j]
-                    .transformMatrices[0][0][0]);
+                         .components.vecSkeletalModelComponent[j]
+                         .transformMatrices[0][0][0]);
 
                 // glBindTexture(GL_TEXTURE_2D, desc->getTexture(k));
                 std::shared_ptr<ActiveMaterial> meshMat =
                     scene.entities[i].components.vecSkeletalModelComponent[j].materials[k];
 
-                glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(), meshMat->baseColor.x, meshMat->baseColor.y, meshMat->baseColor.z);
-                glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(), meshMat->emissiveColor.x, meshMat->emissiveColor.y, meshMat->emissiveColor.z);
+                glUniform3f(getPipeline(TexturePipeline)->getBaseColorID(), meshMat->baseColor.x,
+                    meshMat->baseColor.y, meshMat->baseColor.z);
+                glUniform3f(getPipeline(TexturePipeline)->getEmissiveColorID(),
+                    meshMat->emissiveColor.x, meshMat->emissiveColor.y, meshMat->emissiveColor.z);
 
                 glUniform1f(getPipeline(TexturePipeline)->getRoughnessID(), meshMat->roughness);
                 glUniform1f(getPipeline(TexturePipeline)->getMetalnessID(), meshMat->metalness);
@@ -717,8 +731,7 @@ void RenderManager::renderEntities(const Scene& scene, Camera* camera, int width
                     glBindTexture(GL_TEXTURE_2D, pixelImageDescriptor->texId);
 
                 glActiveTexture(GL_TEXTURE7);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,
-                    skyBoxTexID);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexID);
 
                 glActiveTexture(GL_TEXTURE0);
 
@@ -881,7 +894,7 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
             reconstructed_color.y, reconstructed_color.z);
 
         for (unsigned int j = 0; j < scene.entities[i].components.vecSkeletalModelComponent.size();
-            j++) {
+             j++) {
             auto desc = scene.entities[i].components.vecSkeletalModelComponent[j].modelDescriptor;
             if (!desc) {
                 continue;
@@ -890,8 +903,8 @@ void RenderManager::renderEntitiesID(const Scene& scene, Camera* camera, int wid
                 glUniformMatrix4fv(getPipeline(AnimationIDPipeline)->getBonesMatrix(), 100,
                     GL_FALSE,
                     &scene.entities[i]
-                    .components.vecSkeletalModelComponent[j]
-                    .transformMatrices[0][0][0]);
+                         .components.vecSkeletalModelComponent[j]
+                         .transformMatrices[0][0][0]);
 
                 glBindVertexArray(desc->getVAO(k));
                 glDrawElements(GL_TRIANGLES, desc->getIndexCount(k), GL_UNSIGNED_INT, 0);
@@ -906,7 +919,7 @@ void RenderManager::renderSkybox(const Scene& scene, Camera* camera, int width, 
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-        !(aspect != aspect))
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -942,7 +955,7 @@ void RenderManager::renderGrid(Camera* camera, int width, int height) {
     viewMatrix = camera->getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-        !(aspect != aspect))
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -955,7 +968,7 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
     viewMatrix = camera.getViewMatrix();
     float aspect = float(width) / height;
     aspect = (glm::abs(aspect - std::numeric_limits<float>::epsilon()) > static_cast<float>(0) &&
-        !(aspect != aspect))
+                 !(aspect != aspect))
         ? aspect
         : 1.f;
 
@@ -1031,10 +1044,10 @@ void RenderManager::renderColliders(const Scene& scene, int width, int height) {
                 glUniformMatrix4fv(getPipeline(CapsuleColliderPipeline)->getModelID(), 1, false,
                     &modelMatrix[0][0]);
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
-                    "radius"),
+                                "radius"),
                     rigidBody.capsuleColliders[k].colliderShape->getRadius());
                 glUniform1f(glGetUniformLocation(getPipeline(CapsuleColliderPipeline)->getProgram(),
-                    "height"),
+                                "height"),
                     rigidBody.capsuleColliders[k].colliderShape->getHeight());
                 glBindVertexArray(dummyVAO);
                 glDrawArrays(GL_LINES, 0, 1208);
@@ -1048,7 +1061,7 @@ void RenderManager::renderCamPreview(const Scene& scene, int width, int height) 
     if (scene.selectedEntity) {
         modelMatrix = scene.selectedEntity->state.runtimeTransform;
         for (unsigned int i = 0; i < scene.selectedEntity->components.vecCameraComponent.size();
-            i++) {
+             i++) {
             CameraComponent& cam = scene.selectedEntity->components.vecCameraComponent[i];
             float aspect = float(width) / height;
             aspect =

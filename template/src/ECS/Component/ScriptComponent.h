@@ -24,6 +24,8 @@ struct ScriptArgument {
         NONE,
         ARGTYPE_MAX
     };
+    static constexpr int SELF = -2;
+
     std::string stringBuf; // added separately to avoid compile issues
     void* ref; // runtime ref to entity or component
 

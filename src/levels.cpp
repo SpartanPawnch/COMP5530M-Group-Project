@@ -446,7 +446,8 @@ void loadLevel(const char* path, Scene& scene) {
                 }
 
                 // Directional Light Component
-                else if (strcmp(jsonComponent["type"].GetString(), "DirectionalLightComponent") == 0) {
+                else if (strcmp(jsonComponent["type"].GetString(), "DirectionalLightComponent") ==
+                    0) {
                     DirectionalLightComponent light(name, uuid);
 
                     light.direction = glm::vec3(jsonComponent["direction"][0].GetFloat(),
@@ -682,8 +683,10 @@ void loadLevel(const char* path, Scene& scene) {
         }
     }
     for (size_t i = 0; i < scene.entities.size(); i++) {
-        for (size_t j = 0; j < scene.entities[i].components.vecDirectionalLightComponent.size(); j++) {
-            scene.entities[i].components.vecDirectionalLightComponent[j].update(.0f, scene.entities[i].state);
+        for (size_t j = 0; j < scene.entities[i].components.vecDirectionalLightComponent.size();
+             j++) {
+            scene.entities[i].components.vecDirectionalLightComponent[j].update(.0f,
+                scene.entities[i].state);
         }
     }
 
@@ -701,6 +704,11 @@ static int luaEnqueueLevel(lua_State* state) {
     enqueuedLevel = std::string(luaL_tolstring(state, 1, nullptr));
     return 0;
 }
+
+void enqueueLevel(const char* path) {
+    enqueuedLevel = std::string(path);
+}
+
 void registerLevelFunctionsLua() {
     scripting::beginModule(1);
     scripting::registerModuleFunction("enqueueLevel", &luaEnqueueLevel);

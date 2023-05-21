@@ -405,9 +405,11 @@ void Scene::updatePositions() {
 }
 
 void Scene::updateReferences() {
-    for (unsigned int i = 0; i < entities.size(); i++) {
+    for (size_t i = 0; i < entities.size(); i++) {
         entities[i].state.uuid = entities[i].uuid;
+    }
 
+    for (unsigned int i = 0; i < entities.size(); i++) {
         std::vector<ScriptComponent>& scripts = entities[i].components.vecScriptComponent;
         for (unsigned int j = 0; j < scripts.size(); j++) {
             for (unsigned int k = 0; k < scripts[j].args.size(); k++) {
@@ -422,13 +424,22 @@ void Scene::updateReferences() {
                 // update component pointer
                 else if (scripts[j].args[k].type == ScriptArgument::COMPONENT) {
                     ComponentLocation& loc = scripts[j].args[k].arg._loc;
+                    int idx;
+                    // handle SELF entry
+                    if (loc.entityUuid == ScriptArgument::SELF) {
+                        idx = i;
+                    }
                     // handle invalid entity
-                    if (uuidToIdx.count(loc.entityUuid) == 0) {
+                    else if (uuidToIdx.count(loc.entityUuid) == 0) {
                         scripts[j].args[k].ref = nullptr;
                         continue;
                     }
-                    scripts[j].args[k].ref =
-                        entities[uuidToIdx[loc.entityUuid]].components.getProtectedPtr(loc);
+                    // handle normal entry
+                    else {
+                        idx = uuidToIdx[loc.entityUuid];
+                    }
+
+                    scripts[j].args[k].ref = entities[idx].components.getProtectedPtr(loc);
                 }
             }
         }
@@ -641,6 +652,8 @@ void Scene::processQueues() {
                     src.capsuleColliders[j].height);
             }
         }
+
+        copy.components.startAll();
 
         addEntity(copy);
         copyQueue.pop();

@@ -25,26 +25,24 @@ void PhysicsEvents::onContact(const CollisionCallback::CallbackData& callbackDat
             std::string t1 = "not found";
             std::string t2 = "not found";
 
-            if (type1 == BodyType::DYNAMIC)
-                t1 = "Dynamic";
-            else if (type1 == BodyType::KINEMATIC)
-                t1 = "kinematic";
-            else if (type1 == BodyType::STATIC)
-                t1 = "static";
+            // if (type1 == BodyType::DYNAMIC)
+            //     t1 = "Dynamic";
+            // else if (type1 == BodyType::KINEMATIC)
+            //     t1 = "kinematic";
+            // else if (type1 == BodyType::STATIC)
+            //     t1 = "static";
+            //
+            // if (type2 == BodyType::DYNAMIC)
+            //     t2 = "Dynamic";
+            // else if (type2 == BodyType::KINEMATIC)
+            //     t2 = "kinematic";
+            // else if (type2 == BodyType::STATIC)
+            //     t2 = "static";
+            //
+            // std::cout << t1 << " collided with " << t2 << std::endl;
 
-            if (type2 == BodyType::DYNAMIC)
-                t2 = "Dynamic";
-            else if (type2 == BodyType::KINEMATIC)
-                t2 = "kinematic";
-            else if (type2 == BodyType::STATIC)
-                t2 = "static";
-
-            std::cout << t1 << " collided with " << t2 << std::endl;
-
-            CollisionInfo* body1 =
-                static_cast<CollisionInfo*>(rigidBody1->getUserData());
-            CollisionInfo* body2 =
-                static_cast<CollisionInfo*>(rigidBody2->getUserData());
+            CollisionInfo* body1 = static_cast<CollisionInfo*>(rigidBody1->getUserData());
+            CollisionInfo* body2 = static_cast<CollisionInfo*>(rigidBody2->getUserData());
 
             if (body1 != nullptr && body2 != nullptr) {
                 body1->collidedAsBody1 = true;

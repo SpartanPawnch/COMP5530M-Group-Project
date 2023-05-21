@@ -64,6 +64,7 @@ add_executable(
  	src/asset_import/model.cpp
 	render-engine/LightSource.h render-engine/LightSource.cpp
 	src/ECS/Component/SkeletalModelComponent.cpp src/model_import/animation.cpp 
+	src/ECS/Component/DirectionalLightComponent.cpp
 	src/model_import/bone.cpp src/asset_import/animation.cpp
     src/asset_import/materials.cpp src/asset_import/materials.h
     src/physics_engine/physicsEngine.cpp src/ECS/Component/RigidBodyComponent.cpp 

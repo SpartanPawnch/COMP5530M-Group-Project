@@ -5,6 +5,8 @@
 
 void registerLevelFunctionsLua();
 
+void enqueueLevel(const char* path);
+
 // load level from manifest in path
 void loadLevel(const char* path, Scene& scene);
 void updateLevels(Scene& scene);

@@ -261,7 +261,7 @@ void createProj(const std::string& path) {
         currAssetFolder = assetfolder::getAssetsRootDir();
         std::string level = loadProjectFile((path + "/project.json").c_str());
         if (!level.empty())
-            loadLevel((activePath + "/" + level).c_str(), scene);
+            enqueueLevel((activePath + "/" + level).c_str());
 
         queryAssetsFolder = true;
         queryLevelsFolder = true;
@@ -2299,6 +2299,7 @@ template <typename T> void drawComponentSelector(int& idx, const std::vector<T>&
     std::string previewStr = (idx >= 0 && idx < components.size())
         ? components[idx].name + " #" + std::to_string(components[idx].uuid)
         : "None";
+
     if (ImGui::BeginCombo("##compselector", previewStr.c_str())) {
         for (unsigned int i = 0; i < components.size(); i++) {
             ImGui::PushID(i);
@@ -2324,7 +2325,21 @@ static void drawComponentSelectorOuter(ScriptComponent& component, int i) {
     std::string previewStr = (idx >= 0 && idx < scene.entities.size())
         ? scene.entities[idx].name + " #" + std::to_string(scene.entities[idx].uuid)
         : "None";
+
+    if (loc.entityUuid == ScriptArgument::SELF) {
+        previewStr = "SELF";
+        idx = int(scene.selectedEntity - &scene.entities[0]);
+    }
+
     if (ImGui::BeginCombo("##entityselector", previewStr.c_str())) {
+        ImGui::PushID(-2);
+        bool isSelected = loc.entityUuid == ScriptArgument::SELF;
+        if (ImGui::Selectable("SELF", &isSelected)) {
+            loc.entityUuid = ScriptArgument::SELF;
+            idx = int(scene.selectedEntity - &scene.entities[0]);
+        }
+        ImGui::PopID();
+
         for (unsigned int j = 0; j < scene.entities.size(); j++) {
             ImGui::PushID(j);
             bool isSelected = loc.entityUuid == scene.entities[j].uuid;

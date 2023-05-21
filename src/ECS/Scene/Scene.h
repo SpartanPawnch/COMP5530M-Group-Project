@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
+#include <mutex>
 
 #include "../Entity/BaseEntity.h"
 #include "../Component/BaseComponent.h"
