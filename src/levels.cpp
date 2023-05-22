@@ -122,13 +122,13 @@ void loadLevel(const char* path, Scene& scene) {
             mat.metalness = jsonMaterials[i]["metalness"].GetFloat();
             mat.occlusion = jsonMaterials[i]["occlusion"].GetFloat();
 
-            mat.baseColorMap = jsonMaterials[i]["baseColorMap"].GetString();
-            mat.roughnessMap = jsonMaterials[i]["roughnessMap"].GetString();
-            mat.metalnessMap = jsonMaterials[i]["metalnessMap"].GetString();
-            mat.normalMap = jsonMaterials[i]["normalMap"].GetString();
-            mat.alphaMap = jsonMaterials[i]["alphaMap"].GetString();
-            mat.emissiveMap = jsonMaterials[i]["emissiveMap"].GetString();
-            mat.occlusionMap = jsonMaterials[i]["occlusionMap"].GetString();
+            mat.baseColorMap = projRoot + jsonMaterials[i]["baseColorMap"].GetString();
+            mat.roughnessMap = projRoot + jsonMaterials[i]["roughnessMap"].GetString();
+            mat.metalnessMap = projRoot + jsonMaterials[i]["metalnessMap"].GetString();
+            mat.normalMap = projRoot + jsonMaterials[i]["normalMap"].GetString();
+            mat.alphaMap = projRoot + jsonMaterials[i]["alphaMap"].GetString();
+            mat.emissiveMap = projRoot + jsonMaterials[i]["emissiveMap"].GetString();
+            mat.occlusionMap = projRoot + jsonMaterials[i]["occlusionMap"].GetString();
 
             matInstance->createMaterialDirectly(mat);
         }
@@ -383,12 +383,12 @@ void loadLevel(const char* path, Scene& scene) {
                 else if (strcmp(jsonComponent["type"].GetString(), "SkyBoxComponent") == 0) {
                     SkyBoxComponent sk(name, uuid);
 
-                    sk.updateTex(0, jsonComponent["right"].GetString());
-                    sk.updateTex(1, jsonComponent["left"].GetString());
-                    sk.updateTex(2, jsonComponent["top"].GetString());
-                    sk.updateTex(3, jsonComponent["bottom"].GetString());
-                    sk.updateTex(4, jsonComponent["back"].GetString());
-                    sk.updateTex(5, jsonComponent["front"].GetString());
+                    sk.updateTex(0, projRoot + jsonComponent["right"].GetString());
+                    sk.updateTex(1, projRoot + jsonComponent["left"].GetString());
+                    sk.updateTex(2, projRoot + jsonComponent["top"].GetString());
+                    sk.updateTex(3, projRoot + jsonComponent["bottom"].GetString());
+                    sk.updateTex(4, projRoot + jsonComponent["back"].GetString());
+                    sk.updateTex(5, projRoot + jsonComponent["front"].GetString());
 
                     baseEntity.components.addComponent(sk);
                 }
@@ -821,22 +821,22 @@ static void saveComponent(const SkyBoxComponent& component,
     writer.String("SkyBoxComponent");
 
     writer.Key("right");
-    writer.String(component.skybox.faces[0].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[0].path.c_str()).c_str());
 
     writer.Key("left");
-    writer.String(component.skybox.faces[1].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[1].path.c_str()).c_str());
 
     writer.Key("top");
-    writer.String(component.skybox.faces[2].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[2].path.c_str()).c_str());
 
     writer.Key("bottom");
-    writer.String(component.skybox.faces[3].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[3].path.c_str()).c_str());
 
     writer.Key("back");
-    writer.String(component.skybox.faces[4].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[4].path.c_str()).c_str());
 
     writer.Key("front");
-    writer.String(component.skybox.faces[5].path.c_str());
+    writer.String(assetfolder::getRelativePath(component.skybox.faces[5].path.c_str()).c_str());
 
     writer.EndObject();
 }
@@ -1638,19 +1638,19 @@ void saveLevel(const char* path, const Scene& scene) {
             writer.Double(mat.second.occlusion);
 
             writer.Key("baseColorMap");
-            writer.String(mat.second.baseColorMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.baseColorMap.c_str()).c_str());
             writer.Key("roughnessMap");
-            writer.String(mat.second.roughnessMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.roughnessMap.c_str()).c_str());
             writer.Key("metalnessMap");
-            writer.String(mat.second.metalnessMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.metalnessMap.c_str()).c_str());
             writer.Key("normalMap");
-            writer.String(mat.second.normalMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.normalMap.c_str()).c_str());
             writer.Key("alphaMap");
-            writer.String(mat.second.alphaMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.alphaMap.c_str()).c_str());
             writer.Key("emissiveMap");
-            writer.String(mat.second.emissiveMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.emissiveMap.c_str()).c_str());
             writer.Key("occlusionMap");
-            writer.String(mat.second.occlusionMap.c_str());
+            writer.String(assetfolder::getRelativePath(mat.second.occlusionMap.c_str()).c_str());
 
             writer.EndObject();
         }

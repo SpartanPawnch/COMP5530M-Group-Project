@@ -177,6 +177,7 @@ int main() {
         }
 
         scene.processQueues();
+        updateLevels(scene);
 
         // get window dimensions
         int width, height;
