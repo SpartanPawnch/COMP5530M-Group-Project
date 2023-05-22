@@ -1,6 +1,9 @@
 #include "RigidBodyComponent.h"
 
 static int baseUuid = 0;
+Sleep* sleep = new Sleep();
+RandomWalk* randomW = new RandomWalk();
+Patrol* patrol = new Patrol();
 
 RigidBodyComponent::RigidBodyComponent() {
     name = "Skybox Component";
@@ -8,11 +11,15 @@ RigidBodyComponent::RigidBodyComponent() {
     instance = PhysicsEngine::getInstance();
     assert(rigidBody == nullptr);
     rigidBody = instance->createRigidBody();
+    StateMachine sm;
+    stateMachine = new StateMachine(new baseState());
 }
 RigidBodyComponent::RigidBodyComponent(const std::string& _name, const int _uuid) {
     name = _name;
     uuid = _uuid;
     baseUuid = std::max(baseUuid, _uuid + 1);
+    StateMachine sm;
+    stateMachine = new StateMachine(new baseState());
 }
 void RigidBodyComponent::start() {
    /* PhysicsEngine* instance = PhysicsEngine::getInstance();
@@ -284,17 +291,22 @@ void RigidBodyComponent::setType(BodyType type) {
 
 void RigidBodyComponent::setAIState(AI_STATES state) {
 	if (rigidBody != nullptr) {
+        RandomWalk* rm;
+        Patrol* pat;
+        Sleep* sleep2;
         //initialise with sleep.
-        StateMachine stateMachine;
 		switch (state) {
 		case(AI_STATES::RANDOM):
-			stateMachine.setState(new RandomWalk(&stateMachine));
+            rm = new RandomWalk();
+			stateMachine->setState(rm);
             break;
         case(AI_STATES::PATROL):
-            stateMachine.setState(new Patrol(&stateMachine));
+            pat = new Patrol();
+            stateMachine->setState(pat);
             break;
         case(AI_STATES::SLEEP):
-            stateMachine.setState(new Sleep(&stateMachine));
+            sleep2 = new Sleep();
+            stateMachine->setState(sleep2);
             break;
 		}
 	}
@@ -345,8 +357,8 @@ void RigidBodyComponent::performRandomMovement()
         //random x,y direction.
         //random float: https://stackoverflow.com/questions/686353/random-float-number-generation
         float x = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;
-        float y = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;
-        Vector3 force(x, y, 0.0);
+        float z = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;
+        Vector3 force(x, 0, z);
         rigidBody->applyLocalForceAtCenterOfMass(force);
         //add here. add rotation manually.
     }
@@ -457,5 +469,24 @@ void RigidBodyComponent::createExplosion(Vector3 pos, decimal radius, decimal fo
             i->applyLocalForceAtCenterOfMass(force * dir);
         }
 
+    }
+}
+
+
+State* RigidBodyComponent::getStateMachineState() {
+    if (stateMachine != nullptr)
+        return stateMachine->getState();
+}
+
+void RigidBodyComponent::performStateChange()
+{
+    if (stateMachine != nullptr)
+    {
+        State* state = stateMachine->getState();
+        if (state)
+        {
+            state->updateState(rigidBody);
+        }
+            
     }
 }

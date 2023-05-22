@@ -11,9 +11,7 @@
 struct RigidBodyComponent : BaseComponent {
     RigidBodyComponent();
     RigidBodyComponent(const std::string& name, const int uuid);
-    ~RigidBodyComponent() {
-        
-    }
+    ~RigidBodyComponent() {}
     void start() override;
     void update(float dt, EntityState& state) override;
     void stop() override;
@@ -68,4 +66,6 @@ struct RigidBodyComponent : BaseComponent {
     Vector3 findDirection(Vector3 d);
     void moveTowardsABodyForce(RigidBody* dst);
     void createExplosion(Vector3 pos, decimal radius, decimal force);
+    State* getStateMachineState();
+    void performStateChange();
 };
