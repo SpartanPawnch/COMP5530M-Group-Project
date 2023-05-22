@@ -102,6 +102,15 @@ namespace assetfolder {
             AssetDescriptor::EFileType::FOLDER};
     }
 
+    AssetDescriptor getUIRootDir() {
+        if (activeDirectory.empty())
+            return AssetDescriptor{std::string(""), std::string(""),
+                AssetDescriptor::EFileType::INVALID};
+
+        return AssetDescriptor{std::string(activeDirectory) + "/ui-layouts",
+            std::string("ui-layouts"), AssetDescriptor::EFileType::FOLDER};
+    }
+
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res) {
         assert(dir.type == AssetDescriptor::EFileType::FOLDER);
         res.resize(0);
