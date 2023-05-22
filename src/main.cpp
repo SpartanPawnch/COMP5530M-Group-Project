@@ -32,15 +32,19 @@
 #include "model_import/model.h"
 #include "physics_engine/physicsEngine.h"
 #include "../render-engine/RenderManager.h"
+#include "ai/aiHelper.h"
 
 RenderManager* renderManager;
 MaterialSystem* materialSystem;
 PhysicsEngine* physicsEngine;
+AIHelper* aiHelper;
 
 // set renderEngine instance to nullptr initially
 RenderManager* RenderManager::instance = nullptr;
 MaterialSystem* MaterialSystem::instance = nullptr;
 PhysicsEngine* PhysicsEngine::instance = nullptr;
+AIHelper* AIHelper::instance = nullptr;
+
 
 int main() {
     // switch to correct working directory - platform specific
@@ -162,6 +166,7 @@ int main() {
 
         if (physicsEngine->isSimulating) {
             physicsEngine->world->update(current_time - previous_time);
+            aiHelper->GetInstance()->updateRigidBodies(scene);
 
             renderManager->movePhysicsEntities(scene, &renderManager->camera, viewportTexWidth,
                 viewportTexHeight);

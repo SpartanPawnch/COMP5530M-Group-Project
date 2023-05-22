@@ -72,16 +72,17 @@ public:
 
 	std::vector<RigidBody*> rigidBodies;
 	//moved the following functions to rigidBodyComponent
-	//void performRandomMovement(RigidBody* rigidBody);
-	//actor change orientation.
-	//Quaternion getRotationBasedOnForce(Vector3 force);
-	//void findClosestRigidBody(RigidBody* dst, decimal radius, RigidBody* src);
-	//void goTowardsRigidBody(RigidBody* close);
-	//Vector3 findDirection(Vector3 src, Vector3 d);
-	//void moveTowardsABody(RigidBody* src, RigidBody* dst, decimal linearVelocity);
-	//void moveTowardsABodyForce(RigidBody* src, RigidBody* dst);
-	//void createExplosion(Vector3 pos, decimal radius, decimal force);
+	
 
 };
 
 
+void performRandomMovement(RigidBody* rigidBody);
+//actor change orientation.
+Quaternion getRotationBasedOnForce(Vector3 force);
+void findClosestRigidBody(RigidBody* dst, decimal radius, RigidBody* src);
+void goTowardsRigidBody(RigidBody* close);
+Vector3 findDirection(Vector3 src, Vector3 d);
+void moveTowardsABody(RigidBody* src, RigidBody* dst, decimal linearVelocity);
+void moveTowardsABodyForce(RigidBody* src, RigidBody* dst);
+void createExplosion(Vector3 pos, decimal radius, decimal force);

@@ -1,13 +1,15 @@
 #include "ai.h"
 
-StateMachine::StateMachine() :
-	mCurrentState(nullptr)
+
+
+StateMachine::StateMachine() 
 {
+	
 };
 
-StateMachine::StateMachine(State* state) :
-	mCurrentState(state)
+StateMachine::StateMachine(State* state) 
 {
+	mCurrentState = new baseState();
 }
 
 void StateMachine::setState(State* state)
@@ -15,63 +17,92 @@ void StateMachine::setState(State* state)
 	//initialisation crash
 	if (mCurrentState)
 		mCurrentState->exitState();
-	mCurrentState = state;
+	mCurrentState = std::move(state);
 	mCurrentState->enterState();
 }
 
-void StateMachine::updateMachine()
+void StateMachine::updateMachine(RigidBody* rigidBody)
 {
-	mCurrentState->updateState();
+	mCurrentState->updateState(rigidBody);
 }
 
-State::State(StateMachine* sm) :
-	mStateMachine(sm) {};
 
-RandomWalk::RandomWalk(StateMachine* sm) :
-	mStateMachine(sm) {};
-
-Patrol::Patrol(StateMachine* sm) :
-	mStateMachine(sm) {};
-
-Sleep::Sleep(StateMachine* sm) :
-	mStateMachine(sm) {};
 
 void RandomWalk::exitState()
 {
-	logging::logInfo("%s ", "exit randomWalk");
+	logging::logInfo("exit randomWalk");
 }
-void RandomWalk::updateState()
+void RandomWalk::updateState(RigidBody* rigidBody)
 {
-	logging::logInfo("%s ", "update randomWalk");
+	performRandomMovement(rigidBody);
 }
 void RandomWalk::enterState()
 {
-	logging::logInfo("%s ", "entered randomWalk");
+	logging::logInfo("entered randomWalk");
 }
 
 
 void Patrol::exitState()
 {
-	logging::logInfo("%s ", "exit Patrol");
+	logging::logInfo("exit Patrol");
 }
-void Patrol::updateState()
+void Patrol::updateState(RigidBody* rigidBody)
 {
-	logging::logInfo("%s ", "update Patrol");
+	RigidBody* dst;
+	findClosestRigidBody(dst, 10.0f, rigidBody);
+	moveTowardsABodyForce(rigidBody, dst);
 }
 void Patrol::enterState()
 {
-	logging::logInfo("%s ", "entered Patrol");
+	logging::logInfo("entered Patrol");
 }
 
 void Sleep::exitState()
 {
-	logging::logInfo("%s ", "exit Patrol");
+	logging::logInfo("exit Patrol");
 }
-void Sleep::updateState()
+void Sleep::updateState(RigidBody* rigidBody)
 {
-	logging::logInfo("%s ", "update Patrol");
+	rigidBody->setLinearVelocity(Vector3(0.0f, 0.0f, 0.0f));
+	rigidBody->enableGravity(0);
+	rigidBody->setAngularVelocity(Vector3(0.0f, 0.0f, 0.0f));
 }
 void Sleep::enterState()
 {
-	logging::logInfo("%s ", "entered Patrol");
+	logging::logInfo("entered Sleep");
+}
+
+
+baseState::baseState() :
+	stateName("base") {};
+
+void baseState::exitState()
+{
+	logging::logInfo("exit baseState");
+}
+void baseState::updateState(RigidBody* rigidBody)
+{
+	
+}
+void baseState::enterState()
+{
+	logging::logInfo("entered baseState");
+	stateName = "base";
+}
+
+
+
+Sleep::Sleep()
+{
+	stateName = "Sleep";
+}
+
+Patrol::Patrol()
+{
+	stateName = "Patrol";
+}
+
+RandomWalk::RandomWalk()
+{
+	stateName = "Random";
 }

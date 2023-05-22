@@ -21,14 +21,14 @@ enum class AI_STATES
 
 class State
 {
-protected:
-	StateMachine* mStateMachine = nullptr;
+
+	
 public:
-	State() :mStateMachine(nullptr) {};
-	State(StateMachine* sm);
+	State() {};
 	virtual void exitState() = 0;
-	virtual void updateState() = 0; //this function contains the bulk of our code.
+	virtual void updateState(RigidBody* rigidBody) = 0; //this function contains the bulk of our code.
 	virtual void enterState() = 0;
+	std::string stateName;
 	//not really needed
 };
 
@@ -42,42 +42,54 @@ public:
 	void setState(State* state);
 	State* getState() { return mCurrentState; }
 	//switch to next state;
-	void updateMachine();
+	void updateMachine(RigidBody* rigidBody);
 };
 
 //define some commonly used states;
 class RandomWalk : public State
 {
-protected:
-	StateMachine* mStateMachine = nullptr;
+	
 public:
-	RandomWalk() :mStateMachine(nullptr) {};
-	RandomWalk(StateMachine* sm);
+	RandomWalk();
 	void exitState();
-	void updateState();
+	void updateState(RigidBody* rigidBody);
 	void enterState();
+	void printState();
+	std::string stateName = "Random";
 };
 
 
 class Patrol : public State
 {
-protected:
-	StateMachine* mStateMachine = nullptr;
+
+	
 public:
-	Patrol(StateMachine* sm);
+	Patrol();
 	void exitState();
-	void updateState();
+	void updateState(RigidBody* rigidBody);
 	void enterState();
+	std::string stateName = "Patrol";
 };
 
 class Sleep : public State
 {
-protected:
-	StateMachine* mStateMachine = nullptr;
+	
 public:
-	Sleep(StateMachine* sm);
+	Sleep();
 	void exitState();
-	void updateState();
+	void updateState(RigidBody* rigidBody);
 	void enterState();
+	std::string stateName = "Sleep";
 };
 
+
+class baseState : public State
+{
+	
+public:
+	baseState();
+	void exitState();
+	void updateState(RigidBody* rigidBody);
+	void enterState();
+	std::string stateName = "Base";
+};
