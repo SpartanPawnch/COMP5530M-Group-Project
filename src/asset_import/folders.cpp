@@ -98,17 +98,17 @@ namespace assetfolder {
             return AssetDescriptor{std::string(""), std::string(""),
                 AssetDescriptor::EFileType::INVALID};
 
-        return AssetDescriptor{std::string(activeDirectory) + "/ui-layouts", std::string("Uiname"),
+        return AssetDescriptor{std::string(activeDirectory) + "/levels", std::string("levels"),
             AssetDescriptor::EFileType::FOLDER};
     }
 
-        AssetDescriptor getUIRootDir() {
+    AssetDescriptor getUIRootDir() {
         if (activeDirectory.empty())
             return AssetDescriptor{std::string(""), std::string(""),
                 AssetDescriptor::EFileType::INVALID};
 
-        return AssetDescriptor{std::string(activeDirectory) + "/levels", std::string("levels"),
-            AssetDescriptor::EFileType::FOLDER};
+        return AssetDescriptor{std::string(activeDirectory) + "/ui-layouts",
+            std::string("ui-layouts"), AssetDescriptor::EFileType::FOLDER};
     }
 
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res) {

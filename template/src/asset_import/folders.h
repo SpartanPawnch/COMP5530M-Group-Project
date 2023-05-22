@@ -33,6 +33,9 @@ namespace assetfolder {
     // get entry pointing to levels folder
     AssetDescriptor getLevelsRootDir();
 
+    // get entry pointing to ui folder
+    AssetDescriptor getUIRootDir();
+
     // list items in directory given. dir.type must be EFileType::FOLDER
     void listDir(const AssetDescriptor& dir, std::vector<AssetDescriptor>& res);
 

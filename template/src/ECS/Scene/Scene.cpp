@@ -501,6 +501,7 @@ void Scene::removeEntityByIdx(int idx) {
     // move to back
     int parentIdx = entities[idx].parent;
     for (int i = idx; i < entities.size() - 1; i++) {
+        uuidToIdx[entities[i + 1].uuid]--;
         if (entities[i + 1].parent == idx)
             entities[i + 1].parent = parentIdx;
 
@@ -663,7 +664,7 @@ void Scene::processQueues() {
     // process deletion
     while (deleteQueue.size() > 0) {
         int uuid = deleteQueue.front();
-        entities[uuidToIdx[uuid]].components.clearAll();
+        // entities[uuidToIdx[uuid]].components.clearAll();
         removeEntityByIdx(uuidToIdx[uuid]);
         deleteQueue.pop();
     }
