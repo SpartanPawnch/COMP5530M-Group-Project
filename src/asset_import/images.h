@@ -1,23 +1,24 @@
 #pragma once
 #include <GL/glew.h>
 #include <string>
+#include <memory>
 
-struct TextureInfo {
-    int width;
-    int height;
-    GLuint id;
+struct TextureDescriptor {
+    GLuint texId;
+
+    std::string* path;
+    int idx;
+    TextureDescriptor(int _idx, std::string* _path);
+    ~TextureDescriptor();
 };
 
 // Load a texture with specified path. Returns and internal index to texture.
 // Internal index is potentially invalidated whenever textures are unloaded
-int loadTexture(const char* filename, const std::string& uuid);
-
-// Get texture with index specified
-const TextureInfo& getTexture(int i);
+std::shared_ptr<TextureDescriptor> loadTexture(const char* filename, const std::string& uuid);
 
 // Get texture with uuid specified. Potentially slower,
 // prefer index method when possible.
-const TextureInfo& getTexture(const std::string& uuid);
+std::shared_ptr<TextureDescriptor> getTexture(const std::string& uuid);
 
 // Stop all currently loaded textures from being cleared in
 // the program runtime
@@ -35,3 +36,5 @@ struct TextureManager {
         clearDynamicTextures();
     }
 };
+
+int getTextureCount();
